@@ -1,0 +1,39 @@
+/* Header styles have been moved to global styles.scss */
+
+/* Logo styles specific to the header component */
+.logo-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 4px 0;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.logo {
+  height: 30px;
+  margin: 0;
+  max-width: 200px;
+  background-color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Title logo SVG height fix */
+.title-logo {
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 6px;
+  transform: translateY(-2px); /* Adjust the vertical alignment */
+}
+
+svg.title-logo {
+  height: 24px;
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+  transform: translateY(-2px); /* Adjust the vertical alignment */
+}

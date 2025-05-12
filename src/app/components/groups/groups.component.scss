@@ -1,0 +1,145 @@
+/* Component-specific overrides for groups */
+/* These will take precedence over global styles due to component encapsulation */
+
+.groups h2 {
+  margin-bottom: 1.2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+.grid-item {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid #e0e0e0;
+  min-width: 340px;
+  max-width: 420px;
+  flex: 1 1 340px;
+  padding: 1.2rem 1.2rem 0.7rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.grid-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Tile styles specific to groups component */
+.tile {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff !important; /* Force white text color */
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+  font-weight: 500;
+}
+
+.tile:hover {
+  background-color: #0056b3;
+  text-decoration: none !important;
+}
+
+.tile-footer {
+  margin-top: 1.1em;
+  border-top: 1px solid #ececec;
+  padding-top: 0.5em;
+  color: #888;
+  font-size: 0.93em;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%; /* Ensure footer spans full width */
+}
+
+/* Attribute styles */
+.attribute {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.7rem;
+  font-size: 0.98rem;
+  line-height: 1.4;
+  flex-direction: column;
+  width: 100%;
+}
+
+.attribute strong {
+  font-weight: 600;
+  color: #222;
+  margin-right: 0.5em;
+  text-align: left;
+  min-width: unset;
+  flex-shrink: unset;
+  display: inline;
+}
+
+.attribute span {
+  color: #333;
+  margin: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: inline;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.7rem;
+  color: #2c3e50;
+  word-break: break-all;
+}
+
+/* Resource Types section styles */
+.resource-types {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.resource-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.5rem;
+}
+
+.resource-list li {
+  margin-bottom: 0.5rem;
+}
+
+.resource-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.resource-link:hover {
+  text-decoration: underline;
+}
+
+.resource-count {
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-item {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,202 @@
+.group-container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .group-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+
+    h2 {
+      font-size: 1.75rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .group-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+
+    .group-info, .resource-types {
+      flex: 1;
+      min-width: 300px;
+      background-color: #f9f9f9;
+      padding: 1.5rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #444;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 0.5rem;
+    }
+
+    .attribute {
+      margin-bottom: 0.75rem;
+
+      p {
+        margin: 0;
+        line-height: 1.5;
+
+        strong {
+          color: #555;
+          font-weight: 600;
+          margin-right: 0.5rem;
+        }
+      }
+    }
+
+    .timestamps {
+      margin-top: 1.5rem;
+      font-size: 0.875rem;
+      color: #666;
+
+      div {
+        margin-bottom: 0.25rem;
+      }
+    }    .resource-types {
+      ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          padding: 0.5rem 0;
+          border-bottom: 1px solid #eee;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          a {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 500;
+
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+
+          span {
+            color: #666;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+          }
+        }
+      }
+
+      .resource-type-tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+
+        .resource-type-tile {
+          background-color: #ffffff;
+          border-radius: 5px;
+          padding: 15px;
+          border-left: 4px solid #0066cc;
+          transition: transform 0.2s;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 16px;
+
+            a {
+              color: #0066cc;
+              text-decoration: none;
+
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+
+            .resource-count {
+              font-size: 0.85em;
+              color: #666;
+              margin-left: 5px;
+            }
+          }
+
+          .resource-description {
+            color: #555;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .resource-metadata {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+
+            .badge {
+              display: inline-block;
+              padding: 3px 8px;
+              border-radius: 12px;
+              font-size: 0.75em;
+              font-weight: 500;
+            }
+
+            .versioned {
+              background-color: #e0f2ff;
+              color: #0066cc;
+            }
+
+            .single-version {
+              background-color: #f0f0f0;
+              color: #666;
+            }
+
+            .has-document {
+              background-color: #e6f9e6;
+              color: #008800;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.error-container {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+
+  h2 {
+    color: #cc0000;
+    margin-bottom: 1rem;
+  }
+
+  a {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #0066cc;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #004c99;
+    }
+  }
+}

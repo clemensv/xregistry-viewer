@@ -1,0 +1,133 @@
+.resource-container {
+  padding: 1rem;
+
+  h2 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #444;
+  }
+
+  h4 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #555;
+  }
+
+  .attribute {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+
+    strong {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+  }
+
+  .object-array {
+    margin-left: 1rem;
+    padding-left: 1rem;
+    border-left: 2px solid #ddd;
+  }
+
+  .object-item {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+  }
+
+  .object-field {
+    margin-bottom: 0.25rem;
+  }
+
+  section {
+    margin-bottom: 2rem;
+  }
+
+  pre {
+    background-color: #f5f5f5;
+    padding: 0.5rem;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+
+  .latest-version {
+    background-color: #f0f7ff;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+
+    a {
+      display: inline-block;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .versions-list {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+
+    .versions-table {
+      overflow-x: auto;
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+
+        th, td {
+          text-align: left;
+          padding: 0.75rem;
+          border-bottom: 1px solid #ddd;
+        }
+
+        th {
+          background-color: #f0f0f0;
+          font-weight: 600;
+        }        tr:hover {
+          background-color: #f8f8f8;
+        }
+
+        tr.default-version {
+          background-color: rgba(144, 238, 144, 0.2);
+        }
+
+        .default-badge {
+          color: #008000;
+          font-weight: bold;
+          font-size: 16px;
+        }
+
+        .btn-view {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          background-color: #0066cc;
+          color: white;
+          text-decoration: none;
+          border-radius: 4px;
+          font-size: 0.875rem;
+
+          &:hover {
+            background-color: #004c99;
+          }
+        }
+      }
+    }
+  }
+}

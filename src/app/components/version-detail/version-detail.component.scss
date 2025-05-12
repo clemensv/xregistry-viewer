@@ -1,0 +1,100 @@
+/* Styles for VersionDetailComponent */
+
+.version-detail {
+  h2 {
+    margin-bottom: 1.2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+.grid-item {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid #e0e0e0;
+  min-width: 340px;
+  max-width: 420px;
+  flex: 1 1 340px;
+  padding: 1.2rem 1.2rem 0.7rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.grid-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.7rem;
+  color: #2c3e50;
+  word-break: break-all;
+}
+
+.attribute {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.3rem;
+  font-size: 0.98rem;
+  line-height: 1.4;
+  flex-direction: column;
+}
+
+.attribute strong {
+  font-weight: 600;
+  color: #222;
+  margin-right: 0.5em;
+  text-align: left;
+  min-width: unset;
+  flex-shrink: unset;
+  display: inline;
+}
+
+/* Set the font for <pre> elements to monospace */
+.attribute pre {
+  font-family: monospace;
+  max-width: 100%;
+  max-height: 200px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.attribute span {
+  color: #333;
+  margin: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: inline;
+}
+
+/* Distinct formatting for arrays of objects */
+.attribute .object-array {
+  background: #f7f7f7;
+  border-radius: 5px;
+  padding: 0.7em 1em;
+  margin: 0.3em 0 0.7em 0;
+  font-size: 0.97rem;
+  border: 1px solid #ececec;
+}
+
+.attribute .object-array .object-item {
+  margin-bottom: 0.7em;
+  padding-bottom: 0.7em;
+  border-bottom: 1px solid #e0e0e0;
+}

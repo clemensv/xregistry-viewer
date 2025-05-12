@@ -1,0 +1,21 @@
+<mat-toolbar color="primary">
+  <a routerLink="/" class="logo-container">
+    <img src="xregistry-logo.svg" alt="xRegistry Explorer" class="logo title-logo">
+  </a>
+  <span class="spacer"></span>
+  <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Settings">
+    <mat-icon>settings</mat-icon>
+  </button>
+  <mat-menu #settingsMenu="matMenu">
+    <button mat-menu-item routerLink="/config">
+      <mat-icon>tune</mat-icon>
+      <span>API Configuration</span>
+    </button>
+  </mat-menu>
+  <button mat-button [matMenuTriggerFor]="menu">User</button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item routerLink="/">Home</button>
+    <button mat-menu-item>Profile</button>
+    <button mat-menu-item>Logout</button>
+  </mat-menu>
+</mat-toolbar>

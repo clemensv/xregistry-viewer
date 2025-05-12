@@ -1,0 +1,600 @@
+// Remove the static font import
+// @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@use '@angular/material' as mat;
+@use './theme' as theme;
+@use 'sass:map';
+@use 'sass:color';
+
+/* Global styles */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  font-family: theme.$app-font-family;
+  color: #333;
+  background-color: #fafafa;
+}
+
+/* Common utility classes */
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Breadcrumb styles */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; // Allow wrapping on small screens
+  padding: 0.75rem 1rem;
+  background-color: map.get(theme.$background-color, card);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Light shadow for depth
+
+  &-item {
+    display: flex;
+    align-items: center;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &-link {
+    text-decoration: none;
+    color: theme.$primary-color;
+    transition: color 0.2s ease, background-color 0.2s ease; // Smooth transition
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+
+    .mat-icon {
+      font-size: 1rem;
+      height: 1rem;
+      width: 1rem;
+      margin-right: 0.25rem;
+    }
+
+    &:hover {
+      color: color.adjust(theme.$primary-color, $lightness: -10%);
+      background-color: map.get(theme.$background-color, hover);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px theme.$primary-color;
+    }
+  }
+
+  &-separator {
+    margin: 0 0.5rem;
+    color: map.get(theme.$foreground-color, secondary-text);
+    user-select: none; // Prevent selection
+  }
+
+  &-current {
+    font-weight: 600;
+    color: map.get(theme.$foreground-color, text);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background-color: map.get(theme.$background-color, hover);
+    display: flex;
+    align-items: center;
+
+    .mat-icon {
+      font-size: 1rem;
+      height: 1rem;
+      width: 1rem;
+      margin-right: 0.25rem;
+    }
+  }
+}
+
+// Responsive breadcrumb adjustments
+@media (max-width: 768px) {
+  .breadcrumb {
+    padding: 0.5rem;
+
+    &-separator {
+      margin: 0 0.25rem;
+    }
+
+    &-link, &-current {
+      padding: 0.15rem 0.3rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+/* Layout styles */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Use viewport height to ensure full page coverage */
+}
+
+.main-container {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: calc(100vh - 120px); /* Account for header and footer */
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto; /* Center the container horizontally but not the content */
+  box-sizing: border-box;
+}
+
+// Responsive adjustments for main container
+@media (max-width: 768px) {
+  .main-container {
+    padding: 1rem;
+  }
+}
+
+/* Page layout styles for components */
+.page-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  margin-bottom: 1rem;
+}
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section-container {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Loading animation for smoother transitions */
+.content-loading {
+  width: 100%;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(63, 81, 181, 0.1);
+  border-radius: 50%;
+  border-top-color: theme.$primary-color;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* API info styles */
+.api-info-container {
+  padding: 8px 16px;
+  background-color: map.get(theme.$background-color, hover);
+  border-bottom: 1px solid map.get(theme.$foreground-color, divider);
+}
+
+.api-chip {
+  font-size: 12px;
+}
+
+/* Configuration styles */
+.config-card {
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Registry explorer styles */
+.registry-container {
+  margin: 1rem;
+}
+
+.registry-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.registry-card {
+  margin-bottom: 1rem;
+  background-color: map.get(theme.$background-color, card);
+}
+
+.resource-item {
+  cursor: pointer;
+  &:hover {
+    background-color: map.get(theme.$background-color, hover);
+  }
+}
+
+/* Resources component styles */
+app-resources .resources {
+  h2 {
+    margin-bottom: 1.2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: map.get(theme.$foreground-color, text);
+  }
+}
+
+app-resources .grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+app-resources .grid-item {
+  background: map.get(theme.$background-color, card);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid map.get(theme.$foreground-color, divider);
+  min-width: 340px;
+  max-width: 420px;
+  flex: 1 1 340px;
+  padding: 1.2rem 1.2rem 0.7rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+app-resources .grid-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Resources component styles */
+.resources {
+  h2 {
+    margin-bottom: 1.2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: map.get(theme.$foreground-color, text);
+  }
+}
+
+.grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+.grid-item {
+  background: map.get(theme.$background-color, card);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid map.get(theme.$foreground-color, divider);
+  min-width: 340px;
+  max-width: 420px;
+  flex: 1 1 340px;
+  padding: 1.2rem 1.2rem 0.7rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.grid-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.attribute {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.3rem;
+  font-size: 0.98rem;
+  line-height: 1.4;
+  flex-direction: column;
+}
+
+.attribute strong {
+  font-weight: 600;
+  color: map.get(theme.$foreground-color, secondary-text);
+  margin-right: 0.5em;
+  text-align: left;
+  min-width: unset;
+  flex-shrink: unset;
+  display: inline;
+}
+
+.attribute pre {
+  font-family: monospace;
+  max-width: 100%;
+  max-height: 200px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.attribute span {
+  color: map.get(theme.$foreground-color, text);
+  margin: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: inline;
+}
+
+.attribute .object-array {
+  background: map.get(theme.$background-color, hover);
+  border-radius: 5px;
+  padding: 0.7em 1em;
+  margin: 0.3em 0 0.7em 0;
+  font-size: 0.97rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.attribute .object-array .object-item {
+  margin-bottom: 0.7em;
+  padding-bottom: 0.7em;
+  border-bottom: 1px solid map.get(theme.$foreground-color, divider);
+}
+
+.attribute .object-array .object-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.attribute .object-array .object-field {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.2em;
+}
+
+.attribute .object-array .object-field strong {
+  min-width: 110px;
+  margin-right: 0.5em;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+}
+
+.attribute .object-array .object-field span, .attribute .object-array .object-field pre {
+  display: inline;
+}
+
+.attribute p {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.7rem;
+  color: theme.$primary-color;
+  word-break: break-all;
+}
+
+h4 {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 0.7em 0 0.2em 0;
+  color: theme.$accent-color;
+}
+
+.tile {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 8px 16px;
+  background-color: theme.$primary-color;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.tile:hover {
+  background-color: color.adjust(theme.$primary-color, $lightness: -10%);
+}
+
+.tile-footer {
+  margin-top: 1.1em;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 0.5em;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 0.93em;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.group-header {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: map.get(theme.$foreground-color, text);
+}
+
+/* Table and content container styles */
+.content-container {
+  padding: 16px;
+}
+
+.mat-mdc-table {
+  width: 100%;
+}
+
+.filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.mat-column-actions {
+  width: 120px;
+  text-align: right;
+}
+
+.clickable-row {
+  cursor: pointer;
+  &:hover {
+    background-color: map.get(theme.$background-color, hover);
+  }
+}
+
+/* Footer styles */
+.footer {
+  padding: 1rem;
+  background-color: map.get(theme.$background-color, app-bar);
+  text-align: center;
+  margin-top: auto;
+  border-top: 1px solid map.get(theme.$foreground-color, divider);
+  width: 100%;
+  box-sizing: border-box;
+
+  a {    color: theme.$primary-color;
+    text-decoration: none;
+    margin-left: 8px;
+
+    &:hover {
+      text-decoration: underline;
+      color: color.adjust(theme.$primary-color, $lightness: -10%);
+    }
+  }
+}
+
+/* Form styles */
+.form-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Details page styles */
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.details-card {
+  margin-bottom: 1rem;
+  background-color: map.get(theme.$background-color, card);
+}
+
+.details-section {
+  margin-top: 1.5rem;
+}
+
+.metadata-table {
+  width: 100%;
+
+  th {
+    font-weight: 500;
+    text-align: left;
+    padding: 0.5rem;
+    width: 200px;
+    color: map.get(theme.$foreground-color, secondary-text);
+    border-bottom: 1px solid map.get(theme.$foreground-color, divider);
+  }
+
+  td {
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  tr:nth-child(even) {
+    background-color: map.get(theme.$background-color, hover);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .filter-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mat-column-actions {
+    width: 80px;
+  }
+
+  .metadata-table {
+    th {
+      width: 120px;
+    }
+  }
+}
+
+/* Tiles styles */
+.tiles-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tile-secondary {
+  background-color: theme.$accent-color;
+  color: white;
+
+  &:hover {
+    background-color: color.adjust(theme.$accent-color, $lightness: -10%);
+  }
+}
+
+.tile-success {
+  background-color: #4CAF50;  // Green 500
+  color: white;
+
+  &:hover {
+    background-color: #388E3C;  // Green 700
+  }
+}
+
+.tile-link {
+  background-color: transparent;
+  color: theme.$primary-color;
+  text-decoration: underline;
+  padding: 4px 8px;
+
+  &:hover {
+    color: color.adjust(theme.$primary-color, $lightness: -10%);
+    background-color: transparent;
+  }
+}

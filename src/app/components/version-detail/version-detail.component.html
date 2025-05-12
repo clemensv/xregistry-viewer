@@ -1,0 +1,57 @@
+<div class="version-detail" *ngIf="version$ | async as version">
+  <h2>Version: {{ version['id'] }}</h2>
+  <section>
+    <h3>Attributes</h3>
+    <ng-container *ngFor="let key of displayAttributes">
+      <div class="attribute" *ngIf="hasValue(version[key])">
+        <ng-container *ngIf="resourceAttributes[key]?.type === 'any'; else normalAttr">
+          <strong [title]="resourceAttributes[key]?.description || ''">{{ key }}:</strong>
+          <pre [title]="resourceAttributes[key]?.description || ''">{{ version[key] | json }}</pre>
+        </ng-container>
+        <ng-template #normalAttr>
+          <ng-container *ngIf="!isArray(version[key]) && !isObject(version[key]); else nestedTemplate">
+            <strong [title]="resourceAttributes[key]?.description || ''">{{ key }}:</strong>
+            <span [title]="resourceAttributes[key]?.description || ''">{{ version[key] }}</span>
+          </ng-container>
+          <ng-template #nestedTemplate>
+            <h4 [title]="resourceAttributes[key]?.description || ''">{{ key }}:</h4>
+            <div *ngIf="isArray(version[key]); else objectTemplate" class="object-array">
+              <div *ngFor="let item of version[key]; let i = index" class="object-item">
+                <ng-container *ngIf="isObject(item); else primitiveTemplate">
+                  <div *ngFor="let subKey of objectKeys(item)" class="object-field">
+                    <ng-container *ngIf="resourceAttributes[key]?.item?.attributes?.[subKey]?.type === 'any'; else subNormalAttr">
+                      <strong [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
+                      <pre [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ item[subKey] | json }}</pre>
+                    </ng-container>
+                    <ng-template #subNormalAttr>
+                      <strong [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
+                      <span [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ item[subKey] }}</span>
+                    </ng-template>
+                  </div>
+                </ng-container>
+                <ng-template #primitiveTemplate>
+                  <span>{{ item }}</span>
+                </ng-template>
+              </div>
+            </div>
+            <ng-template #objectTemplate>
+              <div *ngFor="let subKey of objectKeys(version[key])" class="object-field">
+                <ng-container *ngIf="resourceAttributes[key]?.attributes?.[subKey]?.type === 'any'; else subObjNormalAttr">
+                  <strong [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
+                  <pre [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ version[key][subKey] | json }}</pre>
+                </ng-container>
+                <ng-template #subObjNormalAttr>
+                  <strong [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
+                  <span [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ version[key][subKey] }}</span>
+                </ng-template>
+              </div>
+            </ng-template>
+          </ng-template>
+        </ng-template>
+      </div>
+    </ng-container>
+  </section>  <section *ngIf="version['document']">
+    <h3>Document</h3>
+    <pre>{{ version['document'] }}</pre>
+  </section>
+</div>

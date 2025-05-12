@@ -1,0 +1,13 @@
+<div class="group-types">
+  <h2>Group Types</h2>
+  <div class="tiles" *ngIf="groupTypes$ | async as gts">
+    <div class="tile" *ngFor="let gt of gts">
+      <a [routerLink]="[gt.groupType]">
+        <div class="tile-header">{{ gt.model.plural }}</div>
+        <div class="tile-body">
+          <div *ngIf="gt.model.description">{{ gt.model.description }}</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

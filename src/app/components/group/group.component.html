@@ -1,0 +1,64 @@
+<div class="group-container" *ngIf="group$ | async as group">
+  <div class="group-header">
+    <h2>{{ groupType }}: {{ groupId }}</h2>
+  </div>
+
+  <div class="group-details">
+    <div class="group-info">
+      <h3>Group Information</h3>
+      <ng-container *ngFor="let key of displayGroupAttributes">
+        <div class="attribute" *ngIf="hasValue(group[key]) && key !== 'createdAt' && key !== 'modifiedAt' && !key.endsWith('count')">
+          <p><strong>{{ key }}:</strong> {{ group[key] }}</p>
+        </div>
+      </ng-container>
+      <div class="attribute" *ngIf="hasValue(group['description'])">
+        <p><strong>Description:</strong> {{ group['description'] }}</p>
+      </div>
+      <div class="attribute" *ngIf="hasValue(group['name'])">
+        <p><strong>Name:</strong> {{ group['name'] }}</p>
+      </div>
+      <div class="timestamps">
+        <div *ngIf="hasValue(group['createdAt'])">
+          <small><strong>Created:</strong> {{ group['createdAt'] | date:'short' }}</small>
+        </div>
+        <div *ngIf="hasValue(group['modifiedAt'])">
+          <small><strong>Modified:</strong> {{ group['modifiedAt'] | date:'short' }}</small>
+        </div>
+      </div>
+    </div>    <div class="resource-types">
+      <h3>Resource Types</h3>
+      <div *ngIf="resourceTypes$ | async as resourceTypes; else loadingResources">
+        <div *ngIf="resourceTypes.length > 0; else noResourceTypes">
+          <div class="resource-type-tiles">
+            <div *ngFor="let resourceType of resourceTypes" class="resource-type-tile">
+              <h4>
+                <a [routerLink]="[resourceType.id]">{{ resourceType.name }}</a>
+                <span *ngIf="group[resourceType.id + 'count'] !== undefined" class="resource-count">
+                  ({{ group[resourceType.id + 'count'] }})
+                </span>
+              </h4>
+              <p *ngIf="resourceType.description" class="resource-description">{{ resourceType.description }}</p>
+              <div class="resource-metadata">
+                <span *ngIf="resourceType.maxversions > 1" class="badge versioned">Versioned</span>
+                <span *ngIf="resourceType.maxversions === 1" class="badge single-version">Single Version</span>
+                <span *ngIf="resourceType.hasdocument" class="badge has-document">Has Document</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noResourceTypes>
+          <p>No resource types available for this group.</p>
+        </ng-template>
+      </div>
+      <ng-template #loadingResources>
+        <p>Loading resource types...</p>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!(group$ | async)" class="error-container">
+  <h2>Error: Group Not Found</h2>
+  <p>The group "{{ groupId }}" in group type "{{ groupType }}" could not be found.</p>
+  <a [routerLink]="['/', groupType]">Back to Groups</a>
+</div>

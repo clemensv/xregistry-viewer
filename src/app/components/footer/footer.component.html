@@ -1,0 +1,13 @@
+<mat-divider></mat-divider>
+<mat-toolbar color="primary" class="footer">
+  <span>
+    <a href="https://xregistry.io" target="_blank" rel="noopener noreferrer">
+      xRegistry, a project of the Cloud Native Foundation
+    </a>
+  </span>
+  <span class="spacer"></span>
+  <span>APIs: </span>
+  <ng-container *ngIf="capabilities$ | async as cap">
+    <a *ngFor="let api of cap.apis" href="{{ api }}" target="_blank">{{ api }}</a>
+  </ng-container>
+</mat-toolbar>

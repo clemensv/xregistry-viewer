@@ -1,0 +1,24 @@
+/* Breadcrumb styles have been moved to global styles.scss */
+
+/* Breadcrumb styles are defined globally in styles.scss.
+  This component relies on those global styles and doesn't need
+  additional component-specific styling.
+
+  To reference the global styles, see:
+  - .breadcrumb
+  - .breadcrumb-item
+  - .breadcrumb-link
+  - .breadcrumb-separator
+  - .breadcrumb-current
+*/
+
+// Component-specific overrides only (if needed)
+// Keep this file minimal to prioritize global styles
+
+/* Ensures global breadcrumb styles are applied within this component */
+:host {
+  display: block;
+  margin: 0.5rem 0;
+}
+
+/* Remove any ::ng-deep styles as they override global styles */

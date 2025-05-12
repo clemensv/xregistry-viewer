@@ -1,0 +1,53 @@
+// Custom Angular Material Theming
+@use '@angular/material' as mat;
+@use 'sass:map';
+@use 'sass:color';
+
+// Include the core styles for Angular Material
+@include mat.core();
+
+// Define colors directly for our palette
+$primary-color: #3F51B5;  // Indigo 500
+$accent-color: #FF4081;   // Pink A200
+$warn-color: #F44336;     // Red 500
+
+// Create simplified theme
+$light-theme: (
+  color: (
+    primary: (
+      default: $primary-color,
+      lighter: #C5CAE9,
+      darker: #303F9F,
+      text: white
+    ),
+    accent: (
+      default: $accent-color,
+      lighter: #FF80AB,
+      darker: #F50057,
+      text: white
+    ),
+    warn: (
+      default: $warn-color,
+      lighter: #FFCDD2,
+      darker: #D32F2F,
+      text: white
+    ),
+    background: (
+      card: white,
+      app-bar: $primary-color,
+      hover: #F5F5F5
+    ),
+    foreground: (
+      text: #333333,
+      secondary-text: #666666,
+      divider: #E0E0E0
+    )
+  ),
+  density: 0
+);
+
+// Export the theme variables for use in other files
+$theme: $light-theme;
+$background-color: map.get(map.get($theme, color), background);
+$foreground-color: map.get(map.get($theme, color), foreground);
+$app-font-family: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
