@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { ConfigService } from '../../services/config.service';
+import { BaseUrlService } from '../../services/base-url.service';
 
 @Component({
   selector: 'app-config',
@@ -26,18 +27,28 @@ import { ConfigService } from '../../services/config.service';
 export class ConfigComponent implements OnInit {
   configForm!: FormGroup;
   defaultApiUrl: string;
+  defaultBaseUrl: string;
+  restartRequired = false;
 
   constructor(
     private fb: FormBuilder,
     private configService: ConfigService,
+    private baseUrlService: BaseUrlService,
     private snackBar: MatSnackBar
   ) {
     this.defaultApiUrl = this.configService.getApiBaseUrl();
+    this.defaultBaseUrl = this.configService.getBaseUrl();
   }
-
   ngOnInit(): void {
     this.configForm = this.fb.group({
-      apiBaseUrl: [this.configService.getApiBaseUrl(), [Validators.required, Validators.pattern('https?://.*')]]
+      apiBaseUrl: [
+        this.configService.getApiBaseUrl(), 
+        [Validators.required, Validators.pattern('https?://.*')]
+      ],
+      baseUrl: [
+        this.configService.getBaseUrl(),
+        [Validators.required]
+      ]
     });
   }
 
@@ -45,12 +56,37 @@ export class ConfigComponent implements OnInit {
     if (this.configForm.valid) {
       try {
         const newApiUrl = this.configForm.get('apiBaseUrl')?.value;
+        const newBaseUrl = this.configForm.get('baseUrl')?.value;
+        const oldBaseUrl = this.configService.getBaseUrl();
+        
+        // Update API URL
         this.configService.setApiBaseUrl(newApiUrl);
-        this.snackBar.open('API URL updated successfully', 'Close', {
-          duration: 3000
-        });
+        
+        // Update base URL
+        this.configService.setBaseUrl(newBaseUrl);
+        
+        // If base URL changed, update the base href and show message
+        if (oldBaseUrl !== newBaseUrl) {
+          this.baseUrlService.updateBaseHref();
+          this.restartRequired = true;
+        }
+
+        // Save changes to the configuration
+        const config = this.configService.getConfig();
+        if (config) {
+          config.apiBaseUrl = newApiUrl;
+          config.baseUrl = newBaseUrl;
+          this.configService.saveConfig(config);
+        }
+          // Show success message
+        this.snackBar.open(
+          'Configuration updated. API and base URL changes will apply to new requests, but you may need to refresh the page for all changes to take effect.',
+          'Close', 
+          { duration: 7000 }
+        );
       } catch (error) {
-        this.snackBar.open('Failed to update API URL', 'Close', {
+        console.error('Error updating configuration:', error);
+        this.snackBar.open('Failed to update configuration', 'Close', {
           duration: 3000
         });
       }
@@ -58,11 +94,20 @@ export class ConfigComponent implements OnInit {
   }
 
   resetToDefault(): void {
+    // Reset config to default values
     this.configService.resetToDefault();
+    
+    // Update the form
     this.configForm.patchValue({
-      apiBaseUrl: this.defaultApiUrl
+      apiBaseUrl: this.defaultApiUrl,
+      baseUrl: this.defaultBaseUrl
     });
-    this.snackBar.open('Reset to default API URL', 'Close', {
+    
+    // Update base href
+    this.baseUrlService.updateBaseHref();
+    
+    // Show a notification
+    this.snackBar.open('Configuration reset to defaults', 'Close', {
       duration: 3000
     });
   }

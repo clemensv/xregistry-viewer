@@ -98,3 +98,252 @@ h3 {
   padding-bottom: 0.7em;
   border-bottom: 1px solid #e0e0e0;
 }
+
+/* Document section styles */
+section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  
+  h3 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  
+  pre {
+    padding: 1rem;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    overflow-x: auto;
+    max-height: 500px;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .loading-document {
+    padding: 1rem;
+    background-color: #e8f4fd;
+    border-radius: 4px;
+    text-align: center;
+    color: #0366d6;
+  }
+  
+  .document-error {
+    padding: 1rem;
+    background-color: #ffebee;
+    border-radius: 4px;
+    color: #d32f2f;
+  }
+  
+  .download-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #0366d6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #0256b0;
+    }
+    
+    .material-icons {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+section:has(h3:contains("Document")) {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  
+  h3 {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  pre {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-height: 400px;
+  }
+  
+  .loading-document {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    
+    p {
+      font-style: italic;
+      color: #6c757d;
+    }
+  }
+  
+  .document-error {
+    background-color: #fff3f3;
+    padding: 1rem;
+    border-radius: 4px;
+    border-left: 4px solid #dc3545;
+    
+    p {
+      color: #dc3545;
+      margin: 0;
+    }
+  }
+  
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #0069d9;
+    }
+    
+    .material-icons {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+/* Icon styles */
+.doc-icon {
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  color: #2c3e50;
+}
+
+.loading-icon {
+  animation: spin 1s infinite linear;
+  color: #6c757d;
+  margin-right: 0.5rem;
+}
+
+.error-icon {
+  color: #dc3545;
+  margin-right: 0.5rem;
+}
+
+.action-buttons {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Content type specific styles */
+pre.application-json {
+  background-color: #f8f8ff;
+  color: #333;
+}
+
+pre.application-xml {
+  background-color: #fffcf5;
+  color: #333;
+}
+
+pre.text-plain {
+  background-color: #fff;
+  color: #333;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin: 1rem 0;
+  min-height: 200px;
+}
+
+.error-message {
+  padding: 1.5rem;
+  background-color: #fff0f0;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  margin: 1rem 0;
+  
+  h2 {
+    color: #d32f2f;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    margin: 0;
+    color: #616161;
+  }
+}
+
+.loading-document {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: #e8f4fd;
+  border-radius: 4px;
+  
+  .loading-icon {
+    color: #2196f3;
+    margin-right: 0.5rem;
+    animation: spin 1.5s linear infinite;
+  }
+  
+  p {
+    margin: 0;
+  }
+}
+
+.document-error {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: #ffebee;
+  border-radius: 4px;
+  
+  .error-icon {
+    color: #f44336;
+    margin-right: 0.5rem;
+  }
+  
+  p {
+    margin: 0;
+    color: #d32f2f;
+  }
+}

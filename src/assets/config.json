@@ -1,0 +1,10 @@
+{
+  "apiBaseUrl": "https://mcpxreg.org/registry",
+  "baseUrl": "/",
+  "defaultDocumentView": true,
+  "features": {
+    "enableFilters": true,
+    "enableSearch": true,
+    "enableDocDownload": true
+  }
+}

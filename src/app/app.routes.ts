@@ -6,9 +6,11 @@ import { ResourcesComponent } from './components/resources/resources.component';
 import { ResourceComponent } from './components/resource/resource.component';
 import { VersionDetailComponent } from './components/version-detail/version-detail.component';
 import { ConfigComponent } from './components/config/config.component';
+import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
 
 export const routes: Routes = [
   { path: '', component: GroupTypesComponent },
+  { path: 'bootstrap', component: BootstrapComponent },
   { path: 'config', component: ConfigComponent },
   { path: ':groupType', component: GroupsComponent },
   { path: ':groupType/:groupId', component: GroupComponent },

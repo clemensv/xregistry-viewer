@@ -12,10 +12,7 @@ import { isPlatformBrowser } from '@angular/common';
 })
 export class RegistryService {
   private isBrowser: boolean;
-
-  private get apiUrl(): string {
-    return this.configService.getApiBaseUrl();
-  }
+  private currentApiUrl: string;
 
   constructor(
     private http: HttpClient,
@@ -24,6 +21,14 @@ export class RegistryService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
+    // Initialize with current value
+    this.currentApiUrl = this.configService.getApiBaseUrl();
+    
+    // Subscribe to API URL changes
+    this.configService.apiBaseUrl$.subscribe(newUrl => {
+      this.currentApiUrl = newUrl;
+      console.info('RegistryService: API URL updated to:', newUrl);
+    });
   }
   listGroups(groupType: string): Observable<Group[]> {
     // In SSR environment, return empty array to avoid HTTP requests
@@ -38,7 +43,7 @@ export class RegistryService {
           return of([]);
         }
 
-        return this.http.get<{ [key: string]: any }>(`${this.apiUrl}/${groupType}`).pipe(
+        return this.http.get<{ [key: string]: any }>(`${this.currentApiUrl}/${groupType}`).pipe(
           map(res => {
             const groupMeta = model.groups[groupType];
             const attrs = groupMeta.attributes || {};
@@ -74,7 +79,7 @@ export class RegistryService {
         const resMeta = model.groups[groupType].resources[resourceType];
         const attrs = resMeta.attributes || {};
         return this.http
-          .get<{ [key: string]: any }>(`${this.apiUrl}/${groupType}/${groupId}/${resourceType}`)
+          .get<{ [key: string]: any }>(`${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}`)
           .pipe(
             map(res =>
               Object.values(res).map((entry: any) => {
@@ -107,7 +112,7 @@ export class RegistryService {
         const attrs = groupMeta.attributes || {};
         const singularIdKey = `${groupMeta.singular}id`;
 
-        return this.http.get<any>(`${this.apiUrl}/${groupType}/${groupId}`).pipe(
+        return this.http.get<any>(`${this.currentApiUrl}/${groupType}/${groupId}`).pipe(
           map(entry => {
             const group: any = {
               id: entry[singularIdKey] || entry.id,
@@ -159,7 +164,7 @@ export class RegistryService {
 
         const singularIdKey = `${resourceMeta.singular}id`;
 
-        return this.http.get<any>(`${this.apiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}`).pipe(
+        return this.http.get<any>(`${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}`).pipe(
           map(entry => {
             const resource: any = {
               id: entry[singularIdKey] || entry.id,
@@ -198,13 +203,81 @@ export class RegistryService {
         );
       })
     );
-  }
+  }  getVersionDetail(groupType: string, groupId: string, resourceType: string, resourceId: string, versionId: string, hasDocument: boolean): Observable<VersionDetail> {
+    // Construct the URLs for both with and without $details
+    const detailsUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}/$details`;
+    const regularUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}`;
+    
+    // Use the appropriate URL based on hasDocument
+    const primaryUrl = hasDocument ? detailsUrl : regularUrl;
+    
+    console.log(`Fetching version detail from: ${primaryUrl}`);
+    console.log(`hasDocument flag is: ${hasDocument}`);
+    
+    // Function to process the response
+    const processResponse = (response: any): VersionDetail => {
+      console.log('Processing version detail response:', response);
+      
+      // Convert the response to ensure all properties are included
+      const result: any = { ...response };
+      
+      // If the document content is embedded in a specific field, process it
+      if (hasDocument) {
+        const singularName = resourceType.endsWith('s') ? resourceType.slice(0, -1) : resourceType;
+        
+        // Check if we have any document-related fields
+        const hasSpecificDocument = !!(
+          response[singularName] || 
+          response[`${singularName}url`] || 
+          response[`${singularName}base64`]
+        );
+        
+        if ( hasSpecificDocument) {
+          // If the document is in a specific field, we can process it
+          if (response[singularName]) {
+            result["resource"] = response[singularName];
+          } else if (response[`${singularName}url`]) {
+            result["resourceUrl"] = response[`${singularName}url`];
+          } else if (response[`${singularName}base64`]) {
+            result["resourceBase64"] = response[`${singularName}base64`];
+          }
+        }
 
-  getVersionDetail(groupType: string, groupId: string, resourceType: string, resourceId: string, versionId: string, hasDocument: boolean): Observable<VersionDetail> {
-    const url = hasDocument
-      ? `${this.apiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}/$details`
-      : `${this.apiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}`;
-    return this.http.get<VersionDetail>(url);
+        console.log(`Document field found: ${hasSpecificDocument}, singular name: ${singularName}`);
+      }
+      
+      return result as VersionDetail;
+    };
+    
+    // Try the primary URL first, and if it fails with a 404, fallback to the regular URL
+    return this.http.get<any>(primaryUrl).pipe(
+      tap(response => {
+        console.log('API response received for version detail:', response);
+      }),
+      map(processResponse),
+      catchError(error => {
+        console.error(`Error fetching version detail from ${primaryUrl}:`, error);
+        
+        // If hasDocument is true and we get a 404, fall back to the regular URL
+        if (hasDocument && error.status === 404) {
+          console.warn(`$details URL returned 404, falling back to regular URL: ${regularUrl}`);
+          
+          return this.http.get<any>(regularUrl).pipe(
+            tap(response => {
+              console.log('API response received from fallback URL:', response);
+            }),
+            map(processResponse),
+            catchError(fallbackError => {
+              console.error(`Error fetching version detail from fallback URL ${regularUrl}:`, fallbackError);
+              return throwError(() => new Error(`Failed to load version details: ${fallbackError.message}`));
+            })
+          );
+        }
+        
+        // Otherwise, rethrow the original error
+        return throwError(() => new Error(`Failed to load version details: ${error.message}`));
+      })
+    );
   }
   /**
    * Fetch full xRegistry metadata and document representations for the default/latest version of a resource
@@ -216,9 +289,8 @@ export class RegistryService {
     resourceId: string,
     hasDocument: boolean
   ): Observable<VersionDetail> {
-    const url = hasDocument
-      ? `${this.apiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}$details` :
-        `${this.apiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}`;
+    const url = hasDocument      ? `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}$details` :
+        `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}`;
     return this.http.get<VersionDetail>(url);
   }
   /**
@@ -230,7 +302,7 @@ export class RegistryService {
     resourceType: string,
     resourceId: string
   ): Observable<VersionDetail[]> {
-    const url = `${this.apiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions`;
+    const url = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions`;
     return this.http.get<any>(url).pipe(
       map(response => {
         // The response might be an object with each version, so we convert it to an array if needed

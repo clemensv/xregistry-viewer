@@ -3,15 +3,20 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RegistryService } from './registry.service';
 import { ConfigService } from './config.service';
 import { ModelService } from './model.service';
-import { of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 
 describe('RegistryService', () => {
   let service: RegistryService;
   let configServiceSpy: jasmine.SpyObj<ConfigService>;
   let modelServiceSpy: jasmine.SpyObj<ModelService>;
+  let apiBaseUrlSubject: BehaviorSubject<string>;
 
   beforeEach(() => {
-    configServiceSpy = jasmine.createSpyObj('ConfigService', ['getApiBaseUrl']);
+    apiBaseUrlSubject = new BehaviorSubject<string>('https://test-api.mcpxreg.org');
+    
+    configServiceSpy = jasmine.createSpyObj('ConfigService', ['getApiBaseUrl'], {
+      apiBaseUrl$: apiBaseUrlSubject.asObservable()
+    });
     configServiceSpy.getApiBaseUrl.and.returnValue('https://test-api.mcpxreg.org');
 
     modelServiceSpy = jasmine.createSpyObj('ModelService', ['getRegistryModel']);

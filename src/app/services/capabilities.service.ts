@@ -7,15 +7,24 @@ import { ConfigService } from './config.service';
 
 @Injectable({ providedIn: 'root' })
 export class CapabilitiesService {
+  private currentApiUrl: string;
 
   constructor(
     private http: HttpClient,
     private configService: ConfigService
-  ) {}
+  ) {
+    // Initialize with current API URL
+    this.currentApiUrl = this.configService.getApiBaseUrl();
+    
+    // Subscribe to API URL changes
+    this.configService.apiBaseUrl$.subscribe(newUrl => {
+      this.currentApiUrl = newUrl;
+      console.info('CapabilitiesService: API URL updated to:', newUrl);
+    });
+  }
 
   getCapabilities(): Observable<Capabilities> {
-    const apiUrl = this.configService.getApiBaseUrl();
-    return this.http.get<Capabilities>(`${apiUrl}/capabilities`).pipe(
+    return this.http.get<Capabilities>(`${this.currentApiUrl}/capabilities`).pipe(
       catchError(error => {
         //console.warn('Error fetching capabilities, using fallback', error);        // Return a basic fallback capabilities if the server request fails
         return of({

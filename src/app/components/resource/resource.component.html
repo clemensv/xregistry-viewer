@@ -1,4 +1,60 @@
 <div class="resource-container">
+  <!-- Multiple versions mode -->
+  <ng-container *ngIf="hasMultipleVersions">
+    <h2>Resource: {{ resourceId }}</h2>
+
+    <!-- Show default version details -->
+    <!-- Version History -->
+    <div class="versions-list">
+      <h3>Version History</h3>
+      <div *ngIf="versions$ | async as versions; else loadingVersions">
+        <div *ngIf="versions.length > 0; else noVersions" class="versions-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Version ID</th>
+                <th>Created</th>
+                <th>Modified</th>
+                <th>Default</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>              <tr *ngFor="let version of versions" [class.default-version]="version['isdefault'] || version['isDefault']">
+                <td>{{ version['id'] || version['versionid'] }}</td>
+                <td>{{ (version['createdat'] || version['createdAt']) | date:'short' }}</td>
+                <td>{{ (version['modifiedat'] || version['modifiedAt']) | date:'short' }}</td>
+                <td><span *ngIf="version['isdefault'] || version['isDefault']" class="default-badge">✓</span></td>
+                <td>
+                  <a [routerLink]="['versions', version['id'] || version['versionid']]" class="btn-view">View</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noVersions>
+          <p>No version history available.</p>
+        </ng-template>
+      </div>
+      <ng-template #loadingVersions>
+        <p>Loading versions...</p>
+      </ng-template>
+    </div>
+      <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">
+      <h3>Default Version: {{ defaultVersion.id }}</h3>      <a [routerLink]="['versions', defaultVersion['versionid']]">View Version Details</a>
+
+      <section>
+        <h4>Latest Version Attributes</h4>
+        <ng-container *ngFor="let key of displayAttributes">
+          <div class="attribute" *ngIf="hasValue(defaultVersion[key])">
+            <ng-container *ngIf="!isArray(defaultVersion[key]) && !isObject(defaultVersion[key])">
+              <strong [title]="resourceAttributes[key]?.description || ''">{{ key }}:</strong>
+              <span [title]="resourceAttributes[key]?.description || ''">{{ defaultVersion[key] }}</span>
+            </ng-container>
+          </div>
+        </ng-container>
+      </section>
+    </div>
+  </ng-container>
   <!-- Single version mode -->
   <ng-container *ngIf="!hasMultipleVersions && (defaultVersion$ | async) as version">
     <h2>Resource: {{ resourceId }}</h2>
@@ -62,59 +118,5 @@
     </div>
   </ng-container>
 
-  <!-- Multiple versions mode -->
-  <ng-container *ngIf="hasMultipleVersions">
-    <h2>Resource: {{ resourceId }}</h2>
-
-    <!-- Show default version details -->
-    <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">
-      <h3>Default Version: {{ defaultVersion.id }}</h3>      <a [routerLink]="['versions', defaultVersion['versionid']]">View Version Details</a>
-
-      <section>
-        <h4>Latest Version Attributes</h4>
-        <ng-container *ngFor="let key of displayAttributes">
-          <div class="attribute" *ngIf="hasValue(defaultVersion[key])">
-            <ng-container *ngIf="!isArray(defaultVersion[key]) && !isObject(defaultVersion[key])">
-              <strong [title]="resourceAttributes[key]?.description || ''">{{ key }}:</strong>
-              <span [title]="resourceAttributes[key]?.description || ''">{{ defaultVersion[key] }}</span>
-            </ng-container>
-          </div>
-        </ng-container>
-      </section>
-    </div>    <!-- Version History -->
-    <div class="versions-list">
-      <h3>Version History</h3>
-      <div *ngIf="versions$ | async as versions; else loadingVersions">
-        <div *ngIf="versions.length > 0; else noVersions" class="versions-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Version ID</th>
-                <th>Created</th>
-                <th>Modified</th>
-                <th>Default</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>              <tr *ngFor="let version of versions" [class.default-version]="version['isdefault'] || version['isDefault']">
-                <td>{{ version['id'] || version['versionid'] }}</td>
-                <td>{{ (version['createdat'] || version['createdAt']) | date:'short' }}</td>
-                <td>{{ (version['modifiedat'] || version['modifiedAt']) | date:'short' }}</td>
-                <td><span *ngIf="version['isdefault'] || version['isDefault']" class="default-badge">✓</span></td>
-                <td>
-                  <a [routerLink]="['versions', version['id'] || version['versionid']]" class="btn-view">View</a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <ng-template #noVersions>
-          <p>No version history available.</p>
-        </ng-template>
-      </div>
-      <ng-template #loadingVersions>
-        <p>Loading versions...</p>
-      </ng-template>
-    </div>
-  </ng-container>
+  
 </div>

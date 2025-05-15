@@ -39,7 +39,7 @@
               </h4>
               <p *ngIf="resourceType.description" class="resource-description">{{ resourceType.description }}</p>
               <div class="resource-metadata">
-                <span *ngIf="resourceType.maxversions > 1" class="badge versioned">Versioned</span>
+                <span *ngIf="resourceType.maxversions != 1" class="badge versioned">Versioned</span>
                 <span *ngIf="resourceType.maxversions === 1" class="badge single-version">Single Version</span>
                 <span *ngIf="resourceType.hasdocument" class="badge has-document">Has Document</span>
               </div>

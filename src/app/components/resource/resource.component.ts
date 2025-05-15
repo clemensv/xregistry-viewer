@@ -51,7 +51,7 @@ export class ResourceComponent implements OnInit {
 
         // Check if this resource type supports multiple versions
         // According to xRegistry spec, maxversions property determines version storage count
-        this.hasMultipleVersions = this.resourceTypeData.maxversions > 1;
+        this.hasMultipleVersions = this.resourceTypeData.maxversions != 1;
 
         if (this.hasMultipleVersions) {
           // Load all versions when multiple versions are supported
