@@ -3,10 +3,12 @@
     <h2>Resources for {{ resourceType }} in {{ groupType }}/{{ groupId }}</h2>
   </div>
   <div class="page-content">
-    <div *ngIf="resources$ | async as resources;">
-      <div class="grid-container">
-        <div *ngFor="let res of resources" class="grid-item">
-        <h3>{{ res['name'] }}</h3>
+    <div *ngIf="resources$ | async as resources;" [ngClass]="{'single-resource': resources.length === 1}">
+      <div class="grid-container">        <div *ngFor="let res of resources" class="grid-item" [ngClass]="{'single-item': resources.length === 1}">
+          <div class="resource-header">
+            <h3>{{ res['name'] }}</h3>
+            <span *ngIf="res['versionsCount'] > 1" class="version-badge" [title]="res['versionsCount'] + ' versions available'">{{ res['versionsCount'] }}</span>
+          </div>
         <ng-container *ngFor="let key of displayAttributes">
           <div class="attribute" *ngIf="hasValue(res[key])">
             <ng-container *ngIf="resourceAttributes[key]?.type === 'any'; else normalAttr">
@@ -53,9 +55,7 @@
                 </ng-template>
               </ng-template>
             </ng-template>
-          </div>
-        </ng-container>
-        <div style="margin-top: auto;">
+          </div>        </ng-container>        <div style="margin-top: auto; margin-bottom: -5px;" class="resource-footer">
           <a [routerLink]="[res['id']]" class="tile">
             View Details
           </a>

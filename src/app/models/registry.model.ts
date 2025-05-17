@@ -66,14 +66,16 @@ export interface Resource {
   description?: string;
   createdAt?: string; // ISO date string
   modifiedAt?: string; // ISO date string
+  resource?: any;
+  resourceBase64?: string;
+  resourceUrl?: string;
   [key: string]: any; // Index signature for dynamic property access
 }
 
 export interface VersionDetail {
   id: string;
   attributes: any;
-  document?: string;
-  // Document representations when using $details
+   // Document representations when using $details
   resource?: any;
   resourceBase64?: string;
   resourceUrl?: string;

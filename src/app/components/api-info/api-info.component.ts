@@ -11,7 +11,6 @@ import { ConfigService } from '../../services/config.service';
     <div class="api-info-container">
       <mat-chip-listbox aria-label="API Connection">
         <mat-chip highlighted [color]="'accent'" class="api-chip">
-          <mat-icon>cloud</mat-icon>
           API: {{ apiUrl }}
         </mat-chip>
       </mat-chip-listbox>

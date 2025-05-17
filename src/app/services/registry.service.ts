@@ -278,8 +278,7 @@ export class RegistryService {
         return throwError(() => new Error(`Failed to load version details: ${error.message}`));
       })
     );
-  }
-  /**
+  }  /**
    * Fetch full xRegistry metadata and document representations for the default/latest version of a resource
    */
   getResourceDetail(
@@ -289,9 +288,80 @@ export class RegistryService {
     resourceId: string,
     hasDocument: boolean
   ): Observable<VersionDetail> {
-    const url = hasDocument      ? `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}$details` :
-        `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}`;
-    return this.http.get<VersionDetail>(url);
+    // Construct the URLs for both with and without $details
+    const detailsUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}$details`;
+    const regularUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}`;
+    
+    // Use the appropriate URL based on hasDocument
+    const primaryUrl = hasDocument ? detailsUrl : regularUrl;
+    
+    console.log(`Fetching resource detail from: ${primaryUrl}`);
+    console.log(`hasDocument flag is: ${hasDocument}`);
+
+    // Function to process the response
+    const processResponse = (response: any): VersionDetail => {
+      console.log('Processing resource detail response:', response);
+      
+      // Convert the response to ensure all properties are included
+      const result: any = { ...response };
+      
+      // If the document content is embedded in a specific field, process it
+      if (hasDocument) {
+        const singularName = resourceType.endsWith('s') ? resourceType.slice(0, -1) : resourceType;
+        
+        // Check if we have any document-related fields
+        const hasSpecificDocument = !!(
+          response[singularName] || 
+          response[`${singularName}url`] || 
+          response[`${singularName}base64`]
+        );
+        
+        if (hasSpecificDocument) {
+          // If the document is in a specific field, we can process it
+          if (response[singularName]) {
+            result["resource"] = response[singularName];
+          } else if (response[`${singularName}url`]) {
+            result["resourceUrl"] = response[`${singularName}url`];
+          } else if (response[`${singularName}base64`]) {
+            result["resourceBase64"] = response[`${singularName}base64`];
+          }
+        }
+
+        console.log(`Document field found: ${hasSpecificDocument}, singular name: ${singularName}`);
+      }
+      
+      return result as VersionDetail;
+    };
+    
+    // Try the primary URL first, and if it fails with a 404, fallback to the regular URL
+    return this.http.get<any>(primaryUrl).pipe(
+      tap(response => {
+        console.log('API response received for resource detail:', response);
+      }),
+      map(processResponse),
+      catchError(error => {
+        console.error(`Error fetching resource detail from ${primaryUrl}:`, error);
+        
+        // If hasDocument is true and we get a 404, fall back to the regular URL
+        if (hasDocument && error.status === 404) {
+          console.warn(`$details URL returned 404, falling back to regular URL: ${regularUrl}`);
+          
+          return this.http.get<any>(regularUrl).pipe(
+            tap(response => {
+              console.log('API response received from fallback URL:', response);
+            }),
+            map(processResponse),
+            catchError(fallbackError => {
+              console.error(`Error fetching resource detail from fallback URL ${regularUrl}:`, fallbackError);
+              return throwError(() => new Error(`Failed to load resource details: ${fallbackError.message}`));
+            })
+          );
+        }
+        
+        // Otherwise, rethrow the original error
+        return throwError(() => new Error(`Failed to load resource details: ${error.message}`));
+      })
+    );
   }
   /**
    * Fetch all versions of a resource

@@ -3,10 +3,9 @@
   <div *ngIf="groups$ | async as groups">
     <div class="grid-container">
       <div *ngFor="let group of groups" class="grid-item">
-        <h3>{{ group['name'] || group['id'] }}</h3>
-        <div class="attribute" *ngIf="group['description']">
+        <h3>{{ group['name'] || group['id'] }}</h3>        <div class="attribute">
           <strong>Description:</strong>
-          <span>{{ group['description'] }}</span>
+          <span>{{ group['description'] ? group['description'] : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pharetra velit at eros tempus, vel ultrices ante tincidunt.' }}</span>
         </div>
         <div class="attribute" *ngIf="group['labels']">
           <strong>Labels:</strong>
@@ -24,9 +23,7 @@
               <span *ngIf="group[rt + 'count'] !== undefined" class="resource-count"> ({{ group[rt + 'count'] }})</span>
             </li>
           </ul>
-        </div>
-
-        <div style="margin-top: auto;">
+        </div>        <div class="tile-footer-container">
           <a [routerLink]="[group['id']]" class="tile">
             View Group
           </a>

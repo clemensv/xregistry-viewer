@@ -24,6 +24,11 @@ export class ResourceComponent implements OnInit {
   versions$!: Observable<any[]>;
   resourceAttributes: { [key: string]: any } = {};
   loading = true; // Add loading property for template reference
+  // Document handling properties
+  isLoadingDocument = false;
+  documentError: string | null = null;
+  cachedDocumentContent: string | null = null;
+  cachedResourceId: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -31,6 +36,12 @@ export class ResourceComponent implements OnInit {
     private modelService: ModelService
   ) {}  ngOnInit(): void {
     this.loading = true;
+    // Reset document state when initializing
+    this.isLoadingDocument = false;
+    this.documentError = null;
+    this.cachedDocumentContent = null;
+    this.cachedResourceId = null;
+    
     this.route.paramMap.pipe(
       tap(params => {
         this.groupType = params.get('groupType')!;
@@ -65,8 +76,7 @@ export class ResourceComponent implements OnInit {
         console.error('Error loading registry model:', err);
       }
     });
-  }
-  loadDefaultVersion(): void {
+  }  loadDefaultVersion(): void {
     this.defaultVersion$ = this.registry.getResourceDetail(
       this.groupType,
       this.groupId,
@@ -74,9 +84,20 @@ export class ResourceComponent implements OnInit {
       this.resourceId,
       this.resourceTypeData?.hasdocument || false
     ).pipe(
-      tap(() => {
+      tap((version) => {
         // Set loading to false when the default version is loaded
         this.loading = false;
+        
+        // Debug: log the version details to see what document fields we're getting
+        console.log('Default version loaded:', version);
+        console.log('Document fields in version:', {
+          hasResource: !!version.resource,
+          hasResourceUrl: !!version.resourceUrl,
+          hasResourceBase64: !!version.resourceBase64,
+          hasDocument: !!version.resource || !!version.resourceBase64 || !!version.resourceUrl,
+          resourceType: this.resourceType,
+          hasDocumentSupport: this.resourceTypeData?.hasdocument || false
+        });
       }),
       catchError(err => {
         console.error('Error loading default version:', err);
@@ -173,10 +194,184 @@ export class ResourceComponent implements OnInit {
     }
     return value !== '';
   }
-
   get displayAttributes(): string[] {
+    const staticKeys = ['xid', 'self', 'epoch', 'isdefault', 'ancestor', 'versionscount', 'versionsurl', 'metaurl', 'createdat', 'modifiedat'];
+    const singular = this.getSingularName(this.resourceType);
     return Object.keys(this.resourceAttributes || {}).filter(
-      key => !['xid', 'self', 'epoch', 'isdefault', 'ancestor', 'versionscount', 'versionsurl', 'metaurl', 'createdat', 'modifiedat'].includes(key)
+      key => !staticKeys.includes(key) && key !== singular && key !== `${singular}url` && key !== `${singular}base64`
     );
+  }
+
+  // Document handling methods
+  /**
+   * Gets the singular name of a resource type
+   */
+  getSingularName(resourceType: string): string {
+    return resourceType.endsWith('s') ? resourceType.slice(0, -1) : resourceType;
+  }
+  
+  /**
+   * Checks if the version has a document (using any of the supported formats)
+   */
+  hasDocument(version: any, resourceType: string): boolean {
+    if (!version) {
+      console.log(`Document check failed - version is null or undefined`);
+      return false;
+    }
+
+    const hasDoc = !!(version.resource || version.resourceUrl || version.resourceBase64 );
+        
+    return hasDoc;
+  }/**
+   * Gets document content from any available source
+   */
+  getDocumentContent(version: VersionDetail, resourceType: string): string | null {
+    if (!version || !this.resourceTypeData?.hasdocument) {
+      console.log(`Cannot get document content - version: ${!!version}, resourceType has document: ${!!this.resourceTypeData?.hasdocument}`);
+      return null;
+    }
+
+    console.log(`Getting document content for ${resourceType}`, {
+      hasResource: !!version.resource,
+      hasResourceUrl: !!version.resourceUrl,
+      hasResourceBase64: !!version.resourceBase64,
+      hasDocument: !!version.resource || !!version.resourceBase64 || !!version.resourceUrl
+    });
+
+    // Clear previous cached content if we're fetching for a different resource
+    if (!this.cachedResourceId || this.cachedResourceId !== `${resourceType}/${version.id}`) {
+      console.log(`Clearing cached document content for new resource: ${resourceType}/${version.id}`);
+      this.cachedDocumentContent = null;
+      this.cachedResourceId = `${resourceType}/${version.id}`;
+    }
+
+    // If URL is available, fetch the content
+    if (version.resourceUrl && !this.isLoadingDocument && !this.cachedDocumentContent) {
+      console.log(`Fetching document from URL: ${version.resourceUrl}`);
+      this.fetchDocumentFromUrl(version.resourceUrl);
+    }
+
+    if (version.resource && !this.cachedDocumentContent) {
+      console.log(`Using resource field for document content`);
+      this.cachedDocumentContent = JSON.stringify(version.resource);
+    }
+
+    if (version.resourceBase64 && !this.cachedDocumentContent) {
+      console.log(`Using base64 resource field for document content`);
+      this.cachedDocumentContent = atob(version.resourceBase64);
+    }
+    
+    
+    // If we already have cached content, return it
+    if (this.cachedDocumentContent) {
+      return this.cachedDocumentContent;
+    }
+
+    return null;
+  }
+
+  /**
+   * Determines the content type for styling purposes
+   */
+  getDocumentContentType(content: string): string {
+    try {
+      JSON.parse(content);
+      return 'json-content';
+    } catch (e) {
+      return 'text-content';
+    }
+  }
+  /**
+   * Formats document content for display
+   */
+  formatDocumentContent(content: string): string {
+    if (!content) {
+      console.log('No content to format');
+      return '';
+    }
+
+    try {
+      // Try to pretty-print JSON
+      const obj = JSON.parse(content);
+      console.log('Formatting content as JSON');
+      return JSON.stringify(obj, null, 2);
+    } catch (e) {
+      // If not JSON, return as is
+      console.log('Content is not JSON, returning as is');
+      return content;
+    }
+  }
+
+  /**
+   * Checks if base64 encoded document is available
+   */
+  hasBase64Document(version: any, resourceType: string): boolean {
+    if (!version || !this.resourceTypeData?.hasdocument) {
+      return false;
+    }
+
+    return version.resourceBase64 && version.resourceBase64.length > 0;
+  }
+
+  /**
+   * Downloads base64 encoded document
+   */
+  downloadBase64Document(version: any, resourceType: string): void {
+    if (!version || !this.resourceTypeData?.hasdocument) {
+      return;
+    }
+
+    const base64Data = version.resourceBase64;
+    
+    if (!base64Data) {
+      return;
+    }
+
+    try {
+      // Create a blob from the base64 data
+      const binary = atob(base64Data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const blob = new Blob([bytes]);
+
+      // Create a download link
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${resourceType}_${version.id}_document`;
+      link.click();
+      
+      // Clean up
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      this.documentError = 'Failed to download document';
+    }
+  }
+
+  /**
+   * Fetches document content from URL
+   */
+  private fetchDocumentFromUrl(url: string): void {
+    this.isLoadingDocument = true;
+    this.documentError = null;
+
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch document: ${response.status} ${response.statusText}`);
+        }
+        return response.text();
+      })
+      .then(content => {
+        this.cachedDocumentContent = content;
+        this.isLoadingDocument = false;
+      })
+      .catch(error => {
+        console.error('Error fetching document:', error);
+        this.documentError = error.message;
+        this.isLoadingDocument = false;
+      });
   }
 }

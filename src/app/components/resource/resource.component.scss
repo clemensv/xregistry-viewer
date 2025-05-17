@@ -49,12 +49,77 @@
   section {
     margin-bottom: 2rem;
   }
-
   pre {
     background-color: #f5f5f5;
     padding: 0.5rem;
     border-radius: 4px;
     overflow-x: auto;
+  }
+
+  .json-content {
+    background-color: #f5f5f5;
+    color: #333;
+    font-family: monospace;
+    white-space: pre-wrap;
+  }
+
+  .text-content {
+    background-color: #f5f5f5;
+    white-space: pre-wrap;
+    font-family: monospace;
+  }
+
+  .loading-document {
+    display: flex;
+    align-items: center;
+    color: #0066cc;
+    margin: 1rem 0;
+    
+    .loading-icon {
+      animation: spin 1.5s linear infinite;
+      margin-right: 0.5rem;
+    }
+  }
+
+  .document-error {
+    display: flex;
+    align-items: center;
+    color: #cc0000;
+    margin: 1rem 0;
+    
+    .error-icon {
+      margin-right: 0.5rem;
+    }
+  }
+
+  .action-buttons {
+    margin-top: 1rem;
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      
+      &:hover {
+        background-color: #004c99;
+      }
+      
+      .material-icons {
+        margin-right: 0.5rem;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .doc-icon {
+    vertical-align: middle;
+    margin-right: 0.5rem;
   }
 
   .latest-version {
@@ -126,8 +191,13 @@
           &:hover {
             background-color: #004c99;
           }
-        }
-      }
+        }      }
     }
   }
+}
+
+/* Animation for loading spinner */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

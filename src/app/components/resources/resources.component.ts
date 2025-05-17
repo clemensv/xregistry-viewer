@@ -23,7 +23,7 @@ export class ResourcesComponent implements OnInit {
   resourceAttributes: { [key: string]: any } = {}; // Metadata for attributes
   loading = true; // Add loading property for template reference
 
-  private suppressAttributes = ['xid', 'self', 'epoch', 'isdefault', 'ancestor', 'versionscount', 'versionsurl', 'metaurl', 'createdat', 'modifiedat'];
+  private suppressAttributes = ['xid', 'self', 'epoch', 'isdefault', 'ancestor', 'versionscount', 'versionsCount', 'versionsurl', 'metaurl', 'createdat', 'modifiedat', 'createdAt', 'modifiedAt', 'id', 'name'];
 
   constructor(
     private route: ActivatedRoute,

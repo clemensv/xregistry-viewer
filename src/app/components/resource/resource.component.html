@@ -38,20 +38,91 @@
       <ng-template #loadingVersions>
         <p>Loading versions...</p>
       </ng-template>
-    </div>
-      <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">
-      <h3>Default Version: {{ defaultVersion.id }}</h3>      <a [routerLink]="['versions', defaultVersion['versionid']]">View Version Details</a>
+    </div>      <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">      <h3>Default Version: {{ defaultVersion.id }}</h3>      
+      <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
 
       <section>
-        <h4>Latest Version Attributes</h4>
+        <h4>Version Attributes</h4>
         <ng-container *ngFor="let key of displayAttributes">
           <div class="attribute" *ngIf="hasValue(defaultVersion[key])">
-            <ng-container *ngIf="!isArray(defaultVersion[key]) && !isObject(defaultVersion[key])">
+            <ng-container *ngIf="resourceAttributes[key]?.type === 'any'; else normalAttr">
               <strong [title]="resourceAttributes[key]?.description || ''">{{ key }}:</strong>
-              <span [title]="resourceAttributes[key]?.description || ''">{{ defaultVersion[key] }}</span>
+              <pre [title]="resourceAttributes[key]?.description || ''">{{ defaultVersion[key] | json }}</pre>
             </ng-container>
+            <ng-template #normalAttr>
+              <ng-container *ngIf="!isArray(defaultVersion[key]) && !isObject(defaultVersion[key]); else nestedTemplate">
+                <strong [title]="resourceAttributes[key]?.description || ''">{{ key }}:</strong>
+                <span [title]="resourceAttributes[key]?.description || ''">{{ defaultVersion[key] }}</span>
+              </ng-container>
+              <ng-template #nestedTemplate>
+                <h4 [title]="resourceAttributes[key]?.description || ''">{{ key }}:</h4>
+                <div *ngIf="isArray(defaultVersion[key]); else objectTemplate" class="object-array">
+                  <div *ngFor="let item of defaultVersion[key]; let i = index" class="object-item">
+                    <ng-container *ngIf="isObject(item); else primitiveTemplate">
+                      <div *ngFor="let subKey of objectKeys(item)" class="object-field">
+                        <ng-container *ngIf="resourceAttributes[key]?.item?.attributes?.[subKey]?.type === 'any'; else subNormalAttr">
+                          <strong [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
+                          <pre [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ item[subKey] | json }}</pre>
+                        </ng-container>
+                        <ng-template #subNormalAttr>
+                          <strong [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
+                          <span [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ item[subKey] }}</span>
+                        </ng-template>
+                      </div>
+                    </ng-container>
+                    <ng-template #primitiveTemplate>
+                      <span>{{ item }}</span>
+                    </ng-template>
+                  </div>
+                </div>
+                <ng-template #objectTemplate>
+                  <div *ngFor="let subKey of objectKeys(defaultVersion[key])" class="object-field">
+                    <ng-container *ngIf="resourceAttributes[key]?.attributes?.[subKey]?.type === 'any'; else subObjNormalAttr">
+                      <strong [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
+                      <pre [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ defaultVersion[key][subKey] | json }}</pre>
+                    </ng-container>
+                    <ng-template #subObjNormalAttr>
+                      <strong [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
+                      <span [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ defaultVersion[key][subKey] }}</span>
+                    </ng-template>
+                  </div>
+                </ng-template>
+              </ng-template>
+            </ng-template>
           </div>
         </ng-container>
+      </section>
+
+      <!-- Document section -->
+      <section *ngIf="hasDocument(defaultVersion, resourceType)">
+        <h3>
+          <span class="material-icons doc-icon">description</span>
+          Document
+        </h3>
+        
+        <!-- Show document content if available -->
+        <div *ngIf="getDocumentContent(defaultVersion, resourceType) as content">
+          <pre [ngClass]="getDocumentContentType(content)">{{ formatDocumentContent(content) }}</pre>
+        </div>
+        
+        <!-- Show download link if base64 encoded document is available -->
+        <div *ngIf="hasBase64Document(defaultVersion, resourceType)" class="action-buttons">
+          <button (click)="downloadBase64Document(defaultVersion, resourceType)" class="download-btn">
+            <span class="material-icons">download</span> Download Document
+          </button>
+        </div>
+        
+        <!-- Show loading message if fetching from URL -->
+        <div *ngIf="isLoadingDocument" class="loading-document">
+          <span class="material-icons loading-icon">sync</span>
+          <p>Loading document content...</p>
+        </div>
+        
+        <!-- Show error message if document fetch failed -->
+        <div *ngIf="documentError" class="document-error">
+          <span class="material-icons error-icon">error</span>
+          <p>Error loading document: {{ documentError }}</p>
+        </div>
       </section>
     </div>
   </ng-container>
@@ -109,11 +180,36 @@
               </ng-template>
             </ng-template>
           </div>
-        </ng-container>
-      </section>
-      <section *ngIf="version.document">
-        <h3>Document</h3>
-        <pre>{{ version.document }}</pre>
+        </ng-container>      </section>
+      <section *ngIf="hasDocument(version, resourceType)">
+        <h3>
+          <span class="material-icons doc-icon">description</span>
+          Document
+        </h3>
+        
+        <!-- Show document content if available -->
+        <div *ngIf="getDocumentContent(version, resourceType) as content">
+          <pre [ngClass]="getDocumentContentType(content)">{{ formatDocumentContent(content) }}</pre>
+        </div>
+        
+        <!-- Show download link if base64 encoded document is available -->
+        <div *ngIf="hasBase64Document(version, resourceType)" class="action-buttons">
+          <button (click)="downloadBase64Document(version, resourceType)" class="download-btn">
+            <span class="material-icons">download</span> Download Document
+          </button>
+        </div>
+        
+        <!-- Show loading message if fetching from URL -->
+        <div *ngIf="isLoadingDocument" class="loading-document">
+          <span class="material-icons loading-icon">sync</span>
+          <p>Loading document content...</p>
+        </div>
+        
+        <!-- Show error message if document fetch failed -->
+        <div *ngIf="documentError" class="document-error">
+          <span class="material-icons error-icon">error</span>
+          <p>Error loading document: {{ documentError }}</p>
+        </div>
       </section>
     </div>
   </ng-container>

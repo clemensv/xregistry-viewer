@@ -6,10 +6,38 @@
 @use 'sass:map';
 @use 'sass:color';
 
+/* Override Material toolbar height */
+.mat-toolbar {
+  min-height: 48px !important;
+  height: 48px !important;
+  font-size: 16px;
+}
+
+.mat-mdc-icon-button {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 6px !important;
+  font-size: 18px;
+}
+
+.mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  line-height: 18px;
+}
+
+.mat-mdc-menu-item {
+  min-height: 36px;
+  line-height: 36px;
+  font-size: 13px;
+}
+
 /* Global styles */
 html, body {
   height: 100%;
   margin: 0;
+  font-size: 14px; /* Base font size reduced for higher information density */
 }
 
 body {
@@ -18,6 +46,15 @@ body {
   color: #333;
   background-color: #fafafa;
 }
+
+/* Make all font sizes throughout the app slightly smaller for better info density */
+h1 {font-size: 1.6rem;}
+h2 {font-size: 1.3rem;}
+h3 {font-size: 1.1rem;}
+h4 {font-size: 0.95rem;}
+h5 {font-size: 0.85rem;}
+h6 {font-size: 0.8rem;}
+p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
 
 /* Common utility classes */
 .spacer {
@@ -29,10 +66,11 @@ body {
   display: flex;
   align-items: center;
   flex-wrap: wrap; // Allow wrapping on small screens
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.8rem;
   background-color: map.get(theme.$background-color, card);
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Light shadow for depth
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); // Light shadow for depth
+  font-size: 0.82rem;
 
   &-item {
     display: flex;
@@ -119,12 +157,12 @@ body {
 
 .main-container {
   flex: 1;
-  padding: 1.5rem;
+  padding: 0.8rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  min-height: calc(100vh - 120px); /* Account for header and footer */
+  min-height: calc(100vh - 100px); /* Account for reduced header and footer */
   width: 100%;
   max-width: 1440px;
   margin: 0 auto; /* Center the container horizontally but not the content */
@@ -147,22 +185,29 @@ body {
 }
 
 .page-header {
-  margin-bottom: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.page-header h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.2rem;
+  margin-top: 0.2rem;
+  font-weight: 600;
 }
 
 .page-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.8rem;
 }
 
 .section-container {
   width: 100%;
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  padding: 0.9rem;
+  margin-bottom: 0.9rem;
 }
 
 /* Loading animation for smoother transitions */
@@ -188,14 +233,25 @@ body {
 }
 
 /* API info styles */
-.api-info-container {
+/* API info styles when displayed in the main content */
+:not(app-header) > .api-info-container {
   padding: 8px 16px;
   background-color: map.get(theme.$background-color, hover);
   border-bottom: 1px solid map.get(theme.$foreground-color, divider);
 }
 
+/* API info styles when displayed in the header */
+app-header .api-info-container {
+  padding: 0;
+  background-color: transparent;
+  border-bottom: none;
+}
+
 .api-chip {
   font-size: 12px;
+  line-height: normal;
+  display: flex;
+  align-items: center;
 }
 
 /* Configuration styles */
