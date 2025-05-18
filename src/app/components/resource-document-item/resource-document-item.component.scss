@@ -1,7 +1,11 @@
+@use '../shared-variables' as vars;
+@use '../_vertical-bars' as vbars;
+
 .resource-document-item {
   margin: 0.5rem 0;
   display: block;
   position: relative;
+  font-size: vars.$content-size; // Set base font size
   &.nested {
     padding-left: 0.15rem; /* Minimized indent depth */
     margin-bottom: 0.5rem; /* Reduced spacing between items */
@@ -16,23 +20,23 @@
     border-radius: 4px;
     border: 1px solid #e0e0e0;
     transition: all 0.2s ease;
-    margin-bottom: 0.25rem;    // Make rows with simple values non-clickable
+    margin-bottom: 0.25rem;
+
+    // Make rows with simple values non-clickable
     &.simple-row {
       cursor: default;
       background-color: #fafafa;
       position: relative;
       border-left: 3px solid #28a745; // Green tint for simple values
-
       &::before {
         content: '';
         position: absolute;
-        top: 0; /* Align with the top edge */
-        bottom: 0; /* Align with the bottom edge */
-        left: 0; /* Align with the container's border */
-        width: 3px; /* Match the border-left width */
-        height: 100%; /* Ensure full height alignment */
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
         background-color: #28a745; /* Match the border-left color */
-        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
         z-index: 1;
       }
     }
@@ -52,7 +56,8 @@
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
       }
-    }    // Custom styling for arrays
+    }
+    // Custom styling for arrays
     &.array-row {
       position: relative;
       border-left: 3px solid #5bc0de;
@@ -60,13 +65,12 @@
       &::before {
         content: '';
         position: absolute;
-        top: 0; /* Align with the top edge */
-        bottom: 0; /* Align with the bottom edge */
-        left: 0; /* Align with the container's border */
-        width: 3px; /* Match the border-left width */
-        height: 100%; /* Ensure full height alignment */
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
         background-color: #5bc0de; /* Match the border-left color */
-        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
         z-index: 1;
       }
 
@@ -75,7 +79,9 @@
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
       }
-    }    // Custom styling for objects
+    }
+
+    // Custom styling for objects
     &.object-row {
       position: relative;
       border-left: 3px solid #9575cd;
@@ -83,13 +89,11 @@
       &::before {
         content: '';
         position: absolute;
-        top: 0; /* Align with the top edge */
-        bottom: 0; /* Align with the bottom edge */
-        left: 0; /* Align with the container's border */
+        top: 0;
+        left: -3px; /* Match the border-left width */
         width: 3px; /* Match the border-left width */
-        height: 100%; /* Ensure full height alignment */
+        height: 100%;
         background-color: #9575cd; /* Match the border-left color */
-        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
         z-index: 1;
       }
 
@@ -99,40 +103,33 @@
         border-bottom-right-radius: 0;
       }
     }
-
     strong {
       font-weight: 600;
       color: #2c3e50;
       margin-right: 0.5rem;
+      font-size: vars.$content-size;
     }
-
     .toggle-icon {
       margin-right: 0.5rem;
-      font-size: 1.2rem;
+      font-size: calc(vars.$content-size * 1.2);
       color: #555;
       transition: transform 0.15s ease;
-    }
-
-    .item-count {
+    }    .item-count {
       color: #6c757d;
-      font-size: 0.9rem;
+      font-size: vars.$small-size;
       margin-right: 0.5rem;
       font-weight: normal;
-    }
-
-    .item-model-type {
+    }    .item-model-type {
       color: #457B9D;
-      font-size: 0.9rem;
+      font-size: vars.$small-size;
       background-color: #F1FAEE;
       padding: 2px 6px;
       border-radius: 4px;
       border: 1px solid #A8DADC;
       margin-right: 0.75rem;
-    }
-
-    .item-description {
+    }    .item-description {
       color: #6c757d;
-      font-size: 0.85rem;
+      font-size: vars.$small-size;
       font-style: italic;
       white-space: nowrap;
       overflow: hidden;
@@ -169,50 +166,52 @@
         color: #0B6E4F;
       }
     }
-  }  // Expanded content container
+  }
+  // Expanded content container
   .expanded-content {
     position: relative;
     border: 1px solid #e0e0e0;
     border-top: none;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    margin-bottom: 0.5rem;    &.array-content {
+    margin-bottom: 0.5rem;
+
+    &.array-content {
       border-left: 3px solid #5bc0de;
 
       &::before {
         content: '';
         position: absolute;
-        top: 0; /* Align with the top edge */
-        bottom: 0; /* Align with the bottom edge */
-        left: 0; /* Align with the container's border */
+        top: 0;
+        left: -3px; /* Match the border-left width */
         width: 3px; /* Match the border-left width */
-        height: 100%; /* Ensure full height alignment */
+        height: 100%;
         background-color: #5bc0de; /* Match the border color */
-        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
+        border-bottom-left-radius: 4px;
         z-index: 1;
       }
-    }    &.object-content {
+    }
+
+    &.object-content {
       border-left: 3px solid #9575cd;
 
       &::before {
         content: '';
         position: absolute;
-        top: 0; /* Align with the top edge */
-        bottom: 0; /* Align with the bottom edge */
-        left: 0; /* Align with the container's border */
+        top: 0;
+        left: -3px; /* Match the border-left width */
         width: 3px; /* Match the border-left width */
-        height: 100%; /* Ensure full height alignment */
+        height: 100%;
         background-color: #9575cd; /* Match the border color */
-        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
+        border-bottom-left-radius: 4px;
         z-index: 1;
       }
     }
-  }  // Array items styling
+  }
+  // Array items styling
   .array-items {
-    padding: 0.25rem;
-
-    .array-item-details {
-      font-size: 0.9rem;
+    padding: 0.25rem;    .array-item-details {
+      font-size: vars.$small-size;
       margin-bottom: 0.5rem;
       padding: 0.5rem;
       background-color: rgba(91, 192, 222, 0.05);
@@ -297,25 +296,25 @@
         pre {
           margin: 0;
           padding: 0.25rem;
-          font-size: 0.9rem;
+          font-size: vars.$code-size;
         }
       }
 
       .preview-array-items, .preview-object-items {
         border-left: 2px solid #eee;
         padding-left: 0.5rem;
-      }
 
-      .more-items-notice {
-        display: flex;
-        align-items: center;
-        color: #6c757d;
-        font-size: 0.9rem;
-        padding: 0.25rem;
+        .more-items-notice {
+          display: flex;
+          align-items: center;
+          color: #6c757d;
+          font-size: vars.$small-size;
+          padding: 0.25rem;
 
-        .more-icon {
-          font-size: 1.1rem;
-          margin-right: 0.25rem;
+          .more-icon {
+            font-size: 1.1rem;
+            margin-right: 0.25rem;
+          }
         }
       }
     }
@@ -323,21 +322,22 @@
 
   // Styling for the preview elements
   .preview-item, .preview-property {
-    padding: 0.25rem 0.5rem;
-    margin: 0.25rem 0;
-    background-color: rgba(0, 0, 0, 0.02);
-    border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+  margin: 0.25rem 0;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 3px;
+  font-size: vars.$small-size;
   }
 
   // Any-value container styling
   .any-value-container {
     margin-top: 0.5rem;
 
-    app-code-highlight {
-      display: block;
-      font-size: 0.9rem;
+    app-code-highlight {      display: block;
+      font-size: vars.$code-size;
     }
-  }  // Simple attributes with header and value sections
+  }
+  // Simple attributes with header and value sections
   .simple-attribute-container {
     position: relative;
     padding: 0.75rem;
@@ -351,13 +351,12 @@
     &::before {
       content: '';
       position: absolute;
-      top: 0; /* Align with the top edge */
-      bottom: 0; /* Align with the bottom edge */
-      left: 0; /* Align with the container's border */
+      top: 0;
+      left: -3px; /* Match the border-left width */
       width: 3px; /* Match the border-left width */
-      height: 100%; /* Ensure full height alignment */
+      height: 100%;
       background-color: #28a745; /* Match the border-left color */
-      border-bottom-left-radius: 0; /* Remove radius for flush alignment */
+      border-bottom-left-radius: 6px; /* Match the border-radius */
       z-index: 1; /* Ensure it appears above other elements */
     }
 
@@ -367,32 +366,28 @@
       gap: 0.5rem;
       margin-bottom: 0.5rem;
       align-items: center;
-
       strong {
         font-weight: 600;
         color: #2c3e50;
-        font-size: 1rem;
-      }
-
-      .attribute-type {
-        font-size: 0.85rem;
+        font-size: vars.$content-size;
+      }      .attribute-type {
+        font-size: vars.$small-size;
         color: #457B9D;
         background-color: #F1FAEE;
         padding: 2px 6px;
         border-radius: 4px;
         border: 1px solid #A8DADC;
         font-weight: 500;
-      }
-
-      .attribute-description {
-        font-size: 0.85rem;
+      }      .attribute-description {
+        font-size: vars.$small-size;
         color: #6c757d;
         font-style: italic;
         flex-basis: 100%;
         margin-top: 0.25rem;
       }
-    }.attribute-value {
-      font-size: 1.1rem;
+    }
+    .attribute-value {
+      font-size: vars.$content-size * 1.1;
       color: #333;
       word-break: break-word;
       padding: 0.25rem 0;
@@ -430,21 +425,7 @@
   }
 }
 
-// Adjusting vertical bars to be perfectly flush
-.unified-item-row.simple-row::before,
-.unified-item-row.array-row::before,
-.unified-item-row.object-row::before,
-.expanded-content.array-content::before,
-.expanded-content.object-content::before,
-.preview-array-items::before,
-.preview-object-items::before {
-  top: -1px !important; /* Extend slightly beyond the container */
-  bottom: -1px !important; /* Extend slightly beyond the container */
-  left: -3px !important; /* Align with the container's border-left */
-  height: calc(100% + 2px) !important; /* Account for top and bottom extension */
-  z-index: 1 !important;
-}
-
+// Standalone selectors below
 .preview-array-items {
   position: relative;
   padding-left: 0.25rem;
@@ -455,13 +436,12 @@
   &::before {
     content: '';
     position: absolute;
-    top: 0; /* Align with the top edge */
-    bottom: 0; /* Align with the bottom edge */
-    left: 0; /* Align with the container's border */
+    top: 0;
+    left: -3px; /* Match the border-left width */
     width: 3px; /* Match the border-left width */
-    height: 100%; /* Ensure full height alignment */
+    height: 100%;
     background-color: #5bc0de; /* Match the border color */
-    border-bottom-left-radius: 0; /* Remove radius for flush alignment */
+    border-bottom-left-radius: 4px;
     z-index: 1;
   }
 
@@ -470,7 +450,7 @@
     padding: 0.25rem 0.5rem;
     margin: 0.5rem 0 0.25rem 0;
     background-color: #f8f9fa;
-    font-size: 0.9rem;
+    font-size: vars.$small-size;
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -522,13 +502,12 @@
   &::before {
     content: '';
     position: absolute;
-    top: 0; /* Align with the top edge */
-    bottom: 0; /* Align with the bottom edge */
-    left: 0; /* Align with the container's border */
+    top: 0;
+    left: -3px; /* Match the border-left width */
     width: 3px; /* Match the border-left width */
-    height: 100%; /* Ensure full height alignment */
+    height: 100%;
     background-color: #9575cd; /* Match the border color */
-    border-bottom-left-radius: 0; /* Remove radius for flush alignment */
+    border-bottom-left-radius: 4px;
     z-index: 1;
   }
 
@@ -537,7 +516,7 @@
     padding: 0.25rem 0.5rem;
     margin: 0.5rem 0 0.25rem 0;
     background-color: #f8f9fa;
-    font-size: 0.9rem;
+    font-size: vars.$small-size;
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -579,33 +558,20 @@
   }
 }
 
+// Other standalone selectors
 .preview-item, .preview-property {
   padding: 0.15rem 0.25rem;
   margin: 0.25rem 0;
   background-color: rgba(0, 0, 0, 0.02);
   border-radius: 3px;
+  font-size: vars.$small-size;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.04);
   }
 }
 
-.preview-index {
-  font-weight: 500;
-  color: #555;
-  margin-right: 0.5rem;
-}
-
-.preview-more {
-  padding: 0.25rem 0.5rem;
-  margin-top: 0.5rem;
-  background-color: #f8f9fa;
-  border-radius: 3px;
-  font-style: italic;
-  color: #6c757d;
-  display: inline-block;
-}
-
+// Color classes
 .string { color: #008000; }
 .number { color: #0066cc; }
 .boolean { color: #b22222; }
@@ -613,3 +579,17 @@
 .key { color: #0e639c; font-weight: 500; }
 .special { color: #7a3e9d; }
 .empty { color: #999; font-style: italic; }
+
+// All ::before pseudo-elements that create vertical color bars
+[class*="row"]::before,
+[class*="content"]::before,
+.simple-attribute-container::before,
+.preview-array-items::before,
+.preview-object-items::before {
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  border-bottom-left-radius: 0 !important; // Remove border radius for flush alignment
+  z-index: 1 !important;
+}

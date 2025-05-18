@@ -1,0 +1,43 @@
+/**
+ * SHARED VARIABLES FOR XREGISTRY-VIEWER
+ *
+ * This file contains centralized variables used across components
+ * to ensure consistency and ease of maintenance.
+ */
+
+// Font Size System
+// ----------------
+// Base sizes - adjust these to scale the entire UI
+$base-document-size: 1rem;     // Base size for document components
+$scaling-factor: 0.85;         // 15% reduction for resource document components
+$scaled-size: $base-document-size * $scaling-factor;
+
+// Heading Typography
+// -----------------
+$h3-size: $scaled-size * 1.3;   // Main section headings (~1.11rem)
+$h4-size: $scaled-size * 1.15;  // Sub-section headings (~0.98rem)
+
+// Content Typography
+// -----------------
+$content-size: $scaled-size;    // Standard text (~0.85rem)
+$small-size: $scaled-size * 0.9; // Small text, descriptions (~0.77rem)
+$code-size: $scaled-size * 0.95; // Monospace text, code samples (~0.81rem)
+
+// UI Element Sizes
+// ----------------
+$icon-size: $scaled-size * 1.2; // Icons in document components (~1.02rem)
+$detail-size: $scaled-size * 0.85; // Very small text (~0.72rem)
+
+// Spacing Variables
+// ----------------
+$standard-spacing: 1rem;
+$small-spacing: 0.5rem;
+$tiny-spacing: 0.25rem;
+
+/**
+ * HOW TO USE:
+ *
+ * 1. Import this file in your component SCSS: @import '../shared-variables';
+ * 2. Use variables for font sizes: font-size: $content-size;
+ * 3. To adjust all sizes globally, simply change $base-document-size or $scaling-factor
+ */

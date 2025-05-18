@@ -1,18 +1,19 @@
+@use '../shared-variables' as vars;
+
 .resource-document {
-  margin-bottom: 2rem;
+  margin-bottom: 2rem;  font-size: vars.$content-size; // Set base font size for the document
 
   h3 {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 1.3rem;
+    font-size: vars.$h3-size;
     font-weight: 600;
     margin-bottom: 1rem;
     color: #2c3e50;
   }
-
   h4 {
-    font-size: 1.15rem;
+    font-size: vars.$h4-size;
     font-weight: 700;
     margin-bottom: 0.7rem;
     color: #2c3e50;
@@ -33,10 +34,8 @@
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
       border-bottom: 1px solid #e9ecef;
-    }
-
-    .doc-icon {
-      font-size: 1.5rem;
+    }    .doc-icon {
+      font-size: vars.$content-size * 1.5;
       color: #1abc9c;
     }
 
@@ -55,7 +54,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.95rem;
+      font-size: vars.$content-size;
       transition: background-color 0.2s ease;
 
       &:hover {
@@ -63,7 +62,7 @@
       }
 
       .material-icons {
-        font-size: 1.2rem;
+        font-size: vars.$icon-size;
       }
     }
 
@@ -139,20 +138,16 @@
           font-weight: 600;
           color: #2c3e50;
           font-size: 1rem;
-        }
-
-        .attribute-type {
-          font-size: 0.85rem;
+        }        .attribute-type {
+          font-size: vars.$small-size;
           color: #457B9D;
           background-color: #F1FAEE;
           padding: 2px 6px;
           border-radius: 4px;
           border: 1px solid #A8DADC;
           font-weight: 500;
-        }
-
-        .attribute-description {
-          font-size: 0.85rem;
+        }        .attribute-description {
+          font-size: vars.$small-size;
           color: #6c757d;
           font-style: italic;
           flex-basis: 100%;
@@ -161,7 +156,7 @@
       }
 
       .attribute-value {
-        font-size: 1.1rem;
+        font-size: vars.$content-size * 1.1;
         color: #333;
         word-break: break-word;
         padding: 0.25rem 0;
@@ -192,18 +187,18 @@
         ::ng-deep .expanded-content.array-content,
         ::ng-deep .expanded-content.object-content {
           border-left-width: 3px;
-        }        // Ensure color bars extend to the bottom in all nested items        ::ng-deep .simple-attribute-container::before,
+        }        // Ensure color bars extend to the bottom in all nested items
+        ::ng-deep .simple-attribute-container::before,
         ::ng-deep .unified-item-row.array-row::before,
         ::ng-deep .unified-item-row.object-row::before,
         ::ng-deep .unified-item-row.simple-row::before,
         ::ng-deep .expanded-content.array-content::before,
-        ::ng-deep .expanded-content.object-content::before,
-        ::ng-deep .preview-array-items::before,
-        ::ng-deep .preview-object-items::before {
-          border-bottom-left-radius: 4px;
-          top: -1px !important; /* Extend slightly beyond the container */
-          bottom: -1px !important; /* Extend slightly beyond the container */
-          height: calc(100% + 2px) !important; /* Account for top and bottom extension */
+        ::ng-deep .expanded-content.object-content::before {
+          top: 0 !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          height: 100% !important;
+          border-bottom-left-radius: 0 !important;
           outline: none !important;
           box-shadow: none !important;
           z-index: 1 !important;

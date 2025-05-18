@@ -48,11 +48,10 @@
 
 .grid-item .attribute span {
   display: -webkit-box;
-  display: box;
+  display: flex;
   -webkit-line-clamp: 3;  /* Limit to 3 lines */
   line-clamp: 3;          /* Standard property */
   -webkit-box-orient: vertical;
-  box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   max-height: 4.5em;  /* Approximately 3 lines of text */
