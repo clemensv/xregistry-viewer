@@ -1,0 +1,23 @@
+/* Styles for app-code-highlight */
+pre {
+  background-color: #f5f5f5; /* Light grey background */
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto; /* Allow horizontal scrolling for long lines */
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+}
+
+code {
+  font-family: inherit; /* Inherit font from pre */
+}
+
+/* Import a highlight.js theme */
+/* For example, the default theme: */
+@import 'highlight.js/styles/default.css';
+
+/* Or a different one, e.g., atom-one-dark: */
+/* @import 'highlight.js/styles/atom-one-dark.css'; */
+
+/* You might need to adjust the path to highlight.js styles based on your project setup */
+/* If you've installed highlight.js via npm, the path is usually like the above. */

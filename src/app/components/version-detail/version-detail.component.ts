@@ -7,11 +7,12 @@ import { RegistryService } from '../../services/registry.service';
 import { VersionDetail } from '../../models/registry.model';
 import { combineLatest } from 'rxjs';
 import { ModelService } from '../../services/model.service';
+import { CodeHighlightComponent } from '../code-highlight/code-highlight.component'; // Import CodeHighlightComponent
 
 @Component({
   standalone: true,
   selector: 'app-version-detail',
-  imports: [CommonModule],
+  imports: [CommonModule, CodeHighlightComponent], // Add CodeHighlightComponent to imports
   templateUrl: './version-detail.component.html',
   styleUrls: ['./version-detail.component.scss']
 })
@@ -127,7 +128,7 @@ export class VersionDetailComponent implements OnInit {
     }
 
     return (
-      version.resource || version.resourceUrl || version.resourceBase64 
+      version.resource || version.resourceUrl || version.resourceBase64
     );
   }
 
@@ -159,13 +160,13 @@ export class VersionDetailComponent implements OnInit {
     if (version.resourceBase64) {
       this.cachedDocumentContent = atob(version.resourceBase64);
     }
-    
+
     // If we already have cached content, return it
     if (this.cachedDocumentContent) {
       return this.cachedDocumentContent;
     }
 
-    
+
 
     return null;
   }
@@ -190,7 +191,7 @@ export class VersionDetailComponent implements OnInit {
     }
 
    const base64Data = version.resourceBase64;
-    
+
     if (!base64Data) {
       return;
     }
@@ -209,7 +210,7 @@ export class VersionDetailComponent implements OnInit {
       link.href = URL.createObjectURL(blob);
       link.download = `${resourceType}_${version.id}_document`;
       link.click();
-      
+
       // Clean up
       URL.revokeObjectURL(link.href);
     } catch (error) {
@@ -224,23 +225,17 @@ export class VersionDetailComponent implements OnInit {
   private fetchDocumentFromUrl(url: string): void {
     this.isLoadingDocument = true;
     this.documentError = null;
-
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch document: ${response.status} ${response.statusText}`);
-        }
-        return response.text();
-      })
-      .then(content => {
+    this.registry.fetchDocument(url).subscribe({
+      next: (content) => {
         this.cachedDocumentContent = content;
         this.isLoadingDocument = false;
-      })
-      .catch(error => {
-        console.error('Error fetching document:', error);
-        this.documentError = error.message;
+      },
+      error: (err) => {
+        console.error('Error fetching document:', err);
+        this.documentError = err.message || 'Failed to load document from URL.';
         this.isLoadingDocument = false;
-      });
+      }
+    });
   }
 
   /**
@@ -254,48 +249,38 @@ export class VersionDetailComponent implements OnInit {
       return false;
     }
   }
-  
+
   /**
    * Format document content for display
    */
   formatDocumentContent(content: string): string {
-    if (!content) {
-      return '';
-    }
-    
-    // If it's JSON, pretty-print it
-    if (this.isJsonDocument(content)) {
+    const contentType = this.getDocumentContentType(content);
+    if (contentType === 'json') {
       try {
-        return JSON.stringify(JSON.parse(content), null, 2);
+        const parsedJson = JSON.parse(content);
+        return JSON.stringify(parsedJson, null, 2);
       } catch (e) {
-        console.error('Error formatting JSON content:', e);
+        // If parsing fails, return original content
         return content;
       }
     }
-    
+    // For other types, return as is, or add specific formatting
     return content;
   }
-  
+
   /**
    * Get document content type based on content and resource type
    */
   getDocumentContentType(content: string): string {
-    if (!content) {
-      return '';
+    // Basic content type detection (can be expanded)
+    if (content.trim().startsWith('<')) {
+      return 'xml'; // Or 'html'
     }
-    
-    // Check if it's JSON
-    if (this.isObject(content) || this.isJsonDocument(content)) {
-      return 'application/json';
+    if (content.trim().startsWith('---') || content.includes(':\n  ')) {
+        return 'yaml';
     }
-    
-    // Check if it's XML
-    if (content.trim().startsWith('<') && content.trim().endsWith('>')) {
-      return 'application/xml';
-    }
-    
-    // Default to plain text
-    return 'text/plain';
+    // Add more checks for other types like YAML, etc.
+    return 'json'; // Default to json or plain text
   }
 
   /**
@@ -304,7 +289,7 @@ export class VersionDetailComponent implements OnInit {
   supportsDocuments(): boolean {
     return this.resTypeHasDocument;
   }
-  
+
   /**
    * Track whether we've tried to load document metadata
    */
@@ -318,20 +303,48 @@ export class VersionDetailComponent implements OnInit {
     if (this.documentMetadataLoaded) {
       return;
     }
-    
+
     this.documentMetadataLoaded = true;
-    
+
     this.modelService.getRegistryModel().pipe(
       map(m => m.groups[this.groupType]?.resources[this.resourceType])
     ).subscribe(rtModel => {
       this.resourceAttributes = rtModel?.attributes || {};
       this.resTypeHasDocument = rtModel?.hasdocument || false;
-      
+
       console.info(`Resource type ${this.resourceType} document support: ${this.resTypeHasDocument}`);
     }, error => {
       console.error('Error fetching registry model:', error);
       this.resourceAttributes = {};
       this.resTypeHasDocument = false;
     });
+  }
+
+  // Add these helper methods for attribute display
+  isSimpleAttribute(value: any): boolean {
+    return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
+  }
+
+  getPrimitiveAttributes(attributes: any): { key: string, value: any, description?: string }[] {
+    if (!attributes || typeof attributes !== 'object') return [];
+    return this.objectKeys(attributes)
+      .filter(key => this.isSimpleAttribute(attributes[key]))
+      .map(key => ({
+        key,
+        value: attributes[key],
+        description: this.resourceAttributes[key]?.description || ''
+      }));
+  }
+
+  getComplexAttributes(attributes: any): { key: string, value: any, description?: string, type?: string }[] {
+    if (!attributes || typeof attributes !== 'object') return [];
+    return this.objectKeys(attributes)
+      .filter(key => !this.isSimpleAttribute(attributes[key]) && this.hasValue(attributes[key]))
+      .map(key => ({
+        key,
+        value: attributes[key],
+        description: this.resourceAttributes[key]?.description || '',
+        type: this.resourceAttributes[key]?.type
+      }));
   }
 }

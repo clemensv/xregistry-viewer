@@ -1,6 +1,65 @@
 <div class="version-detail" *ngIf="version$ | async as version; else loading">
   <div *ngIf="version; else noData">
     <h2>Version: {{ version['id'] }}</h2>
+
+    <!-- Document section -->
+    <section *ngIf="hasDocument(version, resourceType)">
+      <h3>
+        <span class="material-icons doc-icon">description</span>
+        Document
+      </h3>
+
+      <!-- Show document content if available -->
+      <div *ngIf="getDocumentContent(version, resourceType) as content">
+        <!-- Use app-code-highlight for document content -->
+        <app-code-highlight [code]="content" [language]="getDocumentContentType(content)"></app-code-highlight>
+      </div>
+
+      <!-- Show download link if base64 encoded document is available -->
+      <div *ngIf="hasBase64Document(version, resourceType)" class="action-buttons">
+        <button (click)="downloadBase64Document(version, resourceType)" class="download-btn">
+          <span class="material-icons">download</span> Download Document
+        </button>
+      </div>
+
+      <!-- Show loading message if fetching from URL -->
+      <div *ngIf="isLoadingDocument" class="loading-document">
+        <span class="material-icons loading-icon">sync</span>
+        <p>Loading document content...</p>
+      </div>
+
+      <!-- Show error message if document fetch failed -->
+      <div *ngIf="documentError" class="document-error">
+        <span class="material-icons error-icon">error</span>
+        <p>Error loading document: {{ documentError }}</p>
+      </div>
+    </section>
+
+    <!-- New Attributes Display -->
+    <section>
+      <h3>Attributes</h3>
+      <!-- Simple Attributes in Columns -->
+      <div class="attributes-grid">
+        <ng-container *ngFor="let attr of getPrimitiveAttributes(version)">
+          <div class="attribute-tile simple-attribute">
+            <strong [title]="attr.description">{{ attr.key }}:</strong>
+            <span [title]="attr.description">{{ attr.value }}</span>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Complex Attributes -->
+      <ng-container *ngFor="let attr of getComplexAttributes(version)">
+        <div class="attribute-tile complex-attribute">
+          <h4 [title]="attr.description">{{ attr.key }}:</h4>
+          <app-code-highlight [code]="attr.value | json" [language]="'json'"></app-code-highlight>
+        </div>
+      </ng-container>
+    </section>
+    <!-- End New Attributes Display -->
+
+    <!-- Remove old attributes display -->
+    <!--
     <section>
       <h3>Attributes</h3>
       <ng-container *ngFor="let key of displayAttributes">
@@ -24,7 +83,7 @@
                         <strong [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
                         <pre [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ item[subKey] | json }}</pre>
                       </ng-container>
-                      <ng-template #subNormalAttr>
+                      <ng-template #subNormalAttr">
                         <strong [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
                         <span [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ item[subKey] }}</span>
                       </ng-template>
@@ -41,7 +100,7 @@
                     <strong [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
                     <pre [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ version[key][subKey] | json }}</pre>
                   </ng-container>
-                  <ng-template #subObjNormalAttr>
+                  <ng-template #subObjNormalAttr">
                     <strong [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
                     <span [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ version[key][subKey] }}</span>
                   </ng-template>
@@ -52,40 +111,9 @@
         </div>
       </ng-container>
     </section>
-    
-    <!-- Document section -->
-    <section *ngIf="hasDocument(version, resourceType)">
-      <h3>
-        <span class="material-icons doc-icon">description</span>
-        Document
-      </h3>
-      
-      <!-- Show document content if available -->
-      <div *ngIf="getDocumentContent(version, resourceType) as content">
-        <pre [ngClass]="getDocumentContentType(content)">{{ formatDocumentContent(content) }}</pre>
-      </div>
-      
-      <!-- Show download link if base64 encoded document is available -->
-      <div *ngIf="hasBase64Document(version, resourceType)" class="action-buttons">
-        <button (click)="downloadBase64Document(version, resourceType)" class="download-btn">
-          <span class="material-icons">download</span> Download Document
-        </button>
-      </div>
-      
-      <!-- Show loading message if fetching from URL -->
-      <div *ngIf="isLoadingDocument" class="loading-document">
-        <span class="material-icons loading-icon">sync</span>
-        <p>Loading document content...</p>
-      </div>
-      
-      <!-- Show error message if document fetch failed -->
-      <div *ngIf="documentError" class="document-error">
-        <span class="material-icons error-icon">error</span>
-        <p>Error loading document: {{ documentError }}</p>
-      </div>
-    </section>
+    -->
   </div>
-  
+
   <ng-template #noData>
     <div class="error-message">
       <h2>Version data could not be loaded</h2>

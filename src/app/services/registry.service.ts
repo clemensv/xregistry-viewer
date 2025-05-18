@@ -23,7 +23,7 @@ export class RegistryService {
     this.isBrowser = isPlatformBrowser(this.platformId);
     // Initialize with current value
     this.currentApiUrl = this.configService.getApiBaseUrl();
-    
+
     // Subscribe to API URL changes
     this.configService.apiBaseUrl$.subscribe(newUrl => {
       this.currentApiUrl = newUrl;
@@ -207,31 +207,31 @@ export class RegistryService {
     // Construct the URLs for both with and without $details
     const detailsUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}/$details`;
     const regularUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}`;
-    
+
     // Use the appropriate URL based on hasDocument
     const primaryUrl = hasDocument ? detailsUrl : regularUrl;
-    
+
     console.log(`Fetching version detail from: ${primaryUrl}`);
     console.log(`hasDocument flag is: ${hasDocument}`);
-    
+
     // Function to process the response
     const processResponse = (response: any): VersionDetail => {
       console.log('Processing version detail response:', response);
-      
+
       // Convert the response to ensure all properties are included
       const result: any = { ...response };
-      
+
       // If the document content is embedded in a specific field, process it
       if (hasDocument) {
         const singularName = resourceType.endsWith('s') ? resourceType.slice(0, -1) : resourceType;
-        
+
         // Check if we have any document-related fields
         const hasSpecificDocument = !!(
-          response[singularName] || 
-          response[`${singularName}url`] || 
+          response[singularName] ||
+          response[`${singularName}url`] ||
           response[`${singularName}base64`]
         );
-        
+
         if ( hasSpecificDocument) {
           // If the document is in a specific field, we can process it
           if (response[singularName]) {
@@ -245,10 +245,10 @@ export class RegistryService {
 
         console.log(`Document field found: ${hasSpecificDocument}, singular name: ${singularName}`);
       }
-      
+
       return result as VersionDetail;
     };
-    
+
     // Try the primary URL first, and if it fails with a 404, fallback to the regular URL
     return this.http.get<any>(primaryUrl).pipe(
       tap(response => {
@@ -257,11 +257,11 @@ export class RegistryService {
       map(processResponse),
       catchError(error => {
         console.error(`Error fetching version detail from ${primaryUrl}:`, error);
-        
+
         // If hasDocument is true and we get a 404, fall back to the regular URL
         if (hasDocument && error.status === 404) {
           console.warn(`$details URL returned 404, falling back to regular URL: ${regularUrl}`);
-          
+
           return this.http.get<any>(regularUrl).pipe(
             tap(response => {
               console.log('API response received from fallback URL:', response);
@@ -273,7 +273,7 @@ export class RegistryService {
             })
           );
         }
-        
+
         // Otherwise, rethrow the original error
         return throwError(() => new Error(`Failed to load version details: ${error.message}`));
       })
@@ -291,31 +291,31 @@ export class RegistryService {
     // Construct the URLs for both with and without $details
     const detailsUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}$details`;
     const regularUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}`;
-    
+
     // Use the appropriate URL based on hasDocument
     const primaryUrl = hasDocument ? detailsUrl : regularUrl;
-    
+
     console.log(`Fetching resource detail from: ${primaryUrl}`);
     console.log(`hasDocument flag is: ${hasDocument}`);
 
     // Function to process the response
     const processResponse = (response: any): VersionDetail => {
       console.log('Processing resource detail response:', response);
-      
+
       // Convert the response to ensure all properties are included
       const result: any = { ...response };
-      
+
       // If the document content is embedded in a specific field, process it
       if (hasDocument) {
         const singularName = resourceType.endsWith('s') ? resourceType.slice(0, -1) : resourceType;
-        
+
         // Check if we have any document-related fields
         const hasSpecificDocument = !!(
-          response[singularName] || 
-          response[`${singularName}url`] || 
+          response[singularName] ||
+          response[`${singularName}url`] ||
           response[`${singularName}base64`]
         );
-        
+
         if (hasSpecificDocument) {
           // If the document is in a specific field, we can process it
           if (response[singularName]) {
@@ -329,10 +329,10 @@ export class RegistryService {
 
         console.log(`Document field found: ${hasSpecificDocument}, singular name: ${singularName}`);
       }
-      
+
       return result as VersionDetail;
     };
-    
+
     // Try the primary URL first, and if it fails with a 404, fallback to the regular URL
     return this.http.get<any>(primaryUrl).pipe(
       tap(response => {
@@ -341,11 +341,11 @@ export class RegistryService {
       map(processResponse),
       catchError(error => {
         console.error(`Error fetching resource detail from ${primaryUrl}:`, error);
-        
+
         // If hasDocument is true and we get a 404, fall back to the regular URL
         if (hasDocument && error.status === 404) {
           console.warn(`$details URL returned 404, falling back to regular URL: ${regularUrl}`);
-          
+
           return this.http.get<any>(regularUrl).pipe(
             tap(response => {
               console.log('API response received from fallback URL:', response);
@@ -357,7 +357,7 @@ export class RegistryService {
             })
           );
         }
-        
+
         // Otherwise, rethrow the original error
         return throwError(() => new Error(`Failed to load resource details: ${error.message}`));
       })
@@ -380,6 +380,18 @@ export class RegistryService {
           return Object.values(response);
         }
         return response;
+      })
+    );
+  }
+  fetchDocument(url: string): Observable<string> {
+    // In SSR environment, return empty observable to avoid HTTP requests
+    if (!this.isBrowser) {
+      return of(''); // Or throwError, depending on how you want to handle SSR
+    }
+    return this.http.get(url, { responseType: 'text' }).pipe(
+      catchError(err => {
+        console.error('Error fetching document from URL:', url, err);
+        return throwError(() => new Error(`Failed to fetch document from ${url}`));
       })
     );
   }

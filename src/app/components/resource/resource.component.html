@@ -38,7 +38,7 @@
       <ng-template #loadingVersions>
         <p>Loading versions...</p>
       </ng-template>
-    </div>      <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">      <h3>Default Version: {{ defaultVersion.id }}</h3>      
+    </div>      <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">      <h3>Default Version: {{ defaultVersion.id }}</h3>
       <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
 
       <section>
@@ -99,25 +99,25 @@
           <span class="material-icons doc-icon">description</span>
           Document
         </h3>
-        
+
         <!-- Show document content if available -->
         <div *ngIf="getDocumentContent(defaultVersion, resourceType) as content">
           <pre [ngClass]="getDocumentContentType(content)">{{ formatDocumentContent(content) }}</pre>
         </div>
-        
+
         <!-- Show download link if base64 encoded document is available -->
         <div *ngIf="hasBase64Document(defaultVersion, resourceType)" class="action-buttons">
           <button (click)="downloadBase64Document(defaultVersion, resourceType)" class="download-btn">
             <span class="material-icons">download</span> Download Document
           </button>
         </div>
-        
+
         <!-- Show loading message if fetching from URL -->
         <div *ngIf="isLoadingDocument" class="loading-document">
           <span class="material-icons loading-icon">sync</span>
           <p>Loading document content...</p>
         </div>
-        
+
         <!-- Show error message if document fetch failed -->
         <div *ngIf="documentError" class="document-error">
           <span class="material-icons error-icon">error</span>
@@ -186,25 +186,25 @@
           <span class="material-icons doc-icon">description</span>
           Document
         </h3>
-        
+
         <!-- Show document content if available -->
         <div *ngIf="getDocumentContent(version, resourceType) as content">
           <pre [ngClass]="getDocumentContentType(content)">{{ formatDocumentContent(content) }}</pre>
         </div>
-        
+
         <!-- Show download link if base64 encoded document is available -->
         <div *ngIf="hasBase64Document(version, resourceType)" class="action-buttons">
           <button (click)="downloadBase64Document(version, resourceType)" class="download-btn">
             <span class="material-icons">download</span> Download Document
           </button>
         </div>
-        
+
         <!-- Show loading message if fetching from URL -->
         <div *ngIf="isLoadingDocument" class="loading-document">
           <span class="material-icons loading-icon">sync</span>
           <p>Loading document content...</p>
         </div>
-        
+
         <!-- Show error message if document fetch failed -->
         <div *ngIf="documentError" class="document-error">
           <span class="material-icons error-icon">error</span>
@@ -214,5 +214,5 @@
     </div>
   </ng-container>
 
-  
+
 </div>
