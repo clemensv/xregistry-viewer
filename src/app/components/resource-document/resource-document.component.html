@@ -44,13 +44,10 @@
           <span [title]="attr.description">{{ attr.value }}</span>
         </div>
       </ng-container>
-    </div>
-
-    <!-- Complex Attributes -->
+    </div>    <!-- Complex Attributes -->
     <ng-container *ngFor="let attr of getComplexAttributes()">
       <div class="attribute-tile complex-attribute">
-        <h4 [title]="attr.description">{{ attr.key }}:</h4>
-        <app-code-highlight [code]="attr.value | json" [language]="'json'"></app-code-highlight>
+        <app-resource-document-item [item]="attr"></app-resource-document-item>
       </div>
     </ng-container>
   </section>

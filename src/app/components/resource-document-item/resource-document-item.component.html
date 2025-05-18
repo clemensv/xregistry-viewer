@@ -1,0 +1,54 @@
+<div class="resource-document-item" [class.nested]="nestingLevel > 0">
+  <!-- Header with expandable toggle for arrays and objects -->
+  <div *ngIf="isArray(item.value) || isObject(item.value)" class="item-header" [class.expanded]="item.isExpanded">
+    <div class="item-title" (click)="toggleExpansion()">
+      <span class="toggle-icon material-icons">{{ item.isExpanded ? 'expand_more' : 'chevron_right' }}</span>
+      <strong [title]="item.description">{{ item.key }}:</strong>
+      <span class="item-type">{{ isArray(item.value) ? 'Array' : 'Object' }}</span>
+      <span class="item-count">
+        {{ isArray(item.value) ? '(' + item.value.length + ' items)' : '(' + (isObject(item.value) ? Object.keys(item.value).length : 0) + ' properties)' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Simple values (primitives) -->
+  <div *ngIf="isSimpleValue(item.value)" class="simple-value">
+    <strong [title]="item.description">{{ item.key }}:</strong>
+    <span [title]="item.description">{{ item.value }}</span>
+  </div>
+
+  <!-- Expanded content for arrays and objects -->
+  <div *ngIf="(isArray(item.value) || isObject(item.value)) && item.isExpanded" class="expanded-content">
+    <!-- For arrays -->
+    <div *ngIf="isArray(item.value)" class="array-items">
+      <div *ngIf="item.value.length === 0" class="empty-notice">Empty array</div>
+      <ng-container *ngFor="let arrayItem of getArrayItems(); let i = index">
+        <app-resource-document-item
+          [item]="arrayItem"
+          [nestingLevel]="nestingLevel + 1">
+        </app-resource-document-item>
+      </ng-container>
+    </div>
+
+    <!-- For objects -->
+    <div *ngIf="isObject(item.value)" class="object-items">
+      <div *ngIf="isObject(item.value) && Object.keys(item.value).length === 0" class="empty-notice">Empty object</div>
+      <ng-container *ngFor="let objItem of getObjectItems()">
+        <app-resource-document-item
+          [item]="objItem"
+          [nestingLevel]="nestingLevel + 1">
+        </app-resource-document-item>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Show collapsed JSON when not expanded -->
+  <div *ngIf="(isArray(item.value) || isObject(item.value)) && !item.isExpanded" class="collapsed-preview">
+    <app-code-highlight
+      [code]="isArray(item.value) ?
+        '[' + (item.value.length > 0 ? '...' : '') + ']' :
+        '{' + (Object.keys(item.value).length > 0 ? '...' : '') + '}'"
+      [language]="'json'">
+    </app-code-highlight>
+  </div>
+</div>

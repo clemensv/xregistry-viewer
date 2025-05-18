@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ResourceDocument } from '../../models/registry.model';
 import { CodeHighlightComponent } from '../code-highlight/code-highlight.component';
 import { RegistryService } from '../../services/registry.service';
+import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
+import { ResourceDocumentItem } from '../../models/resource-document-item.model';
 
 @Component({
   selector: 'app-resource-document',
   standalone: true,
-  imports: [CommonModule, CodeHighlightComponent],
+  imports: [CommonModule, CodeHighlightComponent, ResourceDocumentItemComponent],
   templateUrl: './resource-document.component.html',
   styleUrl: './resource-document.component.scss'
 })
@@ -252,8 +254,7 @@ export class ResourceDocumentComponent implements OnInit {
         description: this.resourceAttributes[key]?.description || ''
       }));
   }
-
-  getComplexAttributes(): { key: string, value: any, description?: string, type?: string }[] {
+  getComplexAttributes(): ResourceDocumentItem[] {
     if (!this.resourceDocument || typeof this.resourceDocument !== 'object') {
       return [];
     }
@@ -264,7 +265,9 @@ export class ResourceDocumentComponent implements OnInit {
         key,
         value: this.resourceDocument[key],
         description: this.resourceAttributes[key]?.description || '',
-        type: this.resourceAttributes[key]?.type
+        type: this.resourceAttributes[key]?.type,
+        itemModel: this.resourceAttributes[key],
+        isExpanded: false
       }));
   }
 }

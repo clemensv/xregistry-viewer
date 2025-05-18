@@ -142,14 +142,18 @@
         color: #333;
         word-break: break-word;
       }
-    }
-
-    .complex-attribute {
+    }    .complex-attribute {
       margin-bottom: 1.5rem;
+      padding: 0.5rem;
 
       h4 {
         margin-bottom: 0.5rem;
         color: #2c3e50;
+      }
+
+      app-resource-document-item {
+        display: block;
+        width: 100%;
       }
     }
   }
