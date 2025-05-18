@@ -1,12 +1,11 @@
 .resource-document-item {
   margin: 0.5rem 0;
-
+  display: block;
+  position: relative;
   &.nested {
-    padding-left: 1rem;
-    border-left: 2px solid #e0e0e0;
-    margin-bottom: 1rem;
+    padding-left: 0.15rem; /* Minimized indent depth */
+    margin-bottom: 0.5rem; /* Reduced spacing between items */
   }
-
   // Unified row styling for all item types
   .unified-item-row {
     display: flex;
@@ -17,13 +16,25 @@
     border-radius: 4px;
     border: 1px solid #e0e0e0;
     transition: all 0.2s ease;
-    margin-bottom: 0.25rem;
-
-    // Make rows with simple values non-clickable
+    margin-bottom: 0.25rem;    // Make rows with simple values non-clickable
     &.simple-row {
       cursor: default;
       background-color: #fafafa;
+      position: relative;
       border-left: 3px solid #28a745; // Green tint for simple values
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: -1px; /* Extend slightly beyond the container */
+        bottom: -1px; /* Extend slightly beyond the container */
+        left: -3px; /* Match the border-left width */
+        width: 3px; /* Match the border-left width */
+        height: calc(100% + 2px); /* Account for top and bottom extension */
+        background-color: #28a745; /* Match the border-left color */
+        border-bottom-left-radius: 4px;
+        z-index: 1;
+      }
     }
 
     // Make expandable rows clickable
@@ -41,23 +52,51 @@
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
       }
-    }
-
-    // Custom styling for arrays
+    }    // Custom styling for arrays
     &.array-row {
+      position: relative;
       border-left: 3px solid #5bc0de;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: -1px; /* Extend slightly beyond the container */
+        bottom: -1px; /* Extend slightly beyond the container */
+        left: -3px; /* Match the border-left width */
+        width: 3px; /* Match the border-left width */
+        height: calc(100% + 2px); /* Account for top and bottom extension */
+        background-color: #5bc0de; /* Match the border-left color */
+        border-bottom-left-radius: 4px;
+        z-index: 1;
+      }
 
       &.expanded {
         background-color: rgba(91, 192, 222, 0.1);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
       }
-    }
-
-    // Custom styling for objects
+    }    // Custom styling for objects
     &.object-row {
+      position: relative;
       border-left: 3px solid #9575cd;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: -1px; /* Extend slightly beyond the container */
+        bottom: -1px; /* Extend slightly beyond the container */
+        left: -3px; /* Match the border-left width */
+        width: 3px; /* Match the border-left width */
+        height: calc(100% + 2px); /* Account for top and bottom extension */
+        background-color: #9575cd; /* Match the border-left color */
+        border-bottom-left-radius: 4px;
+        z-index: 1;
+      }
 
       &.expanded {
         background-color: rgba(149, 117, 205, 0.1);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
       }
     }
 
@@ -130,28 +169,47 @@
         color: #0B6E4F;
       }
     }
-  }
-
-  // Expanded content container
+  }  // Expanded content container
   .expanded-content {
+    position: relative;
     border: 1px solid #e0e0e0;
     border-top: none;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    margin-bottom: 0.5rem;
-
-    &.array-content {
+    margin-bottom: 0.5rem;    &.array-content {
       border-left: 3px solid #5bc0de;
-    }
 
-    &.object-content {
+      &::before {
+        content: '';
+        position: absolute;
+        top: -1px; /* Extend slightly beyond the container */
+        bottom: -1px; /* Extend slightly beyond the container */
+        left: -3px; /* Match the border-left width */
+        width: 3px; /* Match the border-left width */
+        height: calc(100% + 2px); /* Account for top and bottom extension */
+        background-color: #5bc0de; /* Match the border color */
+        border-bottom-left-radius: 4px;
+        z-index: 1;
+      }
+    }    &.object-content {
       border-left: 3px solid #9575cd;
-    }
-  }
 
-  // Array items styling
+      &::before {
+        content: '';
+        position: absolute;
+        top: -1px; /* Extend slightly beyond the container */
+        bottom: -1px; /* Extend slightly beyond the container */
+        left: -3px; /* Match the border-left width */
+        width: 3px; /* Match the border-left width */
+        height: calc(100% + 2px); /* Account for top and bottom extension */
+        background-color: #9575cd; /* Match the border color */
+        border-bottom-left-radius: 4px;
+        z-index: 1;
+      }
+    }
+  }  // Array items styling
   .array-items {
-    padding: 0.5rem;
+    padding: 0.25rem;
 
     .array-item-details {
       font-size: 0.9rem;
@@ -181,22 +239,46 @@
       font-style: italic;
       padding: 0.25rem;
     }
-  }
 
+    // Style nested document items in arrays
+    app-resource-document-item {
+      position: relative;
+      display: block;
+      margin-bottom: 0.25rem;
+
+      // Ensure items in arrays have minimal indentation
+      ::ng-deep .resource-document-item.nested {
+        padding-left: 0.25rem;
+        margin-bottom: 0.25rem;
+      }
+    }
+  }
   // Object items styling
   .object-items {
-    padding: 0.5rem;
+    padding: 0.25rem;
 
     .empty-notice {
       color: #999;
       font-style: italic;
       padding: 0.25rem;
     }
-  }
 
+    // Style nested document items in objects
+    app-resource-document-item {
+      position: relative;
+      display: block;
+      margin-bottom: 0.25rem;
+
+      // Ensure items in objects have minimal indentation
+      ::ng-deep .resource-document-item.nested {
+        padding-left: 0.25rem;
+        margin-bottom: 0.25rem;
+      }
+    }
+  }
   // Collapsed preview styling
   .collapsed-preview {
-    padding: 0.5rem;
+    padding: 0.25rem;
     margin-top: -0.25rem;
     margin-bottom: 0.5rem;
     background-color: rgba(0, 0, 0, 0.02);
@@ -255,13 +337,118 @@
       display: block;
       font-size: 0.9rem;
     }
+  }  // Simple attributes with header and value sections
+  .simple-attribute-container {
+    position: relative;
+    padding: 0.75rem;
+    background-color: #fff;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    border-left: 3px solid #28a745; // Green tint for simple values
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -1px; /* Extend slightly beyond the container */
+      bottom: -1px; /* Extend slightly beyond the container */
+      left: -3px; /* Match the border-left width */
+      width: 3px; /* Match the border-left width */
+      height: calc(100% + 2px); /* Account for top and bottom extension */
+      background-color: #28a745; /* Match the border-left color */
+      border-bottom-left-radius: 6px; /* Match the border-radius */
+      z-index: 1; /* Ensure it appears above other elements */
+    }
+
+    .attribute-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+
+      strong {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+      }
+
+      .attribute-type {
+        font-size: 0.85rem;
+        color: #457B9D;
+        background-color: #F1FAEE;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid #A8DADC;
+        font-weight: 500;
+      }
+
+      .attribute-description {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-style: italic;
+        flex-basis: 100%;
+        margin-top: 0.25rem;
+      }
+    }.attribute-value {
+      font-size: 1.1rem;
+      color: #333;
+      word-break: break-word;
+      padding: 0.25rem 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+      .null-value {
+        color: #808080; /* Match the .null class color */
+        font-style: italic;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+
+      .undefined-value {
+        color: #7a3e9d; /* Match the .special class color */
+        font-style: italic;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+
+      .any-value {
+        margin-top: 0.5rem;
+        display: block;
+      }
+
+      // Ensure specific values have consistent styling with code syntax highlighting
+      span:not(.null-value):not(.undefined-value):not(.any-value) {
+        &:empty:after {
+          content: '""';
+          color: #008000; // Match string color
+        }
+      }
+    }
   }
 }
 
 .preview-array-items {
-  padding-left: 0.5rem;
+  position: relative;
+  padding-left: 0.25rem;
   border-left: 3px solid #5bc0de;
   margin-left: 0.25rem;
+  margin-bottom: 0.25rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -1px; /* Extend slightly beyond the container */
+    bottom: -1px; /* Extend slightly beyond the container */
+    left: -3px; /* Match the border-left width */
+    width: 3px; /* Match the border-left width */
+    height: calc(100% + 2px); /* Account for top and bottom extension */
+    background-color: #5bc0de; /* Match the border color */
+    border-bottom-left-radius: 4px;
+    z-index: 1;
+  }
 
   .more-items-notice {
     color: #5f6368;
@@ -283,21 +470,52 @@
   }
 
   ::ng-deep app-resource-document-item {
+    position: relative;
+    display: block;
+
     .resource-document-item {
       margin: 0.25rem 0;
+      padding-left: 0.25rem; /* Minimal nesting indent */
     }
 
     .item-header {
       padding: 0.25rem;
       margin-bottom: 0.25rem;
     }
+
+    // Match styling for nested simple attributes
+    .simple-attribute-container {
+      margin: 0.25rem 0;
+      box-shadow: none;
+      border-radius: 4px;
+    }
+
+    // Ensure nested items also have minimal indentation
+    .nested {
+      padding-left: 0.25rem !important;
+    }
   }
 }
 
 .preview-object-items {
-  padding-left: 0.5rem;
+  position: relative;
+  padding-left: 0.25rem;
   border-left: 3px solid #9575cd;
   margin-left: 0.25rem;
+  margin-bottom: 0.25rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -1px; /* Extend slightly beyond the container */
+    bottom: -1px; /* Extend slightly beyond the container */
+    left: -3px; /* Match the border-left width */
+    width: 3px; /* Match the border-left width */
+    height: calc(100% + 2px); /* Account for top and bottom extension */
+    background-color: #9575cd; /* Match the border color */
+    border-bottom-left-radius: 4px;
+    z-index: 1;
+  }
 
   .more-items-notice {
     color: #5f6368;
@@ -319,19 +537,35 @@
   }
 
   ::ng-deep app-resource-document-item {
+    position: relative;
+    display: block;
+
     .resource-document-item {
       margin: 0.25rem 0;
+      padding-left: 0.25rem; /* Minimal nesting indent */
     }
 
     .item-header {
       padding: 0.25rem;
       margin-bottom: 0.25rem;
     }
+
+    // Match styling for nested simple attributes
+    .simple-attribute-container {
+      margin: 0.25rem 0;
+      box-shadow: none;
+      border-radius: 4px;
+    }
+
+    // Ensure nested items also have minimal indentation
+    .nested {
+      padding-left: 0.25rem !important;
+    }
   }
 }
 
 .preview-item, .preview-property {
-  padding: 0.25rem 0.5rem;
+  padding: 0.15rem 0.25rem;
   margin: 0.25rem 0;
   background-color: rgba(0, 0, 0, 0.02);
   border-radius: 3px;

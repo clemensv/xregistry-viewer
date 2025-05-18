@@ -1,49 +1,56 @@
 <div class="resource-document-item" [class.nested]="nestingLevel > 0">
-  <!-- Unified header for all types (simple values, arrays, objects) -->
-  <div class="unified-item-row"
+  <!-- Unified structure for all types -->
+  <div *ngIf="!isSimpleValue(item.value)" class="unified-item-row"
        [class.array-row]="isArray(item.value)"
        [class.object-row]="isObject(item.value) && !isArray(item.value)"
-       [class.simple-row]="isSimpleValue(item.value)"
        [class.expanded]="item.isExpanded === true"
-       (click)="isArray(item.value) || isObject(item.value) ? toggleExpansion($event) : null">
+       (click)="toggleExpansion($event)">
 
-    <!-- Toggle icon only for arrays and objects -->
-    <span *ngIf="isArray(item.value) || isObject(item.value)"
-          class="toggle-icon material-icons">
+    <!-- Toggle icon for arrays and objects -->
+    <span class="toggle-icon material-icons">
       {{ item.isExpanded === true ? 'expand_more' : 'chevron_right' }}
     </span>
 
-    <!-- Key name for all items -->
+    <!-- Key name for array/object items -->
     <strong [title]="item.description">{{ item.key }}</strong>
 
     <!-- Count for arrays and objects -->
-    <span *ngIf="isArray(item.value) || isObject(item.value)" class="item-count">
+    <span class="item-count">
       {{ isArray(item.value) ? item.value.length + ' items' : (isObject(item.value) ? Object.keys(item.value).length : 0) + ' properties' }}
-    </span>    <!-- Type info if available from model or inferred -->
-    <span class="item-model-type">
-      {{ item.itemModel?.type ? getDisplayType() : (isSimpleValue(item.value) ? (typeof item.value) : (isArray(item.value) ? 'Array' : 'Object')) | titlecase }}
     </span>
 
-    <!-- Description for all types -->
+    <!-- Type info if available from model or inferred -->
+    <span class="item-model-type">
+      {{ item.itemModel?.type ? getDisplayType() : (isArray(item.value) ? 'Array' : 'Object') | titlecase }}
+    </span>
+
+    <!-- Description for arrays/objects -->
     <span *ngIf="item.description" class="item-description" title="{{ item.description }}">
       {{ item.description }}
     </span>
+  </div>
 
-    <!-- Simple value display inline for primitive values -->
-    <span *ngIf="isSimpleValue(item.value)" class="simple-value-display">
+  <!-- Simple attributes with header and value sections -->
+  <div *ngIf="isSimpleValue(item.value)" class="simple-attribute-container">
+    <div class="attribute-header">
+      <strong>{{ item.key }}</strong>
+      <span class="attribute-type">
+        {{ item.itemModel?.type ? getDisplayType() : typeof item.value | titlecase }}
+      </span>
+      <span *ngIf="item.description" class="attribute-description">{{ item.description }}</span>
+    </div>
+    <div class="attribute-value">
       <span *ngIf="isAnyType() && item.value !== null && item.value !== undefined" class="any-value">
         <app-code-highlight
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
-      </span>
-      <span *ngIf="!isAnyType() || item.value === null || item.value === undefined"
-            class="value-text"
+      </span>      <span *ngIf="!isAnyType() || item.value === null || item.value === undefined"
             [class.null-value]="item.value === null"
             [class.undefined-value]="item.value === undefined">
-        {{ item.value }}
+        {{ item.value === null ? 'null' : (item.value === undefined ? 'undefined' : item.value) }}
       </span>
-    </span>
+    </div>
   </div>
 
   <!-- Expanded content for arrays and objects -->

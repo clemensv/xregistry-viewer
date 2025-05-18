@@ -240,8 +240,7 @@ export class ResourceDocumentComponent implements OnInit {
   isSimpleAttribute(value: any): boolean {
     return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
   }
-
-  getPrimitiveAttributes(): { key: string, value: any, description?: string }[] {
+  getPrimitiveAttributes(): { key: string, value: any, description?: string, type?: string }[] {
     if (!this.resourceDocument || typeof this.resourceDocument !== 'object') {
       return [];
     }
@@ -251,7 +250,8 @@ export class ResourceDocumentComponent implements OnInit {
       .map(key => ({
         key,
         value: this.resourceDocument[key],
-        description: this.resourceAttributes[key]?.description || ''
+        description: this.resourceAttributes[key]?.description || '',
+        type: this.resourceAttributes[key]?.type || typeof this.resourceDocument[key]
       }));
   }
   getComplexAttributes(): ResourceDocumentItem[] {

@@ -124,25 +124,49 @@
       border: 1px solid #e0e0e0;
       padding: 1rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-    }
-
-    .simple-attribute {
+    }    .simple-attribute {
       display: flex;
       flex-direction: column;
 
-      strong {
-        font-weight: 600;
-        color: #555;
-        margin-bottom: 0.3rem;
-        font-size: 0.9rem;
+      .attribute-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        align-items: center;
+
+        strong {
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 1rem;
+        }
+
+        .attribute-type {
+          font-size: 0.85rem;
+          color: #457B9D;
+          background-color: #F1FAEE;
+          padding: 2px 6px;
+          border-radius: 4px;
+          border: 1px solid #A8DADC;
+          font-weight: 500;
+        }
+
+        .attribute-description {
+          font-size: 0.85rem;
+          color: #6c757d;
+          font-style: italic;
+          flex-basis: 100%;
+          margin-top: 0.25rem;
+        }
       }
 
-      span {
+      .attribute-value {
         font-size: 1.1rem;
         color: #333;
         word-break: break-word;
+        padding: 0.25rem 0;
       }
-    }    .complex-attribute {
+    }.complex-attribute {
       margin-bottom: 1.5rem;
       padding: 0.5rem;
 
@@ -154,6 +178,36 @@
       app-resource-document-item {
         display: block;
         width: 100%;
+        position: relative;        ::ng-deep .resource-document-item.nested {
+          padding-left: 0.15rem;
+          margin-bottom: 0.25rem;
+        }
+
+        ::ng-deep .unified-item-row.array-row,
+        ::ng-deep .unified-item-row.object-row,
+        ::ng-deep .unified-item-row.simple-row {
+          border-left-width: 3px;
+        }
+
+        ::ng-deep .expanded-content.array-content,
+        ::ng-deep .expanded-content.object-content {
+          border-left-width: 3px;
+        }        // Ensure color bars extend to the bottom in all nested items        ::ng-deep .simple-attribute-container::before,
+        ::ng-deep .unified-item-row.array-row::before,
+        ::ng-deep .unified-item-row.object-row::before,
+        ::ng-deep .unified-item-row.simple-row::before,
+        ::ng-deep .expanded-content.array-content::before,
+        ::ng-deep .expanded-content.object-content::before,
+        ::ng-deep .preview-array-items::before,
+        ::ng-deep .preview-object-items::before {
+          border-bottom-left-radius: 4px;
+          top: -1px !important; /* Extend slightly beyond the container */
+          bottom: -1px !important; /* Extend slightly beyond the container */
+          height: calc(100% + 2px) !important; /* Account for top and bottom extension */
+          outline: none !important;
+          box-shadow: none !important;
+          z-index: 1 !important;
+        }
       }
     }
   }

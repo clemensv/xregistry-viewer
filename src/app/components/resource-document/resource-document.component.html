@@ -34,17 +34,18 @@
 
   <!-- Attributes section -->
   <section *ngIf="showAttributes" class="attributes-section">
-    <h3>Attributes</h3>
-
-    <!-- Simple Attributes in Grid -->
+    <h3>Attributes</h3>    <!-- Simple Attributes in Grid -->
     <div class="attributes-grid">
       <ng-container *ngFor="let attr of getPrimitiveAttributes()">
-        <div class="attribute-tile simple-attribute">
-          <strong [title]="attr.description">{{ attr.key }}:</strong>
-          <span [title]="attr.description">{{ attr.value }}</span>
+        <div class="attribute-tile simple-attribute">          <div class="attribute-header">
+            <strong>{{ attr.key }}</strong>
+            <span class="attribute-type">{{ attr.type | titlecase }}</span>
+            <span *ngIf="attr.description" class="attribute-description">{{ attr.description }}</span>
+          </div>
+          <div class="attribute-value" [title]="attr.value">{{ attr.value }}</div>
         </div>
       </ng-container>
-    </div>    <!-- Complex Attributes -->
+    </div><!-- Complex Attributes -->
     <ng-container *ngFor="let attr of getComplexAttributes()">
       <div class="attribute-tile complex-attribute">
         <app-resource-document-item [item]="attr"></app-resource-document-item>
