@@ -3,28 +3,45 @@
   <div *ngIf="groups$ | async as groups">
     <div class="grid-container">
       <div *ngFor="let group of groups" class="grid-item">
-        <h3>{{ group['name'] || group['id'] }}</h3>        <div class="attribute">
-          <strong>Description:</strong>
-          <span>{{ group['description'] ? group['description'] : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pharetra velit at eros tempus, vel ultrices ante tincidunt.' }}</span>
-        </div>
-        <div class="attribute" *ngIf="group['labels']">
-          <strong>Labels:</strong>
-          <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">
-            <span>{{ label }}: {{ group['labels'][label] }}</span>
+        <h3>
+          <span class="material-icons group-icon">folder</span>
+          {{ group['name'] || group['id'] }}
+        </h3>        <div class="attribute simple-attribute description-attribute">
+          <div class="attribute-header">
+            <strong>Description</strong>
+          </div>
+          <div class="attribute-value">
+            {{ group['description'] ? group['description'] : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pharetra velit at eros tempus, vel ultrices ante tincidunt.' }}
           </div>
         </div>
-
-        <!-- Resource Types Section -->
-        <div *ngIf="resourceTypes$ | async as rts" class="resource-types">
-          <h4>Resource Types:</h4>
-          <ul class="resource-list">
-            <li *ngFor="let rt of rts">
-              <a [routerLink]="[group['id'], rt]" class="resource-link">{{ rt }}</a>
-              <span *ngIf="group[rt + 'count'] !== undefined" class="resource-count"> ({{ group[rt + 'count'] }})</span>
-            </li>
-          </ul>
-        </div>        <div class="tile-footer-container">
-          <a [routerLink]="[group['id']]" class="tile">
+        <div class="attribute simple-attribute" *ngIf="group['labels']">
+          <div class="attribute-header">
+            <strong>Labels</strong>
+          </div>
+          <div class="attribute-value">
+            <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">
+              <span class="label-key">{{ label }}</span>:
+              <span class="label-value">{{ group['labels'][label] }}</span>
+            </div>
+          </div>
+        </div>        <!-- Resource Types Section - styled like arrays in resource document -->
+        <div *ngIf="resourceTypes$ | async as rts" class="attribute simple-attribute resource-types">
+          <div class="attribute-header">
+            <strong>Resource Types</strong>
+            <span class="item-count">{{ rts.length }} {{ rts.length === 1 ? 'type' : 'types' }}</span>
+            <span class="attribute-type">Array</span>
+          </div>
+          <div class="attribute-value">
+            <ul class="resource-list">
+              <li *ngFor="let rt of rts; let i = index">
+                <span class="material-icons resource-type-icon">description</span>
+                <a [routerLink]="[group['id'], rt]" class="resource-link">{{ rt }}</a>
+                <span *ngIf="group[rt + 'count'] !== undefined" class="resource-count">({{ group[rt + 'count'] }})</span>
+              </li>
+            </ul>
+          </div>
+        </div><div class="tile-footer-container">          <a [routerLink]="[group['id']]" class="tile">
+            <span class="material-icons">visibility</span>
             View Group
           </a>
           <footer class="tile-footer">

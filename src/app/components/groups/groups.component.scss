@@ -1,3 +1,6 @@
+@use '../shared-variables' as vars;
+@use '../_vertical-bars' as vbars;
+
 /* Component-specific overrides for groups */
 /* These will take precedence over global styles due to component encapsulation */
 
@@ -11,15 +14,17 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem; /* Consistent spacing between tiles */
-  justify-content: center; /* Center tiles in container */
+  justify-content: flex-start; /* Align tiles to the left like resource documents */
   padding: 16px;
 }
 
 .grid-item {
+  position: relative;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   border: 1px solid #e0e0e0;
+  border-left: 3px solid #9575cd; /* Purple vertical bar to match object styling */
   width: 280px;      /* Fixed width instead of min/max width */
   flex: 0 0 280px;   /* Don't grow or shrink, maintain consistent width */
   padding: 1rem 1rem 0.5rem 1rem;
@@ -29,60 +34,127 @@
   transition: transform 0.2s, box-shadow 0.2s;
   height: 300px;     /* Fixed height for consistent tile sizing */
   overflow: hidden;  /* Hide overflow content */
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background-color: #9575cd; /* Match the border-left color */
+    z-index: 1;
+  }
 }
 
 .grid-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #d0d7de;
 }
 
 .grid-item h3 {
-  font-size: 1.2rem; /* Reduced font size for group name heading */
+  font-size: vars.$h3-size; /* Use shared variable for consistency */
+  font-weight: 600;
+  color: #2c3e50;
   margin-top: 0;
+  margin-bottom: 0.7rem;
 }
 
 .grid-item .attribute {
-  font-size: 0.9rem; /* Smaller font for attributes */
-  margin-bottom: 0.8rem;
+  margin-bottom: 1rem;
+
+  &.simple-attribute {
+    display: flex;
+    flex-direction: column;
+
+    .attribute-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+
+      strong {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: vars.$content-size;
+      }
+    }
+
+    .attribute-value {
+      font-size: vars.$content-size;
+      color: #333;
+      word-break: break-word;
+      padding: 0.25rem 0;
+      -webkit-line-clamp: 3;  /* Limit to 3 lines */
+      line-clamp: 3;          /* Standard property */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-height: 4.5em;  /* Approximately 3 lines of text */
+    }
+  }
 }
 
-.grid-item .attribute span {
-  display: -webkit-box;
-  display: flex;
-  -webkit-line-clamp: 3;  /* Limit to 3 lines */
-  line-clamp: 3;          /* Standard property */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 4.5em;  /* Approximately 3 lines of text */
+.label-item {
+  margin-bottom: 0.25rem;
+
+  .label-key {
+    color: #457B9D;
+    font-weight: 500;
+  }
+
+  .label-value {
+    color: #333;
+    margin-left: 0.25rem;
+  }
 }
 
-.grid-item .resource-types h4 {
-  font-size: 1rem; /* Reduced size for section headings */
-  margin-bottom: 0.5rem;
-}
+.resource-list {
+  padding-left: 1rem;
+  margin: 0.25rem 0;
 
-.grid-item .resource-list {
-  font-size: 0.9rem; /* Smaller font for resource lists */
+  li {
+    margin-bottom: 0.35rem;
+  }
+
+  .resource-link {
+    color: #457B9D;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .resource-count {
+    color: #6c757d;
+    font-size: vars.$small-size;
+  }
 }
 
 /* Tile styles specific to groups component */
 .tile {
   display: inline-block;
   margin-top: 16px;
-  padding: 6px 14px; /* Slightly smaller padding for button */
-  background-color: #007bff;
+  padding: 8px 15px;
+  background-color: #3498db; /* Match the download button from resource document */
   color: #fff !important; /* Force white text color */
   text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
   align-self: flex-start;
   font-weight: 500;
-  font-size: 0.9rem; /* Adjust button text size */
+  font-size: vars.$content-size; /* Use shared variable for consistency */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tile:hover {
-  background-color: #0056b3;
+  background-color: #2980b9; /* Match hover color from resource document */
   text-decoration: none !important;
 }
 
@@ -93,8 +165,8 @@
 
 .tile-footer {
   margin-top: 8px;
-  font-size: 0.8rem;
-  color: #666;
+  font-size: vars.$small-size;
+  color: #6c757d; /* Match text color from resource document */
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -113,36 +185,6 @@
 }
 
 /* Attribute styles */
-.attribute {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 0.7rem;
-  font-size: 0.98rem;
-  line-height: 1.4;
-  flex-direction: column;
-  width: 100%;
-}
-
-.attribute strong {
-  font-weight: 600;
-  color: #222;
-  margin-right: 0.5em;
-  text-align: left;
-  min-width: unset;
-  flex-shrink: unset;
-  display: inline;
-}
-
-.attribute span {
-  color: #333;
-  margin: 0;
-  background: none;
-  border: none;
-  padding: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  display: inline;
-}
 
 h3 {
   font-size: 1.15rem;
@@ -152,42 +194,109 @@ h3 {
   word-break: break-all;
 }
 
-/* Resource Types section styles */
+/* Resource Types section styles - styled like arrays in resource document */
 .resource-types {
   margin-bottom: 1rem;
   flex: 1;
-  overflow-y: auto;
-  max-height: 120px; /* Limit height */
+  display: flex;
+  flex-direction: column;
+
+  .attribute-value {
+    position: relative;
+    padding-left: 0.25rem;
+    border-left: 3px solid #5bc0de; /* Blue vertical bar like arrays */
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    background-color: rgba(91, 192, 222, 0.05); /* Light blue background like arrays */
+    border-radius: 0 4px 4px 0;
+    max-height: 120px; /* Limit height */
+    overflow-y: auto;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -3px; /* Match the border-left width */
+      width: 3px; /* Match the border-left width */
+      height: 100%;
+      background-color: #5bc0de; /* Match the border color */
+      border-bottom-left-radius: 4px;
+      z-index: 1;
+    }
+  }
 }
 
 .resource-list {
   list-style: none;
-  padding-left: 1.2rem;
-  margin-top: 0.5rem;
+  padding: 0.5rem;
   margin: 0;
 
   li {
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.35rem;
+    padding: 0.15rem 0.25rem;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
   }
 }
 
-.resource-list li {
-  margin-bottom: 0.5rem;
-}
-
 .resource-link {
-  color: #007bff;
+  color: #0066cc; /* Match resource document link color */
   text-decoration: none;
   font-weight: 500;
-}
-
-.resource-link:hover {
-  text-decoration: underline;
+  font-size: vars.$content-size;
+  display: inline-flex;
+  align-items: center;
+  
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .resource-count {
   color: #6c757d;
-  font-size: 0.9em;
+  font-size: vars.$small-size;
+  margin-left: 0.25rem;
+}
+
+.group-icon {
+  font-size: vars.$content-size * 1.5;
+  color: #9575cd; /* Match the vertical bar color */
+  margin-right: 0.5rem;
+}
+
+.resource-type-icon {
+  font-size: vars.$content-size * 1.1;
+  color: #5bc0de; /* Match the array bar color */
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+
+.description-attribute {
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Added styles for array-like appearance */
+.item-count {
+  color: #6c757d;
+  font-size: vars.$small-size;
+  margin-right: 0.5rem;
+  font-weight: normal;
+}
+
+.attribute-type {
+  color: #457B9D;
+  font-size: vars.$small-size;
+  background-color: #F1FAEE;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #A8DADC;
+  font-weight: 500;
 }
 
 /* Responsive adjustments */

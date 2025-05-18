@@ -1,53 +1,137 @@
-/* Styles for GroupTypesComponent */
-/* Add styles as needed */
+@use '../shared-variables' as vars;
+@use '../_vertical-bars' as vbars;
 
-.tiles {
+/* Component-specific overrides for group types */
+.group-types h2 {
+  margin-bottom: 1.2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.grid-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
-  margin-top: 2rem;
+  gap: 1.5rem; /* Consistent spacing between tiles */
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+.grid-item {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid #e0e0e0;
+  border-left: 3px solid #3498db; /* Blue vertical bar for group types */
+  width: 280px;
+  flex: 0 0 280px;
+  padding: 1rem 1rem 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 280px;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background-color: #3498db; /* Match the border-left color */
+    z-index: 1;
+  }
+}
+
+.grid-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #d0d7de;
+}
+
+.grid-item h3 {
+  font-size: vars.$h3-size;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+}
+
+.group-type-icon {
+  font-size: vars.$content-size * 1.5;
+  color: #3498db; /* Match the vertical bar color */
+  margin-right: 0.5rem;
+}
+
+.description-attribute {
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.attribute {
+  margin-bottom: 1rem;
+
+  &.simple-attribute {
+    display: flex;
+    flex-direction: column;
+
+    .attribute-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+
+      strong {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: vars.$content-size;
+      }
+    }
+
+    .attribute-value {
+      font-size: vars.$content-size;
+      color: #333;
+      word-break: break-word;
+      padding: 0.25rem 0;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-height: 4.5em;
+    }
+  }
+}
+
+.tile-footer-container {
+  margin-top: auto;
+  width: 100%;
 }
 
 .tile {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  border: 1px solid #e0e0e0;
-  min-width: 320px;
-  max-width: 400px;
-  padding: 1.5rem 1.5rem 1rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow 0.2s, border 0.2s;
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 15px;
+  background-color: #3498db;
+  color: #fff !important;
   text-decoration: none;
-  color: inherit;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  align-self: flex-start;
+  font-weight: 500;
+  font-size: vars.$content-size;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tile:hover {
-  box-shadow: 0 4px 16px rgba(44,62,80,0.13);
-  border: 1.5px solid #b0b0b0;
-}
-
-.tile-header {
-  font-size: 1.4em;
-  font-weight: bold;
-  color: #2c3e50;
-  background: #f4f4f4;
-  border-radius: 6px 6px 0 0;
-  padding: 0.7em 1em 0.7em 1em;
-  margin-bottom: 0.7em;
-}
-
-.tile-body {
-  font-size: 1em;
-  color: #444;
-}
-
-.tile-body ul {
-  margin: 0.5em 0 0 1.2em;
-  padding: 0;
-}
-
-.tile-body li {
-  margin-bottom: 0.2em;
+  background-color: #2980b9;
+  text-decoration: none !important;
 }
