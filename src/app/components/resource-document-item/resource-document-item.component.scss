@@ -26,13 +26,13 @@
       &::before {
         content: '';
         position: absolute;
-        top: -1px; /* Extend slightly beyond the container */
-        bottom: -1px; /* Extend slightly beyond the container */
-        left: -3px; /* Match the border-left width */
+        top: 0; /* Align with the top edge */
+        bottom: 0; /* Align with the bottom edge */
+        left: 0; /* Align with the container's border */
         width: 3px; /* Match the border-left width */
-        height: calc(100% + 2px); /* Account for top and bottom extension */
+        height: 100%; /* Ensure full height alignment */
         background-color: #28a745; /* Match the border-left color */
-        border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
         z-index: 1;
       }
     }
@@ -60,13 +60,13 @@
       &::before {
         content: '';
         position: absolute;
-        top: -1px; /* Extend slightly beyond the container */
-        bottom: -1px; /* Extend slightly beyond the container */
-        left: -3px; /* Match the border-left width */
+        top: 0; /* Align with the top edge */
+        bottom: 0; /* Align with the bottom edge */
+        left: 0; /* Align with the container's border */
         width: 3px; /* Match the border-left width */
-        height: calc(100% + 2px); /* Account for top and bottom extension */
+        height: 100%; /* Ensure full height alignment */
         background-color: #5bc0de; /* Match the border-left color */
-        border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
         z-index: 1;
       }
 
@@ -83,13 +83,13 @@
       &::before {
         content: '';
         position: absolute;
-        top: -1px; /* Extend slightly beyond the container */
-        bottom: -1px; /* Extend slightly beyond the container */
-        left: -3px; /* Match the border-left width */
+        top: 0; /* Align with the top edge */
+        bottom: 0; /* Align with the bottom edge */
+        left: 0; /* Align with the container's border */
         width: 3px; /* Match the border-left width */
-        height: calc(100% + 2px); /* Account for top and bottom extension */
+        height: 100%; /* Ensure full height alignment */
         background-color: #9575cd; /* Match the border-left color */
-        border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
         z-index: 1;
       }
 
@@ -182,13 +182,13 @@
       &::before {
         content: '';
         position: absolute;
-        top: -1px; /* Extend slightly beyond the container */
-        bottom: -1px; /* Extend slightly beyond the container */
-        left: -3px; /* Match the border-left width */
+        top: 0; /* Align with the top edge */
+        bottom: 0; /* Align with the bottom edge */
+        left: 0; /* Align with the container's border */
         width: 3px; /* Match the border-left width */
-        height: calc(100% + 2px); /* Account for top and bottom extension */
+        height: 100%; /* Ensure full height alignment */
         background-color: #5bc0de; /* Match the border color */
-        border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
         z-index: 1;
       }
     }    &.object-content {
@@ -197,13 +197,13 @@
       &::before {
         content: '';
         position: absolute;
-        top: -1px; /* Extend slightly beyond the container */
-        bottom: -1px; /* Extend slightly beyond the container */
-        left: -3px; /* Match the border-left width */
+        top: 0; /* Align with the top edge */
+        bottom: 0; /* Align with the bottom edge */
+        left: 0; /* Align with the container's border */
         width: 3px; /* Match the border-left width */
-        height: calc(100% + 2px); /* Account for top and bottom extension */
+        height: 100%; /* Ensure full height alignment */
         background-color: #9575cd; /* Match the border color */
-        border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 0; /* Remove radius for flush alignment */
         z-index: 1;
       }
     }
@@ -351,13 +351,13 @@
     &::before {
       content: '';
       position: absolute;
-      top: -1px; /* Extend slightly beyond the container */
-      bottom: -1px; /* Extend slightly beyond the container */
-      left: -3px; /* Match the border-left width */
+      top: 0; /* Align with the top edge */
+      bottom: 0; /* Align with the bottom edge */
+      left: 0; /* Align with the container's border */
       width: 3px; /* Match the border-left width */
-      height: calc(100% + 2px); /* Account for top and bottom extension */
+      height: 100%; /* Ensure full height alignment */
       background-color: #28a745; /* Match the border-left color */
-      border-bottom-left-radius: 6px; /* Match the border-radius */
+      border-bottom-left-radius: 0; /* Remove radius for flush alignment */
       z-index: 1; /* Ensure it appears above other elements */
     }
 
@@ -430,6 +430,21 @@
   }
 }
 
+// Adjusting vertical bars to be perfectly flush
+.unified-item-row.simple-row::before,
+.unified-item-row.array-row::before,
+.unified-item-row.object-row::before,
+.expanded-content.array-content::before,
+.expanded-content.object-content::before,
+.preview-array-items::before,
+.preview-object-items::before {
+  top: -1px !important; /* Extend slightly beyond the container */
+  bottom: -1px !important; /* Extend slightly beyond the container */
+  left: -3px !important; /* Align with the container's border-left */
+  height: calc(100% + 2px) !important; /* Account for top and bottom extension */
+  z-index: 1 !important;
+}
+
 .preview-array-items {
   position: relative;
   padding-left: 0.25rem;
@@ -440,13 +455,13 @@
   &::before {
     content: '';
     position: absolute;
-    top: -1px; /* Extend slightly beyond the container */
-    bottom: -1px; /* Extend slightly beyond the container */
-    left: -3px; /* Match the border-left width */
+    top: 0; /* Align with the top edge */
+    bottom: 0; /* Align with the bottom edge */
+    left: 0; /* Align with the container's border */
     width: 3px; /* Match the border-left width */
-    height: calc(100% + 2px); /* Account for top and bottom extension */
+    height: 100%; /* Ensure full height alignment */
     background-color: #5bc0de; /* Match the border color */
-    border-bottom-left-radius: 4px;
+    border-bottom-left-radius: 0; /* Remove radius for flush alignment */
     z-index: 1;
   }
 
@@ -507,13 +522,13 @@
   &::before {
     content: '';
     position: absolute;
-    top: -1px; /* Extend slightly beyond the container */
-    bottom: -1px; /* Extend slightly beyond the container */
-    left: -3px; /* Match the border-left width */
+    top: 0; /* Align with the top edge */
+    bottom: 0; /* Align with the bottom edge */
+    left: 0; /* Align with the container's border */
     width: 3px; /* Match the border-left width */
-    height: calc(100% + 2px); /* Account for top and bottom extension */
+    height: 100%; /* Ensure full height alignment */
     background-color: #9575cd; /* Match the border color */
-    border-bottom-left-radius: 4px;
+    border-bottom-left-radius: 0; /* Remove radius for flush alignment */
     z-index: 1;
   }
 
