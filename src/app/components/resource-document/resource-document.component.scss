@@ -208,6 +208,11 @@
   }
 }
 
+// Add a dark gray left border to the resource-document tile
+.resource-document {
+  border-left: 3px solid #444;
+}
+
 /* Ensure app-code-highlight takes full width and scrolls */
 app-code-highlight {
   display: block;
