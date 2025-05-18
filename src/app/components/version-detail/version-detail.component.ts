@@ -4,20 +4,20 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { switchMap, map, tap } from 'rxjs/operators';
 import { RegistryService } from '../../services/registry.service';
-import { VersionDetail } from '../../models/registry.model';
+import { ResourceDocument } from '../../models/registry.model';
 import { combineLatest } from 'rxjs';
 import { ModelService } from '../../services/model.service';
-import { CodeHighlightComponent } from '../code-highlight/code-highlight.component'; // Import CodeHighlightComponent
+import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 
 @Component({
   standalone: true,
   selector: 'app-version-detail',
-  imports: [CommonModule, CodeHighlightComponent], // Add CodeHighlightComponent to imports
+  imports: [CommonModule, ResourceDocumentComponent],
   templateUrl: './version-detail.component.html',
   styleUrls: ['./version-detail.component.scss']
 })
 export class VersionDetailComponent implements OnInit {
-  version$!: Observable<VersionDetail>;
+  version$!: Observable<ResourceDocument>;
   groupType!: string;
   groupId!: string;
   resourceType!: string;
@@ -70,7 +70,7 @@ export class VersionDetailComponent implements OnInit {
             this.resTypeHasDocument
           );
         }),
-        tap((versionDetail: VersionDetail) => {
+        tap((versionDetail: ResourceDocument) => {
           console.log('Version detail loaded:', versionDetail);
         })
       );
@@ -143,7 +143,7 @@ export class VersionDetailComponent implements OnInit {
   /**
    * Get document content from any available source
    */
-  getDocumentContent(version: VersionDetail, resourceType: string): string | null {
+  getDocumentContent(version: ResourceDocument, resourceType: string): string | null {
     if (!version || !this.resTypeHasDocument) {
       return null;
     }

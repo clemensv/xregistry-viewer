@@ -2,7 +2,7 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { map, switchMap, catchError, tap } from 'rxjs/operators';
-import { Group, Resource, ResourceDocument } from '../models/registry.model';
+import { Group, Resource, VersionDetail, ResourceDocument } from '../models/registry.model';
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { isPlatformBrowser } from '@angular/common';
@@ -30,7 +30,6 @@ export class RegistryService {
       console.info('RegistryService: API URL updated to:', newUrl);
     });
   }
-
   listGroups(groupType: string): Observable<Group[]> {
     // In SSR environment, return empty array to avoid HTTP requests
     if (!this.isBrowser) {
@@ -102,12 +101,9 @@ export class RegistryService {
           );
       })
     );
-  }
-
-  getGroup(groupType: string, groupId: string): Observable<Group> {
+  }  getGroup(groupType: string, groupId: string): Observable<Group> {
     return this.modelService.getRegistryModel().pipe(
-      switchMap(model => {
-        const groupMeta = model.groups[groupType];
+      switchMap(model => {        const groupMeta = model.groups[groupType];
         if (!groupMeta) {
           console.error(`Group type ${groupType} not found in registry model`);
           return throwError(() => new Error(`Group type ${groupType} not found in registry model`));
@@ -149,8 +145,7 @@ export class RegistryService {
             });
 
             return group as Group;
-          }),
-          catchError(error => {
+          }),          catchError(error => {
             console.error(`Error getting group ${groupId} of type ${groupType}:`, error);
             return throwError(() => error);
           })
@@ -158,7 +153,6 @@ export class RegistryService {
       })
     );
   }
-
   getResource(groupType: string, groupId: string, resourceType: string, resourceId: string): Observable<ResourceDocument> {
     return this.modelService.getRegistryModel().pipe(
       switchMap(model => {
@@ -209,11 +203,9 @@ export class RegistryService {
         );
       })
     );
-  }
-
-  getVersionDetail(groupType: string, groupId: string, resourceType: string, resourceId: string, versionId: string, hasDocument: boolean): Observable<ResourceDocument> {
+  }  getVersionDetail(groupType: string, groupId: string, resourceType: string, resourceId: string, versionId: string, hasDocument: boolean): Observable<ResourceDocument> {
     // Construct the URLs for both with and without $details
-    const detailsUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}$details`;
+    const detailsUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}/$details`;
     const regularUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions/${versionId}`;
 
     // Use the appropriate URL based on hasDocument
@@ -222,8 +214,7 @@ export class RegistryService {
     console.log(`Fetching version detail from: ${primaryUrl}`);
     console.log(`hasDocument flag is: ${hasDocument}`);
 
-    // Function to process the response
-    const processResponse = (response: any): ResourceDocument => {
+    // Function to process the response    const processResponse = (response: any): ResourceDocument => {
       console.log('Processing version detail response:', response);
 
       // Convert the response to ensure all properties are included
@@ -240,7 +231,7 @@ export class RegistryService {
           response[`${singularName}base64`]
         );
 
-        if (hasSpecificDocument) {
+        if ( hasSpecificDocument) {
           // If the document is in a specific field, we can process it
           if (response[singularName]) {
             result["resource"] = response[singularName];
@@ -254,7 +245,7 @@ export class RegistryService {
         console.log(`Document field found: ${hasSpecificDocument}, singular name: ${singularName}`);
       }
 
-      return result as ResourceDocument;
+      return result as VersionDetail;
     };
 
     // Try the primary URL first, and if it fails with a 404, fallback to the regular URL
@@ -277,24 +268,25 @@ export class RegistryService {
             map(processResponse),
             catchError(fallbackError => {
               console.error(`Error fetching version detail from fallback URL ${regularUrl}:`, fallbackError);
-              return throwError(() => fallbackError);
+              return throwError(() => new Error(`Failed to load version details: ${fallbackError.message}`));
             })
           );
         }
 
-        // Otherwise, propagate the error
-        return throwError(() => error);
+        // Otherwise, rethrow the original error
+        return throwError(() => new Error(`Failed to load version details: ${error.message}`));
       })
     );
-  }
-
+  }  /**
+   * Fetch full xRegistry metadata and document representations for the default/latest version of a resource
+   */
   getResourceDetail(
     groupType: string,
     groupId: string,
     resourceType: string,
     resourceId: string,
     hasDocument: boolean
-  ): Observable<ResourceDocument> {
+  ): Observable<VersionDetail> {
     // Construct the URLs for both with and without $details
     const detailsUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}$details`;
     const regularUrl = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}`;
@@ -306,7 +298,7 @@ export class RegistryService {
     console.log(`hasDocument flag is: ${hasDocument}`);
 
     // Function to process the response
-    const processResponse = (response: any): ResourceDocument => {
+    const processResponse = (response: any): VersionDetail => {
       console.log('Processing resource detail response:', response);
 
       // Convert the response to ensure all properties are included
@@ -337,7 +329,7 @@ export class RegistryService {
         console.log(`Document field found: ${hasSpecificDocument}, singular name: ${singularName}`);
       }
 
-      return result as ResourceDocument;
+      return result as VersionDetail;
     };
 
     // Try the primary URL first, and if it fails with a 404, fallback to the regular URL
@@ -360,17 +352,19 @@ export class RegistryService {
             map(processResponse),
             catchError(fallbackError => {
               console.error(`Error fetching resource detail from fallback URL ${regularUrl}:`, fallbackError);
-              return throwError(() => fallbackError);
+              return throwError(() => new Error(`Failed to load resource details: ${fallbackError.message}`));
             })
           );
         }
 
-        // Otherwise, propagate the error
-        return throwError(() => error);
+        // Otherwise, rethrow the original error
+        return throwError(() => new Error(`Failed to load resource details: ${error.message}`));
       })
     );
   }
-
+  /**
+   * Fetch all versions of a resource
+   */
   getResourceVersions(
     groupType: string,
     groupId: string,
@@ -380,29 +374,23 @@ export class RegistryService {
     const url = `${this.currentApiUrl}/${groupType}/${groupId}/${resourceType}/${resourceId}/versions`;
     return this.http.get<any>(url).pipe(
       map(response => {
-        // If the response isn't an array (could be an object with values), convert it
+        // The response might be an object with each version, so we convert it to an array if needed
         if (!Array.isArray(response)) {
           return Object.values(response);
         }
         return response;
-      }),
-      catchError(error => {
-        console.error(`Error fetching resource versions:`, error);
-        return throwError(() => error);
       })
     );
   }
-
   fetchDocument(url: string): Observable<string> {
     // In SSR environment, return empty observable to avoid HTTP requests
     if (!this.isBrowser) {
-      return of('');
+      return of(''); // Or throwError, depending on how you want to handle SSR
     }
-
     return this.http.get(url, { responseType: 'text' }).pipe(
-      catchError(error => {
-        console.error(`Error fetching document from ${url}:`, error);
-        return throwError(() => error);
+      catchError(err => {
+        console.error('Error fetching document from URL:', url, err);
+        return throwError(() => new Error(`Failed to fetch document from ${url}`));
       })
     );
   }

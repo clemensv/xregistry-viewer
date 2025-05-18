@@ -4,58 +4,20 @@
   </div>
   <div class="page-content">
     <div *ngIf="resources$ | async as resources;" [ngClass]="{'single-resource': resources.length === 1}">
-      <div class="grid-container">        <div *ngFor="let res of resources" class="grid-item" [ngClass]="{'single-item': resources.length === 1}">
-          <div class="resource-header">
+      <div class="grid-container">        <div *ngFor="let res of resources" class="grid-item" [ngClass]="{'single-item': resources.length === 1}">          <div class="resource-header">
             <h3>{{ res['name'] }}</h3>
             <span *ngIf="res['versionsCount'] > 1" class="version-badge" [title]="res['versionsCount'] + ' versions available'">{{ res['versionsCount'] }}</span>
           </div>
-        <ng-container *ngFor="let key of displayAttributes">
-          <div class="attribute" *ngIf="hasValue(res[key])">
-            <ng-container *ngIf="resourceAttributes[key]?.type === 'any'; else normalAttr">
-              <strong [title]="resourceAttributes[key]?.description || ''">{{ key }}:</strong>
-              <pre [title]="resourceAttributes[key]?.description || ''">{{ res[key] | json }}</pre>
-            </ng-container>
-            <ng-template #normalAttr>
-              <ng-container *ngIf="!isArray(res[key]) && !isObject(res[key]); else nestedTemplate">
-                <strong [title]="resourceAttributes[key]?.description || ''">{{ key }}:</strong>
-                <span [title]="resourceAttributes[key]?.description || ''">{{ res[key] }}</span>
-              </ng-container>
-              <ng-template #nestedTemplate>
-                <h4 [title]="resourceAttributes[key]?.description || ''">{{ key }}:</h4>
-                <div *ngIf="isArray(res[key]); else objectTemplate" class="object-array">
-                  <div *ngFor="let item of res[key]; let i = index" class="object-item">
-                    <ng-container *ngIf="isObject(item); else primitiveTemplate">
-                      <div *ngFor="let subKey of objectKeys(item)" class="object-field">
-                        <ng-container *ngIf="resourceAttributes[key]?.item?.attributes?.[subKey]?.type === 'any'; else subNormalAttr">
-                          <strong [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
-                          <pre [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ item[subKey] | json }}</pre>
-                        </ng-container>
-                        <ng-template #subNormalAttr>
-                          <strong [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
-                          <span [title]="resourceAttributes[key]?.item?.attributes?.[subKey]?.description || ''">{{ item[subKey] }}</span>
-                        </ng-template>
-                      </div>
-                    </ng-container>
-                    <ng-template #primitiveTemplate>
-                      <span>{{ item }}</span>
-                    </ng-template>
-                  </div>
-                </div>
-                <ng-template #objectTemplate>
-                  <div *ngFor="let subKey of objectKeys(res[key])" class="object-field">
-                    <ng-container *ngIf="resourceAttributes[key]?.attributes?.[subKey]?.type === 'any'; else subObjNormalAttr">
-                      <strong [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
-                      <pre [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ res[key][subKey] | json }}</pre>
-                    </ng-container>
-                    <ng-template #subObjNormalAttr>
-                      <strong [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ subKey }}:</strong>
-                      <span [title]="resourceAttributes[key]?.attributes?.[subKey]?.description || ''">{{ res[key][subKey] }}</span>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </ng-template>
-            </ng-template>
-          </div>        </ng-container>        <div style="margin-top: auto; margin-bottom: -5px;" class="resource-footer">
+
+          <!-- Use the shared resource document component -->
+          <app-resource-document
+            [resourceDocument]="res"
+            [resourceType]="resourceType"
+            [resourceAttributes]="resourceAttributes"
+            [hasDocumentSupport]="resTypeHasDocument"
+            [showAttributes]="true"
+            [showDocument]="false">
+          </app-resource-document><div style="margin-top: auto; margin-bottom: -5px;" class="resource-footer">
           <a [routerLink]="[res['id']]" class="tile">
             View Details
           </a>

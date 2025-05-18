@@ -60,27 +60,31 @@ export interface Group {
   [key: string]: any; // Index signature for dynamic property access
 }
 
-export interface Resource {
+export interface ResourceDocument {
+  // Common fields for both resources and versions
   id: string;
-  name: string;
+  name?: string;
   description?: string;
   createdAt?: string; // ISO date string
   modifiedAt?: string; // ISO date string
+
+  // Document representation fields
   resource?: any;
   resourceBase64?: string;
   resourceUrl?: string;
-  [key: string]: any; // Index signature for dynamic property access
+
+  // Version-specific fields
+  versionId?: string;
+  isDefault?: boolean;
+  attributes?: any;
+
+  // Index signature for dynamic property access
+  [key: string]: any;
 }
 
-export interface VersionDetail {
-  id: string;
-  attributes: any;
-   // Document representations when using $details
-  resource?: any;
-  resourceBase64?: string;
-  resourceUrl?: string;
-  [key: string]: any; // Index signature to allow dynamic property access
-}
+// Keep these for backward compatibility
+export interface Resource extends ResourceDocument {}
+export interface VersionDetail extends ResourceDocument {}
 
 export interface Capabilities {
   apis: string[];

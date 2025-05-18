@@ -4,12 +4,12 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of, switchMap, tap, catchError, map } from 'rxjs';
 import { RegistryService } from '../../services/registry.service';
 import { ModelService } from '../../services/model.service';
-import { Resource, VersionDetail } from '../../models/registry.model';
+import { ResourceDocument } from '../../models/registry.model';
+import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 
-@Component({
-  selector: 'app-resource',
+@Component({  selector: 'app-resource',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ResourceDocumentComponent],
   templateUrl: './resource.component.html',
   styleUrl: './resource.component.scss'
 })
@@ -18,9 +18,8 @@ export class ResourceComponent implements OnInit {
   groupId!: string;
   resourceType!: string;
   resourceId!: string;
-  resourceTypeData: any;
-  hasMultipleVersions = false;
-  defaultVersion$!: Observable<VersionDetail>;
+  resourceTypeData: any;  hasMultipleVersions = false;
+  defaultVersion$!: Observable<ResourceDocument>;
   versions$!: Observable<any[]>;
   resourceAttributes: { [key: string]: any } = {};
   loading = true; // Add loading property for template reference
@@ -41,7 +40,7 @@ export class ResourceComponent implements OnInit {
     this.documentError = null;
     this.cachedDocumentContent = null;
     this.cachedResourceId = null;
-    
+
     this.route.paramMap.pipe(
       tap(params => {
         this.groupType = params.get('groupType')!;
@@ -87,7 +86,7 @@ export class ResourceComponent implements OnInit {
       tap((version) => {
         // Set loading to false when the default version is loaded
         this.loading = false;
-        
+
         // Debug: log the version details to see what document fields we're getting
         console.log('Default version loaded:', version);
         console.log('Document fields in version:', {
@@ -102,7 +101,7 @@ export class ResourceComponent implements OnInit {
       catchError(err => {
         console.error('Error loading default version:', err);
         this.loading = false;
-        return of({} as VersionDetail);
+        return of({} as ResourceDocument);
       })
     );
   }
@@ -209,7 +208,7 @@ export class ResourceComponent implements OnInit {
   getSingularName(resourceType: string): string {
     return resourceType.endsWith('s') ? resourceType.slice(0, -1) : resourceType;
   }
-  
+
   /**
    * Checks if the version has a document (using any of the supported formats)
    */
@@ -220,12 +219,12 @@ export class ResourceComponent implements OnInit {
     }
 
     const hasDoc = !!(version.resource || version.resourceUrl || version.resourceBase64 );
-        
+
     return hasDoc;
   }/**
    * Gets document content from any available source
    */
-  getDocumentContent(version: VersionDetail, resourceType: string): string | null {
+  getDocumentContent(version: ResourceDocument, resourceType: string): string | null {
     if (!version || !this.resourceTypeData?.hasdocument) {
       console.log(`Cannot get document content - version: ${!!version}, resourceType has document: ${!!this.resourceTypeData?.hasdocument}`);
       return null;
@@ -260,8 +259,8 @@ export class ResourceComponent implements OnInit {
       console.log(`Using base64 resource field for document content`);
       this.cachedDocumentContent = atob(version.resourceBase64);
     }
-    
-    
+
+
     // If we already have cached content, return it
     if (this.cachedDocumentContent) {
       return this.cachedDocumentContent;
@@ -322,7 +321,7 @@ export class ResourceComponent implements OnInit {
     }
 
     const base64Data = version.resourceBase64;
-    
+
     if (!base64Data) {
       return;
     }
@@ -341,7 +340,7 @@ export class ResourceComponent implements OnInit {
       link.href = URL.createObjectURL(blob);
       link.download = `${resourceType}_${version.id}_document`;
       link.click();
-      
+
       // Clean up
       URL.revokeObjectURL(link.href);
     } catch (error) {

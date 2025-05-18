@@ -3,13 +3,14 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, map } from 'rxjs';
 import { RegistryService } from '../../services/registry.service';
-import { Resource } from '../../models/registry.model';
+import { ResourceDocument } from '../../models/registry.model';
 import { ModelService } from '../../services/model.service';
+import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 
 @Component({
   standalone: true,
   selector: 'app-resources',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ResourceDocumentComponent],
   templateUrl: './resources.component.html',
   styleUrls: ['./resources.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
@@ -18,7 +19,7 @@ export class ResourcesComponent implements OnInit {
   groupType!: string;
   groupId!: string;
   resourceType!: string;
-  resources$!: Observable<Resource[]>;
+  resources$!: Observable<ResourceDocument[]>;
   resTypeHasDocument = false;
   resourceAttributes: { [key: string]: any } = {}; // Metadata for attributes
   loading = true; // Add loading property for template reference
@@ -56,36 +57,11 @@ export class ResourcesComponent implements OnInit {
       );
     });
   }
-
+  // These methods are now handled by the ResourceDocumentComponent
+  // Keeping displayAttributes for backward compatibility, but we'll no longer use it in the template
   get displayAttributes(): string[] {
     return Object.keys(this.resourceAttributes || {}).filter(
       key => !this.suppressAttributes.includes(key)
     );
-  }
-
-  objectKeys(obj: any): string[] {
-    return Object.keys(obj);
-  }
-
-  isArray(value: any): boolean {
-    return Array.isArray(value);
-  }
-
-  isObject(value: any): boolean {
-    return value && typeof value === 'object' && !Array.isArray(value);
-  }
-
-  /** Returns true if the value is non-null, non-empty (for strings, arrays, objects) */
-  hasValue(value: any): boolean {
-    if (value == null) {
-      return false;
-    }
-    if (Array.isArray(value)) {
-      return value.length > 0;
-    }
-    if (this.isObject(value)) {
-      return Object.keys(value).length > 0;
-    }
-    return value !== '';
   }
 }
