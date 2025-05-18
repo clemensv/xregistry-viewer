@@ -82,7 +82,17 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   }
 
   /**
-   * Formats item type for display with better formatting
+   * Gets item attributes from the model if available
+   */
+  getItemAttributes(): { [key: string]: any } | null {
+    if (!this.item.itemModel) {
+      return null;
+    }
+    return this.item.itemModel.attributes || null;
+  }
+
+  /**
+   * Formats item type for display
    */
   getDisplayType(): string {
     // If we have a model type, use it but make first letter uppercase for display
@@ -149,7 +159,8 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   }
 
   /**
-   * Enhanced method to get array items with more user-friendly names
+   * Gets nested items from an array
+   * Enhanced to properly handle nested arrays/objects
    */
   getArrayItems(): ResourceDocumentItem[] {
     if (!this.isArray(this.item.value) || !this.item.value.length) {
@@ -162,30 +173,9 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
                   (val !== null && typeof val === 'object') ? 'object' :
                   typeof val;
 
-      // Try to find a meaningful name for the item
-      let itemName = `Item ${index + 1}`;
-
-      // Look for common identifier properties in object items
-      if (val && typeof val === 'object' && val !== null) {
-        // Check for common identifier properties in the following order of preference
-        const identifierProps = ['name', 'id', 'title', 'key', 'label', 'identifier'];
-
-        for (const prop of identifierProps) {
-          if (val[prop] !== undefined && (typeof val[prop] === 'string' || typeof val[prop] === 'number')) {
-            itemName = String(val[prop]);
-            break;
-          }
-        }
-
-        // If no identifier was found but there's a type property, include it
-        if (itemName === `Item ${index + 1}` && val.type) {
-          itemName = `Item ${index + 1} (${val.type})`;
-        }
-      }
-
       // Create a proper ResourceDocumentItem for each array element with correct model structure
       const childItem: ResourceDocumentItem = {
-        key: itemName,
+        key: `Item ${index + 1}`,  // Renamed from [index] to "Item 1, Item 2" etc.
         value: val,
         type: type,
         // For array items, pass along the item schema if available
@@ -200,7 +190,8 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   }
 
   /**
-   * Enhanced method to get object items with better metadata handling
+   * Gets nested items from an object
+   * Enhanced to properly handle nested objects/arrays
    */
   getObjectItems(): ResourceDocumentItem[] {
     if (!this.isObject(this.item.value)) {
@@ -273,11 +264,11 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   }
 
   /**
-   * Enhanced preview text generation for collapsed view
-   * Shows more compact representations without JSON syntax
+   * Creates a preview string for arrays and objects in collapsed state
+   * This provides a meaningful preview instead of just [...] or {...}
    */
   getCollapsedPreviewText(value: any, maxItems: number = 3): string {
-    // Always generate new preview to ensure content is fresh
+    // For simplicity, we'll remove the brackets and braces from the preview text
     try {
       // Handle null and undefined
       if (value === null) {
@@ -288,32 +279,18 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
         return '<span class="special">undefined</span>';
       }
 
-      // ARRAYS - Clean rendering without brackets
+      // ARRAYS - Enhanced rendering without brackets
       if (Array.isArray(value)) {
         if (value.length === 0) {
           return '<span class="empty">No items</span>';
         }
 
-        let arrayPreview = '';
+        let arrayPreview = '<br>';
         const itemsToShow = Math.min(value.length, maxItems);
 
         for (let i = 0; i < itemsToShow; i++) {
           const item = value[i];
-          arrayPreview += '<div class="preview-item">';
-
-          // Try to get a meaningful item name
-          let itemLabel = `Item ${i + 1}`;
-          if (item && typeof item === 'object' && item !== null) {
-            const identifierProps = ['name', 'id', 'title', 'key', 'label'];
-            for (const prop of identifierProps) {
-              if (item[prop] !== undefined && (typeof item[prop] === 'string' || typeof item[prop] === 'number')) {
-                itemLabel = String(item[prop]);
-                break;
-              }
-            }
-          }
-
-          arrayPreview += `<span class="preview-index">${itemLabel}:</span> `;
+          arrayPreview += '&nbsp;&nbsp;';
 
           if (item === null) {
             arrayPreview += '<span class="null">null</span>';
@@ -326,15 +303,13 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
               if (item.length > 0) {
                 const sampleCount = Math.min(2, item.length);
                 const samples = item.slice(0, sampleCount).map((s: any) =>
-                  typeof s === 'object' ? (s === null ? '<span class="null">null</span>' :
-                                                      (Array.isArray(s) ? `<span class="special">${s.length} items</span>` :
-                                                      '<span class="special">object</span>')) :
-                  typeof s === 'string' ? `<span class="string">${this.escapeHtml(s.substring(0, 10))}${s.length > 10 ? '...' : ''}</span>` :
+                  typeof s === 'object' ? (s === null ? '<span class="null">null</span>' : '{}') :
+                  typeof s === 'string' ? `<span class="string">"${this.escapeHtml(s.substring(0, 10))}${s.length > 10 ? '...' : ''}"</span>` :
                   typeof s === 'number' ? `<span class="number">${s}</span>` :
                   typeof s === 'boolean' ? `<span class="boolean">${s}</span>` :
                   this.escapeHtml(String(s))
                 );
-                arrayPreview += ` <span class="preview-examples">(e.g. ${samples.join(', ')})</span>`;
+                arrayPreview += ` <span class="special">(e.g. ${samples.join(', ')})</span>`;
               }
             } else if (item === null) {
               arrayPreview += '<span class="null">null</span>';
@@ -343,15 +318,15 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
               arrayPreview += `<span class="special">${keys.length} properties</span>`;
               // Add sample keys
               if (keys.length > 0) {
-                arrayPreview += ` <span class="preview-examples">(${keys.slice(0, 2).map(k =>
+                arrayPreview += ` <span class="special">(keys: ${keys.slice(0, 2).map(k =>
                   `<span class="key">${this.escapeHtml(k)}</span>`).join(', ')}${keys.length > 2 ? '...' : ''})</span>`;
               }
             }
           } else if (typeof item === 'string') {
             if (item.length > 30) {
-              arrayPreview += `<span class="string">${this.escapeHtml(item.substring(0, 30))}...</span>`;
+              arrayPreview += `<span class="string">"${this.escapeHtml(item.substring(0, 30))}..."</span>`;
             } else {
-              arrayPreview += `<span class="string">${this.escapeHtml(item)}</span>`;
+              arrayPreview += `<span class="string">"${this.escapeHtml(item)}"</span>`;
             }
           } else if (typeof item === 'number') {
             arrayPreview += `<span class="number">${item}</span>`;
@@ -361,32 +336,35 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
             arrayPreview += this.escapeHtml(String(item));
           }
 
-          arrayPreview += '</div>';
+          if (i < itemsToShow - 1) {
+            arrayPreview += ',<br>';
+          } else {
+            arrayPreview += '<br>';
+          }
         }
 
         if (value.length > maxItems) {
-          arrayPreview += `<div class="preview-more"><span class="special">${value.length - maxItems} more items...</span></div>`;
+          arrayPreview += `&nbsp;&nbsp;<span class="special">${value.length - maxItems} more items...</span><br>`;
         }
 
         return arrayPreview;
       }
 
-      // OBJECTS - Clean rendering without braces
+      // OBJECTS - Enhanced rendering without braces
       if (typeof value === 'object' && value !== null) {
         const keys = Object.keys(value);
         if (keys.length === 0) {
           return '<span class="empty">No properties</span>';
         }
 
-        let objectPreview = '';
+        let objectPreview = '<br>';
         const keysToShow = keys.slice(0, maxItems);
 
         for (let i = 0; i < keysToShow.length; i++) {
           const key = keysToShow[i];
           const propValue = value[key];
 
-          objectPreview += `<div class="preview-property">`;
-          objectPreview += `<span class="key">${this.escapeHtml(key)}</span>: `;
+          objectPreview += `&nbsp;&nbsp;<span class="key">${this.escapeHtml(key)}</span>: `;
 
           if (propValue === null) {
             objectPreview += '<span class="null">null</span>';
@@ -403,11 +381,9 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
                 if (firstItem === null) {
                   sample = '<span class="null">null</span>';
                 } else if (typeof firstItem === 'object') {
-                  sample = Array.isArray(firstItem) ?
-                           `<span class="special">${firstItem.length} items</span>` :
-                           `<span class="special">${Object.keys(firstItem).length} properties</span>`;
+                  sample = Array.isArray(firstItem) ? '[]' : '{}';
                 } else if (typeof firstItem === 'string') {
-                  sample = `<span class="string">${this.escapeHtml(firstItem.substring(0, 15))}${firstItem.length > 15 ? '...' : ''}</span>`;
+                  sample = `<span class="string">"${this.escapeHtml(firstItem.substring(0, 15))}${firstItem.length > 15 ? '...' : ''}"</span>`;
                 } else if (typeof firstItem === 'number') {
                   sample = `<span class="number">${firstItem}</span>`;
                 } else if (typeof firstItem === 'boolean') {
@@ -416,22 +392,24 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
                   sample = this.escapeHtml(String(firstItem));
                 }
 
-                objectPreview += ` <span class="preview-examples">(e.g. ${sample})</span>`;
+                objectPreview += ` <span class="special">(e.g. ${sample}${propValue.length > 1 ? ', ...' : ''})</span>`;
               }
+            } else if (propValue === null) {
+              objectPreview += '<span class="null">null</span>';
             } else {
-              objectPreview += `<span class="special">${Object.keys(propValue).length} properties</span>`;
-              // Include first few keys as sample if object is not empty
-              const objKeys = Object.keys(propValue);
-              if (objKeys.length > 0) {
-                objectPreview += ` <span class="preview-examples">(${objKeys.slice(0, 2).map(k =>
-                  `<span class="key">${this.escapeHtml(k)}</span>`).join(', ')}${objKeys.length > 2 ? '...' : ''})</span>`;
+              const propKeys = Object.keys(propValue);
+              objectPreview += `<span class="special">${propKeys.length} properties</span>`;
+              // Add sample keys
+              if (propKeys.length > 0) {
+                objectPreview += ` <span class="special">(keys: ${propKeys.slice(0, 2).map(k =>
+                  `<span class="key">${this.escapeHtml(k)}</span>`).join(', ')}${propKeys.length > 2 ? '...' : ''})</span>`;
               }
             }
           } else if (typeof propValue === 'string') {
             if (propValue.length > 30) {
-              objectPreview += `<span class="string">${this.escapeHtml(propValue.substring(0, 30))}...</span>`;
+              objectPreview += `<span class="string">"${this.escapeHtml(propValue.substring(0, 30))}..."</span>`;
             } else {
-              objectPreview += `<span class="string">${this.escapeHtml(propValue)}</span>`;
+              objectPreview += `<span class="string">"${this.escapeHtml(propValue)}"</span>`;
             }
           } else if (typeof propValue === 'number') {
             objectPreview += `<span class="number">${propValue}</span>`;
@@ -441,21 +419,98 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
             objectPreview += this.escapeHtml(String(propValue));
           }
 
-          objectPreview += `</div>`;
+          if (i < keysToShow.length - 1) {
+            objectPreview += ',<br>';
+          } else {
+            objectPreview += '<br>';
+          }
         }
 
         if (keys.length > maxItems) {
-          objectPreview += `<div class="preview-more"><span class="special">${keys.length - maxItems} more properties...</span></div>`;
+          objectPreview += `&nbsp;&nbsp;<span class="special">${keys.length - maxItems} more properties...</span><br>`;
         }
 
         return objectPreview;
       }
 
-      // For primitive values
+      // Any other type with proper type-based highlighting
+      if (typeof value === 'string') {
+        return `<span class="string">"${this.escapeHtml(value)}"</span>`;
+      } else if (typeof value === 'number') {
+        return `<span class="number">${value}</span>`;
+      } else if (typeof value === 'boolean') {
+        return `<span class="boolean">${value}</span>`;
+      }
+
       return this.escapeHtml(String(value));
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      return '<span class="error">Error generating preview</span>';
+    } catch (err) {
+      console.error('PREVIEW ERROR:', err);
+
+      // Fallback for error cases - make it clear there's content that couldn't be displayed properly
+      if (Array.isArray(value)) {
+        return `<span class="special">Array with ${value.length} items - Display Error</span>`;
+      } else if (typeof value === 'object' && value !== null) {
+        return `<span class="special">Object with ${Object.keys(value).length} properties - Display Error</span>`;
+      }
+
+      return `<span class="special">Value (${typeof value}) - Display Error</span>`;
     }
+  }
+
+  /**
+   * Gets a limited number of array items for preview display
+   */
+  getPreviewArrayItems(): ResourceDocumentItem[] {
+    if (!this.isArray(this.item.value) || !this.item.value.length) {
+      return [];
+    }
+
+    const maxItems = this.getMaxPreviewItems();
+    return this.getArrayItems().slice(0, maxItems);
+  }
+
+  /**
+   * Gets the maximum number of items to show in preview mode
+   */
+  getMaxPreviewItems(): number {
+    return 3; // Show max 3 items in preview mode
+  }
+
+  /**
+   * Gets a limited number of object properties for preview display
+   */
+  getPreviewObjectItems(): ResourceDocumentItem[] {
+    if (!this.isObject(this.item.value)) {
+      return [];
+    }
+
+    const maxItems = this.getMaxPreviewItems();
+    return this.getObjectItems().slice(0, maxItems);
+  }
+
+  /**
+   * Checks if there are more items in the array/object than shown in preview
+   */
+  hasMoreItemsThanPreview(): boolean {
+    if (this.isArray(this.item.value)) {
+      return this.item.value.length > this.getMaxPreviewItems();
+    }
+    if (this.isObject(this.item.value)) {
+      return Object.keys(this.item.value).length > this.getMaxPreviewItems();
+    }
+    return false;
+  }
+
+  /**
+   * Gets the total count of items in the array or object
+   */
+  getTotalItemsCount(): number {
+    if (this.isArray(this.item.value)) {
+      return this.item.value.length;
+    }
+    if (this.isObject(this.item.value)) {
+      return Object.keys(this.item.value).length;
+    }
+    return 0;
   }
 }

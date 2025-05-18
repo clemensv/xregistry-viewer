@@ -1,54 +1,150 @@
 <div class="resource-document-item" [class.nested]="nestingLevel > 0">
-  <!-- Header with expandable toggle for arrays and objects -->
-  <div *ngIf="isArray(item.value) || isObject(item.value)" class="item-header" [class.expanded]="item.isExpanded">
-    <div class="item-title" (click)="toggleExpansion()">
-      <span class="toggle-icon material-icons">{{ item.isExpanded ? 'expand_more' : 'chevron_right' }}</span>
-      <strong [title]="item.description">{{ item.key }}:</strong>
-      <span class="item-type">{{ isArray(item.value) ? 'Array' : 'Object' }}</span>
-      <span class="item-count">
-        {{ isArray(item.value) ? '(' + item.value.length + ' items)' : '(' + (isObject(item.value) ? Object.keys(item.value).length : 0) + ' properties)' }}
-      </span>
-    </div>
-  </div>
+  <!-- Unified header for all types (simple values, arrays, objects) -->
+  <div class="unified-item-row"
+       [class.array-row]="isArray(item.value)"
+       [class.object-row]="isObject(item.value) && !isArray(item.value)"
+       [class.simple-row]="isSimpleValue(item.value)"
+       [class.expanded]="item.isExpanded === true"
+       (click)="isArray(item.value) || isObject(item.value) ? toggleExpansion($event) : null">
 
-  <!-- Simple values (primitives) -->
-  <div *ngIf="isSimpleValue(item.value)" class="simple-value">
-    <strong [title]="item.description">{{ item.key }}:</strong>
-    <span [title]="item.description">{{ item.value }}</span>
+    <!-- Toggle icon only for arrays and objects -->
+    <span *ngIf="isArray(item.value) || isObject(item.value)"
+          class="toggle-icon material-icons">
+      {{ item.isExpanded === true ? 'expand_more' : 'chevron_right' }}
+    </span>
+
+    <!-- Key name for all items -->
+    <strong [title]="item.description">{{ item.key }}</strong>
+
+    <!-- Count for arrays and objects -->
+    <span *ngIf="isArray(item.value) || isObject(item.value)" class="item-count">
+      {{ isArray(item.value) ? item.value.length + ' items' : (isObject(item.value) ? Object.keys(item.value).length : 0) + ' properties' }}
+    </span>    <!-- Type info if available from model or inferred -->
+    <span class="item-model-type">
+      {{ item.itemModel?.type ? getDisplayType() : (isSimpleValue(item.value) ? (typeof item.value) : (isArray(item.value) ? 'Array' : 'Object')) | titlecase }}
+    </span>
+
+    <!-- Description for all types -->
+    <span *ngIf="item.description" class="item-description" title="{{ item.description }}">
+      {{ item.description }}
+    </span>
+
+    <!-- Simple value display inline for primitive values -->
+    <span *ngIf="isSimpleValue(item.value)" class="simple-value-display">
+      <span *ngIf="isAnyType() && item.value !== null && item.value !== undefined" class="any-value">
+        <app-code-highlight
+          [code]="getSafeJsonString(item.value)"
+          [language]="'json'">
+        </app-code-highlight>
+      </span>
+      <span *ngIf="!isAnyType() || item.value === null || item.value === undefined"
+            class="value-text"
+            [class.null-value]="item.value === null"
+            [class.undefined-value]="item.value === undefined">
+        {{ item.value }}
+      </span>
+    </span>
   </div>
 
   <!-- Expanded content for arrays and objects -->
-  <div *ngIf="(isArray(item.value) || isObject(item.value)) && item.isExpanded" class="expanded-content">
+  <div *ngIf="(isArray(item.value) || isObject(item.value)) && item.isExpanded === true"
+       class="expanded-content"
+       [class.array-content]="isArray(item.value)"
+       [class.object-content]="isObject(item.value) && !isArray(item.value)">
+
     <!-- For arrays -->
     <div *ngIf="isArray(item.value)" class="array-items">
-      <div *ngIf="item.value.length === 0" class="empty-notice">Empty array</div>
-      <ng-container *ngFor="let arrayItem of getArrayItems(); let i = index">
-        <app-resource-document-item
-          [item]="arrayItem"
-          [nestingLevel]="nestingLevel + 1">
-        </app-resource-document-item>
+      <div *ngIf="item.value.length === 0" class="empty-notice">No items</div>
+
+      <!-- Display array item details if available (now more compact) -->
+      <div *ngIf="hasArrayItemModelInfo() && (getArrayItemType() || getArrayItemDescription())" class="array-item-details">
+        <div class="detail-row">
+          <span *ngIf="getArrayItemType()" class="detail-label">Type: <span class="detail-value">{{ getArrayItemType() }}</span></span>
+          <span *ngIf="getArrayItemDescription()" class="detail-label">Description: <span class="detail-value">{{ getArrayItemDescription() }}</span></span>
+        </div>
+      </div>
+
+      <!-- Display array items -->
+      <ng-container *ngIf="!isAnyType()">
+        <ng-container *ngFor="let arrayItem of getArrayItems(); let i = index">
+          <app-resource-document-item
+            [item]="arrayItem"
+            [nestingLevel]="nestingLevel + 1">
+          </app-resource-document-item>
+        </ng-container>
       </ng-container>
+
+      <!-- Display JSON for 'any' type array content -->
+      <div *ngIf="isAnyType()" class="any-value-container">
+        <app-code-highlight
+          [code]="getSafeJsonString(item.value)"
+          [language]="'json'">
+        </app-code-highlight>
+      </div>
     </div>
 
     <!-- For objects -->
     <div *ngIf="isObject(item.value)" class="object-items">
-      <div *ngIf="isObject(item.value) && Object.keys(item.value).length === 0" class="empty-notice">Empty object</div>
-      <ng-container *ngFor="let objItem of getObjectItems()">
-        <app-resource-document-item
-          [item]="objItem"
-          [nestingLevel]="nestingLevel + 1">
-        </app-resource-document-item>
+      <div *ngIf="Object.keys(item.value).length === 0" class="empty-notice">No properties</div>
+
+      <!-- Display object properties -->
+      <ng-container *ngIf="!isAnyType()">
+        <ng-container *ngFor="let objItem of getObjectItems()">
+          <app-resource-document-item
+            [item]="objItem"
+            [nestingLevel]="nestingLevel + 1">
+          </app-resource-document-item>
+        </ng-container>
       </ng-container>
+
+      <!-- Display JSON for 'any' type object content -->
+      <div *ngIf="isAnyType()" class="any-value-container">
+        <app-code-highlight
+          [code]="getSafeJsonString(item.value)"
+          [language]="'json'">
+        </app-code-highlight>
+      </div>
     </div>
   </div>
 
-  <!-- Show collapsed JSON when not expanded -->
-  <div *ngIf="(isArray(item.value) || isObject(item.value)) && !item.isExpanded" class="collapsed-preview">
-    <app-code-highlight
-      [code]="isArray(item.value) ?
-        '[' + (item.value.length > 0 ? '...' : '') + ']' :
-        '{' + (Object.keys(item.value).length > 0 ? '...' : '') + '}'"
-      [language]="'json'">
-    </app-code-highlight>
-  </div>
+  <!-- Improved collapsed preview with better click handling and visual cues -->
+  <div *ngIf="(isArray(item.value) || isObject(item.value)) && item.isExpanded !== true"
+       class="collapsed-preview"
+       (click)="toggleExpansion($event)">
+
+    <!-- Preview content - show nested document items for arrays rather than just text preview -->
+    <div class="preview-content">
+      <!-- For "any" type values, use JSON preview -->
+      <div *ngIf="isAnyType()" class="preview-code">
+        <pre><code [innerHTML]="getCollapsedPreviewText(item.value)"></code></pre>
+      </div>
+
+      <!-- For arrays, show a preview of first few items as nested document-items -->
+      <div *ngIf="isArray(item.value) && !isAnyType()" class="preview-array-items">
+        <ng-container *ngFor="let arrayItem of getArrayItems().slice(0, 3); let i = index">
+          <app-resource-document-item
+            [item]="arrayItem"
+            [nestingLevel]="nestingLevel + 1">
+          </app-resource-document-item>
+        </ng-container>
+        <div *ngIf="item.value.length > 3" class="more-items-notice">
+          <span class="material-icons more-icon">more_horiz</span>
+          {{ item.value.length - 3 }} more items
+        </div>
+      </div>
+
+      <!-- For objects, show structured fields -->
+      <div *ngIf="isObject(item.value) && !isArray(item.value) && !isAnyType()" class="preview-object-items">
+        <ng-container *ngFor="let objItem of getObjectItems().slice(0, 3); let i = index">
+          <app-resource-document-item
+            [item]="objItem"
+            [nestingLevel]="nestingLevel + 1">
+          </app-resource-document-item>
+        </ng-container>
+        <div *ngIf="Object.keys(item.value).length > 3" class="more-items-notice">
+          <span class="material-icons more-icon">more_horiz</span>
+          {{ Object.keys(item.value).length - 3 }} more properties
+        </div>
+      </div>
+    </div>  </div>
 </div>
