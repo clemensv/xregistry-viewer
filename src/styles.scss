@@ -9,6 +9,8 @@
 @use 'sass:map';
 @use 'sass:color';
 
+@import '../node_modules/highlight.js/styles/default.css';
+
 /* Override Material toolbar height */
 .mat-toolbar {
   min-height: 48px !important;
