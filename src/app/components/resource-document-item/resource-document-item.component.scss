@@ -36,10 +36,10 @@
     transition: all 0.2s ease;
     margin-bottom: s(xs);
 
-    &.expanded {
+    &.expanded,
+    &.collapsed {
       animation: flash 0.5s ease-out;
     }
-    // Removed collapsed trigger to prevent global flash on collapse
 
     // Make rows with simple values non-clickable
     &.simple-row {

@@ -47,8 +47,7 @@
       <div class="origin-field" *ngIf="defaultVersion.origin">Origin: {{ defaultVersion.origin }}</div>
       <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
 
-      <!-- Use our new shared component -->
-      <app-resource-document
+      <!-- Use our new shared component -->      <app-resource-document
         [resourceDocument]="defaultVersion"
         [resourceType]="resourceType"
         [resourceAttributes]="resourceAttributes"
@@ -65,9 +64,8 @@
     <h2>Resource: {{ resourceId }}</h2>
     <div class="version-detail">
       <h3>Version: {{ version.id }}</h3>
-      <div class="origin-field" *ngIf="version.origin">Origin: {{ version.origin }}</div>
-      <!-- Use our new shared component -->
-      <app-resource-document
+
+      <!-- Use our new shared component -->      <app-resource-document
         [resourceDocument]="version"
         [resourceType]="resourceType"
         [resourceAttributes]="resourceAttributes"

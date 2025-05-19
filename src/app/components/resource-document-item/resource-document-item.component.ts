@@ -19,36 +19,13 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   // Enable debug mode to show internal state in UI
   debugMode: boolean = false;
 
-  // Local expansion state for this component
-  private expanded: boolean = false;
-
   // Cache for collapsed preview text
   private collapsedPreviewCache: { [key: string]: string } = {};
   // Expose Object and JSON to template
   Object = Object;
   JSON = JSON;
 
-  constructor(private cdr: ChangeDetectorRef) {}
-
-  copyToClipboard(value: any): void {
-    let text: string;
-    if (typeof value === 'object') {
-      try {
-        text = JSON.stringify(value, null, 2);
-      } catch {
-        text = String(value);
-      }
-    } else {
-      text = String(value);
-    }
-    navigator.clipboard.writeText(text).then(() => {
-      // Optionally, show a toast/snackbar or visual feedback here
-      // e.g., this.showCopySuccess = true; setTimeout(() => this.showCopySuccess = false, 1500);
-      console.log('Copied to clipboard:', text);
-    });
-  }
-
-  /**
+  constructor(private cdr: ChangeDetectorRef) {}  /**
    * Implement AfterViewInit lifecycle hook
    */  ngAfterViewInit(): void {
     // Ensure we have proper previews for all items after view is initialized
@@ -56,8 +33,15 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
       // Clear any existing cache
       this.clearCache();
 
-      // Initialize local expanded state once view is ready
-      this.expanded = this.initialExpanded;
+      // ONLY set expanded state if it's undefined to avoid overriding user actions
+      if (this.item.isExpanded === undefined) {
+        this.item.isExpanded = this.initialExpanded;
+        console.log('AfterViewInit: Setting undefined expanded state for', this.item.key, 'to', this.item.isExpanded);
+      } else {
+        console.log('AfterViewInit: Preserving expanded state for', this.item.key, 'as', this.item.isExpanded);
+      }
+
+      // Ensure the change detection cycle picks up this change
       this.cdr.detectChanges();
     }
   }
@@ -68,9 +52,38 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
       if (!changes['item'].firstChange) {
         // Only clear the cache when the item actually changes (not on first init)
         this.clearCache();
+      }      // Only set expansion state on initialization or if undefined
+      if (this.item) {
+        // First check if we have a saved state in session storage
+        const savedState = this.getSavedExpansionState(this.item.key);
+
+        if (savedState !== undefined) {
+          // Use the saved state from session storage
+          console.log('Loading saved expansion state for', this.item.key, 'as', savedState);
+          this.item.isExpanded = savedState;
+        }
+        // If no saved state, check previous value from change detection
+        else if (changes['item'].previousValue) {
+          let previousItem = changes['item'].previousValue as ResourceDocumentItem;
+          if (previousItem && previousItem.key === this.item.key && previousItem.isExpanded !== undefined) {
+            // Preserve expanded state from previous instance
+            console.log('Preserving previous expansion state for', this.item.key, 'as', previousItem.isExpanded);
+            this.item.isExpanded = previousItem.isExpanded;
+          }
+          else if (this.item.isExpanded === undefined) {
+            // Initialize with default only if truly a new item or first load
+            this.item.isExpanded = this.initialExpanded;
+            console.log('Setting initial expanded state for', this.item.key, 'to', this.item.isExpanded);
+          }
+        }
+        else if (this.item.isExpanded === undefined) {
+          // No previous value and no saved state
+          this.item.isExpanded = this.initialExpanded;
+          console.log('Initializing default state for', this.item.key, 'to', this.item.isExpanded);
+        }
       }
-      // reset expansion when item changes
-      this.expanded = this.initialExpanded;
+
+      // Mark component for change detection after updating properties
       this.cdr.markForCheck();
     }
   }
@@ -169,22 +182,25 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
 
     try {
       // Toggle the state - make sure to use an explicit boolean to avoid any type issues
-      this.expanded = !currentlyExpanded;
+      this.item.isExpanded = currentlyExpanded === true ? false : true;
 
       // Immediately output the new state to verify the toggle worked
-      console.log(`TOGGLE-ACTION: ${itemKey} toggled to ${this.expanded ? 'expanded' : 'collapsed'}`);
+      console.log(`TOGGLE-ACTION: ${itemKey} toggled to ${this.item.isExpanded ? 'expanded' : 'collapsed'}`);
+
+      // Store the expanded state in session storage to persist across reloads and re-renders
+      sessionStorage.setItem(`expanded:${itemKey}`, String(this.item.isExpanded));
 
       // Force full change detection cycle
       this.cdr.markForCheck();
       this.cdr.detectChanges();
 
       // Log after toggle and change detection
-      console.log(`POST-TOGGLE: ${itemKey} is now ${this.expanded ? 'expanded' : 'collapsed'}`);
+      console.log(`POST-TOGGLE: ${itemKey} is now ${this.item.isExpanded ? 'expanded' : 'collapsed'}`);
 
       // Apply visual updates after the toggle
       setTimeout(() => {
         // Verify state after timeout
-        console.log(`TIMEOUT-VERIFY: ${itemKey} remains ${this.expanded ? 'expanded' : 'collapsed'}`);
+        console.log(`TIMEOUT-VERIFY: ${itemKey} remains ${this.item.isExpanded ? 'expanded' : 'collapsed'}`);
 
         // One final change detection cycle
         this.cdr.detectChanges();
@@ -320,7 +336,21 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   /**
    * Helper method to determine if content should be shown expanded
    */  isExpanded(): boolean {
-    return this.expanded;
+    // First check if there's a persisted state in session storage
+    if (this.item && this.item.key) {
+      const savedState = this.getSavedExpansionState(this.item.key);
+      if (savedState !== undefined) {
+        // Update the item state to match the saved state if they differ
+        if (this.item.isExpanded !== savedState) {
+          this.item.isExpanded = savedState;
+        }
+        return savedState;
+      }
+    }
+
+    // Otherwise check the item's state directly
+    if (!this.item) return false;
+    return this.item.isExpanded === true;
   }
 
   /**
@@ -335,7 +365,7 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
    * Helper method to check if item is expandable (array or object)
    */
   isExpandable(): boolean {
-    return !this.isSimpleValue(this.item.value);
+    return this.item && (this.isArray(this.item.value) || this.isObject(this.item.value));
   }
 
   /**

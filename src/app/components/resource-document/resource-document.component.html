@@ -13,31 +13,17 @@
             <div class="attribute-value-row" style="display: flex; align-items: center;">
               <div class="attribute-value" [title]="attr.value" style="margin-right: 8px;">{{ attr.value }}</div>
               <button class="copy-btn" title="Copy value" (click)="copyToClipboard(attr.value); $event.stopPropagation();">
-              <span class="material-icons">content_copy</span>
+                <span class="material-icons">content_copy</span>
               </button>
             </div>
           </div>
         </ng-container>
-      </div>
-      <!-- Complex Attributes -->
-      <ng-container *ngFor="let attr of getComplexAttributes()">
-        <div class="attribute-tile complex-attribute">
-          <app-resource-document-item [item]="attr" [initialExpanded]="initialExpanded"></app-resource-document-item>
-        </div>
-      </ng-container>
-    </section>
-
-    <!-- Document section -->
-    <section *ngIf="showDocument && (hasDocument() || cachedDocumentContent)" class="document-section">
-      <h3>
-        <span class="material-icons doc-icon">description</span>
-        Document
-      </h3>
-
-      <!-- Show document content if available -->
-      <div *ngIf="getDocumentContent() as content">
-        <!-- Use code-highlight for document content -->
-        <app-code-highlight [code]="content" [language]="getDocumentContentType(content)"></app-code-highlight>
+        <!-- Complex Attributes -->
+        <ng-container *ngFor="let attr of getComplexAttributes()">
+          <div class="attribute-tile complex-attribute">
+            <app-resource-document-item [item]="attr"></app-resource-document-item>
+          </div>
+        </ng-container>
       </div>
 
       <!-- Show download link if base64 encoded document is available -->

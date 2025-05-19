@@ -46,17 +46,11 @@
     </div>
     <div class="attribute-value">
       <span *ngIf="isAnyType() && item.value !== null && item.value !== undefined" class="any-value">
-        <span class="any-value-inline"></span>
-          <div class="inline-flex align-center space-between">
-            <app-code-highlight
-              [code]="getSafeJsonString(item.value)"
-              [language]="'json'"></app-code-highlight>
-            <button class="copy-btn" title="Copy value" (click)="copyToClipboard(getSafeJsonString(item.value)); $event.stopPropagation();">
-              <span class="material-icons">content_copy</span>
-            </button>
-          </div>
+        <app-code-highlight
+          [code]="getSafeJsonString(item.value)"
+          [language]="'json'">
+        </app-code-highlight>
       </span>
-       <div class="inline-flex align-center space-between"></div>
       <span *ngIf="!isAnyType() || item.value === null || item.value === undefined"
             [class.null-value]="item.value === null"
             [class.undefined-value]="item.value === undefined">
@@ -65,7 +59,6 @@
         <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
           <span class="material-icons">content_copy</span>
         </button>
-    </div>
     </div>
   </div>  <!-- Expanded content for arrays and objects -->
   <div *ngIf="isExpandable() && isExpanded()"
@@ -88,8 +81,7 @@
         <ng-container *ngFor="let arrayItem of getArrayItems(); let i = index">
           <app-resource-document-item
             [item]="arrayItem"
-            [nestingLevel]="nestingLevel + 1"
-            [initialExpanded]="initialExpanded">
+            [nestingLevel]="nestingLevel + 1">
           </app-resource-document-item>
         </ng-container>
       </ng-container>
@@ -102,11 +94,12 @@
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
-        <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
+        <button class="copy-btn" title="Copy value">
           <span class="material-icons">content_copy</span>
         </button>
       </div>
     </div>
+  </div>
 
     <!-- For objects -->
     <div *ngIf="isObject(item.value)" class="object-items">
@@ -115,8 +108,7 @@
         <ng-container *ngFor="let objItem of getObjectItems()">
           <app-resource-document-item
             [item]="objItem"
-            [nestingLevel]="nestingLevel + 1"
-            [initialExpanded]="initialExpanded">
+            [nestingLevel]="nestingLevel + 1">
           </app-resource-document-item>
         </ng-container>
       </ng-container>
@@ -129,7 +121,7 @@
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
-        <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
+        <button class="copy-btn" title="Copy value">
           <span class="material-icons">content_copy</span>
         </button>
         </div>
