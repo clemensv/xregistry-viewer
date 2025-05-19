@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://clemensv.github.io/xregistry-a2a/registry',
+  apiBaseUrl: 'http://localhost:20996/api/registry',
   baseUrl: '/'
 };

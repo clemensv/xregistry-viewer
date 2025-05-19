@@ -1,53 +1,58 @@
-<div class="resource-document">  <!-- Document section -->
-  <section *ngIf="showDocument && (hasDocument() || cachedDocumentContent)" class="document-section">
-    <h3>
-      <span class="material-icons doc-icon">description</span>
-      Document
-    </h3>
-
-    <!-- Show document content if available -->
-    <div *ngIf="getDocumentContent() as content">
-      <!-- Use code-highlight for document content -->
-      <app-code-highlight [code]="content" [language]="getDocumentContentType(content)"></app-code-highlight>
-    </div>
-
-    <!-- Show download link if base64 encoded document is available -->
-    <div *ngIf="hasBase64Document()" class="action-buttons">
-      <button (click)="downloadBase64Document()" class="download-btn">
-        <span class="material-icons">download</span> Download Document
-      </button>
-    </div>
-
-    <!-- Show loading message if fetching from URL -->
-    <div *ngIf="isLoadingDocument" class="loading-document">
-      <span class="material-icons loading-icon">sync</span>
-      <p>Loading document content...</p>
-    </div>
-
-    <!-- Show error message if document fetch failed -->
-    <div *ngIf="documentError" class="document-error">
-      <span class="material-icons error-icon">error</span>
-      <p>Error loading document: {{ documentError }}</p>
-    </div>
-  </section>
-
-  <!-- Attributes section -->
-  <section *ngIf="showAttributes" class="attributes-section">
-    <div class="attributes-grid">
-      <ng-container *ngFor="let attr of getPrimitiveAttributes()">
-        <div class="attribute-tile simple-attribute">
-          <div class="attribute-header">
-            <strong>{{ attr.key }}</strong>
-            <span class="attribute-type">{{ attr.type | titlecase }}</span>
-            <span *ngIf="attr.description" class="attribute-description">{{ attr.description }}</span>
+<div class="resource-document">
+  <div class="resource-document-container" [class.has-document]="showDocument && (hasDocument() || cachedDocumentContent)">
+    <!-- Attributes section -->
+    <section *ngIf="showAttributes" class="attributes-section">
+      <div class="attributes-grid">
+        <ng-container *ngFor="let attr of getPrimitiveAttributes()">
+          <div class="attribute-tile simple-attribute">
+            <div class="attribute-header">
+              <strong>{{ attr.key }}</strong>
+              <span class="attribute-type">{{ attr.type | titlecase }}</span>
+              <span *ngIf="attr.description" class="attribute-description">{{ attr.description }}</span>
+            </div>
+            <div class="attribute-value" [title]="attr.value">{{ attr.value }}</div>
           </div>
-          <div class="attribute-value" [title]="attr.value">{{ attr.value }}</div>
+        </ng-container>
+      </div>
+      <!-- Complex Attributes -->
+      <ng-container *ngFor="let attr of getComplexAttributes()">
+        <div class="attribute-tile complex-attribute">
+          <app-resource-document-item [item]="attr" [initialExpanded]="initialExpanded"></app-resource-document-item>
         </div>
       </ng-container>
-    </div><!-- Complex Attributes -->
-    <ng-container *ngFor="let attr of getComplexAttributes()">      <div class="attribute-tile complex-attribute">
-        <app-resource-document-item [item]="attr" [initialExpanded]="initialExpanded"></app-resource-document-item>
+    </section>
+
+    <!-- Document section -->
+    <section *ngIf="showDocument && (hasDocument() || cachedDocumentContent)" class="document-section">
+      <h3>
+        <span class="material-icons doc-icon">description</span>
+        Document
+      </h3>
+
+      <!-- Show document content if available -->
+      <div *ngIf="getDocumentContent() as content">
+        <!-- Use code-highlight for document content -->
+        <app-code-highlight [code]="content" [language]="getDocumentContentType(content)"></app-code-highlight>
       </div>
-    </ng-container>
-  </section>
+
+      <!-- Show download link if base64 encoded document is available -->
+      <div *ngIf="hasBase64Document()" class="action-buttons">
+        <button (click)="downloadBase64Document()" class="download-btn">
+          <span class="material-icons">download</span> Download Document
+        </button>
+      </div>
+
+      <!-- Show loading message if fetching from URL -->
+      <div *ngIf="isLoadingDocument" class="loading-document">
+        <span class="material-icons loading-icon">sync</span>
+        <p>Loading document content...</p>
+      </div>
+
+      <!-- Show error message if document fetch failed -->
+      <div *ngIf="documentError" class="document-error">
+        <span class="material-icons error-icon">error</span>
+        <p>Error loading document: {{ documentError }}</p>
+      </div>
+    </section>
+  </div>
 </div>

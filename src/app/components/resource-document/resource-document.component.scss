@@ -2,11 +2,46 @@
 @use '../../../styles/theme' as *;
 @use '../_vertical-bars' as vbars;
 
+:host {
+  width: 100%;
+  display: block;
+}
+
 .resource-document {
   position: relative;
   @include vbars.vertical-color-bar(c(dark));
   margin-bottom: s(l);
   font-size: $body-size;
+  width: 100%;
+
+  // Add a dark gray left border to the resource-document
+  border-left: 3px solid #444;
+
+  // Container to allow flex layout for responsive design
+  .resource-document-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column; // Default stacked layout for mobile
+    gap: 1.5rem;
+      // Responsive layout for desktop (width > 541px)
+    @media (min-width: 542px) {
+      &.has-document {
+        flex-direction: row;
+
+        .attributes-section {
+          flex: 1;
+          min-width: 300px;
+          margin-right: 1.5rem;
+        }
+
+        .document-section {
+          flex: 1;
+          min-width: 300px;
+          max-width: 50%;
+        }
+      }
+    }
+  }
 
   h3 {
     display: flex;
@@ -27,11 +62,13 @@
   }
 
   section {
-    margin-top: 1.5rem;
+    margin-top: 0; // Remove top margin as we're using gap in the container
     padding: 1.5rem;
     background-color: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #dee2e6;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   /* Document section styles */
@@ -123,6 +160,7 @@
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
+      width: 100%;
     }
 
     .attribute-tile {
@@ -226,11 +264,6 @@
       }
     }
   }
-}
-
-// Add a dark gray left border to the resource-document tile
-.resource-document {
-  border-left: 3px solid #444;
 }
 
 /* Ensure app-code-highlight takes full width and scrolls */

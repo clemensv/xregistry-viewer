@@ -1,4 +1,9 @@
 /* Styles for app-code-highlight */
+:host {
+  width: 100%;
+  display: block;
+}
+
 pre {
   background-color: #f5f5f5; /* Light grey background */
   padding: 10px;
@@ -6,6 +11,8 @@ pre {
   overflow-x: auto; /* Allow horizontal scrolling for long lines */
   font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
   font-size: 0.9em;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 code {
