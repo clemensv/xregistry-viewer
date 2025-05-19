@@ -15,11 +15,11 @@ import { ResourceDocumentItem } from '../../models/resource-document-item.model'
 })
 export class ResourceDocumentComponent implements OnInit {
   @Input() resourceDocument!: ResourceDocument;
-  @Input() resourceType!: string;
-  @Input() resourceAttributes: { [key: string]: any } = {};
+  @Input() resourceType!: string;  @Input() resourceAttributes: { [key: string]: any } = {};
   @Input() hasDocumentSupport: boolean = false;
   @Input() showAttributes: boolean = true;
   @Input() showDocument: boolean = true;
+  @Input() initialExpanded: boolean = false;
 
   // Document handling properties
   isLoadingDocument = false;

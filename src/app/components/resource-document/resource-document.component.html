@@ -45,9 +45,8 @@
         </div>
       </ng-container>
     </div><!-- Complex Attributes -->
-    <ng-container *ngFor="let attr of getComplexAttributes()">
-      <div class="attribute-tile complex-attribute">
-        <app-resource-document-item [item]="attr"></app-resource-document-item>
+    <ng-container *ngFor="let attr of getComplexAttributes()">      <div class="attribute-tile complex-attribute">
+        <app-resource-document-item [item]="attr" [initialExpanded]="initialExpanded"></app-resource-document-item>
       </div>
     </ng-container>
   </section>

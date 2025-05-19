@@ -44,14 +44,14 @@
       <h3>Default Version: {{ defaultVersion.id }}</h3>
       <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
 
-      <!-- Use our new shared component -->
-      <app-resource-document
+      <!-- Use our new shared component -->      <app-resource-document
         [resourceDocument]="defaultVersion"
         [resourceType]="resourceType"
         [resourceAttributes]="resourceAttributes"
         [hasDocumentSupport]="resourceTypeData?.hasdocument"
         [showAttributes]="true"
-        [showDocument]="true">
+        [showDocument]="true"
+        [initialExpanded]="true">
       </app-resource-document>
     </div>
   </ng-container>
@@ -62,14 +62,14 @@
     <div class="version-detail">
       <h3>Version: {{ version.id }}</h3>
 
-      <!-- Use our new shared component -->
-      <app-resource-document
+      <!-- Use our new shared component -->      <app-resource-document
         [resourceDocument]="version"
         [resourceType]="resourceType"
         [resourceAttributes]="resourceAttributes"
         [hasDocumentSupport]="resourceTypeData?.hasdocument"
         [showAttributes]="true"
-        [showDocument]="true">
+        [showDocument]="true"
+        [initialExpanded]="true">
       </app-resource-document>
     </div>
   </ng-container>

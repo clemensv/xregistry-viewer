@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, AfterViewInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CodeHighlightComponent } from '../code-highlight/code-highlight.component';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
@@ -8,11 +8,16 @@ import { ResourceDocumentItem } from '../../models/resource-document-item.model'
   standalone: true,
   imports: [CommonModule, CodeHighlightComponent],
   templateUrl: './resource-document-item.component.html',
-  styleUrl: './resource-document-item.component.scss'
+  styleUrl: './resource-document-item.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   @Input() item!: ResourceDocumentItem;
   @Input() nestingLevel: number = 0;
+  @Input() initialExpanded: boolean = false;
+
+  // Enable debug mode to show internal state in UI
+  debugMode: boolean = false;
 
   // Cache for collapsed preview text
   private collapsedPreviewCache: { [key: string]: string } = {};
@@ -20,34 +25,66 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   Object = Object;
   JSON = JSON;
 
-  constructor(private cdr: ChangeDetectorRef) {}
-  /**
+  constructor(private cdr: ChangeDetectorRef) {}  /**
    * Implement AfterViewInit lifecycle hook
-   */
-  ngAfterViewInit(): void {
+   */  ngAfterViewInit(): void {
     // Ensure we have proper previews for all items after view is initialized
     if (this.item) {
       // Clear any existing cache
       this.clearCache();
 
-      // Ensure expansion state is explicitly defined
+      // ONLY set expanded state if it's undefined to avoid overriding user actions
       if (this.item.isExpanded === undefined) {
-        this.item.isExpanded = false;
+        this.item.isExpanded = this.initialExpanded;
+        console.log('AfterViewInit: Setting undefined expanded state for', this.item.key, 'to', this.item.isExpanded);
+      } else {
+        console.log('AfterViewInit: Preserving expanded state for', this.item.key, 'as', this.item.isExpanded);
       }
+
+      // Ensure the change detection cycle picks up this change
+      this.cdr.detectChanges();
     }
   }
   /**
    * Detect changes to input properties
-   */
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['item'] && !changes['item'].firstChange) {
-      // Only clear the cache when the item actually changes (not on first init)
-      this.clearCache();
+   */  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['item']) {
+      if (!changes['item'].firstChange) {
+        // Only clear the cache when the item actually changes (not on first init)
+        this.clearCache();
+      }      // Only set expansion state on initialization or if undefined
+      if (this.item) {
+        // First check if we have a saved state in session storage
+        const savedState = this.getSavedExpansionState(this.item.key);
 
-      // Ensure isExpanded is explicitly set without triggering detection
-      if (this.item && this.item.isExpanded === undefined) {
-        this.item.isExpanded = false;
+        if (savedState !== undefined) {
+          // Use the saved state from session storage
+          console.log('Loading saved expansion state for', this.item.key, 'as', savedState);
+          this.item.isExpanded = savedState;
+        }
+        // If no saved state, check previous value from change detection
+        else if (changes['item'].previousValue) {
+          let previousItem = changes['item'].previousValue as ResourceDocumentItem;
+          if (previousItem && previousItem.key === this.item.key && previousItem.isExpanded !== undefined) {
+            // Preserve expanded state from previous instance
+            console.log('Preserving previous expansion state for', this.item.key, 'as', previousItem.isExpanded);
+            this.item.isExpanded = previousItem.isExpanded;
+          }
+          else if (this.item.isExpanded === undefined) {
+            // Initialize with default only if truly a new item or first load
+            this.item.isExpanded = this.initialExpanded;
+            console.log('Setting initial expanded state for', this.item.key, 'to', this.item.isExpanded);
+          }
+        }
+        else if (this.item.isExpanded === undefined) {
+          // No previous value and no saved state
+          this.item.isExpanded = this.initialExpanded;
+          console.log('Initializing default state for', this.item.key, 'to', this.item.isExpanded);
+        }
       }
+
+      // Mark component for change detection after updating properties
+      this.cdr.markForCheck();
     }
   }
 
@@ -122,30 +159,55 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   isObject(value: any): boolean {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
   }
-
   /**
    * Toggles expansion state of the item
    * @param event Optional MouseEvent to prevent further propagation
+   */  /**
+   * Enhanced toggle method with state persistence
+   * @param event Optional MouseEvent to prevent further propagation
    */
   toggleExpansion(event?: MouseEvent): void {
-    // Stop event propagation if provided to prevent bubbling
+    // Always stop event propagation
     if (event) {
       event.stopPropagation();
       event.preventDefault();
     }
 
-    // First ensure the property is defined
-    if (this.item.isExpanded === undefined) {
-      this.item.isExpanded = false;
+    // Store key for debug logging
+    const itemKey = this.item.key;
+
+    // Get current state and log it
+    const currentlyExpanded = this.isExpanded();
+    console.log(`PRE-TOGGLE: ${itemKey} is currently ${currentlyExpanded ? 'expanded' : 'collapsed'}`);
+
+    try {
+      // Toggle the state - make sure to use an explicit boolean to avoid any type issues
+      this.item.isExpanded = currentlyExpanded === true ? false : true;
+
+      // Immediately output the new state to verify the toggle worked
+      console.log(`TOGGLE-ACTION: ${itemKey} toggled to ${this.item.isExpanded ? 'expanded' : 'collapsed'}`);
+
+      // Store the expanded state in session storage to persist across reloads and re-renders
+      sessionStorage.setItem(`expanded:${itemKey}`, String(this.item.isExpanded));
+
+      // Force full change detection cycle
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+
+      // Log after toggle and change detection
+      console.log(`POST-TOGGLE: ${itemKey} is now ${this.item.isExpanded ? 'expanded' : 'collapsed'}`);
+
+      // Apply visual updates after the toggle
+      setTimeout(() => {
+        // Verify state after timeout
+        console.log(`TIMEOUT-VERIFY: ${itemKey} remains ${this.item.isExpanded ? 'expanded' : 'collapsed'}`);
+
+        // One final change detection cycle
+        this.cdr.detectChanges();
+      }, 0);
+    } catch (err) {
+      console.error("Error during toggle:", err);
     }
-
-    // Toggle the expansion state
-    const newState = !this.item.isExpanded;
-    this.item.isExpanded = newState;
-
-    // Use markForCheck() to notify Angular that this component needs checking
-    // but don't immediately force a change detection cycle
-    this.cdr.markForCheck();
   }
 
   /**
@@ -271,191 +333,154 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
+  /**
+   * Helper method to determine if content should be shown expanded
+   */  isExpanded(): boolean {
+    // First check if there's a persisted state in session storage
+    if (this.item && this.item.key) {
+      const savedState = this.getSavedExpansionState(this.item.key);
+      if (savedState !== undefined) {
+        // Update the item state to match the saved state if they differ
+        if (this.item.isExpanded !== savedState) {
+          this.item.isExpanded = savedState;
+        }
+        return savedState;
+      }
+    }
+
+    // Otherwise check the item's state directly
+    if (!this.item) return false;
+    return this.item.isExpanded === true;
+  }
 
   /**
-   * Enhanced preview text generation for collapsed view
-   * Shows more compact representations without JSON syntax
+   * Helper method to determine if content should be shown collapsed
    */
-  getCollapsedPreviewText(value: any, maxItems: number = 3): string {
-    // Always generate new preview to ensure content is fresh
-    try {
-      // Handle null and undefined
-      if (value === null) {
-        return '<span class="null">null</span>';
+  isCollapsed(): boolean {
+    // Simply the inverse of isExpanded
+    return !this.isExpanded();
+  }
+
+  /**
+   * Helper method to check if item is expandable (array or object)
+   */
+  isExpandable(): boolean {
+    return this.item && (this.isArray(this.item.value) || this.isObject(this.item.value));
+  }
+
+  /**
+   * Returns a summarized preview text for array items
+   * @param array The array to summarize
+   */
+  getSummarizedArrayPreview(array: any[]): string {
+    if (!array || array.length === 0) return '';
+
+    const previewItems: string[] = [];
+    const maxItems = Math.min(array.length, 3); // Show up to 3 items in preview
+
+    for (let i = 0; i < maxItems; i++) {
+      const item = array[i];
+      if (item === null) {
+        previewItems.push('null');
+      } else if (item === undefined) {
+        previewItems.push('undefined');
+      } else if (typeof item === 'string') {
+        // Truncate long strings and add quotes
+        previewItems.push(`"${item.length > 15 ? item.substring(0, 12) + '...' : item}"`);
+      } else if (typeof item === 'object') {
+        // For objects and arrays, just show the type
+        previewItems.push(Array.isArray(item) ? '[ ... ]' : '{ ... }');
+      } else {
+        // For numbers, booleans, etc.
+        previewItems.push(String(item));
       }
-
-      if (value === undefined) {
-        return '<span class="special">undefined</span>';
-      }
-
-      // ARRAYS - Clean rendering without brackets
-      if (Array.isArray(value)) {
-        if (value.length === 0) {
-          return '<span class="empty">No items</span>';
-        }
-
-        let arrayPreview = '';
-        const itemsToShow = Math.min(value.length, maxItems);
-
-        for (let i = 0; i < itemsToShow; i++) {
-          const item = value[i];
-          arrayPreview += '<div class="preview-item">';
-
-          // Try to get a meaningful item name
-          let itemLabel = `Item ${i + 1}`;
-          if (item && typeof item === 'object' && item !== null) {
-            const identifierProps = ['name', 'id', 'title', 'key', 'label'];
-            for (const prop of identifierProps) {
-              if (item[prop] !== undefined && (typeof item[prop] === 'string' || typeof item[prop] === 'number')) {
-                itemLabel = String(item[prop]);
-                break;
-              }
-            }
-          }
-
-          arrayPreview += `<span class="preview-index">${itemLabel}:</span> `;
-
-          if (item === null) {
-            arrayPreview += '<span class="null">null</span>';
-          } else if (item === undefined) {
-            arrayPreview += '<span class="special">undefined</span>';
-          } else if (typeof item === 'object') {
-            if (Array.isArray(item)) {
-              arrayPreview += `<span class="special">${item.length} items</span>`;
-              // Include sample of first few items if array is not empty
-              if (item.length > 0) {
-                const sampleCount = Math.min(2, item.length);
-                const samples = item.slice(0, sampleCount).map((s: any) =>
-                  typeof s === 'object' ? (s === null ? '<span class="null">null</span>' :
-                                                      (Array.isArray(s) ? `<span class="special">${s.length} items</span>` :
-                                                      '<span class="special">object</span>')) :
-                  typeof s === 'string' ? `<span class="string">${this.escapeHtml(s.substring(0, 10))}${s.length > 10 ? '...' : ''}</span>` :
-                  typeof s === 'number' ? `<span class="number">${s}</span>` :
-                  typeof s === 'boolean' ? `<span class="boolean">${s}</span>` :
-                  this.escapeHtml(String(s))
-                );
-                arrayPreview += ` <span class="preview-examples">(e.g. ${samples.join(', ')})</span>`;
-              }
-            } else if (item === null) {
-              arrayPreview += '<span class="null">null</span>';
-            } else {
-              const keys = Object.keys(item);
-              arrayPreview += `<span class="special">${keys.length} properties</span>`;
-              // Add sample keys
-              if (keys.length > 0) {
-                arrayPreview += ` <span class="preview-examples">(${keys.slice(0, 2).map(k =>
-                  `<span class="key">${this.escapeHtml(k)}</span>`).join(', ')}${keys.length > 2 ? '...' : ''})</span>`;
-              }
-            }
-          } else if (typeof item === 'string') {
-            if (item.length > 30) {
-              arrayPreview += `<span class="string">${this.escapeHtml(item.substring(0, 30))}...</span>`;
-            } else {
-              arrayPreview += `<span class="string">${this.escapeHtml(item)}</span>`;
-            }
-          } else if (typeof item === 'number') {
-            arrayPreview += `<span class="number">${item}</span>`;
-          } else if (typeof item === 'boolean') {
-            arrayPreview += `<span class="boolean">${item}</span>`;
-          } else {
-            arrayPreview += this.escapeHtml(String(item));
-          }
-
-          arrayPreview += '</div>';
-        }
-
-        if (value.length > maxItems) {
-          arrayPreview += `<div class="preview-more"><span class="special">${value.length - maxItems} more items...</span></div>`;
-        }
-
-        return arrayPreview;
-      }
-
-      // OBJECTS - Clean rendering without braces
-      if (typeof value === 'object' && value !== null) {
-        const keys = Object.keys(value);
-        if (keys.length === 0) {
-          return '<span class="empty">No properties</span>';
-        }
-
-        let objectPreview = '';
-        const keysToShow = keys.slice(0, maxItems);
-
-        for (let i = 0; i < keysToShow.length; i++) {
-          const key = keysToShow[i];
-          const propValue = value[key];
-
-          objectPreview += `<div class="preview-property">`;
-          objectPreview += `<span class="key">${this.escapeHtml(key)}</span>: `;
-
-          if (propValue === null) {
-            objectPreview += '<span class="null">null</span>';
-          } else if (propValue === undefined) {
-            objectPreview += '<span class="special">undefined</span>';
-          } else if (typeof propValue === 'object') {
-            if (Array.isArray(propValue)) {
-              objectPreview += `<span class="special">${propValue.length} items</span>`;
-              // Include first item as sample if array is not empty
-              if (propValue.length > 0) {
-                const firstItem = propValue[0];
-                let sample = '';
-
-                if (firstItem === null) {
-                  sample = '<span class="null">null</span>';
-                } else if (typeof firstItem === 'object') {
-                  sample = Array.isArray(firstItem) ?
-                           `<span class="special">${firstItem.length} items</span>` :
-                           `<span class="special">${Object.keys(firstItem).length} properties</span>`;
-                } else if (typeof firstItem === 'string') {
-                  sample = `<span class="string">${this.escapeHtml(firstItem.substring(0, 15))}${firstItem.length > 15 ? '...' : ''}</span>`;
-                } else if (typeof firstItem === 'number') {
-                  sample = `<span class="number">${firstItem}</span>`;
-                } else if (typeof firstItem === 'boolean') {
-                  sample = `<span class="boolean">${firstItem}</span>`;
-                } else {
-                  sample = this.escapeHtml(String(firstItem));
-                }
-
-                objectPreview += ` <span class="preview-examples">(e.g. ${sample})</span>`;
-              }
-            } else {
-              objectPreview += `<span class="special">${Object.keys(propValue).length} properties</span>`;
-              // Include first few keys as sample if object is not empty
-              const objKeys = Object.keys(propValue);
-              if (objKeys.length > 0) {
-                objectPreview += ` <span class="preview-examples">(${objKeys.slice(0, 2).map(k =>
-                  `<span class="key">${this.escapeHtml(k)}</span>`).join(', ')}${objKeys.length > 2 ? '...' : ''})</span>`;
-              }
-            }
-          } else if (typeof propValue === 'string') {
-            if (propValue.length > 30) {
-              objectPreview += `<span class="string">${this.escapeHtml(propValue.substring(0, 30))}...</span>`;
-            } else {
-              objectPreview += `<span class="string">${this.escapeHtml(propValue)}</span>`;
-            }
-          } else if (typeof propValue === 'number') {
-            objectPreview += `<span class="number">${propValue}</span>`;
-          } else if (typeof propValue === 'boolean') {
-            objectPreview += `<span class="boolean">${propValue}</span>`;
-          } else {
-            objectPreview += this.escapeHtml(String(propValue));
-          }
-
-          objectPreview += `</div>`;
-        }
-
-        if (keys.length > maxItems) {
-          objectPreview += `<div class="preview-more"><span class="special">${keys.length - maxItems} more properties...</span></div>`;
-        }
-
-        return objectPreview;
-      }
-
-      // For primitive values
-      return this.escapeHtml(String(value));
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      return '<span class="error">Error generating preview</span>';
     }
+
+    // If there are more items than we're showing
+    if (array.length > maxItems) {
+      previewItems.push('...');
+    }
+
+    return previewItems.join(', ');
+  }
+
+  /**
+   * Returns a summarized preview text for object properties
+   * @param obj The object to summarize
+   */
+  getSummarizedObjectPreview(obj: any): string {
+    if (!obj || Object.keys(obj).length === 0) return '';
+
+    const keys = Object.keys(obj);
+    const previewItems: string[] = [];
+    const maxItems = Math.min(keys.length, 3); // Show up to 3 properties in preview
+
+    for (let i = 0; i < maxItems; i++) {
+      const key = keys[i];
+      const value = obj[key];
+
+      let valueStr: string;
+      if (value === null) {
+        valueStr = 'null';
+      } else if (value === undefined) {
+        valueStr = 'undefined';
+      } else if (typeof value === 'string') {
+        // Truncate long strings and add quotes
+        valueStr = `"${value.length > 10 ? value.substring(0, 7) + '...' : value}"`;
+      } else if (typeof value === 'object') {
+        // For objects and arrays, just show the type
+        valueStr = Array.isArray(value) ? '[ ... ]' : '{ ... }';
+      } else {
+        // For numbers, booleans, etc.
+        valueStr = String(value);
+      }
+
+      previewItems.push(`${key}: ${valueStr}`);
+    }
+
+    // If there are more properties than we're showing
+    if (keys.length > maxItems) {
+      previewItems.push('...');
+    }
+
+    return previewItems.join(', ');
+  }
+
+  /**
+   * Gets a simplified text preview of a collapsed value for display
+   * @param value The value to create a preview for
+   */
+  getCollapsedPreviewText(value: any): string {
+    if (value === undefined) {
+      return 'undefined';
+    }
+    if (value === null) {
+      return 'null';
+    }
+
+    try {
+      // For any type values, use JSON representation but truncate
+      const json = JSON.stringify(value, null, 2);
+      if (json.length > 100) {
+        return json.substring(0, 100) + '...';
+      }
+      return json;
+    } catch (e) {
+      return String(value);
+    }
+  }
+
+  /**
+   * Get saved expansion state from session storage
+   * This helps preserve expansion state across renders
+   */
+  private getSavedExpansionState(key: string): boolean | undefined {
+    if (!key) return undefined;
+
+    const savedState = sessionStorage.getItem(`expanded:${key}`);
+    if (savedState !== null) {
+      return savedState === 'true';
+    }
+    return undefined;
   }
 }
