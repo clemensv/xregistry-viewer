@@ -1,6 +1,5 @@
-<div class="resource-document">
-  <!-- Document section -->
-  <section *ngIf="showDocument && hasDocument()" class="document-section">
+<div class="resource-document">  <!-- Document section -->
+  <section *ngIf="showDocument && (hasDocument() || cachedDocumentContent)" class="document-section">
     <h3>
       <span class="material-icons doc-icon">description</span>
       Document
@@ -34,10 +33,10 @@
 
   <!-- Attributes section -->
   <section *ngIf="showAttributes" class="attributes-section">
-    <h3>Attributes</h3>    <!-- Simple Attributes in Grid -->
     <div class="attributes-grid">
       <ng-container *ngFor="let attr of getPrimitiveAttributes()">
-        <div class="attribute-tile simple-attribute">          <div class="attribute-header">
+        <div class="attribute-tile simple-attribute">
+          <div class="attribute-header">
             <strong>{{ attr.key }}</strong>
             <span class="attribute-type">{{ attr.type | titlecase }}</span>
             <span *ngIf="attr.description" class="attribute-description">{{ attr.description }}</span>

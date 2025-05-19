@@ -1,8 +1,11 @@
+// Import theme variables
+@use '../../styles/theme' as *;
+
 // Shared vertical bars styling
 // This mixin creates flush vertical color bars for document items
 @mixin vertical-color-bar($color) {
   position: relative;
-  border-left: 3px solid $color;
+  @include chromeline($color);
 
   &::before {
     content: '';

@@ -4,12 +4,12 @@
        [class.array-row]="isArray(item.value)"
        [class.object-row]="isObject(item.value) && !isArray(item.value)"
        [class.expanded]="item.isExpanded === true"
-       (click)="toggleExpansion($event)">
-
-    <!-- Toggle icon for arrays and objects -->
-    <span class="toggle-icon material-icons">
+       (click)="toggleExpansion($event)">    <!-- Toggle icon for arrays and objects -->
+    <button type="button"
+            class="toggle-icon material-icons"
+            [attr.aria-expanded]="item.isExpanded === true">
       {{ item.isExpanded === true ? 'expand_more' : 'chevron_right' }}
-    </span>
+    </button>
 
     <!-- Key name for array/object items -->
     <strong [title]="item.description">{{ item.key }}</strong>

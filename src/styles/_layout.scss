@@ -1,0 +1,52 @@
+@use '_theme' as *;
+
+/* Responsive grid for cards/tiles */
+.grid-container {
+  display: grid;
+  gap: s(l);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* Semantic wrappers */
+.card, .tile {
+  background: white;
+  border-radius: $radius;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid #e0e0e0;
+  @include pad-y(m);
+  @include pad-x(m);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 420px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .card, .tile {
+    @include pad-x(s);
+    @include pad-y(s);
+  }
+}
+
+/* Accessibility utilities */
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+:focus-visible {
+  outline: 2px solid c(primary);
+  outline-offset: 2px;
+}

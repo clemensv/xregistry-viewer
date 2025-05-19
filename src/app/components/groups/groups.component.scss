@@ -1,64 +1,50 @@
 @use '../shared-variables' as vars;
 @use '../_vertical-bars' as vbars;
+@use '../../../styles/theme' as *;
 
 /* Component-specific overrides for groups */
 /* These will take precedence over global styles due to component encapsulation */
 
 .groups h2 {
-  margin-bottom: 1.2rem;
-  font-size: 1.5rem;
+  margin-bottom: s(m);
+  font-size: $heading-size * 1.3;
   font-weight: 600;
+  color: c(dark);
 }
 
-.grid-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem; /* Consistent spacing between tiles */
-  justify-content: flex-start; /* Align tiles to the left like resource documents */
-  padding: 16px;
-}
+// The global grid-container is now provided by _layout.scss
 
 .grid-item {
   position: relative;
-  background: #fff;
-  border-radius: 8px;
+  background: white;
+  border-radius: $radius;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  border: 1px solid #e0e0e0;
-  border-left: 3px solid #9575cd; /* Purple vertical bar to match object styling */
-  width: 280px;      /* Fixed width instead of min/max width */
-  flex: 0 0 280px;   /* Don't grow or shrink, maintain consistent width */
-  padding: 1rem 1rem 0.5rem 1rem;
+  border: 1px solid c(neutral);
+  @include chromeline(#9575cd); /* Purple for group objects */
+  width: 280px;
+  flex: 0 0 280px;
+  @include pad-x(m);
+  @include pad-y(s);
   display: flex;
   flex-direction: column;
-  margin-bottom: 0.5rem;
+  margin-bottom: s(xs);
   transition: transform 0.2s, box-shadow 0.2s;
-  height: 300px;     /* Fixed height for consistent tile sizing */
-  overflow: hidden;  /* Hide overflow content */
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 3px;
-    height: 100%;
-    background-color: #9575cd; /* Match the border-left color */
-    z-index: 1;
-  }
+  height: 300px;
+  overflow: hidden;
 }
 
 .grid-item:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #d0d7de;
+  border-color: c(neutral);
 }
 
 .grid-item h3 {
-  font-size: vars.$h3-size; /* Use shared variable for consistency */
+  font-size: $heading-size;
   font-weight: 600;
-  color: #2c3e50;
+  color: c(dark);
   margin-top: 0;
-  margin-bottom: 0.7rem;
+  margin-bottom: s(s);
 }
 
 .grid-item .attribute {
@@ -80,19 +66,17 @@
         color: #2c3e50;
         font-size: vars.$content-size;
       }
-    }
-
-    .attribute-value {
-      font-size: vars.$content-size;
-      color: #333;
+    }    .attribute-value {
+      font-size: $body-size;
+      color: c(text);
       word-break: break-word;
-      padding: 0.25rem 0;
-      -webkit-line-clamp: 3;  /* Limit to 3 lines */
-      line-clamp: 3;          /* Standard property */
+      padding: s(xs) 0;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-height: 4.5em;  /* Approximately 3 lines of text */
+      max-height: $body-size * 4.5;
     }
   }
 }
@@ -196,61 +180,67 @@ h3 {
 
 /* Resource Types section styles - styled like arrays in resource document */
 .resource-types {
-  margin-bottom: 1rem;
+  margin-bottom: s(m);
   flex: 1;
   display: flex;
   flex-direction: column;
 
   .attribute-value {
     position: relative;
-    padding-left: 0.25rem;
-    border-left: 3px solid #5bc0de; /* Blue vertical bar like arrays */
-    margin-top: 0.25rem;
-    margin-bottom: 0.5rem;
-    background-color: rgba(91, 192, 222, 0.05); /* Light blue background like arrays */
-    border-radius: 0 4px 4px 0;
-    max-height: 120px; /* Limit height */
+    padding-left: s(xs);
+    @include chromeline(c(info)); /* Blue vertical bar like arrays */
+    margin-top: s(xs);
+    margin-bottom: s(xs);
+    background-color: rgba(91, 192, 222, 0.05);
+    border-radius: 0 $radius $radius 0;
+    max-height: 120px;
     overflow-y: auto;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -3px; /* Match the border-left width */
-      width: 3px; /* Match the border-left width */
-      height: 100%;
-      background-color: #5bc0de; /* Match the border color */
-      border-bottom-left-radius: 4px;
-      z-index: 1;
-    }
   }
 }
 
 // Remove extra left padding and margin from resource-types-list and resource-type-row
 .resource-types-list {
+  position: relative;
   margin-top: 0.5rem;
-  padding-left: 0 !important;
+  padding-left: 0.25rem !important;
   margin-left: 0 !important;
+  border-left: 3px solid #5bc0de; /* Blue vertical bar like arrays */
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -3px; /* Match the border-left width */
+    width: 3px; /* Match the border-left width */
+    height: 100%;
+    background-color: #5bc0de; /* Match the border color */
+    border-bottom-left-radius: 4px;
+    z-index: 1;
+  }
 }
 
 .resource-type-row {
   display: inline-block;
-  background: #f7fafd;
-  border-left: 3px solid #5bc0de;
-  padding: 2px 10px 2px 8px;
-  border-radius: 0 4px 4px 0;
-  margin-bottom: 0.25rem;
-  font-size: 1.04rem;
+  background: rgba(91, 192, 222, 0.1);
+  @include chromeline(c(info));
+  @include pad-x(xs);
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border-radius: 0 $radius $radius 0;
+  margin-bottom: s(xs);
+  font-size: $body-size;
   font-weight: 500;
   line-height: 1.7;
   margin-left: 0 !important;
-  padding-left: 8px !important; /* Only minimal padding for border */
 }
 
-// Ensure .attribute-value.resource-types-list is not indented deeper than resources link
+// Ensure .attribute-value.resource-types-list has proper styling with vertical bar
 .attribute-value.resource-types-list {
-  padding-left: 0 !important;
+  position: relative;
+  padding-left: 0.5rem !important;
   margin-left: 0 !important;
+  background-color: rgba(91, 192, 222, 0.05);
+  border-radius: 0 $radius $radius 0;
 }
 
 .resource-list {
@@ -271,14 +261,19 @@ h3 {
 }
 
 .resource-link {
-  color: #2196f3;
+  color: c(primary);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.04rem;
-  padding-right: 2px;
+  font-size: $body-size;
+  padding-right: s(xs);
 
   &:hover {
     text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid c(primary);
+    outline-offset: 2px;
   }
 }
 
@@ -316,12 +311,10 @@ h3 {
 }
 
 .attribute-type {
-  color: #457B9D;
-  font-size: vars.$small-size;
-  background-color: #F1FAEE;
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid #A8DADC;
+  @extend %badge;
+  color: c(primary);
+  background-color: rgba(94, 92, 230, 0.1);
+  border: 1px solid rgba(94, 92, 230, 0.3);
   font-weight: 500;
 }
 

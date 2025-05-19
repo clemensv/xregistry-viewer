@@ -1,0 +1,98 @@
+/* Global theme variables and mixins */
+@forward 'sass:map';
+@forward 'sass:color';
+@use 'sass:map';
+@use 'sass:color';
+
+// IMPORTANT: Making all variables public for use with namespaces
+// Color palette
+$palette: (
+  primary : #5e5ce6,
+  info    : #5bc0de,
+  success : #2b9348,
+  warning : #f4a261,
+  danger  : #e76f51,
+  neutral : #ececec,
+  dark    : #2c3e50,
+  text    : #333
+) !default;
+
+// Color helper
+@function c($key) {
+  @return map.get($palette, $key);
+}
+
+// Spacing scale
+$space: (
+  xs: 0.25rem, // 4px
+  s : 0.5rem,  // 8px
+  m : 1rem,    // 16px
+  l : 1.5rem,  // 24px
+  xl: 2rem     // 32px
+);
+
+// Spacing helper
+@function s($key) {
+  @return map.get($space, $key);
+}
+
+// Border radius
+$radius: 0.5rem;
+
+// Font sizes
+$heading-size: 1.15rem;
+$body-size: 1rem;
+
+// Font family
+$app-font-family: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+// Background and foreground colors for theme-based styling
+$background-color: (
+  card: white,
+  app-bar: #5e5ce6,  // Using primary color from palette
+  hover: #F5F5F5
+) !default;
+
+$foreground-color: (
+  text: #333333,
+  secondary-text: #666666,
+  divider: #E0E0E0
+) !default;
+
+// Theme colors for global usage
+$primary-color: map.get($palette, primary) !default;
+$accent-color: #FF4081 !default;   // Pink A200
+
+// Helper functions for accessing map values
+@function bg($key) {
+  @return map.get($background-color, $key);
+}
+
+@function fg($key) {
+  @return map.get($foreground-color, $key);
+}
+
+// Padding/margin mixins
+@mixin pad-x($key) {
+  padding-left: s($key);
+  padding-right: s($key);
+}
+
+@mixin pad-y($key) {
+  padding-top: s($key);
+  padding-bottom: s($key);
+}
+
+// Chromeline mixin
+@mixin chromeline($color) {
+  border-left: 3px solid $color;
+}
+
+// Badge placeholder
+%badge {
+  @include pad-x(xs);
+  border-radius: $radius;
+  background: c(neutral);
+  font-size: .75rem;
+  line-height: 1.3;
+}

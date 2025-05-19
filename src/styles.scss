@@ -2,7 +2,10 @@
 // @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @use '@angular/material' as mat;
-@use './theme' as theme;
+@use './styles/theme' as theme;
+@use './styles/layout';
+
+// Make sure we can access map and color functions
 @use 'sass:map';
 @use 'sass:color';
 
@@ -37,7 +40,8 @@
 html, body {
   height: 100%;
   margin: 0;
-  font-size: 14px; /* Base font size reduced for higher information density */
+  font-size: 14px;
+  color: theme.c(text);
 }
 
 body {
@@ -65,9 +69,9 @@ p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
 .breadcrumb {
   display: flex;
   align-items: center;
-  flex-wrap: wrap; // Allow wrapping on small screens
-  padding: 0.5rem 0.8rem;
-  background-color: map.get(theme.$background-color, card);
+  flex-wrap: wrap; // Allow wrapping on small screens  padding: 0.5rem 0.8rem;
+  // Use the helper function instead of direct map access
+  background-color: theme.bg('card');
   border-radius: 3px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); // Light shadow for depth
   font-size: 0.82rem;
@@ -99,7 +103,7 @@ p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
 
     &:hover {
       color: color.adjust(theme.$primary-color, $lightness: -10%);
-      background-color: map.get(theme.$background-color, hover);
+      background-color: theme.bg('hover');
     }
 
     &:focus {
@@ -107,19 +111,17 @@ p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
       box-shadow: 0 0 0 2px theme.$primary-color;
     }
   }
-
   &-separator {
     margin: 0 0.5rem;
-    color: map.get(theme.$foreground-color, secondary-text);
+    color: theme.fg('secondary-text');
     user-select: none; // Prevent selection
   }
-
   &-current {
     font-weight: 600;
-    color: map.get(theme.$foreground-color, text);
+    color: theme.fg('text');
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
-    background-color: map.get(theme.$background-color, hover);
+    background-color: theme.bg('hover');
     display: flex;
     align-items: center;
 
@@ -459,8 +461,7 @@ h3 {
   word-break: break-all;
 }
 
-h4 {
-  font-size: 1.02rem;
+h4 {  font-size: 1.02rem;
   font-weight: 600;
   margin: 0.7em 0 0.2em 0;
   color: theme.$accent-color;
@@ -648,9 +649,28 @@ h4 {
   color: theme.$primary-color;
   text-decoration: underline;
   padding: 4px 8px;
-
   &:hover {
     color: color.adjust(theme.$primary-color, $lightness: -10%);
     background-color: transparent;
   }
+}
+
+/* Typography utility classes */
+.text-xs { font-size: 0.75rem; }
+.text-s  { font-size: 0.875rem; }
+.text-m  { font-size: 1rem; }
+.text-l  { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+
+/* Color utility classes */
+.text-primary { color: theme.c(primary); }
+.text-info    { color: theme.c(info); }
+.text-success { color: theme.c(success); }
+.text-warning { color: theme.c(warning); }
+.text-danger  { color: theme.c(danger); }
+.text-dark    { color: theme.c(dark); }
+
+/* Badge styling */
+.badge {
+  @extend %badge;
 }

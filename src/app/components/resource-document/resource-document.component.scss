@@ -1,17 +1,23 @@
 @use '../shared-variables' as vars;
+@use '../../../styles/theme' as *;
+@use '../_vertical-bars' as vbars;
 
 .resource-document {
-  margin-bottom: 2rem;  font-size: vars.$content-size; // Set base font size for the document
+  position: relative;
+  @include vbars.vertical-color-bar(c(dark));
+  margin-bottom: s(l);
+  font-size: $body-size;
 
   h3 {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: vars.$h3-size;
+    gap: s(xs);
+    font-size: $heading-size;
     font-weight: 600;
-    margin-bottom: 1rem;
-    color: #2c3e50;
+    margin-bottom: s(m);
+    color: c(dark);
   }
+
   h4 {
     font-size: vars.$h4-size;
     font-weight: 700;
@@ -34,7 +40,9 @@
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
       border-bottom: 1px solid #e9ecef;
-    }    .doc-icon {
+    }
+
+    .doc-icon {
       font-size: vars.$content-size * 1.5;
       color: #1abc9c;
     }
@@ -123,7 +131,9 @@
       border: 1px solid #e0e0e0;
       padding: 1rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-    }    .simple-attribute {
+    }
+
+    .simple-attribute {
       display: flex;
       flex-direction: column;
 
@@ -138,7 +148,9 @@
           font-weight: 600;
           color: #2c3e50;
           font-size: 1rem;
-        }        .attribute-type {
+        }
+
+        .attribute-type {
           font-size: vars.$small-size;
           color: #457B9D;
           background-color: #F1FAEE;
@@ -146,7 +158,9 @@
           border-radius: 4px;
           border: 1px solid #A8DADC;
           font-weight: 500;
-        }        .attribute-description {
+        }
+
+        .attribute-description {
           font-size: vars.$small-size;
           color: #6c757d;
           font-style: italic;
@@ -161,7 +175,9 @@
         word-break: break-word;
         padding: 0.25rem 0;
       }
-    }.complex-attribute {
+    }
+
+    .complex-attribute {
       margin-bottom: 1.5rem;
       padding: 0.5rem;
 
@@ -173,7 +189,9 @@
       app-resource-document-item {
         display: block;
         width: 100%;
-        position: relative;        ::ng-deep .resource-document-item.nested {
+        position: relative;
+
+        ::ng-deep .resource-document-item.nested {
           padding-left: 0.15rem;
           margin-bottom: 0.25rem;
         }
@@ -187,7 +205,9 @@
         ::ng-deep .expanded-content.array-content,
         ::ng-deep .expanded-content.object-content {
           border-left-width: 3px;
-        }        // Ensure color bars extend to the bottom in all nested items
+        }
+
+        // Ensure color bars extend to the bottom in all nested items
         ::ng-deep .simple-attribute-container::before,
         ::ng-deep .unified-item-row.array-row::before,
         ::ng-deep .unified-item-row.object-row::before,
@@ -222,6 +242,11 @@ app-code-highlight {
 
 /* Animation for loading icon */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }

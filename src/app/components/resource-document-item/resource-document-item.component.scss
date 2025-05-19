@@ -1,26 +1,30 @@
 @use '../shared-variables' as vars;
 @use '../_vertical-bars' as vbars;
+@use '../../../styles/theme' as *;
 
 .resource-document-item {
-  margin: 0.5rem 0;
+  margin: s(xs) 0;
   display: block;
   position: relative;
-  font-size: vars.$content-size; // Set base font size
+  font-size: $body-size;
+
   &.nested {
-    padding-left: 0.15rem; /* Minimized indent depth */
-    margin-bottom: 0.5rem; /* Reduced spacing between items */
+    padding-left: s(xs);
+    margin-bottom: s(xs);
   }
+
   // Unified row styling for all item types
   .unified-item-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     flex-wrap: wrap;
-    padding: 0.35rem 0.5rem;
-    border-radius: 4px;
-    border: 1px solid #e0e0e0;
+    @include pad-x(xs);
+    @include pad-y(xs);
+    border-radius: $radius;
+    border: 1px solid c(neutral);
     transition: all 0.2s ease;
-    margin-bottom: 0.25rem;
+    margin-bottom: s(xs);
 
     // Make rows with simple values non-clickable
     &.simple-row {
@@ -108,13 +112,22 @@
       color: #2c3e50;
       margin-right: 0.5rem;
       font-size: vars.$content-size;
-    }
-    .toggle-icon {
-      margin-right: 0.5rem;
-      font-size: calc(vars.$content-size * 1.2);
-      color: #555;
+    }    .toggle-icon {
+      margin-right: s(xs);
+      font-size: calc($body-size * 1.2);
+      color: c(dark);
       transition: transform 0.15s ease;
-    }    .item-count {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      border-radius: $radius;
+
+      &:focus-visible {
+        outline: 2px solid c(primary);
+        outline-offset: 2px;
+      }
+    }.item-count {
       color: #6c757d;
       font-size: vars.$small-size;
       margin-right: 0.5rem;

@@ -27,12 +27,28 @@ export class ResourceDocumentComponent implements OnInit {
   cachedDocumentContent: string | null = null;
 
   constructor(private registry: RegistryService) {}
-
   ngOnInit(): void {
     // Clear cached content when component initializes with new data
     this.cachedDocumentContent = null;
     this.isLoadingDocument = false;
     this.documentError = null;
+
+    // Pre-check for document content on initialization
+    if (this.resourceDocument && this.hasDocumentSupport) {
+      console.log('ngOnInit: Checking for document content');
+
+      // For debugging, log the resource document structure
+      console.log('Resource document:', this.resourceDocument);
+      console.log('Resource type:', this.resourceType);
+
+      if (this.resourceType) {
+        const singularName = this.getSingularName(this.resourceType);
+        console.log('Checking for field:', singularName, this.resourceDocument[singularName] ? 'exists' : 'not found');
+      }
+
+      // Force document content check
+      this.getDocumentContent();
+    }
   }
 
   // Helper methods for displaying attributes
@@ -63,22 +79,31 @@ export class ResourceDocumentComponent implements OnInit {
     }
     return value !== '';
   }
-
   // Get attributes to display, filtering out system and document fields
   get displayAttributes(): string[] {
     const staticKeys = ['xid', 'self', 'epoch', 'isdefault', 'isDefault',
       'ancestor', 'versionscount', 'versionsCount', 'versionsurl',
-      'metaurl', 'createdat', 'modifiedat', 'createdAt', 'modifiedAt', 'id', 'name'];
+      'metaurl', 'createdat', 'modifiedat', 'createdAt', 'modifiedAt', 'id', 'name', 'description'];
 
     const singular = this.getSingularName(this.resourceType);
+
+    // Check if the type-specific field should be shown as a document
+    const hasTypeDocument = this.hasDocumentSupport &&
+      this.resourceDocument &&
+      this.resourceDocument[singular] &&
+      typeof this.resourceDocument[singular] === 'object';
+
     return Object.keys(this.resourceDocument || {}).filter(
       key => !staticKeys.includes(key) &&
+             // Exclude document fields
              key !== singular &&
              key !== `${singular}url` &&
              key !== `${singular}base64` &&
              key !== 'resource' &&
              key !== 'resourceUrl' &&
-             key !== 'resourceBase64'
+             key !== 'resourceBase64' &&
+             // If we're showing this field as a document, don't include it in attributes
+             (!hasTypeDocument || key !== singular)
     );
   }
 
@@ -88,52 +113,85 @@ export class ResourceDocumentComponent implements OnInit {
    */
   getSingularName(resourceType: string): string {
     return resourceType.endsWith('s') ? resourceType.slice(0, -1) : resourceType;
-  }
-
-  /**
+  }  /**
    * Checks if the version has a document (using any of the supported formats)
    */
   hasDocument(): boolean {
     if (!this.resourceDocument || !this.hasDocumentSupport) {
+      console.log('hasDocument early return: resourceDocument, hasDocumentSupport:',
+        !!this.resourceDocument, this.hasDocumentSupport);
       return false;
     }
 
-    return !!(
+    // Check for standard document formats
+    if (
       this.resourceDocument.resource ||
       this.resourceDocument.resourceUrl ||
       this.resourceDocument.resourceBase64
-    );
-  }
+    ) {
+      console.log('hasDocument: found standard document format');
+      return true;
+    }
 
+    // Check if there's a field matching the resource type name (e.g., 'agentcard' for agentcards)
+    if (this.resourceType) {
+      const singularName = this.getSingularName(this.resourceType);
+      const hasTypedDoc = !!(this.resourceDocument[singularName] && typeof this.resourceDocument[singularName] === 'object');
+      console.log('hasDocument: checked for typed document field:', singularName, hasTypedDoc,
+        typeof this.resourceDocument[singularName]);
+      return hasTypedDoc;
+    }
+
+    console.log('hasDocument: no document found');
+    return false;
+  }
   /**
    * Gets document content from any available source
    */
   getDocumentContent(): string | null {
     if (!this.resourceDocument || !this.hasDocumentSupport) {
+      console.log('getDocumentContent early return: resourceDocument, hasDocumentSupport:',
+        !!this.resourceDocument, this.hasDocumentSupport);
       return null;
     }
 
     // If URL is available, fetch the content
     if (this.resourceDocument.resourceUrl && !this.isLoadingDocument && !this.cachedDocumentContent) {
+      console.log('getDocumentContent: fetching from URL', this.resourceDocument.resourceUrl);
       this.fetchDocumentFromUrl(this.resourceDocument.resourceUrl);
     }
 
     if (this.resourceDocument.resource && !this.cachedDocumentContent) {
-      this.cachedDocumentContent = JSON.stringify(this.resourceDocument.resource);
+      console.log('getDocumentContent: using resource object');
+      this.cachedDocumentContent = JSON.stringify(this.resourceDocument.resource, null, 2);
     }
 
     if (this.resourceDocument.resourceBase64 && !this.cachedDocumentContent) {
+      console.log('getDocumentContent: using base64 content');
       this.cachedDocumentContent = atob(this.resourceDocument.resourceBase64);
+    }
+
+    // Check if there's a field matching the resource type name (e.g., 'agentcard' for agentcards)
+    if (!this.cachedDocumentContent && this.resourceType) {
+      const singularName = this.getSingularName(this.resourceType);
+      console.log('getDocumentContent: checking for type-specific field:', singularName,
+        this.resourceDocument[singularName] ? typeof this.resourceDocument[singularName] : 'undefined');
+
+      if (this.resourceDocument[singularName] && typeof this.resourceDocument[singularName] === 'object') {
+        console.log('getDocumentContent: using type-specific field', singularName);
+        this.cachedDocumentContent = JSON.stringify(this.resourceDocument[singularName], null, 2);
+      }
     }
 
     // Return cached content if available
     if (this.cachedDocumentContent) {
+      console.log('getDocumentContent: returning cached content');
       return this.cachedDocumentContent;
     }
 
+    console.log('getDocumentContent: no content found');
     return null;
   }
-
   /**
    * Determines the content type for styling purposes
    */
@@ -144,19 +202,28 @@ export class ResourceDocumentComponent implements OnInit {
     }
 
     try {
+      // Check if it's already valid JSON
+      if (typeof content === 'object') {
+        return 'json';
+      }
+
+      // Try to parse as JSON
       JSON.parse(content);
       return 'json';
     } catch (e) {
+      // Check for XML
       if (content.trim().startsWith('<')) {
         return 'xml';
       }
-      if (content.trim().startsWith('---') || content.includes(':\n  ')) {
+      // Check for YAML
+      if (content.trim().startsWith('---') ||
+          content.includes(':\n  ') ||
+          content.match(/^[a-zA-Z0-9_-]+:\s*\S+$/m)) {
         return 'yaml';
       }
     }
     return 'text';
   }
-
   /**
    * Formats document content for display
    */
@@ -166,8 +233,16 @@ export class ResourceDocumentComponent implements OnInit {
     }
 
     try {
-      // Try to pretty-print JSON
-      const obj = JSON.parse(content);
+      // Try to parse as JSON and pretty-print it
+      let obj;
+      if (typeof content === 'string') {
+        obj = JSON.parse(content);
+      } else if (typeof content === 'object') {
+        obj = content;
+      } else {
+        return content;
+      }
+
       return JSON.stringify(obj, null, 2);
     } catch (e) {
       // If not JSON, return as is

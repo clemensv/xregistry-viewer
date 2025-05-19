@@ -32,7 +32,6 @@
   .object-array {
     margin-left: 1rem;
     padding-left: 1rem;
-    border-left: 2px solid #ddd;
   }
 
   .object-item {
@@ -74,7 +73,7 @@
     align-items: center;
     color: #0066cc;
     margin: 1rem 0;
-    
+
     .loading-icon {
       animation: spin 1.5s linear infinite;
       margin-right: 0.5rem;
@@ -86,7 +85,7 @@
     align-items: center;
     color: #cc0000;
     margin: 1rem 0;
-    
+
     .error-icon {
       margin-right: 0.5rem;
     }
@@ -105,11 +104,11 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 0.875rem;
-      
+
       &:hover {
         background-color: #004c99;
       }
-      
+
       .material-icons {
         margin-right: 0.5rem;
         font-size: 1rem;
