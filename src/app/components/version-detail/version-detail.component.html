@@ -1,7 +1,7 @@
 <div class="version-detail" *ngIf="version$ | async as version; else loading">
   <div *ngIf="version; else noData" class="version-content">
     <h2>Version: {{ version['id'] }}</h2>
-
+    <div class="origin-field" *ngIf="version.origin">Origin: {{ version.origin }}</div>
     <!-- Use our shared component -->
     <app-resource-document
       [resourceDocument]="version"

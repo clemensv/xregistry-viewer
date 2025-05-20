@@ -15,6 +15,7 @@
                 <th>Created</th>
                 <th>Modified</th>
                 <th>Default</th>
+                <th>Origin</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -24,6 +25,7 @@
                 <td>{{ (version['createdat'] || version['createdAt']) | date:'short' }}</td>
                 <td>{{ (version['modifiedat'] || version['modifiedAt']) | date:'short' }}</td>
                 <td><span *ngIf="version['isdefault'] || version['isDefault']" class="default-badge">✓</span></td>
+                <td><span class="origin-field">{{ version.origin }}</span></td>
                 <td>
                   <a [routerLink]="['versions', version['id'] || version['versionid']]" class="btn-view">View</a>
                 </td>
@@ -42,9 +44,11 @@
 
     <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">
       <h3>Default Version: {{ defaultVersion.id }}</h3>
+      <div class="origin-field" *ngIf="defaultVersion.origin">Origin: {{ defaultVersion.origin }}</div>
       <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
 
-      <!-- Use our new shared component -->      <app-resource-document
+      <!-- Use our new shared component -->
+      <app-resource-document
         [resourceDocument]="defaultVersion"
         [resourceType]="resourceType"
         [resourceAttributes]="resourceAttributes"
@@ -61,8 +65,9 @@
     <h2>Resource: {{ resourceId }}</h2>
     <div class="version-detail">
       <h3>Version: {{ version.id }}</h3>
-
-      <!-- Use our new shared component -->      <app-resource-document
+      <div class="origin-field" *ngIf="version.origin">Origin: {{ version.origin }}</div>
+      <!-- Use our new shared component -->
+      <app-resource-document
         [resourceDocument]="version"
         [resourceType]="resourceType"
         [resourceAttributes]="resourceAttributes"

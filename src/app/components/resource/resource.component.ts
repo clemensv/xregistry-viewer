@@ -30,6 +30,8 @@ export class ResourceComponent implements OnInit {
   documentError: string | null = null;
   cachedDocumentContent: string | null = null;
   cachedResourceId: string | null = null;
+  // Add property to expose origin for display
+  defaultVersionOrigin?: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -104,6 +106,7 @@ export class ResourceComponent implements OnInit {
         tap((version) => {
           // Set loading to false when the default version is loaded
           this.loading = false;
+          this.defaultVersionOrigin = version?.origin;
 
           // Debug: log the version details to see what document fields we're getting
           console.log('Default version loaded:', version);
@@ -154,7 +157,8 @@ export class ResourceComponent implements OnInit {
               this.groupType,
               this.groupId,
               this.resourceType,
-              this.resourceId
+              this.resourceId,
+              resource.origin // Pass origin for correct endpoint
             )
             .pipe(
               map((versions) => {

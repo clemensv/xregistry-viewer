@@ -8,9 +8,10 @@
         <div *ngFor="let res of resources" class="grid-item" [ngClass]="{'single-item': resources.length === 1}">
           <div class="resource-header">
             <h3>{{ res['name'] }}</h3>
-             <a [routerLink]="[res['id']]" class="tile">
-            View Details
-          </a>
+            <div class="origin-field" *ngIf="res.origin">Origin: {{ res.origin }}</div>
+            <a [routerLink]="[res['id']]" class="tile">
+              View Details
+            </a>
             <span *ngIf="res['versionsCount'] > 1" class="version-badge"
               [title]="res['versionsCount'] + ' versions available'">{{ res['versionsCount'] }}</span>
           </div> <!-- Use the shared resource document component -->

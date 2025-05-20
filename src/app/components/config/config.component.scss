@@ -1,1 +1,146 @@
-/* Configuration component styles have been moved to global styles.scss */
+/*
+  Horizontally center the config card, align it to the top, and allow it to expand up to 1000px wide.
+  Make edit fields flex to use available space, improve proportions and spacing for a more modern look.
+  Reduce vertical spacing in the config card and make input placeholders low-contrast for clarity.
+*/
+
+.config-page-container {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fafbfc;
+  padding-top: 2rem;
+  box-sizing: border-box;
+}
+
+.config-card {
+  width: 100%;
+  max-width: 900px;
+  min-width: 340px;
+  margin: 0 auto;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border-radius: 14px;
+  background: #fafbfc;
+  padding: 1.2rem 1.5rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+mat-card-header {
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0.7rem;
+}
+
+mat-card-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2a3a4a;
+}
+
+mat-card-subtitle {
+  color: #6c7a89;
+  font-size: 1rem;
+}
+
+.endpoint-section {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  padding: 0.7rem 1rem 0.7rem 1rem;
+  margin-bottom: 0.7rem;
+  border: 1px solid #e5e8ec;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.endpoint-section h3 {
+  margin-top: 0;
+  margin-bottom: 0.3rem;
+  font-size: 1.08rem;
+  color: #3a4a5a;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.endpoint-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 0.1rem;
+}
+
+.endpoint-field {
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+mat-form-field.endpoint-field {
+  width: 100%;
+}
+
+mat-form-field .mat-mdc-text-field-wrapper {
+  padding-left: 0.3rem;
+  padding-right: 0.3rem;
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+}
+
+mat-form-field input {
+  font-size: 1.02rem;
+  padding: 0.3rem 0.2rem;
+}
+
+::ng-deep input::placeholder {
+  color: #bfc5cc !important;
+  opacity: 1 !important;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+  justify-content: flex-end;
+}
+
+button[mat-stroked-button], button[mat-raised-button], button[mat-button] {
+  min-width: 110px;
+  font-size: 1rem;
+}
+
+button[mat-icon-button] {
+  margin-left: 0.1rem;
+  margin-right: 0.1rem;
+  transition: background 0.2s;
+}
+button[mat-icon-button]:hover:not([disabled]) {
+  background: #e3eaf3;
+}
+
+@media (max-width: 1100px) {
+  .config-card {
+    max-width: 98vw;
+    padding: 0.7rem 0.3rem;
+  }
+  .endpoint-section {
+    padding: 0.4rem 0.3rem;
+  }
+}
+@media (max-width: 700px) {
+  .endpoint-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.1rem;
+  }
+  .button-row {
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: stretch;
+  }
+}

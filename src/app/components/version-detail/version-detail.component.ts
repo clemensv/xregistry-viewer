@@ -29,6 +29,7 @@ export class VersionDetailComponent implements OnInit {
   isLoadingDocument = false;
   documentError: string | null = null;
   cachedDocumentContent: string | null = null;
+  versionOrigin?: string;
 
   constructor(private route: ActivatedRoute, private registry: RegistryService, private modelService: ModelService) {}  ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -72,6 +73,7 @@ export class VersionDetailComponent implements OnInit {
         }),
         tap((versionDetail: ResourceDocument) => {
           console.log('Version detail loaded:', versionDetail);
+          this.versionOrigin = versionDetail?.origin;
         })
       );
     });

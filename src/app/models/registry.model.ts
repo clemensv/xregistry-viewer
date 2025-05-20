@@ -57,6 +57,7 @@ export interface Group {
   name: string;
   description?: string;
   serverscount?: number; // Added to support displaying server count
+  origin?: string; // API endpoint of origin
   [key: string]: any; // Index signature for dynamic property access
 }
 
@@ -78,13 +79,17 @@ export interface ResourceDocument {
   isDefault?: boolean;
   attributes?: any;
 
+  origin?: string; // API endpoint of origin
+
   // Index signature for dynamic property access
   [key: string]: any;
 }
 
 // Keep these for backward compatibility
 export interface Resource extends ResourceDocument {}
-export interface VersionDetail extends ResourceDocument {}
+export interface VersionDetail extends ResourceDocument {
+  origin?: string; // API endpoint of origin
+}
 
 export interface Capabilities {
   apis: string[];

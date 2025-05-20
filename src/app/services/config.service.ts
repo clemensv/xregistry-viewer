@@ -5,7 +5,9 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
 export interface AppConfig {
-  apiBaseUrl: string;
+  apiBaseUrl?: string; // legacy, optional
+  apiEndpoints?: string[]; // new, multi-endpoint
+  modelUris?: string[]; // new, multi-model
   baseUrl: string;
   defaultDocumentView: boolean;
   features: {
@@ -21,16 +23,16 @@ export interface AppConfig {
 export class ConfigService {
   private apiBaseUrlSubject = new BehaviorSubject<string>(environment.apiBaseUrl);
   public apiBaseUrl$: Observable<string> = this.apiBaseUrlSubject.asObservable();
-  
+
   private baseUrlSubject = new BehaviorSubject<string>(environment.baseUrl || '/');
   public baseUrl$: Observable<string> = this.baseUrlSubject.asObservable();
-  
+
   private configSubject = new BehaviorSubject<AppConfig | null>(null);
   public config$: Observable<AppConfig | null> = this.configSubject.asObservable();
-  
+
   private configLoaded = false;
   private configLoading = false;
-  
+
   private isBrowser: boolean;
 
   constructor(
@@ -45,7 +47,7 @@ export class ConfigService {
       if (savedApiBaseUrl) {
         this.apiBaseUrlSubject.next(savedApiBaseUrl);
       }
-      
+
       const savedBaseUrl = localStorage.getItem('baseUrl');
       if (savedBaseUrl) {
         this.baseUrlSubject.next(savedBaseUrl);
@@ -87,17 +89,17 @@ export class ConfigService {
     try {
       // Normalize the base URL
       let normalizedUrl = url;
-      
+
       // Ensure base URL starts with a slash
       if (!normalizedUrl.startsWith('/') && !normalizedUrl.startsWith('http')) {
         normalizedUrl = '/' + normalizedUrl;
       }
-      
+
       // Ensure base URL ends with a slash
       if (!normalizedUrl.endsWith('/')) {
         normalizedUrl = normalizedUrl + '/';
       }
-      
+
       this.baseUrlSubject.next(normalizedUrl);
       if (this.isBrowser) {
         localStorage.setItem('baseUrl', normalizedUrl);
@@ -126,72 +128,82 @@ export class ConfigService {
     if (this.configLoading) {
       return firstValueFrom(this.config$);
     }
-    
+
     // If already loaded, return the current config
     if (this.configLoaded) {
       return Promise.resolve(this.configSubject.getValue());
     }
-    
+
     this.configLoading = true;
-    
+
     return firstValueFrom(
       this.http.get<AppConfig>(configPath).pipe(
         tap(config => {
-          // Store the loaded config
+          // Backward compatibility: migrate legacy config
+          if (!config.apiEndpoints && config.apiBaseUrl) {
+            config.apiEndpoints = [config.apiBaseUrl];
+          }
+          if (!config.modelUris) {
+            config.modelUris = [];
+          }
           this.configSubject.next(config);
           this.configLoaded = true;
           this.configLoading = false;
-          
+
           // Update the base URLs from the config
           if (config.apiBaseUrl) {
             this.apiBaseUrlSubject.next(config.apiBaseUrl);
           }
-          
+
           if (config.baseUrl) {
             this.baseUrlSubject.next(config.baseUrl);
           }
-          
+
           console.info('Configuration loaded successfully:', config);
         }),
         catchError(error => {
           console.error('Error loading configuration:', error);
           this.configLoading = false;
-          
+
           // Return default config on error
           const defaultConfig = this.getDefaultConfig();
-          
+
           this.configSubject.next(defaultConfig);
           this.configLoaded = true;
-          
+
           return of(defaultConfig);
         })
       )
     );
   }
-  
+
   /**
    * Save the current configuration
    * @param config Configuration to save
    */
   saveConfig(config: AppConfig): Promise<void> {
+    // Backward compatibility: always set apiBaseUrl to first apiEndpoints if present
+    if (config.apiEndpoints && config.apiEndpoints.length > 0) {
+      config.apiBaseUrl = config.apiEndpoints[0];
+    }
     // Update current configuration
     this.configSubject.next(config);
-    
+
     // Update base URLs
     if (config.apiBaseUrl) {
       this.setApiBaseUrl(config.apiBaseUrl);
     }
-    
+
     if (config.baseUrl) {
       this.setBaseUrl(config.baseUrl);
     }
-    
+
     // In a real application, you might want to persist this to a server
     // For now, we'll just store it in localStorage
     if (this.isBrowser) {
       localStorage.setItem('appConfig', JSON.stringify(config));
     }
-    
+
     return Promise.resolve();
   }
 
@@ -200,7 +212,15 @@ export class ConfigService {
    * @returns The current configuration
    */
   getConfig(): AppConfig | null {
-    return this.configSubject.getValue();
+    // Backward compatibility: migrate legacy config
+    const config = this.configSubject.getValue();
+    if (config && !config.apiEndpoints && config.apiBaseUrl) {
+      config.apiEndpoints = [config.apiBaseUrl];
+    }
+    if (config && !config.modelUris) {
+      config.modelUris = [];
+    }
+    return config;
   }
 
   /**
@@ -209,6 +229,8 @@ export class ConfigService {
   private getDefaultConfig(): AppConfig {
     return {
       apiBaseUrl: environment.apiBaseUrl,
+      apiEndpoints: [environment.apiBaseUrl],
+      modelUris: [],
       baseUrl: environment.baseUrl,
       defaultDocumentView: true,
       features: {

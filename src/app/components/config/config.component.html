@@ -1,38 +1,66 @@
+<div class="config-page-container">
 <mat-card class="config-card">
   <mat-card-header>
-    <mat-card-title>API Configuration</mat-card-title>
-    <mat-card-subtitle>Customize API connection settings</mat-card-subtitle>
+    <mat-card-title>Registry Endpoints Configuration</mat-card-title>
+    <mat-card-subtitle>Manage multiple API and model endpoints</mat-card-subtitle>
   </mat-card-header>
-  <mat-card-content>    <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>API Base URL</mat-label>
-        <input matInput placeholder="https://mcpxreg.org" formControlName="apiBaseUrl">
-        <mat-error *ngIf="configForm.get('apiBaseUrl')?.hasError('required')">
-          API URL is required
-        </mat-error>
-        <mat-error *ngIf="configForm.get('apiBaseUrl')?.hasError('pattern')">
-          Enter a valid URL (must start with http:// or https://)
-        </mat-error>
-        <mat-hint>The base URL for the xRegistry API</mat-hint>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Application Base Path</mat-label>
-        <input matInput placeholder="/" formControlName="baseUrl">
-        <mat-error *ngIf="configForm.get('baseUrl')?.hasError('required')">
-          Base path is required
-        </mat-error>
-        <mat-hint>The base path where the application is deployed (e.g., /xregistry/)</mat-hint>
-      </mat-form-field>
-
+  <mat-card-content>
+    <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
+      <div class="endpoint-section">
+        <h3><mat-icon color="primary">cloud</mat-icon> API Endpoints</h3>
+        <div *ngFor="let ctrl of apiEndpointControls; let i = index" class="endpoint-row">
+          <mat-form-field appearance="outline" class="endpoint-field">
+            <mat-label>API Endpoint {{i + 1}}</mat-label>
+            <input matInput [formControl]="ctrl" placeholder="https://api.example.com/registry">
+            <mat-error *ngIf="ctrl.hasError('required')">API endpoint is required</mat-error>
+            <mat-error *ngIf="ctrl.hasError('pattern')">Must start with http:// or https://</mat-error>
+          </mat-form-field>
+          <button mat-icon-button color="primary" type="button" (click)="moveApiEndpointUp(i)" [disabled]="i === 0" title="Move up">
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <button mat-icon-button color="primary" type="button" (click)="moveApiEndpointDown(i)" [disabled]="i === apiEndpointControls.length - 1" title="Move down">
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" type="button" (click)="removeApiEndpoint(i)" title="Remove">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <button mat-stroked-button color="primary" type="button" (click)="addApiEndpoint()">
+          <mat-icon>add</mat-icon> Add API Endpoint
+        </button>
+      </div>
+      <div class="endpoint-section">
+        <h3><mat-icon color="primary">description</mat-icon> Model Document URIs</h3>
+        <div *ngFor="let ctrl of modelUriControls; let i = index" class="endpoint-row">
+          <mat-form-field appearance="outline" class="endpoint-field">
+            <mat-label>Model URI {{i + 1}}</mat-label>
+            <input matInput [formControl]="ctrl">
+            <mat-hint *ngIf="!ctrl.value">e.g. https://example.com/model.json</mat-hint>
+            <mat-error *ngIf="ctrl.hasError('required')">Model URI is required</mat-error>
+          </mat-form-field>
+          <button mat-icon-button color="primary" type="button" (click)="moveModelUriUp(i)" [disabled]="i === 0" title="Move up">
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <button mat-icon-button color="primary" type="button" (click)="moveModelUriDown(i)" [disabled]="i === modelUriControls.length - 1" title="Move down">
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" type="button" (click)="removeModelUri(i)" title="Remove">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <button mat-stroked-button color="primary" type="button" (click)="addModelUri()">
+          <mat-icon>add</mat-icon> Add Model URI
+        </button>
+      </div>
       <div class="button-row">
         <button mat-raised-button color="primary" type="submit" [disabled]="configForm.invalid">
-          Save Changes
+          <mat-icon>save</mat-icon> Save Changes
         </button>
         <button mat-button type="button" (click)="resetToDefault()">
-          Reset to Default
+          <mat-icon>refresh</mat-icon> Reset to Default
         </button>
       </div>
     </form>
   </mat-card-content>
 </mat-card>
+</div>
