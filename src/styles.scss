@@ -676,3 +676,32 @@ h4 {  font-size: 1.02rem;
 .badge {
   @extend %badge;
 }
+
+.copy-btn {
+  background: none;
+  display: inline-flex;
+  border: none;
+  padding: 2px 4px;
+  margin-left: 4px;
+  cursor: pointer;
+  vertical-align: middle;
+  color: #888;
+  border-radius: 3px;
+  font-size: 1em;
+  line-height: 1;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+  float: right; // Float the button to the right of its container
+
+  .material-icons {
+    font-size: 1.1em;
+    line-height: 1;
+    vertical-align: middle;
+  }
+
+  &:hover, &:focus {
+    background: #f0f0f0;
+    color: #222;
+    outline: none;
+  }
+}

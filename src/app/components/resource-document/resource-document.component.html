@@ -10,7 +10,12 @@
               <span class="attribute-type">{{ attr.type | titlecase }}</span>
               <span *ngIf="attr.description" class="attribute-description">{{ attr.description }}</span>
             </div>
-            <div class="attribute-value" [title]="attr.value">{{ attr.value }}</div>
+            <div class="attribute-value-row" style="display: flex; align-items: center;">
+              <div class="attribute-value" [title]="attr.value" style="margin-right: 8px;">{{ attr.value }}</div>
+              <button class="copy-btn" title="Copy value" (click)="copyToClipboard(attr.value); $event.stopPropagation();">
+              <span class="material-icons">content_copy</span>
+              </button>
+            </div>
           </div>
         </ng-container>
       </div>

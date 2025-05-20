@@ -25,7 +25,27 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   Object = Object;
   JSON = JSON;
 
-  constructor(private cdr: ChangeDetectorRef) {}  /**
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  copyToClipboard(value: any): void {
+    let text: string;
+    if (typeof value === 'object') {
+      try {
+        text = JSON.stringify(value, null, 2);
+      } catch {
+        text = String(value);
+      }
+    } else {
+      text = String(value);
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      // Optionally, show a toast/snackbar or visual feedback here
+      // e.g., this.showCopySuccess = true; setTimeout(() => this.showCopySuccess = false, 1500);
+      console.log('Copied to clipboard:', text);
+    });
+  }
+
+  /**
    * Implement AfterViewInit lifecycle hook
    */  ngAfterViewInit(): void {
     // Ensure we have proper previews for all items after view is initialized

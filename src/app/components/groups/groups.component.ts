@@ -23,7 +23,7 @@ export class GroupsComponent implements OnInit {
   groups$!: Observable<Group[]>;
   resourceTypes$!: Observable<string[]>;
   groupAttributes: { [key: string]: any } = {};
-  private suppressGroupAttributes = ['groupid', 'id', 'name', 'self', 'xid', 'epoch', 'createdat', 'modifiedat'];
+  private suppressGroupAttributes = ['groupid', 'self', 'xid', 'epoch', 'createdat', 'modifiedat'];
   registryModel: any = null;
 
   constructor(

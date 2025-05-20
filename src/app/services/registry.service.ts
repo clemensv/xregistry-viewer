@@ -101,12 +101,11 @@ export class RegistryService {
                 const resource: any = {
                   id: entry[resMeta['singular'] + 'id'] || entry.id,
                   name: entry.name,
+                  description: entry.description,
                   createdAt: entry.createdat, // map createdat to createdAt
                   modifiedAt: entry.modifiedat, // map modifiedat to modifiedAt
                 };
                 Object.keys(attrs).forEach((key) => {
-                  if ([resMeta['singular'] + 'id', 'id', 'name'].includes(key))
-                    return;
                   if (entry[key] != null) {
                     resource[key] = entry[key];
                   }

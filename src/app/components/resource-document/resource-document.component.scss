@@ -24,21 +24,21 @@
     flex-direction: column; // Default stacked layout for mobile
     gap: 1.5rem;
       // Responsive layout for desktop (width > 541px)
-    @media (min-width: 542px) {
+    @media (min-width: 800px) {
       &.has-document {
-        flex-direction: row;
+      flex-direction: row;
 
-        .attributes-section {
-          flex: 1;
-          min-width: 300px;
-          margin-right: 1.5rem;
-        }
+      .attributes-section {
+        flex: 1;
+        min-width: 300px;
+        margin-right: 1.5rem;
+      }
 
-        .document-section {
-          flex: 1;
-          min-width: 300px;
-          max-width: 50%;
-        }
+      .document-section {
+        flex: 3;
+        min-width: 300px;
+        max-width: 75%;
+      }
       }
     }
   }

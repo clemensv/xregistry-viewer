@@ -79,13 +79,34 @@ export class ResourceDocumentComponent implements OnInit {
     }
     return value !== '';
   }
+
+   copyToClipboard(value: any): void {
+    let text: string;
+    if (typeof value === 'object') {
+      try {
+        text = JSON.stringify(value, null, 2);
+      } catch {
+        text = String(value);
+      }
+    } else {
+      text = String(value);
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      // Optionally, show a toast/snackbar or visual feedback here
+      // e.g., this.showCopySuccess = true; setTimeout(() => this.showCopySuccess = false, 1500);
+      console.log('Copied to clipboard:', text);
+    });
+  }
+
   // Get attributes to display, filtering out system and document fields
   get displayAttributes(): string[] {
+
+    const singular = this.getSingularName(this.resourceType);
+
     const staticKeys = ['xid', 'self', 'epoch', 'isdefault', 'isDefault',
       'ancestor', 'versionscount', 'versionsCount', 'versionsurl',
       'metaurl', 'createdat', 'modifiedat', 'createdAt', 'modifiedAt', 'id', 'name', 'description'];
 
-    const singular = this.getSingularName(this.resourceType);
 
     // Check if the type-specific field should be shown as a document
     const hasTypeDocument = this.hasDocumentSupport &&

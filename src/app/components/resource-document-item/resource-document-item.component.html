@@ -46,16 +46,26 @@
     </div>
     <div class="attribute-value">
       <span *ngIf="isAnyType() && item.value !== null && item.value !== undefined" class="any-value">
-        <app-code-highlight
-          [code]="getSafeJsonString(item.value)"
-          [language]="'json'">
-        </app-code-highlight>
+        <span class="any-value-inline"></span>
+          <div class="inline-flex align-center space-between">
+            <app-code-highlight
+              [code]="getSafeJsonString(item.value)"
+              [language]="'json'"></app-code-highlight>
+            <button class="copy-btn" title="Copy value" (click)="copyToClipboard(getSafeJsonString(item.value)); $event.stopPropagation();">
+              <span class="material-icons">content_copy</span>
+            </button>
+          </div>
       </span>
+       <div class="inline-flex align-center space-between"></div>
       <span *ngIf="!isAnyType() || item.value === null || item.value === undefined"
             [class.null-value]="item.value === null"
             [class.undefined-value]="item.value === undefined">
         {{ item.value === null ? 'null' : (item.value === undefined ? 'undefined' : item.value) }}
-      </span>
+        </span>
+        <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
+          <span class="material-icons">content_copy</span>
+        </button>
+    </div>
     </div>
   </div>  <!-- Expanded content for arrays and objects -->
   <div *ngIf="isExpandable() && isExpanded()"
@@ -86,10 +96,15 @@
 
       <!-- Display JSON for 'any' type array content -->
       <div *ngIf="isAnyType()" class="any-value-container">
+        <div class="inline-flex align-center space-between">
+
         <app-code-highlight
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
+        <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
+          <span class="material-icons">content_copy</span>
+        </button>
       </div>
     </div>
 
@@ -108,10 +123,16 @@
 
       <!-- Display JSON for 'any' type object content -->
       <div *ngIf="isAnyType()" class="any-value-container">
-        <app-code-highlight
+
+         <div class="inline-flex align-center space-between">
+          <app-code-highlight
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
+        <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
+          <span class="material-icons">content_copy</span>
+        </button>
+        </div>
       </div>
     </div>
   </div>  <!-- Improved collapsed preview with better click handling and visual cues -->
