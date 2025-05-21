@@ -1,4 +1,7 @@
 <nav class="breadcrumb" aria-label="breadcrumb">
+  <a [routerLink]="'/'" class="breadcrumb-home" title="Home" style="display: inline-flex; align-items: center; height: 1.5em; vertical-align: middle; margin-right: 0.5em;">
+    <span class="material-icons" style="font-size: 1.5em; color: #333; line-height: 1;">home</span>
+  </a>
   <ng-container *ngIf="breadcrumbs$ | async as breadcrumbs">
     <div *ngFor="let crumb of breadcrumbs; let i = index; let isLast = last" class="breadcrumb-item">
       <ng-container *ngIf="!isLast">
