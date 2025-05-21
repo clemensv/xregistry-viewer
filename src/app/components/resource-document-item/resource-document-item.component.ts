@@ -483,4 +483,22 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
     }
     return undefined;
   }
+
+  copyToClipboard(value: any): void {
+    let text: string;
+    if (typeof value === 'object') {
+      try {
+        text = JSON.stringify(value, null, 2);
+      } catch {
+        text = String(value);
+      }
+    } else {
+      text = String(value);
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      // Optionally, show a toast/snackbar or visual feedback here
+      // e.g., this.showCopySuccess = true; setTimeout(() => this.showCopySuccess = false, 1500);
+      console.log('Copied to clipboard:', text);
+    });
+  }
 }
