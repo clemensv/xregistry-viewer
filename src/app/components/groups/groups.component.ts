@@ -8,12 +8,11 @@ import { ModelService } from '../../services/model.service';
 import { Group } from '../../models/registry.model';
 import { FormsModule } from '@angular/forms';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
-import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 
 @Component({
   standalone: true,
   selector: 'app-groups',
-  imports: [CommonModule, RouterModule, FormsModule, ResourceDocumentItemComponent], // Added ResourceDocumentItemComponent
+  imports: [CommonModule, RouterModule, FormsModule], // Added ResourceDocumentItemComponent
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components

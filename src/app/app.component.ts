@@ -4,13 +4,12 @@ import { isPlatformBrowser } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from './components/footer/footer.component';
-import { ApiInfoComponent } from './components/api-info/api-info.component';
 import { FontService } from './services/font.service';
 
 @Component({
   standalone: true,
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, BreadcrumbComponent, FooterComponent, ApiInfoComponent],
+  imports: [RouterOutlet, HeaderComponent, BreadcrumbComponent, FooterComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

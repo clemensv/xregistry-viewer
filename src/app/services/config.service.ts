@@ -5,7 +5,6 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
 export interface AppConfig {
-  apiBaseUrl?: string; // legacy, optional
   apiEndpoints?: string[]; // new, multi-endpoint
   modelUris?: string[]; // new, multi-model
   baseUrl: string;
@@ -21,9 +20,6 @@ export interface AppConfig {
   providedIn: 'root'
 })
 export class ConfigService {
-  private apiBaseUrlSubject = new BehaviorSubject<string>(environment.apiBaseUrl);
-  public apiBaseUrl$: Observable<string> = this.apiBaseUrlSubject.asObservable();
-
   private baseUrlSubject = new BehaviorSubject<string>(environment.baseUrl || '/');
   public baseUrl$: Observable<string> = this.baseUrlSubject.asObservable();
 
@@ -43,46 +39,15 @@ export class ConfigService {
 
     // Load from local storage if available and in browser environment
     if (this.isBrowser) {
-      const savedApiBaseUrl = localStorage.getItem('apiBaseUrl');
-      if (savedApiBaseUrl) {
-        this.apiBaseUrlSubject.next(savedApiBaseUrl);
-      }
-
       const savedBaseUrl = localStorage.getItem('baseUrl');
       if (savedBaseUrl) {
         this.baseUrlSubject.next(savedBaseUrl);
       }
     }
-  }  getApiBaseUrl(): string {
-    return this.apiBaseUrlSubject.value;
   }
 
   getBaseUrl(): string {
     return this.baseUrlSubject.value;
-  }
-
-  setApiBaseUrl(url: string): void {
-    // Validate URL - be more forgiving with relative URLs
-    try {
-      // For relative URLs, we'll just accept them
-      if (url.startsWith('/')) {
-        this.apiBaseUrlSubject.next(url);
-        if (this.isBrowser) {
-          localStorage.setItem('apiBaseUrl', url);
-        }
-        return;
-      }
-
-      // For absolute URLs, attempt to validate
-      new URL(url); // This will throw if the URL is invalid
-      this.apiBaseUrlSubject.next(url);
-      if (this.isBrowser) {
-        localStorage.setItem('apiBaseUrl', url);
-      }
-    } catch (e) {
-      console.error('Invalid URL format:', url);
-      throw new Error('Invalid URL format');
-    }
   }
 
   setBaseUrl(url: string): void {
@@ -111,10 +76,9 @@ export class ConfigService {
   }
 
   resetToDefault(): void {
-    this.apiBaseUrlSubject.next(environment.apiBaseUrl);
+    this.configLoaded = false;
     this.baseUrlSubject.next(environment.baseUrl);
     if (this.isBrowser) {
-      localStorage.removeItem('apiBaseUrl');
       localStorage.removeItem('baseUrl');
     }
   }
@@ -139,21 +103,12 @@ export class ConfigService {
     return firstValueFrom(
       this.http.get<AppConfig>(configPath).pipe(
         tap(config => {
-          // Backward compatibility: migrate legacy config
-          if (!config.apiEndpoints && config.apiBaseUrl) {
-            config.apiEndpoints = [config.apiBaseUrl];
-          }
           if (!config.modelUris) {
             config.modelUris = [];
           }
           this.configSubject.next(config);
           this.configLoaded = true;
           this.configLoading = false;
-
-          // Update the base URLs from the config
-          if (config.apiBaseUrl) {
-            this.apiBaseUrlSubject.next(config.apiBaseUrl);
-          }
 
           if (config.baseUrl) {
             this.baseUrlSubject.next(config.baseUrl);
@@ -182,17 +137,7 @@ export class ConfigService {
    * @param config Configuration to save
    */
   saveConfig(config: AppConfig): Promise<void> {
-    // Backward compatibility: always set apiBaseUrl to first apiEndpoints if present
-    if (config.apiEndpoints && config.apiEndpoints.length > 0) {
-      config.apiBaseUrl = config.apiEndpoints[0];
-    }
-    // Update current configuration
     this.configSubject.next(config);
-
-    // Update base URLs
-    if (config.apiBaseUrl) {
-      this.setApiBaseUrl(config.apiBaseUrl);
-    }
 
     if (config.baseUrl) {
       this.setBaseUrl(config.baseUrl);
@@ -212,11 +157,7 @@ export class ConfigService {
    * @returns The current configuration
    */
   getConfig(): AppConfig | null {
-    // Backward compatibility: migrate legacy config
     const config = this.configSubject.getValue();
-    if (config && !config.apiEndpoints && config.apiBaseUrl) {
-      config.apiEndpoints = [config.apiBaseUrl];
-    }
     if (config && !config.modelUris) {
       config.modelUris = [];
     }
@@ -228,8 +169,7 @@ export class ConfigService {
    */
   private getDefaultConfig(): AppConfig {
     return {
-      apiBaseUrl: environment.apiBaseUrl,
-      apiEndpoints: [environment.apiBaseUrl],
+      apiEndpoints: [environment.apiBaseUrl], // fallback to env for now
       modelUris: [],
       baseUrl: environment.baseUrl,
       defaultDocumentView: true,

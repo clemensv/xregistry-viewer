@@ -29,49 +29,9 @@ describe('ConfigService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should initialize with default API URL from environment', () => {
-    // When localStorage has no saved URL
-    localStorage.getItem.and.returnValue(null);
-
-    // Re-create service to trigger constructor
-    service = TestBed.inject(ConfigService);
-
-    expect(service.getApiBaseUrl()).toEqual(environment.apiBaseUrl);
-  });
-
-  it('should initialize with saved API URL from localStorage', () => {
-    const savedUrl = 'https://test-api.example.com';
-    localStorage.getItem.and.returnValue(savedUrl);
-
-    // Re-create service to trigger constructor
-    service = TestBed.inject(ConfigService);
-
-    expect(service.getApiBaseUrl()).toEqual(savedUrl);
-  });
-
-  it('should update API URL and save to localStorage', () => {
-    const newUrl = 'https://new-api.example.com';
-    service.setApiBaseUrl(newUrl);
-
-    expect(service.getApiBaseUrl()).toEqual(newUrl);
-    expect(localStorage.setItem).toHaveBeenCalledWith('apiBaseUrl', newUrl);
-  });
-
-  it('should reset API URL to default and remove from localStorage', () => {
-    service.resetToDefault();
-
-    expect(service.getApiBaseUrl()).toEqual(environment.apiBaseUrl);
-    expect(localStorage.removeItem).toHaveBeenCalledWith('apiBaseUrl');
-  });
-  it('should throw error for invalid URL format', () => {
-    const invalidUrl = 'not-a-valid-url';
-
-    expect(() => {
-      service.setApiBaseUrl(invalidUrl);
-    }).toThrow(new Error('Invalid URL format'));
-
-    // localStorage should not be updated with invalid URL
-    expect(localStorage.setItem).not.toHaveBeenCalled();
+  it('should get the first apiEndpoint from config', () => {
+    service['configSubject'].next({ apiEndpoints: ['https://test.com'], baseUrl: '/', defaultDocumentView: true, features: { enableFilters: true, enableSearch: true, enableDocDownload: true }, modelUris: [] });
+    expect(service.getConfig()?.apiEndpoints?.[0]).toEqual('https://test.com');
   });
 
   it('should work correctly in server environment (SSR)', () => {
@@ -89,11 +49,16 @@ describe('ConfigService', () => {
     expect(serverService).toBeTruthy();
 
     // These operations should not throw errors on server
-    serverService.setApiBaseUrl('https://valid-url.example.com');
+    // serverService.setApiBaseUrl('https://valid-url.example.com');
     serverService.resetToDefault();
 
     // localStorage should not be called in server environment
     expect(localStorage.setItem).not.toHaveBeenCalled();
     expect(localStorage.removeItem).not.toHaveBeenCalled();
+  });
+
+  it('should get the first apiEndpoint', () => {
+    service['configSubject'].next({ apiEndpoints: ['https://test.com'], baseUrl: '/', defaultDocumentView: true, features: { enableFilters: true, enableSearch: true, enableDocDownload: true }, modelUris: [] });
+    expect(service.getConfig()?.apiEndpoints?.[0]).toEqual('https://test.com');
   });
 });

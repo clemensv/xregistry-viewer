@@ -12,11 +12,11 @@ import { RouterModule } from '@angular/router';
  * This ensures the base URL and API URL are set up before the app starts
  */
 function configFactory(configService: ConfigService, baseUrlService: BaseUrlService) {
-  return () => configService.loadConfigFromJson('/assets/config.json')
+  return () => configService.loadConfigFromJson('/config.json')
     .then(() => {
       // Update the base href after config is loaded
       baseUrlService.updateBaseHref();
-      
+
       // Log successful initialization
       console.info('Application configuration loaded successfully');
     });

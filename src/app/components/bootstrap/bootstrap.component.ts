@@ -34,21 +34,21 @@ import { Router } from '@angular/router';
       background-color: #f8f9fa;
       z-index: 9999;
     }
-    
+
     .loading-container {
       text-align: center;
       padding: 2rem;
     }
-    
+
     .logo-container {
       margin-bottom: 2rem;
     }
-    
+
     .logo {
       max-width: 200px;
       height: auto;
     }
-    
+
     .loading-spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #007bff;
@@ -58,23 +58,23 @@ import { Router } from '@angular/router';
       animation: spin 2s linear infinite;
       margin: 0 auto 1rem;
     }
-    
+
     .loading-text {
       font-size: 1.2rem;
       color: #6c757d;
       margin-bottom: 0.5rem;
     }
-    
+
     .config-text {
       font-size: 0.9rem;
       color: #28a745;
     }
-    
+
     .error-text {
       color: #dc3545;
       margin-top: 1rem;
     }
-    
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -93,14 +93,14 @@ export class BootstrapComponent implements OnInit {
 
   ngOnInit(): void {
     // Load configuration
-    this.configService.loadConfigFromJson('assets/config.json')
+    this.configService.loadConfigFromJson('/config.json')
       .then(config => {
         this.configLoaded = true;
         console.log('Configuration loaded successfully:', config);
-        
+
         // Update base URL
         this.baseUrlService.updateBaseHref();
-        
+
         // Navigate to home page after a brief delay
         setTimeout(() => {
           this.router.navigate(['/']);

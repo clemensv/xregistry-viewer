@@ -54,6 +54,7 @@ export interface ResourceType {
 
 export interface Group {
   id: string;
+  xid: string;
   name: string;
   description?: string;
   serverscount?: number; // Added to support displaying server count

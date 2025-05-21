@@ -9,21 +9,27 @@ describe('RegistryService', () => {
   let service: RegistryService;
   let configServiceSpy: jasmine.SpyObj<ConfigService>;
   let modelServiceSpy: jasmine.SpyObj<ModelService>;
-  let apiBaseUrlSubject: BehaviorSubject<string>;
 
   beforeEach(() => {
-    apiBaseUrlSubject = new BehaviorSubject<string>('https://test-api.mcpxreg.org');
-    
-    configServiceSpy = jasmine.createSpyObj('ConfigService', ['getApiBaseUrl'], {
-      apiBaseUrl$: apiBaseUrlSubject.asObservable()
+    configServiceSpy = jasmine.createSpyObj('ConfigService', ['getConfig'], {
+      config$: of({ apiEndpoints: ['https://test-api.mcpxreg.org'], baseUrl: '/', defaultDocumentView: true, features: { enableFilters: true, enableSearch: true, enableDocDownload: true }, modelUris: [] })
     });
-    configServiceSpy.getApiBaseUrl.and.returnValue('https://test-api.mcpxreg.org');
-
-    modelServiceSpy = jasmine.createSpyObj('ModelService', ['getRegistryModel']);
+    configServiceSpy.getConfig.and.returnValue({ apiEndpoints: ['https://test-api.mcpxreg.org'], baseUrl: '/', defaultDocumentView: true, features: { enableFilters: true, enableSearch: true, enableDocDownload: true }, modelUris: [] });    modelServiceSpy = jasmine.createSpyObj('ModelService', ['getRegistryModel']);
     modelServiceSpy.getRegistryModel.and.returnValue(of({
+      specversion: '1.0.0',
+      registryid: 'test-registry',
+      name: 'Test Registry',
+      description: 'Test Registry for Unit Tests',
+      capabilities: {
+        apis: ['api1', 'api2'],
+        schemas: ['schema1'],
+        pagination: true
+      },
       groups: {
         testGroup: {
           singular: 'testgroup',
+          plural: 'testgroups',
+          description: 'Test group',
           attributes: { name: { type: 'string' } },
           resources: {}
         }
@@ -46,6 +52,6 @@ describe('RegistryService', () => {
   });
 
   it('should use the API URL from config service', () => {
-    expect(configServiceSpy.getApiBaseUrl).toHaveBeenCalled();
+    expect(configServiceSpy.getConfig).toHaveBeenCalled();
   });
 });

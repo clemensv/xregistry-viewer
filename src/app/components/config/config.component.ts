@@ -144,9 +144,11 @@ export class ConfigComponent implements OnInit {
     }
   }
 
-  resetToDefault(): void {
+  async resetToDefault(): Promise<void> {
+    // Remove any locally cached config
     this.configService.resetToDefault();
-    const config = this.configService.getConfig();
+    // Reload config from server (default config path)
+    const config = await this.configService.loadConfigFromJson('/config.json');
     // Patch arrays by clearing and re-adding controls
     while (this.apiEndpoints.length > 0) this.apiEndpoints.removeAt(0);
     (config?.apiEndpoints || []).forEach((url: string) => this.apiEndpoints.push(this.fb.control(url, [Validators.required, Validators.pattern('https?://.*')])));
@@ -157,7 +159,7 @@ export class ConfigComponent implements OnInit {
     });
     // Update base href
     this.baseUrlService.updateBaseHref();
-    this.snackBar.open('Configuration reset to defaults', 'Close', {
+    this.snackBar.open('Configuration reset to server defaults', 'Close', {
       duration: 3000
     });
   }
