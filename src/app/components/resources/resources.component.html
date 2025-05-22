@@ -3,9 +3,10 @@
     <h2>Resources for {{ resourceType }} in {{ groupType }}/{{ groupId }}</h2>
   </div>
   <div class="page-content">
-    <div *ngIf="resources$ | async as resources;" [ngClass]="{'single-resource': resources.length === 1}">
+    <app-pagination *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>
+    <div *ngIf="!loading; else loadingTpl" [ngClass]="{'single-resource': resourcesList.length === 1}">
       <div class="grid-container">
-        <div *ngFor="let res of resources" class="grid-item" [ngClass]="{'single-item': resources.length === 1}">
+        <div *ngFor="let res of resourcesList" class="grid-item" [ngClass]="{'single-item': resourcesList.length === 1}">
           <div class="resource-header">
             <h3>{{ res['name'] }}</h3>
              <a [routerLink]="[res['id']]" class="tile">
@@ -29,10 +30,11 @@
           </div>
         </div>
       </div>
-      <ng-template #loading>
-        <div class="content-loading">
-          <div class="loading-spinner"></div>
-        </div>
-      </ng-template>
     </div>
+    <ng-template #loadingTpl>
+      <div class="content-loading">
+        <div class="loading-spinner"></div>
+      </div>
+    </ng-template>
   </div>
+</div>

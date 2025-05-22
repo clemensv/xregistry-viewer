@@ -2,6 +2,7 @@
   "apiEndpoints": [
     "https://mcpxreg.org/registry",
     "https://xregistry.soaphub.org",
+    "http://localhost:3000",
     "http://localhost:20996/api/registry"
   ],
   "modelUris": [],

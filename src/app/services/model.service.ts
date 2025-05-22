@@ -169,10 +169,22 @@ export class ModelService {
 
   /**
    * Returns only those API endpoints whose loaded model defines the given group type
+   * For 'pythonregistries' group type, only return localhost:3000 endpoint
    */
   getApiEndpointsForGroupType(groupType: string): string[] {
     const config = this.configService.getConfig();
     const apiEndpoints = config?.apiEndpoints || [];
+
+    // Special case for pythonregistries: only use localhost:3000
+    if (groupType === 'pythonregistries') {
+      const localhostEndpoint = apiEndpoints.find(api => api.includes('localhost:3000'));
+      if (localhostEndpoint) {
+        console.log('Using only localhost:3000 endpoint for pythonregistries group');
+        return [localhostEndpoint];
+      }
+    }
+
+    // For other group types, return all available endpoints
     return apiEndpoints.filter(api =>
       this.endpointModels[api] && this.endpointModels[api].groups?.hasOwnProperty(groupType)
     );

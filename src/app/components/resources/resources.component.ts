@@ -6,11 +6,12 @@ import { RegistryService } from '../../services/registry.service';
 import { ResourceDocument } from '../../models/registry.model';
 import { ModelService } from '../../services/model.service';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
+import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 
 @Component({
   standalone: true,
   selector: 'app-resources',
-  imports: [CommonModule, RouterModule, ResourceDocumentComponent],
+  imports: [CommonModule, RouterModule, ResourceDocumentComponent, PaginationComponent],
   templateUrl: './resources.component.html',
   styleUrls: ['./resources.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
@@ -19,7 +20,8 @@ export class ResourcesComponent implements OnInit {
   groupType!: string;
   groupId!: string;
   resourceType!: string;
-  resources$!: Observable<ResourceDocument[]>;
+  resourcesList: ResourceDocument[] = [];
+  pageLinks: { first?: string; prev?: string; next?: string; last?: string } = {};
   resTypeHasDocument = false;
   resourceAttributes: { [key: string]: any } = {}; // Metadata for attributes
   loading = true; // Add loading property for template reference
@@ -44,19 +46,26 @@ export class ResourcesComponent implements OnInit {
       ).subscribe(rtModel => {
         this.resourceAttributes = rtModel.attributes || {};
         this.resTypeHasDocument = rtModel.hasdocument;
-      });      // Load actual resource instances
-      this.resources$ = this.registry.listResources(
-        this.groupType,
-        this.groupId,
-        this.resourceType
-      ).pipe(
-        map(resources => {
-          this.loading = false;
-          return resources;
-        })
-      );
+      });
+      this.loadResources();
     });
   }
+
+  loadResources(pageRel: string = ''): void {
+    this.loading = true;
+    this.registry.listResources(this.groupType, this.groupId, this.resourceType, pageRel)
+      .subscribe(page => {
+        console.log('loadResources links:', page.links);
+        this.resourcesList = page.items;
+        this.pageLinks = page.links;
+        this.loading = false;
+      });
+  }
+
+  onPageChange(pageRel: string): void {
+    this.loadResources(pageRel);
+  }
+
   // These methods are now handled by the ResourceDocumentComponent
   // Keeping displayAttributes for backward compatibility, but we'll no longer use it in the template
   get displayAttributes(): string[] {

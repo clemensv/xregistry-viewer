@@ -6,11 +6,12 @@ import { RegistryService } from '../../services/registry.service';
 import { ModelService } from '../../services/model.service';
 import { ResourceDocument } from '../../models/registry.model';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
+import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 
 @Component({
   selector: 'app-resource',
   standalone: true,
-  imports: [CommonModule, RouterModule, ResourceDocumentComponent],
+  imports: [CommonModule, RouterModule, ResourceDocumentComponent, PaginationComponent],
   templateUrl: './resource.component.html',
   styleUrl: './resource.component.scss',
 })
@@ -22,7 +23,6 @@ export class ResourceComponent implements OnInit {
   resourceTypeData: any;
   hasMultipleVersions = false;
   defaultVersion$!: Observable<ResourceDocument>;
-  versions$!: Observable<any[]>;
   resourceAttributes: { [key: string]: any } = {};
   loading = true; // Add loading property for template reference
   // Document handling properties
@@ -32,6 +32,8 @@ export class ResourceComponent implements OnInit {
   cachedResourceId: string | null = null;
   // Add property to expose origin for display
   defaultVersionOrigin?: string;
+  versionsList: any[] = [];
+  pageLinks: LinkSet = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -77,7 +79,7 @@ export class ResourceComponent implements OnInit {
           this.hasMultipleVersions = this.resourceTypeData.maxversions != 1;
 
           if (this.hasMultipleVersions) {
-            // Load all versions when multiple versions are supported
+            this.loadDefaultVersion();
             this.loadVersions();
           } else {
             // Load only default version when single version is supported
@@ -131,88 +133,28 @@ export class ResourceComponent implements OnInit {
   }
 
   /**
-   * Loads all versions of the resource
+   * Loads paginated version history using relation-based links
    */
-  loadVersions(): void {
-    // First, load the resource details to get metadata
-    this.registry
-      .getResource(
-        this.groupType,
-        this.groupId,
-        this.resourceType,
-        this.resourceId
-      )
-      .subscribe({
-        next: (resource) => {
-          // Check how many versions we have according to versionscount
-          const versionsCount = resource['versionscount'] || 0;
-          console.log(`Resource has ${versionsCount} versions`);
+  loadVersions(pageRel: string = ''): void {
+    this.loading = true;
+    this.registry.getResourceVersions(
+      this.groupType,
+      this.groupId,
+      this.resourceType,
+      this.resourceId,
+      pageRel
+    ).subscribe(page => {
+      const items = page.items.sort((a, b) => new Date(b.modifiedAt || b['modifiedat']).getTime() - new Date(a.modifiedAt || a['modifiedat']).getTime());
+      // mark default version
+      const dv = items.find(v => v.isDefault);
+      this.versionsList = items.map(v => ({ ...v, isDefault: dv ? v.id === dv.id : false }));
+      this.pageLinks = page.links;
+      this.loading = false;
+    });
+  }
 
-          // Load the default version to display first
-          this.loadDefaultVersion();
-
-          // Get all versions from the API
-          this.versions$ = this.registry
-            .getResourceVersions(
-              this.groupType,
-              this.groupId,
-              this.resourceType,
-              this.resourceId,
-              resource.origin // Pass origin for correct endpoint
-            )
-            .pipe(
-              map((versions) => {
-                // Sort versions by date (newest first) if available
-                if (
-                  versions.length > 0 &&
-                  (versions[0]['createdat'] || versions[0]['createdAt'])
-                ) {
-                  return versions.sort((a, b) => {
-                    const dateA =
-                      a['modifiedat'] ||
-                      a['modifiedAt'] ||
-                      a['createdat'] ||
-                      a['createdAt'];
-                    const dateB =
-                      b['modifiedat'] ||
-                      b['modifiedAt'] ||
-                      b['createdat'] ||
-                      b['createdAt'];
-                    return (
-                      new Date(dateB).getTime() - new Date(dateA).getTime()
-                    );
-                  });
-                }
-                return versions;
-              }),
-              tap((versions) => {
-                // Mark the default version
-                const defaultVersionId =
-                  resource['defaultversionid'] ||
-                  resource['meta']?.defaultversionid;
-                if (defaultVersionId) {
-                  versions.forEach((v) => {
-                    v['isDefault'] =
-                      v['id'] === defaultVersionId ||
-                      v['versionid'] === defaultVersionId;
-                  });
-                }
-                this.loading = false; // Set loading to false when versions are loaded
-              }),
-              catchError((err) => {
-                console.error('Error loading resource versions:', err);
-                this.loading = false; // Set loading to false even on error
-                return of([]);
-              })
-            );
-        },
-        error: (err) => {
-          console.error('Error loading resource:', err);
-          this.versions$ = of([]);
-          // Still try to load default version
-          this.loadDefaultVersion();
-        },
-      });
+  onVersionPageChange(rel: string): void {
+    this.loadVersions(rel);
   }
 
   objectKeys(obj: any): string[] {

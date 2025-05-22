@@ -6,48 +6,40 @@
     <!-- Version History -->
     <div class="versions-list">
       <h3>Version History</h3>
-      <div *ngIf="versions$ | async as versions; else loadingVersions">
-        <div *ngIf="versions.length > 0; else noVersions" class="versions-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Version ID</th>
-                <th>Created</th>
-                <th>Modified</th>
-                <th>Default</th>
-                <th>Origin</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let version of versions" [class.default-version]="version['isdefault'] || version['isDefault']">
-                <td>{{ version['id'] || version['versionid'] }}</td>
-                <td>{{ (version['createdat'] || version['createdAt']) | date:'short' }}</td>
-                <td>{{ (version['modifiedat'] || version['modifiedAt']) | date:'short' }}</td>
-                <td><span *ngIf="version['isdefault'] || version['isDefault']" class="default-badge">✓</span></td>
-                <td><span class="origin-field">{{ version.origin }}</span></td>
-                <td>
-                  <a [routerLink]="['versions', version['id'] || version['versionid']]" class="btn-view">View</a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <ng-template #noVersions>
-          <p>No version history available.</p>
-        </ng-template>
-      </div>
-      <ng-template #loadingVersions>
-        <p>Loading versions...</p>
+      <app-pagination *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" [links]="pageLinks" (pageChange)="onVersionPageChange($event)"></app-pagination>
+      <table>
+        <thead>
+          <tr>
+            <th>Version ID</th>
+            <th>Created</th>
+            <th>Modified</th>
+            <th>Default</th>
+            <th>Origin</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of versionsList" [class.default-version]="v.isDefault">
+            <td>{{ v.id || v.versionid }}</td>
+            <td>{{ (v.createdAt || v.createdat) | date:'short' }}</td>
+            <td>{{ (v.modifiedAt || v.modifiedat) | date:'short' }}</td>
+            <td><span *ngIf="v.isDefault" class="default-badge">✓</span></td>
+            <td>{{ v.origin }}</td>
+            <td><a [routerLink]="['versions', v.id || v.versionid]" class="btn-view">View</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noVersions>
+        <p>No version history available.</p>
       </ng-template>
     </div>
 
+    <!-- Always show default version too -->
     <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">
       <h3>Default Version: {{ defaultVersion.id }}</h3>
       <div class="origin-field" *ngIf="defaultVersion.origin">Origin: {{ defaultVersion.origin }}</div>
       <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
-
-      <!-- Use our new shared component -->      <app-resource-document
+      <app-resource-document
         [resourceDocument]="defaultVersion"
         [resourceType]="resourceType"
         [resourceAttributes]="resourceAttributes"

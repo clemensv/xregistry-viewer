@@ -1,54 +1,53 @@
 <div class="groups">
   <h2>Registry Groups</h2>
-  <div *ngIf="groups$ | async as groups">
-    <div class="grid-container">
-      <div *ngFor="let group of groups" class="grid-item">
-        <h3>
-          <span class="material-icons group-icon">folder</span>
-          {{ group['name'] || group['id'] }}
-        </h3>
-        <div class="origin-field" *ngIf="group.origin">Origin: {{ group.origin }}</div>
-        <div class="attribute simple-attribute description-attribute" *ngIf="group['description']">
-          <div class="attribute-header">
-            <strong>Description</strong>
-          </div>
-          <div class="attribute-value">
-            {{ group['description'] }}
+  <app-pagination *ngIf="pageLinks" [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>
+  <div *ngIf="groupsList.length > 0" class="grid-container">
+    <div *ngFor="let group of groupsList" class="grid-item">
+      <h3>
+        <span class="material-icons group-icon">folder</span>
+        {{ group['name'] || group['id'] }}
+      </h3>
+      <div class="origin-field" *ngIf="group.origin">Origin: {{ group.origin }}</div>
+      <div class="attribute simple-attribute description-attribute" *ngIf="group['description']">
+        <div class="attribute-header">
+          <strong>Description</strong>
+        </div>
+        <div class="attribute-value">
+          {{ group['description'] }}
+        </div>
+      </div>
+      <div class="attribute simple-attribute" *ngIf="group['labels']">
+        <div class="attribute-header">
+          <strong>Labels</strong>
+        </div>
+        <div class="attribute-value">
+          <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">
+            <span class="label-key">{{ label }}</span>:
+            <span class="label-value">{{ group['labels'][label] }}</span>
           </div>
         </div>
-        <div class="attribute simple-attribute" *ngIf="group['labels']">
-          <div class="attribute-header">
-            <strong>Labels</strong>
-          </div>
-          <div class="attribute-value">
-            <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">
-              <span class="label-key">{{ label }}</span>:
-              <span class="label-value">{{ group['labels'][label] }}</span>
-            </div>
-          </div>
-        </div>        <!-- Resource Types Section - optimized formatting -->
-        <div class="attribute simple-attribute resource-types">
-          <div class="attribute-header unified-item-row array-row">
-            <strong>Resource Types</strong>
-            <span class="item-count">{{ getResourceTypesItem(group)?.value.length }} {{ getResourceTypesItem(group)?.value.length === 1 ? 'item' : 'items' }}</span>
-          </div>
-          <div class="attribute-value resource-types-list">
-            <ng-container *ngFor="let rt of getResourceTypesItem(group)?.value">
-              <span class="resource-type-row">
-                <a [routerLink]="['/', groupType, group['id'], rt.name]" class="resource-link">{{ rt.name }}</a>
-                <span *ngIf="rt.count !== undefined" class="resource-count">({{ rt.count }})</span>
-              </span>
-            </ng-container>
-          </div>
+      </div>        <!-- Resource Types Section - optimized formatting -->
+      <div class="attribute simple-attribute resource-types">
+        <div class="attribute-header unified-item-row array-row">
+          <strong>Resource Types</strong>
+          <span class="item-count">{{ getResourceTypesItem(group)?.value.length }} {{ getResourceTypesItem(group)?.value.length === 1 ? 'item' : 'items' }}</span>
         </div>
-        <div class="tile-footer-container">
-          <footer class="tile-footer">
-            <small>
-              <span>Created: {{ group['createdAt'] | date:'short' }}</span>&nbsp;|
-              <span>Modified: {{ group['modifiedAt'] | date:'short' }}</span>
-            </small>
-          </footer>
+        <div class="attribute-value resource-types-list">
+          <ng-container *ngFor="let rt of getResourceTypesItem(group)?.value">
+            <span class="resource-type-row">
+              <a [routerLink]="['/', groupType, group['id'], rt.name]" class="resource-link">{{ rt.name }}</a>
+              <span *ngIf="rt.count !== undefined" class="resource-count">({{ rt.count }})</span>
+            </span>
+          </ng-container>
         </div>
+      </div>
+      <div class="tile-footer-container">
+        <footer class="tile-footer">
+          <small>
+            <span>Created: {{ group['createdAt'] | date:'short' }}</span>&nbsp;|
+            <span>Modified: {{ group['modifiedAt'] | date:'short' }}</span>
+          </small>
+        </footer>
       </div>
     </div>
   </div>

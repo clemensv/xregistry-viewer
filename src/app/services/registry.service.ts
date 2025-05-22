@@ -1,5 +1,6 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+// Removed PaginationInfo import as pagination now uses LinkSet and Page<T>
 import { Observable, of, throwError, forkJoin, from, lastValueFrom } from 'rxjs';
 import { map, switchMap, catchError, tap } from 'rxjs/operators';
 import { Group, Resource, ResourceDocument } from '../models/registry.model';
@@ -7,6 +8,7 @@ import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { isPlatformBrowser } from '@angular/common';
 import { LRUCache } from '../utils/lru-cache';
+// Removed duplicate import of HttpResponse
 
 /**
  * Type to represent the key structure for API endpoint caching
@@ -17,6 +19,17 @@ type ResourceKey = {
   resourceType: string;
   resourceId?: string;
 };
+
+// Define a Page<T> structure for paginated results
+export interface Page<T> {
+  items: T;
+  links: {
+    first?: string;
+    prev?: string;
+    next?: string;
+    last?: string;
+  };
+}
 
 @Injectable({
   providedIn: 'root',
@@ -83,185 +96,87 @@ export class RegistryService {
     }
     return `${api}${path}`;
   }
-  listGroups(groupType: string): Observable<Group[]> {
-    // Ensure models are loaded and track endpoints per model before requesting groups
-    return from(this.listGroupsAsync(groupType));
-  }
 
   /**
-   * Async implementation of listGroups
+   * List resources using RFC5988 relation-based navigation
+   * @param groupType the group type
+   * @param groupId the group id
+   * @param resourceType the resource type
+   * @param pageRel optional Link rel URL or path (first, prev, next, last or empty)
    */
-  private async listGroupsAsync(groupType: string): Promise<Group[]> {
-    const model = await lastValueFrom(this.modelService.getRegistryModel());
-    const apis = this.modelService.getApiEndpointsForGroupType(groupType);
-
-    if (apis.length === 0) {
-      return [] as Group[];
-    }
-
-    // Check if we have a cached successful endpoint for this group type
-    const cacheKey = this.getCacheKey({ groupType, groupId: '*', resourceType: '*' });
-    const cachedApi = this.endpointCache.get(cacheKey);
-
-    // If we have a cached API, try it first
-    const apisToTry = cachedApi
-      ? [cachedApi, ...apis.filter(a => a !== cachedApi)]
-      : apis;
-
-    const results: Group[][] = [];
-
-    for (const api of apisToTry) {
-      try {
-        const url = this.getApiUrl(api, `/${groupType}`);
-        const groupMap = await lastValueFrom(
-          this.http.get<{ [id: string]: any }>(url)
-        );
-
-        const groupMeta = model.groups[groupType] || { singular: groupType, attributes: {} };
-        const attrs = groupMeta.attributes || {};
-
-        // Map each entry to Group with standardized fields
-        const groups = Object.values(groupMap).map((entry: any) => {
-          const singularIdKey = groupMeta.singular + 'id';
-          const group: any = {
-            id: entry[singularIdKey] || entry.id,
-            name: entry.name,
-            createdAt: entry.createdat,
-            modifiedAt: entry.modifiedat,
-          };
-
-          // include additional attributes
-          Object.keys(attrs).forEach(key => {
-            if ([singularIdKey, 'id', 'name'].includes(key)) return;
-            if (entry[key] != null) {
-              group[key] = entry[key];
-            }
-          });
-
-          return { ...group, origin: api } as Group;
-        });
-
-        results.push(groups);
-
-        // Cache successful API endpoint
-        this.endpointCache.set(cacheKey, api);
-        break;
-      } catch (err) {
-        console.error('Failed to list groups from', api, err);
-        continue;
-      }
-    }
-
-    // Merge results from all successful API calls
-    const seen = new Set<string>();
-    const merged: Group[] = [];
-    for (const groupList of results) {
-      for (const group of groupList) {
-        if (!seen.has(group.id)) {
-          merged.push(group);
-          seen.add(group.id);
-        }
-      }
-    }
-
-    return merged;
-  }
-  // Standardize resource mapping similar to listGroups
   listResources(
     groupType: string,
     groupId: string,
-    resourceType: string
-  ): Observable<ResourceDocument[]> {
-    return from(this.listResourcesAsync(groupType, groupId, resourceType));
+    resourceType: string,
+    pageRel: string = ''
+  ): Observable<Page<ResourceDocument[]>> {
+    const pagePath = pageRel || `/${groupType}/${groupId}/${resourceType}`;
+    return from(this.listResourcesAsync(groupType, groupId, resourceType, pagePath));
   }
 
   /**
-   * Async implementation of listResources
+   * Async implementation of listResources with relation-based URL
    */
   private async listResourcesAsync(
     groupType: string,
     groupId: string,
-    resourceType: string
-  ): Promise<ResourceDocument[]> {
+    resourceType: string,
+    pagePath: string
+  ): Promise<Page<ResourceDocument[]>> {
     const model = await lastValueFrom(this.modelService.getRegistryModel());
+    const apis = this.modelService.getApiEndpointsForGroupType(groupType);
+    if (apis.length === 0) {
+      return { items: [], links: {} };
+    }
+    // Use first API; assume consistent paging for all endpoints
+    const api = apis[0];
+    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
 
-    // Check if we have a cached successful endpoint for this resource
-    const cacheKey = this.getCacheKey({
-      groupType,
-      groupId,
-      resourceType
+    console.log(`Requesting resources from: ${url}`);
+    const response = await lastValueFrom(
+      this.http.get<{ [key: string]: any }>(url, { observe: 'response' as const })
+    );
+    const data = response.body || {};
+
+    // Parse Link header into links with improved regex
+    const links: any = {};
+    const linkHeader = response.headers.get('Link') || '';
+    console.log(`Link header received: ${linkHeader}`);
+
+    linkHeader.split(',').forEach(part => {
+      // More robust regex to handle various link header formats
+      const m = part.trim().match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+      if (m) {
+        links[m[2]] = m[1];
+        console.log(`Found link relation: ${m[2]} -> ${m[1]}`);
+      } else {
+        console.warn(`Failed to parse link header part: ${part}`);
+      }
     });
-    const cachedApi = this.endpointCache.get(cacheKey);
 
-    // Get all potential APIs
-    const apis = this.getApiEndpoints();
-    if (apis.length === 0) return [] as ResourceDocument[];
-
-    // If we have a cached API, try it first
-    const apisToTry = cachedApi
-      ? [cachedApi, ...apis.filter(a => a !== cachedApi)]
-      : apis;
-
-    const results: ResourceDocument[][] = [];
-
-    for (const api of apisToTry) {
-      try {
-        const url = this.getApiUrl(
-          api,
-          `/${groupType}/${groupId}/${resourceType}`
-        );
-
-        const resMap = await lastValueFrom(
-          this.http.get<{ [key: string]: any }>(url)
-        );
-
-        const resMeta = model.groups[groupType]?.resources?.[resourceType] ||
-          { singular: resourceType, attributes: {} };
-        const attrs = resMeta.attributes || {};
-
-        const resources = Object.values(resMap).map((entry: any) => {
-          const singularIdKey = resMeta.singular + 'id';
-          const resource: any = {
-            id: entry[singularIdKey] || entry.id,
-            name: entry.name,
-            createdAt: entry.createdat,
-            modifiedAt: entry.modifiedat,
-          };
-
-          // include other attributes
-          Object.keys(attrs).forEach(key => {
-            if ([singularIdKey, 'id', 'name'].includes(key)) return;
-            if (entry[key] != null) resource[key] = entry[key];
-          });
-
-          return { ...resource, origin: api } as ResourceDocument;
-        });
-
-        results.push(resources);
-
-        // Cache successful API endpoint
-        this.endpointCache.set(cacheKey, api);
-        break;
-      } catch (err) {
-        console.error('Failed to list resources from', api, err);
-        continue;
-      }
-    }
-
-    // Merge results, prioritizing first API endpoint's results
-    const seen = new Set<string>();
-    const merged: ResourceDocument[] = [];
-    for (const list of results) {
-      for (const item of list) {
-        if (!seen.has(item.id)) {
-          merged.push(item);
-          seen.add(item.id);
+    // Map entries to ResourceDocument[]
+    const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };
+    const attrs = resMeta.attributes || {};
+    const items: ResourceDocument[] = Object.values(data).map((entry: any) => {
+      const idKey = resMeta.singular + 'id';
+      const doc: any = {
+        id: entry[idKey] || entry.id,
+        name: entry.name,
+        createdAt: entry.createdat,
+        modifiedAt: entry.modifiedat,
+        origin: api,
+        ...entry
+      };
+      Object.keys(attrs).forEach(key => {
+        if (!['id', 'name', idKey].includes(key) && entry[key] != null) {
+          doc[key] = entry[key];
         }
-      }
-    }
-
-    return merged;
+      });
+      return doc as ResourceDocument;
+    });
+    return { items, links };
   }
+
   getGroup(groupType: string, groupId: string): Observable<Group> {
     return from(this.getGroupAsync(groupType, groupId));
   }
@@ -276,10 +191,8 @@ export class RegistryService {
       groupId,
       resourceType: '*'
     });
-    const cachedApi = this.endpointCache.get(cacheKey);
-
-    // Get all APIs to try
-    const apis = this.getApiEndpoints();
+    const cachedApi = this.endpointCache.get(cacheKey);    // Get all APIs to try
+    const apis = this.modelService.getApiEndpointsForGroupType(groupType);
     if (apis.length === 0) return null as any;
 
     // If we have a cached API, try it first
@@ -477,98 +390,89 @@ export class RegistryService {
 
     return resource;
   }
+  /**
+   * List resource version history using RFC5988 relation-based navigation
+   * @param groupType the group type
+   * @param groupId the group id
+   * @param resourceType the resource type
+   * @param resourceId the resource id
+   * @param pageRel optional Link rel URL or path (first, prev, next, last or empty)
+   */
   getResourceVersions(
     groupType: string,
     groupId: string,
     resourceType: string,
     resourceId: string,
-    origin?: string // use origin if provided
-  ): Observable<ResourceDocument[]> {
-    return from(this.getResourceVersionsAsync(
-      groupType,
-      groupId,
-      resourceType,
-      resourceId,
-      origin
-    ));
+    pageRel: string = ''
+  ): Observable<Page<ResourceDocument[]>> {
+    const pagePath = pageRel || `/${groupType}/${groupId}/${resourceType}/${resourceId}/versions`;
+    return from(
+      this.listResourceVersionsAsync(
+        groupType,
+        groupId,
+        resourceType,
+        resourceId,
+        pagePath
+      )
+    );
   }
-
-  /**
-   * Async implementation of getResourceVersions
-   */
-  private async getResourceVersionsAsync(
+  private async listResourceVersionsAsync(
     groupType: string,
     groupId: string,
     resourceType: string,
     resourceId: string,
-    origin?: string
-  ): Promise<ResourceDocument[]> {
-    // Check cache for successful endpoint
-    const cacheKey = this.getCacheKey({
-      groupType,
-      groupId,
-      resourceType,
-      resourceId: `${resourceId}/versions`
+    pagePath: string
+  ): Promise<Page<ResourceDocument[]>> {
+    const model = await lastValueFrom(this.modelService.getRegistryModel());
+    const apis = this.modelService.getApiEndpointsForGroupType(groupType);
+    if (apis.length === 0) {
+      return { items: [], links: {} };
+    }    // Use first API endpoint for paging
+    const api = apis[0];
+    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
+
+    console.log(`Requesting versions from: ${url}`);
+    const response = await lastValueFrom(
+      this.http.get<any>(url, { observe: 'response' as const })
+    );
+    const data = response.body || {};
+
+    // Parse Link header into relations with improved regex
+    const linkHeader = response.headers.get('Link') || '';
+    console.log(`Link header received for versions: ${linkHeader}`);
+
+    const links: any = {};
+    linkHeader.split(',').forEach(part => {
+      // More robust regex to handle various link header formats
+      const m = part.trim().match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+      if (m) {
+        links[m[2]] = m[1];
+        console.log(`Found version link relation: ${m[2]} -> ${m[1]}`);
+      } else {
+        console.warn(`Failed to parse version link header part: ${part}`);
+      }
     });
-    const cachedApi = this.endpointCache.get(cacheKey);
-
-    // Get all APIs to try
-    const apis = origin ? [origin] : this.getApiEndpoints();
-    if (apis.length === 0) return [];
-
-    // If we have a cached API, try it first
-    const apisToTry = !origin && cachedApi
-      ? [cachedApi, ...apis.filter(a => a !== cachedApi)]
-      : apis;
-
-    const results: any[][] = [];
-
-    // Try each API
-    for (const api of apisToTry) {
-      try {
-        const url = this.getApiUrl(
-          api,
-          `/${groupType}/${groupId}/${resourceType}/${resourceId}/versions`
-        );
-
-        let response = await lastValueFrom(this.http.get<any>(url));
-
-        // If the response isn't an array (could be an object with values), convert it
-        if (!Array.isArray(response)) {
-          response = Object.values(response);
+    // Map entries to ResourceDocument[]
+    const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };
+    const attrs = resMeta.attributes || {};
+    const items: ResourceDocument[] = Object.values(data).map((entry: any) => {
+      const idKey = resMeta.singular + 'id';
+      const doc: any = {
+        id: entry[idKey] || entry.id,
+        name: entry.name,
+        createdAt: entry.createdat,
+        modifiedAt: entry.modifiedat,
+        origin: api,
+        ...entry
+      };
+      Object.keys(attrs).forEach(key => {
+        if (!['id', 'name', idKey].includes(key) && entry[key] != null) {
+          doc[key] = entry[key];
         }
-
-        results.push(response);
-
-        // Cache successful API endpoint
-        this.endpointCache.set(cacheKey, api);
-        break;
-      } catch (err) {
-        console.error(`Failed to get versions from ${api}:`, err);
-        continue;
-      }
-    }
-
-    // Merge and standardize the results
-    const seen = new Set<string>();
-    const merged: ResourceDocument[] = [];
-    for (const versions of results) {
-      for (const v of versions) {
-        // Use consistent version ID field
-        const key = v.versionId || v.id;
-        if (!seen.has(key)) {
-          // Standardize version object to match ResourceDocument interface
-          merged.push({
-            ...v,
-            versionId: v.versionId || v.id,
-            id: v.id || v.versionId
-          });
-          seen.add(key);
-        }
-      }
-    }
-
-    return merged;
+      });
+      return doc as ResourceDocument;
+    });
+    return { items, links };
   }
 
   fetchDocument(url: string): Observable<string> {
@@ -773,20 +677,19 @@ export class RegistryService {
         resource.origin
       );
     } else if (resource['versionscount'] && resource['versionscount'] > 0) {
-      // If there are versions but no default specified, get the first one
-      const versions = await this.getResourceVersionsAsync(
+      // If there are versions but no default specified, fetch first page of versions
+      const page = await this.listResourceVersionsAsync(
         groupType,
         groupId,
         resourceType,
         resourceId,
-        resource.origin
+        '' // initial pageRel to use default versions path
       );
-
-      if (versions && versions.length > 0) {
+      const versions = page.items;
+      if (versions.length > 0) {
         // Assume first version is default if not specified
         const firstVersion = versions[0];
         const versionId = firstVersion.versionId || firstVersion.id;
-
         return await this.getVersionDetailAsync(
           groupType,
           groupId,
@@ -949,10 +852,8 @@ export class RegistryService {
       resourceType,
       resourceId: versionId ? `${resourceId}/versions/${versionId}` : resourceId
     });
-    const cachedApi = this.endpointCache.get(endpointCacheKey);
-
-    // Get APIs to try (use origin if provided, otherwise all endpoints)
-    const apis = origin ? [origin] : this.getApiEndpoints();
+    const cachedApi = this.endpointCache.get(endpointCacheKey);    // Get APIs to try (use origin if provided, otherwise all endpoints)
+    const apis = origin ? [origin] : this.modelService.getApiEndpointsForGroupType(groupType);
     if (apis.length === 0) return null as any;
 
     // If we have a cached API, try it first (unless origin is specified)
@@ -1031,4 +932,104 @@ export class RegistryService {
     // If we reach this point, all APIs failed
     return null as any;
   }
+
+  /**
+   * Parse RFC5988 Link header into pagination info
+   */
+  private parseLinkHeader(header: string, pageSize: number) {
+    let totalCount: number | undefined;
+    let totalPages = 1;
+    let currentPage = 1;
+    const links = header.split(',').map(part => part.trim());
+    const rels: any = {};
+    links.forEach(link => {
+      const match = link.match(/<([^>]+)>;\s*rel="?(\w+)"?(?:;count=(\d+))?/);
+      if (match) {
+        const url = match[1];
+        const rel = match[2];
+        const count = match[3] ? parseInt(match[3], 10) : undefined;
+        rels[rel] = { url, count };
+        if (count !== undefined) {
+          totalCount = count;
+        }
+      }
+    });
+    if (totalCount !== undefined) {
+      totalPages = Math.ceil(totalCount / pageSize);
+    } else if (rels['last'] && rels['last'].url) {
+      const params = new URL(rels['last'].url).searchParams;
+      const offset = parseInt(params.get('offset') || '0', 10);
+      totalPages = Math.floor(offset / pageSize) + 1;
+    }
+    if (rels['next']) {
+      const params = new URL(rels['next'].url).searchParams;
+      const nextOffset = parseInt(params.get('offset') || '0', 10);
+      currentPage = Math.floor(nextOffset / pageSize);
+    } else if (rels['prev']) {
+      const params = new URL(rels['prev'].url).searchParams;
+      const prevOffset = parseInt(params.get('offset') || '0', 10);
+      currentPage = Math.floor(prevOffset / pageSize) + 2;
+    }
+    return { currentPage, totalPages, pageSize, totalCount };
+  }
+
+  /**
+   * List groups using RFC5988 relation-based navigation (first, prev, next, last).
+   * @param groupType the type of group to list
+   * @param pageRel URL or relation name (e.g. '', 'first', 'next', full path)
+   */
+  listGroups(groupType: string, pageRel: string = ''): Observable<Page<Group[]>> {
+    const pagePath = pageRel || `/${groupType}`;
+    return from(this.listGroupsAsync(groupType, pagePath));
+  }
+
+  /**
+   * Async implementation of listGroups with relation-based URL
+   */
+  private async listGroupsAsync(groupType: string, pagePath: string): Promise<Page<Group[]>> {
+    const model = await lastValueFrom(this.modelService.getRegistryModel());
+    const apis = this.modelService.getApiEndpointsForGroupType(groupType);
+    if (apis.length === 0) {
+      return { items: [], links: {} };
+    }    const api = apis[0];
+    // Determine full URL: if pagePath is absolute, use as is; otherwise build via getApiUrl
+    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
+
+    console.log(`Requesting groups from: ${url}`);
+    const response = await lastValueFrom(
+      this.http.get<{ [id: string]: any }>(url, { observe: 'response' as const })
+    );
+    const data = response.body || {};
+
+    // Parse RFC5988 Link header with improved regex
+    const linkHeader = response.headers.get('Link') || '';
+    console.log(`Link header received for groups: ${linkHeader}`);
+
+    const links: any = {};
+    linkHeader.split(',').forEach(part => {
+      // More robust regex to handle various link header formats
+      const match = part.trim().match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+      if (match) {
+        links[match[2]] = match[1];
+        console.log(`Found link relation: ${match[2]} -> ${match[1]}`);
+      } else {
+        console.warn(`Failed to parse link header part: ${part}`);
+      }
+    });
+    // Map entries to Group[]
+    const meta = model.groups[groupType] || { singular: groupType, attributes: {} };
+    const groups: Group[] = Object.entries(data).map(([key, entry]: [string, any]) => {
+      const idKey = meta.singular + 'id';
+      return {
+        id: entry[idKey] || entry.id || key,
+        name: entry.name,
+        createdAt: entry.createdat,
+        modifiedAt: entry.modifiedat,
+        origin: api,
+        ...entry
+      } as Group;
+    });
+    return { items: groups, links };
+  }
+
 }

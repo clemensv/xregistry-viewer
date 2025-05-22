@@ -8,22 +8,24 @@ import { ModelService } from '../../services/model.service';
 import { Group } from '../../models/registry.model';
 import { FormsModule } from '@angular/forms';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
+import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 
 @Component({
   standalone: true,
   selector: 'app-groups',
-  imports: [CommonModule, RouterModule, FormsModule], // Added ResourceDocumentItemComponent
+  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent],
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
 export class GroupsComponent implements OnInit {
   groupType!: string;
-  groups$!: Observable<Group[]>;
   resourceTypes$!: Observable<string[]>;
   groupAttributes: { [key: string]: any } = {};
   private suppressGroupAttributes = ['groupid', 'self', 'xid', 'epoch', 'createdat', 'modifiedat'];
   registryModel: any = null;
+  groupsList: Group[] = [];
+  pageLinks: LinkSet = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -47,8 +49,6 @@ export class GroupsComponent implements OnInit {
       this.registryModel = model;
     });
 
-    this.groups$ = this.registry.listGroups(this.groupType);
-
     this.resourceTypes$ = this.route.paramMap.pipe(
       map(params => params.get('groupType')!),
       distinctUntilChanged(),
@@ -64,6 +64,22 @@ export class GroupsComponent implements OnInit {
         })
       ))
     );
+
+    this.loadGroups();
+  }
+
+  /** Load groups with current pagination */
+  loadGroups(pageRel: string = ''): void {
+    this.registry.listGroups(this.groupType, pageRel)
+      .subscribe(page => {
+        this.groupsList = page.items;
+        this.pageLinks = page.links;
+        this.cdr.markForCheck();
+      });
+  }
+
+  onPageChange(pageRel: string): void {
+    this.loadGroups(pageRel);
   }
 
   get displayGroupAttributes(): string[] {
