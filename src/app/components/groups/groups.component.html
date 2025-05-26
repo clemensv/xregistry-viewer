@@ -1,7 +1,28 @@
-<div class="groups">
-  <h2>Registry Groups</h2>
-  <app-pagination *ngIf="pageLinks" [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>
-  <div *ngIf="groupsList.length > 0" class="grid-container">
+<div class="header-outer">
+  <div class="page-header">
+    <h2>{{ (modelService.getRegistryModel() | async)?.groups?.[groupType]?.plural || 'Registry Groups' }}</h2>
+    <div class="view-toggle">
+      <button [class.active]="viewMode === 'cards'" (click)="setViewMode('cards')" title="Card View">
+        <i class="material-icons">grid_view</i>
+      </button>
+      <button [class.active]="viewMode === 'list'" (click)="setViewMode('list')" title="List View">
+        <i class="material-icons">list</i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Pagination row within header -->
+  <div class="pagination-header" *ngIf="pageLinks">
+    <div class="pagination-info">
+      <span class="results-count" *ngIf="groupsList && groupsList.length">
+        Showing {{ groupsList.length }} groups
+      </span>
+    </div>
+    <app-pagination [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>
+  </div>
+</div>
+
+<!-- Cards View --><div class="groups">  <div *ngIf="viewMode === 'cards' && groupsList.length > 0" class="grid-container cards-view">
     <div *ngFor="let group of groupsList" class="grid-item">
       <h3>
         <span class="material-icons group-icon">folder</span>
@@ -16,17 +37,7 @@
           {{ group['description'] }}
         </div>
       </div>
-      <div class="attribute simple-attribute" *ngIf="group['labels']">
-        <div class="attribute-header">
-          <strong>Labels</strong>
-        </div>
-        <div class="attribute-value">
-          <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">
-            <span class="label-key">{{ label }}</span>:
-            <span class="label-value">{{ group['labels'][label] }}</span>
-          </div>
-        </div>
-      </div>        <!-- Resource Types Section - optimized formatting -->
+            <div class="attribute simple-attribute" *ngIf="group['labels']">        <div class="attribute-header">          <strong>Labels</strong>        </div>        <div class="attribute-value">          <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">            <span class="label-key">{{ label }}</span>:            <span class="label-value">{{ group['labels'][label] }}</span>          </div>        </div>      </div>      <!-- Group Attributes Display -->      <ng-container *ngFor="let attrName of displayGroupAttributes">        <div class="attribute simple-attribute group-attributes" *ngIf="hasValue(group[attrName])">          <div class="attribute-header">            <strong>{{ attrName }}</strong>            <span class="attribute-type" *ngIf="groupAttributes[attrName]?.type">{{ groupAttributes[attrName].type }}</span>          </div>          <div class="attribute-value">            <app-resource-document-item               [item]="{                key: attrName,                value: group[attrName],                type: groupAttributes[attrName]?.type || typeof group[attrName],                description: groupAttributes[attrName]?.description,                itemModel: groupAttributes[attrName],                isExpanded: false              }"              [nestingLevel]="0"              [initialExpanded]="false">            </app-resource-document-item>          </div>        </div>      </ng-container>        <!-- Resource Types Section - optimized formatting -->
       <div class="attribute simple-attribute resource-types">
         <div class="attribute-header unified-item-row array-row">
           <strong>Resource Types</strong>
@@ -47,8 +58,32 @@
             <span>Created: {{ group['createdAt'] | date:'short' }}</span>&nbsp;|
             <span>Modified: {{ group['modifiedAt'] | date:'short' }}</span>
           </small>
-        </footer>
-      </div>
+        </footer>      </div>
     </div>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="viewMode === 'list' && groupsList.length > 0" class="list-view">
+    <table class="groups-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Origin</th>
+          <th>Resource Types</th>
+          <th>Created At</th>
+          <th>Modified At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Use tr with app-group-row attribute -->
+        <tr *ngFor="let group of groupsList"
+            app-group-row
+            [group]="group"
+            [groupType]="groupType"
+            [resourceTypes]="getResourceTypesItem(group)?.value || []">
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

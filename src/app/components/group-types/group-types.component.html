@@ -1,36 +1,93 @@
 <div class="group-types">
-  <h2>Group Types</h2>
-  <div class="grid-container" *ngIf="groupTypes$ | async as gts">
+  <div class="page-header">
+    <h2>Group Types</h2>
+    <div class="view-toggle">
+      <button [class.active]="viewMode === 'cards'" (click)="setViewMode('cards')" title="Card View">
+        <i class="material-icons">grid_view</i>
+      </button>
+      <button [class.active]="viewMode === 'list'" (click)="setViewMode('list')" title="List View">
+        <i class="material-icons">list</i>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="viewMode === 'cards' && (groupTypes$ | async) as gts" class="grid-container cards-view">
     <div *ngFor="let gt of gts" class="grid-item">
-      <h3>
-        <span class="material-icons group-type-icon">category</span>
-        {{ gt.model.plural }}
-      </h3>
+      <div class="card-header">
+        <span class="material-icons group-type-icon" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
+        <h3>{{ gt.model.plural }}</h3>
+      </div>
 
-      <div class="attribute simple-attribute description-attribute">
-        <div class="attribute-header">
-          <strong>Description</strong>
+      <div class="card-content">
+        <div class="description" *ngIf="gt.model.description">
+          {{ gt.model.description }}
         </div>
-        <div class="attribute-value">
-          {{ gt.model.description || 'No description available.' }}
+
+        <div class="description no-description" *ngIf="!gt.model.description">
+          No description available for this group type.
+        </div>
+
+        <div class="resource-types-section" *ngIf="getResourceTypesCount(gt.model) > 0">
+          <div class="section-header">
+            <strong class="auxiliary-text">Resource Types</strong>
+            <span class="count-badge">{{ getResourceTypesCount(gt.model) }}</span>
+          </div>
+          <div class="resource-types-list">
+            <span *ngFor="let rt of getResourceTypesList(gt.model)" class="resource-type-tag auxiliary-text">
+              {{ rt }}
+            </span>
+          </div>
+        </div>
+
+        <div class="no-resources" *ngIf="getResourceTypesCount(gt.model) === 0">
+          <span class="no-resources-text auxiliary-text">No resource types defined</span>
         </div>
       </div>
 
-      <div class="attribute simple-attribute">
-        <div class="attribute-header">
-          <strong>Group Type</strong>
-        </div>
-        <div class="attribute-value">
-          {{ gt.groupType }}
-        </div>
-      </div>
-
-      <div class="tile-footer-container">
-        <a [routerLink]="[gt.groupType]" class="tile">
-          <span class="material-icons">list</span>
-          Browse Groups
+      <div class="card-footer">
+        <a [routerLink]="[gt.groupType]" class="browse-link">
+          <span class="material-icons">arrow_forward</span>
+          Browse
         </a>
       </div>
     </div>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="viewMode === 'list' && (groupTypes$ | async) as gts" class="list-view">
+    <table class="group-types-table">
+      <thead>
+        <tr>
+          <th>Group Type</th>
+          <th>Plural Name</th>
+          <th>Description</th>
+          <th>Resource Types</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let gt of gts">
+          <td>
+            <div class="table-group-type">
+              <span class="material-icons group-type-icon-small" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
+              <span class="group-type-name">{{ gt.groupType }}</span>
+            </div>
+          </td>
+          <td class="plural-name">{{ gt.model.plural }}</td>
+          <td class="description-cell">{{ gt.model.description || '-' }}</td>
+          <td>
+            <div *ngIf="getResourceTypesCount(gt.model) > 0" class="resource-types-compact">
+              <span *ngFor="let rt of getResourceTypesList(gt.model)" class="resource-type-pill">{{ rt }}</span>
+            </div>
+            <span *ngIf="getResourceTypesCount(gt.model) === 0" class="no-resources-indicator">-</span>
+          </td>
+          <td>
+            <a [routerLink]="[gt.groupType]" class="table-action-button">
+              <span class="material-icons">arrow_forward</span>
+              Browse
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

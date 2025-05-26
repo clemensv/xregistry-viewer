@@ -3,17 +3,14 @@ import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angula
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { map, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { RegistryService } from '../../services/registry.service';
-import { ModelService } from '../../services/model.service';
-import { Group } from '../../models/registry.model';
+import { RegistryService } from '../../services/registry.service';import { ModelService } from '../../services/model.service';import { DebugService } from '../../services/debug.service';import { Group } from '../../models/registry.model';
 import { FormsModule } from '@angular/forms';
-import { ResourceDocumentItem } from '../../models/resource-document-item.model';
-import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
+import { ResourceDocumentItem } from '../../models/resource-document-item.model';import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';import { LinkSet, PaginationComponent } from '../pagination/pagination.component';import { GroupRowComponent } from '../group-row/group-row.component';
 
 @Component({
   standalone: true,
   selector: 'app-groups',
-  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, GroupRowComponent, ResourceDocumentItemComponent],
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
@@ -26,13 +23,9 @@ export class GroupsComponent implements OnInit {
   registryModel: any = null;
   groupsList: Group[] = [];
   pageLinks: LinkSet = {};
+  viewMode: 'cards' | 'list' = 'cards'; // Default view mode
 
-  constructor(
-    private route: ActivatedRoute,
-    private registry: RegistryService,
-    private modelService: ModelService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  constructor(    private route: ActivatedRoute,    private registry: RegistryService,    public modelService: ModelService,    private cdr: ChangeDetectorRef,    private debug: DebugService  ) {}
 
   ngOnInit(): void {
     this.groupType = this.route.snapshot.paramMap.get('groupType') || '';
@@ -59,7 +52,7 @@ export class GroupsComponent implements OnInit {
             return [];
           }
           const resourceTypes = Object.keys(model.groups[gt].resources);
-          console.log('Extracted resourceTypes:', resourceTypes);
+          this.debug.log('Extracted resourceTypes:', resourceTypes);
           return resourceTypes;
         })
       ))
@@ -67,19 +60,32 @@ export class GroupsComponent implements OnInit {
 
     this.loadGroups();
   }
-
   /** Load groups with current pagination */
   loadGroups(pageRel: string = ''): void {
     this.registry.listGroups(this.groupType, pageRel)
       .subscribe(page => {
         this.groupsList = page.items;
         this.pageLinks = page.links;
+
+        // Only set default view mode on initial load (when pageRel is empty)
+        if (!pageRel) {
+        if (this.groupsList.length > 20) {
+          this.viewMode = 'list';
+        } else {
+          this.viewMode = 'cards';
+        }
+        }
+        // For pagination (pageRel is not empty), preserve current viewMode
+
         this.cdr.markForCheck();
       });
   }
-
   onPageChange(pageRel: string): void {
     this.loadGroups(pageRel);
+  }
+
+  setViewMode(mode: 'cards' | 'list'): void {
+    this.viewMode = mode;
   }
 
   get displayGroupAttributes(): string[] {
@@ -90,10 +96,20 @@ export class GroupsComponent implements OnInit {
 
   /** reuse hasValue from ResourcesComponent or reimplement*/
   hasValue(value: any): boolean {
-    if (value == null) return false;
-    if (Array.isArray(value)) return value.length > 0;
-    if (value && typeof value === 'object') return Object.keys(value).length > 0;
-    return value !== '';
+    // Check for null, undefined, or empty string
+    if (value === null || value === undefined || value === '') {
+      return false;
+    }
+    // Check for empty arrays
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    // Check for empty objects (but not null)
+    if (value && typeof value === 'object') {
+      return Object.keys(value).length > 0;
+    }
+    // For primitive values (numbers, booleans, etc.)
+    return true;
   }
 
   /**

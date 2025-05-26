@@ -1,0 +1,9 @@
+/* filepath: c:\git\xregistry-viewer\src\app\components\resource-row\resource-row.component.scss */
+.docs-link {
+  color: #007bff;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

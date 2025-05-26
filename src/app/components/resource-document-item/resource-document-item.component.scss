@@ -156,23 +156,20 @@
         outline-offset: 2px;
       }
 
+      i.material-icons {
+        font-size: calc($body-size * 1.2);
+        color: c(dark);
+        transition: all 0.2s ease;
+      }
+
       /* Force specific colors based on expanded state */
-      .expanded & {
+      .expanded & i.material-icons {
         color: c(primary);
       }
 
-      /* Force specific icon for expanded state */
-      .expanded &::after {
-        content: 'expand_more';
-        display: none;
-        /* Just for specificity */
-      }
-
-      /* Force specific icon for collapsed state */
-      .collapsed &::after {
-        content: 'chevron_right';
-        display: none;
-        /* Just for specificity */
+      /* Force specific colors based on collapsed state */
+      .collapsed & i.material-icons {
+        color: c(dark);
       }
     }
 
@@ -427,13 +424,13 @@
 // Simple attributes with header and value sections
 .simple-attribute-container {
   position: relative;
-  padding: 0.75rem;
-  background-color: #fff;
+  padding: 1rem;
+  background-color: #f8f9fa;
   border-radius: 6px;
-  border: 1px solid #e0e0e0;
-  border-left: 3px solid #28a745; // Green tint for simple values
+  border: 1px solid #e9ecef;
+  border-left: 3px solid #28a745 !important; // Green tint for simple values
   margin-bottom: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   &::before {
     content: '';
@@ -456,69 +453,94 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     align-items: center;
 
     strong {
       font-weight: 600;
-      color: #2c3e50;
-      font-size: vars.$content-size;
+      color: #495057;
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 0.25rem;
     }
 
     .attribute-type {
-      font-size: vars.$small-size;
+      font-size: 0.75rem;
       color: #457B9D;
-      background-color: #F1FAEE;
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid #A8DADC;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      border: 1px solid #d1ecf1;
       font-weight: 500;
     }
 
     .attribute-description {
-      font-size: vars.$small-size;
+      font-size: 0.8rem;
       color: #6c757d;
       font-style: italic;
       flex-basis: 100%;
       margin-top: 0.25rem;
+      display: block;
     }
   }
 
   .attribute-value {
-    font-size: vars.$content-size * 1.1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    span:not(.copy-btn) {
+      flex: 1;
+      font-size: 0.85rem;
     color: #333;
-    word-break: break-word;
-    padding: 0.25rem 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+      word-break: break-all;
+      font-weight: 500;
 
-    .null-value {
+      &.null-value {
       color: #808080;
-      /* Match the .null class color */
       font-style: italic;
-      padding: 2px 6px;
-      border-radius: 4px;
-      display: inline-block;
     }
 
-    .undefined-value {
+      &.undefined-value {
       color: #7a3e9d;
-      /* Match the .special class color */
       font-style: italic;
-      padding: 2px 6px;
+      }
+    }
+
+    .copy-btn {
+      flex: 0 0 auto;
+      background: none;
+      border: 1px solid #dee2e6;
       border-radius: 4px;
-      display: inline-block;
+      padding: 0.25rem;
+      cursor: pointer;
+      color: #6c757d;
+      display: inline-flex;
+      align-items: center;
+
+      &:hover {
+        background: #f8f9fa;
+        border-color: #007bff;
+        color: #007bff;
     }
 
-    .any-value {
-      margin-top: 0.5rem;
-      display: block;
+      i.material-icons {
+        font-size: 14px;
+        line-height: 1;
+      }
     }
 
-    // Ensure specific values have consistent styling with code syntax highlighting
+    // Ensure empty values show properly
     span:not(.null-value):not(.undefined-value):not(.any-value) {
       &:empty:after {
         content: '""';
-        color: #008000; // Match string color
+        color: #808080;
+        font-style: italic;
       }
     }
   }
@@ -755,4 +777,239 @@
   top: -10px;
   right: 5px;
   z-index: 10;
+}
+
+// Support for horizontal flow within complex attributes - Using CSS Grid approach
+.object-items,
+.array-items {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  padding: 0.5rem;
+  align-items: start;
+
+  // Individual nested items
+  app-resource-document-item {
+    width: 100%;
+
+    // Items with simple attribute containers should flow in grid
+    .simple-attribute-container {
+      background: #f8f9fa !important;
+      border: 1px solid #e9ecef !important;
+      border-left: 3px solid #28a745 !important; // Green tint for simple values
+      border-radius: 6px !important;
+      padding: 1rem !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+      height: fit-content;
+
+      .attribute-header {
+        margin-bottom: 0.75rem;
+
+        strong {
+          font-size: 0.9rem;
+          color: #495057;
+          font-weight: 600;
+          display: block;
+          margin-bottom: 0.25rem;
+        }
+
+        .attribute-type {
+          font-size: 0.75rem;
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid #d1ecf1;
+          padding: 0.1rem 0.4rem;
+          border-radius: 3px;
+        }
+
+        .attribute-description {
+          font-size: 0.8rem;
+          color: #6c757d;
+          font-style: italic;
+          margin-top: 0.25rem;
+          display: block;
+        }
+      }
+
+      .attribute-value {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        span:not(.copy-btn) {
+          flex: 1;
+          font-size: 0.85rem;
+          color: #333;
+          font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+          background: rgba(255, 255, 255, 0.9);
+          padding: 0.3rem 0.5rem;
+          border-radius: 4px;
+          border: 1px solid #dee2e6;
+          word-break: break-all;
+          font-weight: 500;
+
+          &.null-value {
+            color: #808080;
+            font-style: italic;
+          }
+
+          &.undefined-value {
+            color: #7a3e9d;
+            font-style: italic;
+          }
+        }
+
+        .copy-btn {
+          flex: 0 0 auto;
+          background: none;
+          border: 1px solid #dee2e6;
+          border-radius: 4px;
+          padding: 0.25rem;
+          cursor: pointer;
+          color: #6c757d;
+          display: inline-flex;
+          align-items: center;
+
+          &:hover {
+            background: #f8f9fa;
+            border-color: #007bff;
+            color: #007bff;
+          }
+
+          i.material-icons {
+            font-size: 14px;
+            line-height: 1;
+          }
+        }
+      }
+    }
+
+    // Items with complex content (unified-item-row for objects/arrays) should span full width
+    .unified-item-row.object-row,
+    .unified-item-row.array-row {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+    }
+
+    // Make sure expanded content also spans full width
+    .expanded-content {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+
+      // Nested array/object items should also use grid layout
+      .array-items,
+      .object-items {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 0.5rem;
+      }
+    }
+  }
+
+  // Empty notice should span full width
+  .empty-notice {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 2rem;
+  }
+
+  // Array item details should span full width
+  .array-item-details {
+    grid-column: 1 / -1;
+    background: rgba(91, 192, 222, 0.1);
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+
+    .detail-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+
+      .detail-label {
+        font-size: 0.85rem;
+        color: #495057;
+
+        .detail-value {
+          font-weight: 600;
+          color: #333;
+        }
+      }
+    }
+  }
+
+  // Mobile responsive
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr !important;
+  }
+
+  // Tablet responsive
+  @media (min-width: 769px) and (max-width: 1024px) {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  }
+}
+
+// Additional specific overrides to ensure grid layout works
+.array-items > app-resource-document-item,
+.object-items > app-resource-document-item {
+  // Force grid item behavior for direct children
+  display: block;
+  width: 100%;
+
+  // Simple items should fit in grid cells
+  .resource-document-item .simple-attribute-container {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box;
+  }
+
+  // Complex items should span full width
+  .resource-document-item:has(.unified-item-row.object-row),
+  .resource-document-item:has(.unified-item-row.array-row) {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  // Fallback for complex items without :has() support
+  .unified-item-row.object-row,
+  .unified-item-row.array-row {
+    // Force the parent grid item to span all columns
+    ~ * {
+      grid-column: 1 / -1 !important;
+    }
+  }
+}
+
+// Force parent grid behavior when containing complex items
+.array-items:has(.unified-item-row.object-row),
+.array-items:has(.unified-item-row.array-row),
+.object-items:has(.unified-item-row.object-row),
+.object-items:has(.unified-item-row.array-row) {
+  // Switch to single column for complex content
+  grid-template-columns: 1fr !important;
+}
+
+// Alternative approach using attribute selectors for broader support
+app-resource-document-item[data-complex="true"] {
+  grid-column: 1 / -1 !important;
+}
+
+// Simpler grid control using data attributes
+.array-items,
+.object-items {
+  // Simple approach: use CSS Grid with proper targeting
+  app-resource-document-item[data-item-type="simple"] {
+    // Simple items stay in grid flow
+    grid-column: span 1;
+  }
+
+  app-resource-document-item[data-item-type="array"],
+  app-resource-document-item[data-item-type="object"] {
+    // Complex items span full width
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
 }

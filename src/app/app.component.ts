@@ -5,6 +5,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { FontService } from './services/font.service';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   standalone: true,
@@ -19,6 +20,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     private fontService: FontService,
+    private themeService: ThemeService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -27,6 +29,7 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     // Dynamically load Inter font if in browser
     this.fontService.loadInterFont();
+    // Theme service is automatically initialized via dependency injection
   }
 
   ngAfterViewInit() {

@@ -1,0 +1,10 @@
+<td><a [routerLink]="[resource && (resource['id'] || resource['name'] || '')]">{{ resource && (resource['name'] || resource['id'] || 'Unknown') }}</a></td>
+<td>{{ resource && (resource['description'] || '-') }}</td>
+<td>
+  <a *ngIf="hasDocumentSupport && resource && (resource['docs'] || resource['resourceUrl'])" [href]="resource && (resource['docs'] || resource['resourceUrl'])" target="_blank" class="docs-link">
+    View Docs
+  </a>
+  <span *ngIf="!hasDocumentSupport || !resource || (!resource['docs'] && !resource['resourceUrl'])">-</span>
+</td>
+<td>{{ resource && resource['createdAt'] ? (resource['createdAt'] | date:'short') : '-' }}</td>
+<td>{{ resource && resource['modifiedAt'] ? (resource['modifiedAt'] | date:'short') : '-' }}</td>

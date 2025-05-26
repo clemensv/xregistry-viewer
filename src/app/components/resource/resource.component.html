@@ -1,53 +1,57 @@
 <div class="resource-container">
-  <!-- Multiple versions mode -->
+  <!-- Multiple versions mode with sidebar layout -->
   <ng-container *ngIf="hasMultipleVersions">
     <h2>Resource: {{ resourceId }}</h2>
 
-    <!-- Version History -->
-    <div class="versions-list">
-      <h3>Version History</h3>
-      <app-pagination *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" [links]="pageLinks" (pageChange)="onVersionPageChange($event)"></app-pagination>
-      <table>
-        <thead>
-          <tr>
-            <th>Version ID</th>
-            <th>Created</th>
-            <th>Modified</th>
-            <th>Default</th>
-            <th>Origin</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let v of versionsList" [class.default-version]="v.isDefault">
-            <td>{{ v.id || v.versionid }}</td>
-            <td>{{ (v.createdAt || v.createdat) | date:'short' }}</td>
-            <td>{{ (v.modifiedAt || v.modifiedat) | date:'short' }}</td>
-            <td><span *ngIf="v.isDefault" class="default-badge">✓</span></td>
-            <td>{{ v.origin }}</td>
-            <td><a [routerLink]="['versions', v.id || v.versionid]" class="btn-view">View</a></td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #noVersions>
-        <p>No version history available.</p>
-      </ng-template>
-    </div>
+    <div class="resource-layout">
+      <!-- Main content area -->
+      <div class="main-content">
+        <div *ngIf="defaultVersion$ | async as defaultVersion" class="default-version-section">
+          <h3>Default Version: {{ defaultVersion.id }}</h3>
+          <div class="origin-field" *ngIf="defaultVersion.origin">Origin: {{ defaultVersion.origin }}</div>
+          <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
+          <app-resource-document
+            [resourceDocument]="defaultVersion"
+            [resourceType]="resourceType"
+            [resourceAttributes]="resourceAttributes"
+            [hasDocumentSupport]="resourceTypeData?.hasdocument"
+            [showAttributes]="true"
+            [showDocument]="true"
+            [initialExpanded]="true">
+          </app-resource-document>
+        </div>
+      </div>
 
-    <!-- Always show default version too -->
-    <div *ngIf="defaultVersion$ | async as defaultVersion" class="latest-version">
-      <h3>Default Version: {{ defaultVersion.id }}</h3>
-      <div class="origin-field" *ngIf="defaultVersion.origin">Origin: {{ defaultVersion.origin }}</div>
-      <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
-      <app-resource-document
-        [resourceDocument]="defaultVersion"
-        [resourceType]="resourceType"
-        [resourceAttributes]="resourceAttributes"
-        [hasDocumentSupport]="resourceTypeData?.hasdocument"
-        [showAttributes]="true"
-        [showDocument]="true"
-        [initialExpanded]="true">
-      </app-resource-document>
+      <!-- Version History Sidebar -->
+      <div class="versions-sidebar">
+        <div class="sidebar-header">
+          <h3>Version History</h3>
+          <app-pagination
+            *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)"
+            [links]="pageLinks"
+            (pageChange)="onVersionPageChange($event)">
+          </app-pagination>
+        </div>
+
+        <div class="versions-list-compact">
+          <div *ngFor="let v of versionsList"
+               class="version-item"
+               [class.default-version]="v.isDefault">
+            <div class="version-header">
+              <span class="version-id">{{ v.id || v.versionid }}</span>
+              <span *ngIf="v.isDefault" class="default-badge">Default</span>
+            </div>
+            <div class="version-meta">
+              <small>Modified: {{ (v.modifiedAt || v.modifiedat) | date:'short' }}</small>
+            </div>
+            <a [routerLink]="['versions', v.id || v.versionid]" class="btn-view-compact">View</a>
+          </div>
+
+          <div *ngIf="versionsList.length === 0" class="no-versions">
+            <p>No version history available.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </ng-container>
 

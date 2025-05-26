@@ -155,12 +155,99 @@
 
   /* Attributes section styles */
   .attributes-section {
-    .attributes-grid {
+
+    /* Simple Attributes Section */
+    .simple-attributes-section {
+      margin-bottom: 2rem;
+    }
+
+    .simple-attributes-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1rem;
-      margin-bottom: 1.5rem;
       width: 100%;
+    }
+
+    /* Complex Attributes Section */
+    .complex-attributes-section {
+      margin-top: 2rem;
+    }
+
+    .attributes-separator {
+      position: relative;
+      margin: 2rem 0;
+      text-align: center;
+
+      hr {
+        border: 0;
+        height: 2px;
+        background: linear-gradient(to right, transparent, #e9ecef 20%, #e9ecef 80%, transparent);
+        margin: 0;
+      }
+
+      .separator-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #f8f9fa;
+        padding: 0 1rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+    }
+
+    .complex-attributes-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .complex-attribute-tile {
+      width: 100%;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+
+      // Make complex attributes span full width
+      app-resource-document-item {
+        display: block;
+        width: 100%;
+
+        // Allow simple attributes within complex attributes to flow horizontally
+        ::ng-deep .attribute-tile.simple-attribute {
+          display: inline-block;
+          width: auto;
+          min-width: 200px;
+          margin-right: 1rem;
+          margin-bottom: 0.5rem;
+          vertical-align: top;
+        }
+
+        // For object/array content, create horizontal flow for simple children
+        ::ng-deep .object-content,
+        ::ng-deep .array-content {
+          .simple-attribute-container {
+            display: inline-flex;
+            flex-direction: column;
+            width: auto;
+            min-width: 180px;
+            max-width: 250px;
+            margin-right: 1rem;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            vertical-align: top;
+          }
+        }
+      }
     }
 
     .attribute-tile {
@@ -207,12 +294,53 @@
         }
       }
 
+      .attribute-value-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
       .attribute-value {
         font-size: vars.$content-size * 1.1;
         color: #333;
         word-break: break-word;
         padding: 0.25rem 0;
+        flex: 1;
       }
+
+      .copy-btn {
+        background: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 0.25rem;
+        cursor: pointer;
+        color: #6c757d;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+
+        &:hover {
+          background: #f8f9fa;
+          border-color: #007bff;
+          color: #007bff;
+        }
+
+        .material-icons {
+          font-size: 14px;
+        }
+      }
+    }
+
+    // Remove old styles that are now redundant
+    .attributes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      width: 100%;
     }
 
     .complex-attribute {

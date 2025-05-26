@@ -1,16 +1,36 @@
-<nav class="pagination-bar" *ngIf="links && (links.first || links.prev || links.next || links.last)">
-  <ul class="pagination">
-    <li [class.disabled]="!links.first">
-      <button type="button" (click)="onRel('first')" [disabled]="!links.first">First</button>
-    </li>
-    <li [class.disabled]="!links.prev">
-      <button type="button" (click)="onRel('prev')" [disabled]="!links.prev">Prev</button>
-    </li>
-    <li [class.disabled]="!links.next">
-      <button type="button" (click)="onRel('next')" [disabled]="!links.next">Next</button>
-    </li>
-    <li [class.disabled]="!links.last">
-      <button type="button" (click)="onRel('last')" [disabled]="!links.last">Last</button>
-    </li>
-  </ul>
+<nav class="pagination-nav" *ngIf="links && (links.first || links.prev || links.next || links.last)">
+  <div class="pagination-controls">
+    <button
+      type="button"
+      class="pagination-btn pagination-btn-first"
+      (click)="onRel('first')"
+      [disabled]="!links.first"
+      title="First page">
+      <i class="material-icons">first_page</i>
+    </button>
+    <button
+      type="button"
+      class="pagination-btn pagination-btn-prev"
+      (click)="onRel('prev')"
+      [disabled]="!links.prev"
+      title="Previous page">
+      <i class="material-icons">chevron_left</i>
+    </button>
+    <button
+      type="button"
+      class="pagination-btn pagination-btn-next"
+      (click)="onRel('next')"
+      [disabled]="!links.next"
+      title="Next page">
+      <i class="material-icons">chevron_right</i>
+    </button>
+    <button
+      type="button"
+      class="pagination-btn pagination-btn-last"
+      (click)="onRel('last')"
+      [disabled]="!links.last"
+      title="Last page">
+      <i class="material-icons">last_page</i>
+    </button>
+  </div>
 </nav>

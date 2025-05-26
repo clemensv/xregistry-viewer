@@ -1,8 +1,38 @@
 <mat-toolbar color="primary">
   <a routerLink="/" class="logo-container">
-    <img src="xregistry-logo.svg" alt="xRegistry Explorer" class="logo title-logo">
+    <img *ngIf="currentTheme === 'light'" src="xregistry-logo.svg" alt="xRegistry Explorer" class="logo title-logo">
+    <img *ngIf="currentTheme === 'dark'" src="xregistry-logo-dark.svg" alt="xRegistry Explorer" class="logo title-logo">
   </a>
   <span class="spacer"></span>
+
+  <!-- Font Size Selector -->
+  <div class="control-group">
+    <button mat-icon-button [matMenuTriggerFor]="fontSizeMenu" aria-label="Font Size" title="Font Size">
+      <mat-icon>format_size</mat-icon>
+    </button>
+    <mat-menu #fontSizeMenu="matMenu">
+      <button mat-menu-item (click)="setFontSize('small')" [class.active]="currentFontSize === 'small'">
+        <mat-icon>text_fields</mat-icon>
+        <span>Small</span>
+      </button>
+      <button mat-menu-item (click)="setFontSize('medium')" [class.active]="currentFontSize === 'medium'">
+        <mat-icon>text_fields</mat-icon>
+        <span>Medium</span>
+      </button>
+      <button mat-menu-item (click)="setFontSize('large')" [class.active]="currentFontSize === 'large'">
+        <mat-icon>text_fields</mat-icon>
+        <span>Large</span>
+      </button>
+    </mat-menu>
+  </div>
+
+  <!-- Theme Selector -->
+  <div class="control-group">
+    <button mat-icon-button (click)="toggleTheme()" [title]="currentTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+      <mat-icon>{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+    </button>
+  </div>
+
   <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Settings">
     <mat-icon>settings</mat-icon>
   </button>

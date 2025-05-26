@@ -2,28 +2,47 @@
   <div class="resource-document-container" [class.has-document]="showDocument && (hasDocument() || cachedDocumentContent)">
     <!-- Attributes section -->
     <section *ngIf="showAttributes" class="attributes-section">
-      <div class="attributes-grid">
-        <ng-container *ngFor="let attr of getPrimitiveAttributes()">
-          <div class="attribute-tile simple-attribute">
-            <div class="attribute-header">
-              <strong>{{ attr.key }}</strong>
-              <span class="attribute-type">{{ attr.type | titlecase }}</span>
-              <span *ngIf="attr.description" class="attribute-description">{{ attr.description }}</span>
+
+      <!-- Simple Attributes Grid -->
+      <div *ngIf="getPrimitiveAttributes().length > 0" class="simple-attributes-section">
+        <div class="simple-attributes-grid">
+          <ng-container *ngFor="let attr of getPrimitiveAttributes()">
+            <div class="attribute-tile simple-attribute">
+              <div class="attribute-header">
+                <strong>{{ attr.key }}</strong>
+                <span class="attribute-type">{{ attr.type | titlecase }}</span>
+                <span *ngIf="attr.description" class="attribute-description">{{ attr.description }}</span>
+              </div>
+              <div class="attribute-value-row">
+                <div class="attribute-value" [title]="attr.value">{{ attr.value }}</div>
+                <button class="copy-btn" title="Copy value" (click)="copyToClipboard(attr.value); $event.stopPropagation();">
+                  <span class="material-icons">content_copy</span>
+                </button>
+              </div>
             </div>
-            <div class="attribute-value-row" style="display: flex; align-items: center;">
-              <div class="attribute-value" [title]="attr.value" style="margin-right: 8px;">{{ attr.value }}</div>
-              <button class="copy-btn" title="Copy value" (click)="copyToClipboard(attr.value); $event.stopPropagation();">
-                <span class="material-icons">content_copy</span>
-              </button>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Complex Attributes Section -->
+      <div *ngIf="getComplexAttributes().length > 0" class="complex-attributes-section">
+        <!-- Separator line -->
+        <div *ngIf="getPrimitiveAttributes().length > 0" class="attributes-separator">
+          <hr>
+          <span class="separator-label">Complex Attributes</span>
+        </div>
+
+        <div class="complex-attributes-container">
+          <ng-container *ngFor="let attr of getComplexAttributes()">
+            <div class="complex-attribute-tile">
+              <app-resource-document-item
+                [item]="attr"
+                [nestingLevel]="0"
+                [initialExpanded]="initialExpanded">
+              </app-resource-document-item>
             </div>
-          </div>
-        </ng-container>
-        <!-- Complex Attributes -->
-        <ng-container *ngFor="let attr of getComplexAttributes()">
-          <div class="attribute-tile complex-attribute">
-            <app-resource-document-item [item]="attr"></app-resource-document-item>
-          </div>
-        </ng-container>
+          </ng-container>
+        </div>
       </div>
 
       <!-- Show download link if base64 encoded document is available -->

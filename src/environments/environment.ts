@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:20996/api/registry',
+  debugMode: true,
+  apiBaseUrl: 'http://localhost:8080',
   baseUrl: '/'
 };

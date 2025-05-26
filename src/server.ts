@@ -134,12 +134,31 @@ export function app(): express.Express {
         fetchOptions.body = req;
       }
       console.log(`[${new Date().toISOString()}] [PROXY] Forwarding request to: ${target} with options:`, JSON.stringify({ ...fetchOptions, body: undefined }));
-      const response = await fetch(target, fetchOptions);
-      // Forward status and headers
+      const response = await fetch(target, fetchOptions);      // Forward status and headers
       res.status(response.status);
+
+      // Debug Link header specifically
+      const linkHeader = response.headers.get('Link');
+      if (linkHeader) {
+        console.log(`[${new Date().toISOString()}] [PROXY] Found Link header in response: "${linkHeader}"`);
+        // Ensure Link header is properly forwarded
+        res.setHeader('Link', linkHeader);
+        // Also set a duplicate header with a different case to test case-sensitivity
+        res.setHeader('link', linkHeader);
+      } else {
+        console.log(`[${new Date().toISOString()}] [PROXY] No Link header found in response`);
+      }
+
+      // Forward all headers
       response.headers.forEach((value, key) => {
+        // Debug each header
+        console.log(`[${new Date().toISOString()}] [PROXY] Forwarding header: ${key}: ${value}`);
         res.setHeader(key, value);
       });
+
+      // Log all headers that were set on the response
+      console.log(`[${new Date().toISOString()}] [PROXY] All headers set on response:`, res.getHeaders());
+
       console.log(`[${new Date().toISOString()}] [PROXY] Response from target: status=${response.status}, headers=${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
       if (response.body) {
         response.body.pipe(res);

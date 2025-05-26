@@ -1,4 +1,7 @@
-<div class="resource-document-item" [class.nested]="nestingLevel > 0">  <!-- Unified structure for all types -->
+<div class="resource-document-item"
+     [class.nested]="nestingLevel > 0"
+     [attr.data-item-type]="isSimpleValue(item.value) ? 'simple' : (isArray(item.value) ? 'array' : 'object')"
+     [attr.data-complex]="!isSimpleValue(item.value)">
   <div *ngIf="!isSimpleValue(item.value)" class="unified-item-row"
        [class.array-row]="isArray(item.value)"
        [class.object-row]="isObject(item.value) && !isArray(item.value)"
@@ -12,10 +15,10 @@
 
       <!-- Toggle icon for arrays and objects -->      <!-- Simple toggle button without complex bindings -->
       <button type="button"
-            class="toggle-icon material-icons"
+            class="toggle-icon"
             [attr.aria-expanded]="isExpanded()"
             (click)="$event.stopPropagation(); toggleExpansion($event)">
-            {{ isExpanded() ? 'expand_more' : 'chevron_right' }}
+            <i class="material-icons">{{ isExpanded() ? 'expand_more' : 'chevron_right' }}</i>
        </button>
 
     <!-- Key name for array/object items -->
@@ -51,13 +54,13 @@
           [language]="'json'">
         </app-code-highlight>
       </span>
-      <span *ngIf="!isAnyType() || item.value === null || item.value === undefined"
+      <span *ngIf="!isAnyType()"
             [class.null-value]="item.value === null"
             [class.undefined-value]="item.value === undefined">
         {{ item.value === null ? 'null' : (item.value === undefined ? 'undefined' : item.value) }}
         </span>
         <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
-          <span class="material-icons">content_copy</span>
+        <i class="material-icons">content_copy</i>
         </button>
     </div>
   </div>  <!-- Expanded content for arrays and objects -->
@@ -76,7 +79,9 @@
           <span *ngIf="getArrayItemType()" class="detail-label">Type: <span class="detail-value">{{ getArrayItemType() }}</span></span>
           <span *ngIf="getArrayItemDescription()" class="detail-label">Description: <span class="detail-value">{{ getArrayItemDescription() }}</span></span>
         </div>
-      </div>      <!-- Display array items -->
+      </div>
+
+      <!-- Display array items -->
       <ng-container *ngIf="!isAnyType()">
         <ng-container *ngFor="let arrayItem of getArrayItems(); let i = index">
           <app-resource-document-item
@@ -88,22 +93,18 @@
 
       <!-- Display JSON for 'any' type array content -->
       <div *ngIf="isAnyType()" class="any-value-container">
-        <div class="inline-flex align-center space-between">
-
         <app-code-highlight
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
-        <button class="copy-btn" title="Copy value">
-          <span class="material-icons">content_copy</span>
-        </button>
-      </div>
     </div>
   </div>
 
     <!-- For objects -->
     <div *ngIf="isObject(item.value)" class="object-items">
-      <div *ngIf="Object.keys(item.value).length === 0" class="empty-notice">No properties</div>      <!-- Display object properties -->
+      <div *ngIf="Object.keys(item.value).length === 0" class="empty-notice">No properties</div>
+
+      <!-- Display object properties -->
       <ng-container *ngIf="!isAnyType()">
         <ng-container *ngFor="let objItem of getObjectItems()">
           <app-resource-document-item
@@ -115,19 +116,15 @@
 
       <!-- Display JSON for 'any' type object content -->
       <div *ngIf="isAnyType()" class="any-value-container">
-
-         <div class="inline-flex align-center space-between">
           <app-code-highlight
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
-        <button class="copy-btn" title="Copy value">
-          <span class="material-icons">content_copy</span>
-        </button>
-        </div>
       </div>
     </div>
-  </div>  <!-- Improved collapsed preview with better click handling and visual cues -->
+  </div>
+
+    <!-- Improved collapsed preview with better click handling and visual cues -->
   <div *ngIf="isExpandable() && isCollapsed()"
        class="collapsed-preview"
        (click)="toggleExpansion($event)">
@@ -137,7 +134,7 @@
       <!-- For "any" type values, use JSON preview -->
       <div *ngIf="isAnyType()" class="preview-code">
         <pre><code [innerHTML]="getCollapsedPreviewText(item.value)"></code></pre>
-      </div>      <!-- For arrays, show a simplified preview instead of nested components -->
+        </div>        <!-- For arrays, show a simplified preview instead of nested components -->
       <div *ngIf="isArray(item.value) && !isAnyType()" class="preview-array-items">
         <div class="simplified-preview">
           <span *ngIf="item.value.length > 0" class="preview-summary">

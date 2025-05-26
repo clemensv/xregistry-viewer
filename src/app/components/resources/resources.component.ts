@@ -7,11 +7,12 @@ import { ResourceDocument } from '../../models/registry.model';
 import { ModelService } from '../../services/model.service';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
+import { ResourceRowComponent } from '../resource-row/resource-row.component';
 
 @Component({
   standalone: true,
   selector: 'app-resources',
-  imports: [CommonModule, RouterModule, ResourceDocumentComponent, PaginationComponent],
+  imports: [CommonModule, RouterModule, ResourceDocumentComponent, PaginationComponent, ResourceRowComponent],
   templateUrl: './resources.component.html',
   styleUrls: ['./resources.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
@@ -25,6 +26,7 @@ export class ResourcesComponent implements OnInit {
   resTypeHasDocument = false;
   resourceAttributes: { [key: string]: any } = {}; // Metadata for attributes
   loading = true; // Add loading property for template reference
+  viewMode: 'cards' | 'list' = 'cards'; // Default view mode
 
   private suppressAttributes = ['xid', 'self', 'epoch', 'isdefault', 'ancestor', 'versionscount', 'versionsCount', 'versionsurl', 'metaurl', 'createdat', 'modifiedat', 'createdAt', 'modifiedAt'];
 
@@ -33,6 +35,7 @@ export class ResourcesComponent implements OnInit {
     private registry: RegistryService,
     private modelService: ModelService
   ) {}
+
   ngOnInit(): void {
     this.loading = true;
     this.route.paramMap.subscribe(params => {
@@ -49,21 +52,52 @@ export class ResourcesComponent implements OnInit {
       });
       this.loadResources();
     });
-  }
-
-  loadResources(pageRel: string = ''): void {
+  }  loadResources(pageRel: string = ''): void {
     this.loading = true;
     this.registry.listResources(this.groupType, this.groupId, this.resourceType, pageRel)
       .subscribe(page => {
         console.log('loadResources links:', page.links);
         this.resourcesList = page.items;
+          // Process resources to ensure all required fields are present
+        this.resourcesList = this.resourcesList.map(resource => {
+          // Ensure name is available
+          if (!resource['name'] && resource['id']) {
+            resource['name'] = resource['id'];
+          }
+
+          // Ensure resourceUrl is mapped from docs
+          if (!resource['resourceUrl'] && resource['docs']) {
+            resource['resourceUrl'] = resource['docs'];
+          }
+
+          return resource;
+        });
+
+        // Debug the actual resources data
+        console.log('Resources loaded:', this.resourcesList);
+        if (this.resourcesList.length > 0) {
+          console.log('First resource sample:', this.resourcesList[0]);
+          console.log('Resource properties:', Object.keys(this.resourcesList[0]));
+        }
+
         this.pageLinks = page.links;
         this.loading = false;
+
+        // Set default view mode based on the number of items
+        if (this.resourcesList.length > 20) {
+          this.viewMode = 'list';
+        } else {
+          this.viewMode = 'cards';
+        }
       });
   }
 
   onPageChange(pageRel: string): void {
     this.loadResources(pageRel);
+  }
+
+  setViewMode(mode: 'cards' | 'list'): void {
+    this.viewMode = mode;
   }
 
   // These methods are now handled by the ResourceDocumentComponent

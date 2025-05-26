@@ -51,16 +51,244 @@ body {
   font-family: theme.$app-font-family;
   color: #333;
   background-color: #fafafa;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Make all font sizes throughout the app slightly smaller for better info density */
-h1 {font-size: 1.6rem;}
-h2 {font-size: 1.3rem;}
-h3 {font-size: 1.1rem;}
-h4 {font-size: 0.95rem;}
-h5 {font-size: 0.85rem;}
-h6 {font-size: 0.8rem;}
-p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
+/* Font size system for high information density */
+/* Small font size variant */
+body.font-size-small {
+  h1 {font-size: 1.2rem;}
+  h2 {font-size: 1.0rem;}
+  h3 {font-size: 0.9rem;}
+  h4 {font-size: 0.8rem;}
+  h5 {font-size: 0.75rem;}
+  h6 {font-size: 0.7rem;}
+  p, div, span, a, input, button, select, textarea {font-size: 0.75rem;}
+  .auxiliary-text {font-size: 0.6rem;} /* 8pt equivalent */
+  .table-text {font-size: 0.7rem;}
+  .card-text {font-size: 0.72rem;}
+}
+
+/* Medium font size variant (default) */
+body.font-size-medium {
+  h1 {font-size: 1.4rem;}
+  h2 {font-size: 1.15rem;}
+  h3 {font-size: 1.0rem;}
+  h4 {font-size: 0.9rem;}
+  h5 {font-size: 0.8rem;}
+  h6 {font-size: 0.75rem;}
+  p, div, span, a, input, button, select, textarea {font-size: 0.85rem;}
+  .auxiliary-text {font-size: 0.7rem;} /* 8pt equivalent */
+  .table-text {font-size: 0.8rem;}
+  .card-text {font-size: 0.82rem;}
+}
+
+/* Large font size variant */
+body.font-size-large {
+  h1 {font-size: 1.6rem;}
+  h2 {font-size: 1.3rem;}
+  h3 {font-size: 1.1rem;}
+  h4 {font-size: 0.95rem;}
+  h5 {font-size: 0.85rem;}
+  h6 {font-size: 0.8rem;}
+  p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
+  .auxiliary-text {font-size: 0.75rem;} /* 8pt equivalent */
+  .table-text {font-size: 0.85rem;}
+  .card-text {font-size: 0.87rem;}
+}
+
+/* Dark theme */
+body.theme-dark {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+
+  /* Update theme colors for dark mode */
+  --bg-card: #2d2d2d;
+  --bg-hover: #3d3d3d;
+  --bg-app: #1a1a1a;
+  --bg-surface: #2d2d2d;
+  --bg-elevated: #3d3d3d;
+  --fg-text: #e0e0e0;
+  --fg-secondary-text: #b0b0b0;
+  --fg-tertiary-text: #888888;
+  --fg-divider: #404040;
+  --fg-border: #404040;
+  --primary-color: #6d9eeb;
+  --success-color: #90ee90;
+  --warning-color: #ffd700;
+  --error-color: #ff6b6b;
+  --info-color: #87ceeb;
+  --link-color: #6d9eeb;
+  --code-bg: #1d1d1d;
+
+  /* Dark theme Material components */
+  .mat-toolbar.mat-primary {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0 !important;
+  }
+
+  .mat-mdc-menu-panel {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0 !important;
+  }
+
+  .mat-mdc-menu-item {
+    color: #e0e0e0 !important;
+
+    &:hover {
+      background-color: #3d3d3d !important;
+    }
+
+    &.active {
+      background-color: rgba(109, 158, 235, 0.2) !important;
+      color: #6d9eeb !important;
+
+      .mat-icon {
+        color: #6d9eeb !important;
+      }
+    }
+  }
+
+  .mat-icon {
+    color: #e0e0e0 !important;
+  }
+
+  /* Button and interactive elements in dark mode */
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-outlined-button {
+    &.mat-primary {
+      background-color: #6d9eeb !important;
+      color: #1a1a1a !important;
+    }
+  }
+
+  /* Cards and containers */
+  .section-container {
+    background-color: #2d2d2d !important;
+    border: 1px solid #404040 !important;
+  }
+
+  /* Tables and data display */
+  .mat-mdc-table {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0 !important;
+  }
+
+  /* Form elements */
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background-color: #3d3d3d !important;
+    }
+
+    .mat-mdc-input-element {
+      color: #e0e0e0 !important;
+    }
+  }
+
+  /* Chips and badges */
+  .mat-mdc-chip {
+    background-color: #3d3d3d !important;
+    color: #e0e0e0 !important;
+  }
+
+  /* Cards */
+  .mat-mdc-card {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0 !important;
+  }
+
+  /* Override hardcoded colors in components */
+  .grid-item,
+  .registry-card,
+  .page-container {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0 !important;
+    border-color: #404040 !important;
+  }
+
+  /* Pagination and navigation */
+  .pagination button {
+    background-color: #3d3d3d !important;
+    color: #e0e0e0 !important;
+    border-color: #404040 !important;
+
+    &:hover {
+      background-color: #4d4d4d !important;
+    }
+
+    &.active {
+      background-color: #6d9eeb !important;
+      color: #1a1a1a !important;
+    }
+  }
+
+  /* Success, warning, and error states */
+  .success-badge,
+  .status-success {
+    background-color: #2d5a3d !important;
+    color: #90ee90 !important;
+  }
+
+  .warning-badge,
+  .status-warning {
+    background-color: #5d4e2d !important;
+    color: #ffd700 !important;
+  }
+
+  .error-badge,
+  .status-error {
+    background-color: #5d2d2d !important;
+    color: #ff6b6b !important;
+  }
+
+  /* Links and interactive text */
+  a:not(.mat-mdc-button):not(.mat-mdc-tab-link) {
+    color: #6d9eeb !important;
+
+    &:hover {
+      color: #8fb4f0 !important;
+    }
+  }
+
+  /* Code blocks and pre elements */
+  pre,
+  code {
+    background-color: #1d1d1d !important;
+    color: #e0e0e0 !important;
+    border-color: #404040 !important;
+  }
+
+  /* Dividers and borders */
+  hr,
+  .divider {
+    border-color: #404040 !important;
+  }
+}
+
+/* Light theme (default) */
+body.theme-light {
+  background-color: #fafafa;
+  color: #333;
+
+  --bg-card: white;
+  --bg-hover: #f5f5f5;
+  --bg-app: #fafafa;
+  --bg-surface: white;
+  --bg-elevated: #f8f9fa;
+  --fg-text: #333333;
+  --fg-secondary-text: #666666;
+  --fg-tertiary-text: #999999;
+  --fg-divider: #e0e0e0;
+  --fg-border: #dee2e6;
+  --primary-color: #5e5ce6;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --error-color: #dc3545;
+  --info-color: #17a2b8;
+  --link-color: #007bff;
+  --code-bg: #f8f9fa;
+}
 
 /* Common utility classes */
 .spacer {
@@ -71,12 +299,11 @@ p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
 .breadcrumb {
   display: flex;
   align-items: center;
-  flex-wrap: wrap; // Allow wrapping on small screens  padding: 0.5rem 0.8rem;
-  // Use the helper function instead of direct map access
-  background-color: theme.bg('card');
-  border-radius: 3px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); // Light shadow for depth
-  font-size: 0.82rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0;
+  background-color: var(--bg-card, white);
+  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
+  margin-bottom: 0.75rem;
 
   &-item {
     display: flex;
@@ -152,31 +379,169 @@ p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
   }
 }
 
-/* Layout styles */
+/* Layout styles - no centering, consistent alignment */
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Use viewport height to ensure full page coverage */
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--bg-app, #fafafa);
+  color: var(--fg-text, #333);
 }
 
-.main-container {
-  flex: 1;
-  padding: 0.8rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  min-height: calc(100vh - 100px); /* Account for reduced header and footer */
+/* Global theme-aware element overrides */
+* {
+  /* Override any hardcoded colors with theme variables */
+  &:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-button) {
+    border-color: var(--fg-border, #dee2e6) !important;
+  }
+}
+
+/* Theme-aware link styling */
+a:not(.mat-mdc-button):not(.mat-mdc-tab-link) {
+  color: var(--link-color, #007bff) !important;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+/* Theme-aware code styling */
+pre,
+code {
+  background-color: var(--code-bg, #f8f9fa) !important;
+  color: var(--fg-text, #333) !important;
+  border-color: var(--fg-border, #dee2e6) !important;
+}
+
+/* Theme-aware badge and chip styling */
+.badge,
+.chip,
+.status-badge {
+  background-color: var(--bg-elevated, #f8f9fa) !important;
+  color: var(--fg-text, #333) !important;
+  border-color: var(--fg-border, #dee2e6) !important;
+}
+
+/* Success state styling */
+.success,
+.status-success,
+.badge-success {
+  background-color: var(--success-color, #28a745) !important;
+  color: white !important;
+}
+
+/* Warning state styling */
+.warning,
+.status-warning,
+.badge-warning {
+  background-color: var(--warning-color, #ffc107) !important;
+  color: #212529 !important;
+}
+
+/* Error state styling */
+.error,
+.status-error,
+.badge-error {
+  background-color: var(--error-color, #dc3545) !important;
+  color: white !important;
+}
+
+/* Info state styling */
+.info,
+.status-info,
+.badge-info {
+  background-color: var(--info-color, #17a2b8) !important;
+  color: white !important;
+}
+
+/* Override section containers */
+.section-container {
+  background-color: var(--bg-card, white) !important;
+  color: var(--fg-text, #333) !important;
+  border-color: var(--fg-border, #dee2e6) !important;
+}
+
+/* Override grid items */
+.grid-item {
+  background-color: var(--bg-card, white) !important;
+  color: var(--fg-text, #333) !important;
+  border-color: var(--fg-border, #dee2e6) !important;
+}
+
+/* Override buttons that aren't Material buttons */
+button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-button):not(.mat-mdc-icon-button) {
+  background-color: var(--bg-elevated, #f8f9fa) !important;
+  color: var(--fg-text, #333) !important;
+  border-color: var(--fg-border, #dee2e6) !important;
+
+  &:hover {
+    background-color: var(--bg-hover, #f5f5f5) !important;
+  }
+
+  &.primary {
+    background-color: var(--primary-color, #007bff) !important;
+    color: white !important;
+  }
+}
+
+/* Global layout constraints - prevent ultra-wide stretching */
+.layout-container {
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto; /* Center the container horizontally but not the content */
+  max-width: 1440px; /* Maximum width for ultra-wide screens */
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
   box-sizing: border-box;
 }
 
-// Responsive adjustments for main container
+/* Header, breadcrumb, and content alignment */
+.main-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Allow flex shrinking */
+  overflow-y: auto;
+}
+
+/* Consistent inner content width */
+.content-wrapper {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+/* Page structure - consistent spacing */
+.page-structure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Reduced for higher density */
+  padding: 0.75rem 0;
+  padding-bottom: 80px; /* Account for footer */
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .main-container {
-    padding: 1rem;
+  .layout-container,
+  .content-wrapper {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .page-structure {
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-container,
+  .content-wrapper {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 }
 
@@ -704,4 +1069,36 @@ h4 {  font-size: 1.02rem;
     color: #222;
     outline: none;
   }
+}
+
+.groups {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  // Center the entire block horizontally
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  // Center the content (list/grid) inside the container
+  .list-view,
+  .groups-table,
+  .grid-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+}
+
+/* Make footer sticky at bottom */
+app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
 }

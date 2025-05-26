@@ -1,0 +1,37 @@
+@use '../shared-variables' as vars;
+@use '../../../styles/theme' as *;
+
+.group-icon-small {
+  font-size: 1rem;
+  color: #9575cd; /* Match the vertical bar color */
+  margin-right: 0.3rem;
+  vertical-align: middle;
+}
+
+.resource-types-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.5rem;
+  max-width: 100%;
+}
+
+.resource-link-small {
+  color: #457B9D;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.resource-count-small {
+  color: #6c757d;
+  font-size: 0.75rem;
+}
+
+.resource-separator {
+  color: #6c757d;
+  font-size: 0.85rem;
+}

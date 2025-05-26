@@ -18,7 +18,30 @@
 /* Ensures global breadcrumb styles are applied within this component */
 :host {
   display: block;
-  margin: 0.5rem 0;
+  width: 100%;
+  background-color: var(--bg-card, white);
 }
 
-/* Remove any ::ng-deep styles as they override global styles */
+/* Use CSS variables for theme support */
+.breadcrumb {
+  font-size: 0.82rem;
+  color: var(--fg-text, #333);
+
+  &-link {
+    color: var(--primary-color, #5e5ce6);
+
+    &:hover {
+      color: var(--primary-color, #5e5ce6);
+      background-color: var(--bg-hover, #f5f5f5);
+    }
+  }
+
+  &-separator {
+    color: var(--fg-secondary-text, #666);
+  }
+
+  &-current {
+    color: var(--fg-text, #333);
+    background-color: var(--bg-hover, #f5f5f5);
+  }
+}

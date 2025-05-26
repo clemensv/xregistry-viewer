@@ -138,40 +138,82 @@ export class RegistryService {
     );
     const data = response.body || {};
 
-    // Parse Link header into links with improved regex
+    // Parse Link header into links
     const links: any = {};
     const linkHeader = response.headers.get('Link') || '';
-    console.log(`Link header received: ${linkHeader}`);
 
-    linkHeader.split(',').forEach(part => {
-      // More robust regex to handle various link header formats
-      const m = part.trim().match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
-      if (m) {
-        links[m[2]] = m[1];
-        console.log(`Found link relation: ${m[2]} -> ${m[1]}`);
-      } else {
-        console.warn(`Failed to parse link header part: ${part}`);
+    if (linkHeader) {
+    // Split by comma and process each part
+      linkHeader.split(',').forEach(part => {
+      const trimmedPart = part.trim();
+
+      // Format: <url>; rel="relation" (standard RFC 5988)
+      const linkMatch = trimmedPart.match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+      if (linkMatch) {
+        const url = linkMatch[1];
+        const rel = linkMatch[2].toLowerCase(); // Normalize to lowercase
+        links[rel] = url;
+        return; // Continue to next part
       }
-    });
+
+      // Try a more lenient pattern for the URL and rel attribute
+      const lenientLinkMatch = trimmedPart.match(/<([^>]+)>.*rel="?([a-zA-Z0-9_-]+)"?/i);
+      if (lenientLinkMatch) {
+        const url = lenientLinkMatch[1];
+        const rel = lenientLinkMatch[2].toLowerCase();
+        links[rel] = url;
+        return;
+      }
+
+      // Format: key="value" (metadata fields)
+      const metaMatch = trimmedPart.match(/([a-zA-Z0-9_-]+)="?([^"]+)"?/i);
+      if (metaMatch) {
+        const key = metaMatch[1].toLowerCase();
+        const value = metaMatch[2].replace(/"/g, '');
+        // Store metadata with the same format as links
+        links[key] = value;
+        return; // Continue to next part
+        }
+      });
+      }
 
     // Map entries to ResourceDocument[]
     const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };
     const attrs = resMeta.attributes || {};
+    console.log('Original data entries:', data);
+
     const items: ResourceDocument[] = Object.values(data).map((entry: any) => {
       const idKey = resMeta.singular + 'id';
-      const doc: any = {
-        id: entry[idKey] || entry.id,
-        name: entry.name,
-        createdAt: entry.createdat,
-        modifiedAt: entry.modifiedat,
-        origin: api,
-        ...entry
-      };
+
+      // First, clone the entry to preserve all original fields
+      const doc: any = { ...entry };
+
+      // Then override with the properly cased and mapped fields
+      doc.id = entry[idKey] || entry.id || entry.name; // Fallback to name if id is missing
+      doc.name = entry.name || entry[idKey] || entry.id; // Fallback to id if name is missing
+      doc.description = entry.description;
+
+      // Explicitly map docs to resourceUrl for the resource-row component
+      if (entry.docs) {
+        doc.resourceUrl = entry.docs;
+        doc.docs = entry.docs; // Make sure both are set
+      }
+
+      // Ensure proper case for timestamp fields
+      doc.createdAt = entry.createdat || entry.createdAt;
+      doc.modifiedAt = entry.modifiedat || entry.modifiedAt;
+      doc.origin = api;
+
+      // Add attributes from the registry model
       Object.keys(attrs).forEach(key => {
         if (!['id', 'name', idKey].includes(key) && entry[key] != null) {
           doc[key] = entry[key];
         }
       });
+
+      // Log the mapped document for debugging
+      console.log('Mapped resource:', doc);
+
       return doc as ResourceDocument;
     });
     return { items, links };
@@ -435,22 +477,37 @@ export class RegistryService {
     const response = await lastValueFrom(
       this.http.get<any>(url, { observe: 'response' as const })
     );
-    const data = response.body || {};
-
-    // Parse Link header into relations with improved regex
+    const data = response.body || {};    // Parse Link header into relations with improved regex
     const linkHeader = response.headers.get('Link') || '';
     console.log(`Link header received for versions: ${linkHeader}`);
 
     const links: any = {};
+    // Split by comma and process each part
     linkHeader.split(',').forEach(part => {
-      // More robust regex to handle various link header formats
-      const m = part.trim().match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
-      if (m) {
-        links[m[2]] = m[1];
-        console.log(`Found version link relation: ${m[2]} -> ${m[1]}`);
-      } else {
-        console.warn(`Failed to parse version link header part: ${part}`);
+      const trimmedPart = part.trim();
+
+      // Format: <url>; rel="relation" (standard RFC 5988)
+      const linkMatch = trimmedPart.match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+      if (linkMatch) {
+        const url = linkMatch[1];
+        const rel = linkMatch[2].toLowerCase(); // Normalize to lowercase
+        links[rel] = url;
+        console.log(`Found version link relation: ${rel} -> ${url}`);
+        return; // Continue to next part
       }
+
+      // Format: key="value" (metadata fields)
+      const metaMatch = trimmedPart.match(/([a-zA-Z0-9_-]+)="?([^"]+)"?/i);
+      if (metaMatch) {
+        const key = metaMatch[1].toLowerCase();
+        const value = metaMatch[2].replace(/"/g, '');
+        // Store metadata with the same format as links
+        links[key] = value;
+        console.log(`Found version metadata: ${key} -> ${value}`);
+        return; // Continue to next part
+      }
+        // If we reach here, we couldn't parse this part
+      console.log(`Skipping version Link header part (not a link or metadata): ${trimmedPart}`);
     });
     // Map entries to ResourceDocument[]
     const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };

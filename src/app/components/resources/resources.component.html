@@ -1,34 +1,66 @@
 <div class="page-container">
   <div class="page-header">
-    <h2>Resources for {{ resourceType }} in {{ groupType }}/{{ groupId }}</h2>
+    <div class="header-row">
+      <h2>Resources for {{ resourceType }} in {{ groupType }}/{{ groupId }}</h2>
+      <div class="view-toggle">
+        <button [class.active]="viewMode === 'cards'" (click)="setViewMode('cards')" title="Card View">
+          <i class="fa fa-th"></i> Cards
+        </button>
+        <button [class.active]="viewMode === 'list'" (click)="setViewMode('list')" title="List View">
+          <i class="fa fa-list"></i> List
+        </button>
+      </div>
+    </div>
+    <div class="header-divider"></div>
   </div>
   <div class="page-content">
-    <app-pagination *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>
-    <div *ngIf="!loading; else loadingTpl" [ngClass]="{'single-resource': resourcesList.length === 1}">
-      <div class="grid-container">
-        <div *ngFor="let res of resourcesList" class="grid-item" [ngClass]="{'single-item': resourcesList.length === 1}">
-          <div class="resource-header">
-            <h3>{{ res['name'] }}</h3>
-             <a [routerLink]="[res['id']]" class="tile">
-            View Details
-          </a>
-            <span *ngIf="res['versionsCount'] > 1" class="version-badge"
-              [title]="res['versionsCount'] + ' versions available'">{{ res['versionsCount'] }}</span>
-          </div> <!-- Use the shared resource document component -->
-          <app-resource-document [resourceDocument]="res" [resourceType]="resourceType"
-            [resourceAttributes]="resourceAttributes" [hasDocumentSupport]="resTypeHasDocument" [showAttributes]="true"
-            [showDocument]="false" [initialExpanded]="false">
-          </app-resource-document>
-          <div style="margin-top: auto; margin-bottom: -5px;" class="resource-footer">
-
-            <footer class="tile-footer">
-              <small>
-                <span>Created: {{ res['createdAt'] | date:'short' }}</span>&nbsp;|
-                <span>Modified: {{ res['modifiedAt'] | date:'short' }}</span>
-              </small>
-            </footer>
+    <app-pagination *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>    <div *ngIf="!loading; else loadingTpl">
+      <!-- Cards View -->
+      <div *ngIf="viewMode === 'cards'" [ngClass]="{'single-resource': resourcesList.length === 1}">
+        <div class="grid-container">
+          <div *ngFor="let res of resourcesList" class="grid-item" [ngClass]="{'single-item': resourcesList.length === 1}">
+            <div class="resource-header">
+              <h3>{{ res['name'] }}</h3>
+               <a [routerLink]="[res['id']]" class="tile">
+              View Details
+            </a>
+              <span *ngIf="res['versionsCount'] > 1" class="version-badge"
+                [title]="res['versionsCount'] + ' versions available'">{{ res['versionsCount'] }}</span>
+            </div> <!-- Use the shared resource document component -->
+            <app-resource-document [resourceDocument]="res" [resourceType]="resourceType"
+              [resourceAttributes]="resourceAttributes" [hasDocumentSupport]="resTypeHasDocument" [showAttributes]="true"
+              [showDocument]="false" [initialExpanded]="false">
+            </app-resource-document>
+            <div style="margin-top: auto; margin-bottom: -5px;" class="resource-footer">              <footer class="tile-footer">
+                <small>
+                  <span>Created: {{ res?.createdAt ? (res.createdAt | date:'short') : '-' }}</span>&nbsp;|
+                  <span>Modified: {{ res?.modifiedAt ? (res.modifiedAt | date:'short') : '-' }}</span>
+                </small>
+              </footer>
+            </div>
           </div>
         </div>
+      </div>      <!-- List View -->
+      <div *ngIf="viewMode === 'list'" class="list-view">
+        <table class="resources-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Description</th>
+              <th>Docs</th>
+              <th>Created At</th>
+              <th>Modified At</th>
+            </tr>
+          </thead>          <tbody>
+            <!-- Use tr with app-resource-row attribute -->
+            <tr *ngFor="let res of resourcesList"
+                app-resource-row
+                [resource]="res"
+                [resourceType]="resourceType"
+                [hasDocumentSupport]="resTypeHasDocument">
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
     <ng-template #loadingTpl>

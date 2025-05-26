@@ -1,137 +1,600 @@
 @use '../shared-variables' as vars;
 @use '../_vertical-bars' as vbars;
+@use '../../../styles/theme' as *;
 
 /* Component-specific overrides for group types */
-.group-types h2 {
-  margin-bottom: 1.2rem;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
+/* These will take precedence over global styles due to component encapsulation */
 
-.grid-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem; /* Consistent spacing between tiles */
-  justify-content: flex-start;
-  padding: 16px;
-}
-
-.grid-item {
-  position: relative;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  border: 1px solid #e0e0e0;
-  border-left: 3px solid #3498db; /* Blue vertical bar for group types */
-  width: 280px;
-  flex: 0 0 280px;
-  padding: 1rem 1rem 0.5rem 1rem;
+/* Container styling - prevent overlap */
+.group-types {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  margin-bottom: 0.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  height: 280px;
-  overflow: hidden;
+  gap: 0.75rem;
+  overflow: hidden; /* Prevent any container overflow */
+  box-sizing: border-box;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 3px;
-    height: 100%;
-    background-color: #3498db; /* Match the border-left color */
-    z-index: 1;
+/* Page Header Layout - aligned with breadcrumb */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
+  margin-bottom: 0.75rem;
+  background-color: var(--bg-card, white);
+}
+
+.page-header h2 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--fg-text, #333);
+}
+
+.page-header .view-toggle {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.page-header .view-toggle button {
+  background: none;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+
+  &:hover {
+    background: #f8f9fa;
+    color: #495057;
+  }
+
+  &.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+  }
+
+  i {
+    font-size: 1rem;
   }
 }
 
-.grid-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #d0d7de;
+// Grid container - no overlap guaranteed, equal row heights
+.grid-container.cards-view {
+  display: grid;
+  width: 100%;
+  justify-items: center; /* Center tiles when they don't fill the row */
+  align-items: stretch;
+  grid-auto-rows: minmax(180px, auto); /* All tiles in same row have same height */
+  overflow: hidden; /* Prevent grid overflow */
+  box-sizing: border-box;
+  justify-content: center; /* Center the entire grid */
+
+  // Default (medium) sizing - ensure proper spacing with max width
+  grid-template-columns: repeat(auto-fit, minmax(240px, 320px)); /* Max 320px to prevent over-growth */
+  gap: 1.5rem; /* Increased gap to prevent overlap */
+  grid-row-gap: 1.5rem; /* Explicit row gap for clarity */
+  grid-column-gap: 1.5rem; /* Explicit column gap for clarity */
+
+  // Ensure no margin/padding on grid items that could cause overlap
+  > * {
+    margin: 0;
+    box-sizing: border-box;
+    position: relative;
+    isolation: isolate; /* Ensure stacking context isolation */
+  }
 }
 
-.grid-item h3 {
-  font-size: vars.$h3-size;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-top: 0;
-  margin-bottom: 0.7rem;
+// High density layout for small font size - consistent spacing
+:host-context(body.font-size-small) .grid-container.cards-view {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 160px)); /* Max 160px to prevent over-growth */
+  grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
+  gap: 0.75rem; /* Increased for better separation */
+  grid-row-gap: 0.75rem; /* Identical vertical gap */
+  grid-column-gap: 0.75rem; /* Identical horizontal gap */
+}
+
+// Large font size layout - consistent spacing
+:host-context(body.font-size-large) .grid-container.cards-view {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 400px)); /* Max 400px to prevent over-growth */
+  grid-auto-rows: minmax(200px, auto); /* Equal row heights for large cards */
+  gap: 1.75rem; /* Increased gap to prevent overlap */
+  grid-row-gap: 1.75rem; /* Explicit vertical gap */
+  grid-column-gap: 1.75rem; /* Explicit horizontal gap */
+}
+
+// Grid items - no overlap with proper spacing
+.grid-item {
+  position: relative;
+  background: var(--bg-card, white);
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border: 1px solid var(--fg-divider, #e9ecef);
+  display: flex;
+  flex-direction: column;
+  width: 240px; /* Fixed width for medium font */
+  height: 100%; /* Fill the grid cell completely */
+  transition: all 0.2s ease;
+  overflow: hidden;
+  box-sizing: border-box; /* Ensure padding/border don't cause overflow */
+  margin: 0; /* Explicit no margin to prevent overlap */
+
+  &:hover {
+    /* Remove transform to prevent overlap */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color, #007bff);
+    /* No z-index needed without transform */
+  }
+}
+
+// Compact cards for small font size - no overlap
+:host-context(body.font-size-small) .grid-item {
+  width: 133px; /* Fixed width for small font */
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  margin: 0; /* Explicit no margin */
+
+  &:hover {
+    /* Remove transform to prevent overlap */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border-color: var(--primary-color, #007bff);
+    /* No z-index needed without transform */
+  }
+}
+
+// Larger cards for large font size - no overlap
+:host-context(body.font-size-large) .grid-item {
+  width: 267px; /* Fixed width for large font */
+  margin: 0; /* Explicit no margin */
+
+  &:hover {
+    /* Remove transform to prevent overlap */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color, #007bff);
+  }
+}
+
+/* Card Header - responsive density */
+.card-header {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--fg-divider, #f1f3f4);
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  background-color: var(--bg-card, white);
 }
 
+.card-header h3 {
+  font-weight: 600;
+  color: var(--fg-text, #2c3e50);
+  margin: 0;
+  line-height: 1.2;
+}
+
+// Compact header for small font size
+:host-context(body.font-size-small) .card-header {
+  padding: 0.375rem;
+  gap: 0.25rem;
+
+  h3 {
+    line-height: 1.0;
+    font-size: 0.8rem;
+  }
+}
+
+// Larger header for large font size
+:host-context(body.font-size-large) .card-header {
+  padding: 1rem;
+  gap: 0.75rem;
+}
+
+/* Generic Icon Styling - responsive */
 .group-type-icon {
-  font-size: vars.$content-size * 1.5;
-  color: #3498db; /* Match the vertical bar color */
-  margin-right: 0.5rem;
+  font-size: 1.5rem !important;
+  color: var(--primary-color, #007bff);
+  flex-shrink: 0;
+
+  &.icon-group-type {
+    color: var(--primary-color, #007bff);
+  }
 }
 
-.description-attribute {
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
+// Compact icons for small font size
+:host-context(body.font-size-small) .group-type-icon {
+  font-size: 1.0rem !important;
 }
 
-.attribute {
-  margin-bottom: 1rem;
+// Larger icons for large font size
+:host-context(body.font-size-large) .group-type-icon {
+  font-size: 1.75rem !important;
+}
 
-  &.simple-attribute {
+/* Card Content - responsive density with proper flex grow */
+.card-content {
+  padding: 0.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0; /* Allow flex shrinking */
+  overflow: hidden; /* Prevent content overflow in fixed aspect ratio */
+}
+
+.description {
+  color: var(--fg-secondary-text, #495057);
+  line-height: 1.3;
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Limit to 3 lines */
+  -webkit-box-orient: vertical;
+
+  &.no-description {
+    color: var(--fg-secondary-text, #6c757d);
+    font-style: italic;
+  }
+}
+
+// Compact content for small font size
+:host-context(body.font-size-small) .card-content {
+  padding: 0.375rem;
+  gap: 0.25rem;
+
+  .description {
+    line-height: 1.1;
+    font-size: 0.7rem;
+  }
+}
+
+// Larger content for large font size
+:host-context(body.font-size-large) .card-content {
+  padding: 1rem;
+  gap: 0.75rem;
+
+  .description {
+    line-height: 1.4;
+  }
+}
+
+/* Resource Types Section - responsive */
+.resource-types-section {
+  .section-header {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
 
-    .attribute-header {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-      align-items: center;
-
-      strong {
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: vars.$content-size;
-      }
+    strong {
+      font-weight: 600;
+      color: var(--fg-secondary-text, #495057);
     }
+  }
 
-    .attribute-value {
-      font-size: vars.$content-size;
-      color: #333;
-      word-break: break-word;
-      padding: 0.25rem 0;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-height: 4.5em;
+  .count-badge {
+    background: #28a745;
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: 8px;
+    font-weight: 600;
+    min-width: 1.2rem;
+    text-align: center;
+  }
+}
+
+// Compact resource types for small font size
+:host-context(body.font-size-small) .resource-types-section {
+  .section-header {
+    gap: 0.15rem;
+    margin-bottom: 0.15rem;
+
+    strong {
+      font-size: 0.6rem;
+    }
+  }
+
+  .count-badge {
+    padding: 0.05rem 0.2rem;
+    border-radius: 4px;
+    font-size: 0.55rem;
+    min-width: 0.8rem;
+  }
+}
+
+.resource-types-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  overflow: hidden;
+  max-height: 3rem; /* Limit height to prevent overflow */
+}
+
+.resource-type-tag {
+  background: var(--bg-hover, #f8f9fa);
+  color: var(--fg-secondary-text, #495057);
+  border: 1px solid var(--fg-divider, #dee2e6);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+}
+
+// Compact resource type tags for small font size
+:host-context(body.font-size-small) .resource-types-list {
+  gap: 0.15rem;
+}
+
+:host-context(body.font-size-small) .resource-type-tag {
+  padding: 0.1rem 0.25rem;
+  border-radius: 2px;
+  font-size: 0.6rem;
+}
+
+.no-resources {
+  .no-resources-text {
+    color: #6c757d;
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+}
+
+/* Card Footer - responsive density */
+.card-footer {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-hover, #f8f9fa);
+  border-top: 1px solid var(--fg-divider, #e9ecef);
+  margin-top: auto;
+}
+
+// Compact footer for small font size
+:host-context(body.font-size-small) .card-footer {
+  padding: 0.25rem 0.375rem;
+}
+
+// Larger footer for large font size
+:host-context(body.font-size-large) .card-footer {
+  padding: 0.75rem 1rem;
+}
+
+.browse-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--primary-color, #007bff) !important;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.25rem 0;
+
+  &:hover {
+    color: #0056b3 !important;
+    text-decoration: none !important;
+    transform: translateX(2px);
+  }
+
+  .material-icons {
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover .material-icons {
+    transform: translateX(2px);
+  }
+}
+
+// Compact browse link for small font size
+:host-context(body.font-size-small) .browse-link {
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  padding: 0.15rem 0;
+
+  .material-icons {
+    font-size: 0.8rem;
+  }
+}
+
+/* List view styling */
+.list-view {
+  width: 100%;
+  overflow-x: auto;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.group-types-table {
+  width: 100%;
+  max-width: 1000px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  table-layout: fixed;
+}
+
+.group-types-table th, .group-types-table td {
+  padding: 1rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.group-types-table th:first-child, .group-types-table td:first-child {
+  width: 20%;
+  min-width: 150px;
+}
+
+.group-types-table th:nth-child(2), .group-types-table td:nth-child(2) {
+  width: 20%;
+  min-width: 150px;
+}
+
+.group-types-table th:nth-child(3), .group-types-table td:nth-child(3) {
+  width: 30%;
+  min-width: 200px;
+}
+
+.group-types-table th:nth-child(4), .group-types-table td:nth-child(4) {
+  width: 20%;
+  min-width: 150px;
+}
+
+.group-types-table th:nth-child(5), .group-types-table td:nth-child(5) {
+  width: 10%;
+  min-width: 120px;
+}
+
+.group-types-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.group-types-table tr:last-child td {
+  border-bottom: none;
+}
+
+.group-types-table tr:hover td {
+  background-color: #f8f9fa;
+}
+
+/* Table-specific styling */
+.table-group-type {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.group-type-icon-small {
+  font-size: 1.2rem !important;
+  color: #007bff;
+
+  &.icon-group-type {
+    color: #007bff;
+  }
+}
+
+.group-type-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.plural-name {
+  font-weight: 600;
+  color: #495057;
+}
+
+.description-cell {
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.resource-types-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  max-width: 100%;
+}
+
+.resource-type-pill {
+  background: #e9ecef;
+  color: #495057;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.no-resources-indicator {
+  color: #adb5bd;
+  font-style: italic;
+}
+
+.table-action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #007bff;
+  color: white !important;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #0056b3;
+    text-decoration: none !important;
+    /* Remove transform to prevent overlap */
+  }
+
+  .material-icons {
+    font-size: 1rem;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-container.cards-view {
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(180px, auto); /* Equal row heights */
+    gap: 1.5rem; /* Increased spacing on mobile */
+    grid-row-gap: 1.5rem;
+    grid-column-gap: 1.5rem;
+  }
+
+  // Small font size on mobile - 2 columns with proper spacing
+  :host-context(body.font-size-small) {
+    .grid-container.cards-view {
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
+      gap: 0.75rem; /* Increased for better separation */
+      grid-row-gap: 0.75rem;
+      grid-column-gap: 0.75rem;
     }
   }
 }
 
-.tile-footer-container {
-  margin-top: auto;
-  width: 100%;
+@media (min-width: 769px) and (max-width: 1200px) {
+  // Small font size on tablets - consistent spacing
+  :host-context(body.font-size-small) {
+    .grid-container.cards-view {
+      grid-template-columns: repeat(auto-fit, minmax(100px, 150px)); /* Max 150px to prevent over-growth */
+      grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
+      gap: 0.75rem; /* Increased for better separation */
+      grid-row-gap: 0.75rem;
+      grid-column-gap: 0.75rem;
+    }
+  }
 }
 
-.tile {
-  display: inline-block;
-  margin-top: 16px;
-  padding: 8px 15px;
-  background-color: #3498db;
-  color: #fff !important;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.2s ease;
-  align-self: flex-start;
-  font-weight: 500;
-  font-size: vars.$content-size;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+@media (min-width: 1201px) {
+  // Small font size on desktop - consistent spacing
+  :host-context(body.font-size-small) {
+    .grid-container.cards-view {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 160px)); /* Max 160px to prevent over-growth */
+      grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
+      gap: 0.75rem; /* Increased for better separation */
+      grid-row-gap: 0.75rem;
+      grid-column-gap: 0.75rem;
+    }
+  }
 }
 
-.tile:hover {
-  background-color: #2980b9;
-  text-decoration: none !important;
-}
+

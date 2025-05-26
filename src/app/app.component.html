@@ -72,6 +72,18 @@
     position: relative;
   }
 
+  .main-container {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: top;
+    width: 100%;
+    min-height: calc(100vh - 4rem);
+    padding: 0 1rem;
+    box-sizing: border-box;
+    position: relative;
+  }
+
   .angular-logo {
     max-width: 9.2rem;
   }
@@ -179,9 +191,15 @@
 
 <div class="app-container">
   <app-header></app-header>
-  <app-breadcrumb></app-breadcrumb>
+  <div class="layout-container">
+    <app-breadcrumb></app-breadcrumb>
+  </div>
   <main class="main-container">
-    <router-outlet></router-outlet>
+    <div class="content-wrapper">
+      <div class="page-structure">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
   </main>
   <app-footer></app-footer>
 </div>

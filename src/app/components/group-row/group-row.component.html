@@ -1,0 +1,17 @@
+<td><span class="material-icons group-icon-small">folder</span> <a [routerLink]="['/', groupType, group['id']]">{{ group['name'] || group['id'] }}</a></td>
+<td>{{ group && (group['description'] || '-') }}</td>
+<td>{{ group && group['origin'] ? group['origin'] : '-' }}</td>
+<td>
+  <div *ngIf="resourceTypes && resourceTypes.length > 0" class="resource-types-compact">
+    <ng-container *ngFor="let rt of resourceTypes; let last = last">
+      <a [routerLink]="['/', groupType, group['id'], rt.name]" class="resource-link-small">
+        {{ rt.name }}
+        <span *ngIf="rt.count !== undefined" class="resource-count-small">({{ rt.count }})</span>
+      </a>
+      <span *ngIf="!last" class="resource-separator">, </span>
+    </ng-container>
+  </div>
+  <span *ngIf="!resourceTypes || resourceTypes.length === 0">-</span>
+</td>
+<td>{{ group && group['createdAt'] ? (group['createdAt'] | date:'short') : '-' }}</td>
+<td>{{ group && group['modifiedAt'] ? (group['modifiedAt'] | date:'short') : '-' }}</td>

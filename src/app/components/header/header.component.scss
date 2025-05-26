@@ -47,3 +47,20 @@ svg.title-logo {
 app-api-info {
   margin-right: 12px;
 }
+
+/* Control group styling */
+.control-group {
+  display: flex;
+  align-items: center;
+  margin-right: 4px;
+}
+
+/* Active menu item styling */
+::ng-deep .mat-mdc-menu-item.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #007bff;
+
+  .mat-icon {
+    color: #007bff;
+  }
+}

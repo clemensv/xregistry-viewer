@@ -1,0 +1,33 @@
+<div *ngIf="searchVisible" class="search-container">
+  <mat-form-field appearance="outline" class="search-field">
+    <input
+      matInput
+      type="text"
+      placeholder="Search..."
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="onSearch()"
+      aria-label="Search resources">
+    <mat-hint *ngIf="searchTerm.length > 0 && searchTerm.length < 3">Type at least 3 characters</mat-hint>
+    <button
+      *ngIf="searchTerm"
+      matSuffix
+      mat-icon-button
+      aria-label="Clear"
+      (click)="clearSearch()">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button
+      matSuffix
+      mat-icon-button
+      aria-label="Search"
+      [disabled]="searchTerm.length > 0 && searchTerm.length < 3"
+      (click)="onSearch()">
+      <mat-icon>search</mat-icon>
+    </button>
+  </mat-form-field>
+</div>
+
+<!-- Debug element - always visible -->
+<div style="display: none;">
+  Search visible: {{searchVisible}}
+</div>

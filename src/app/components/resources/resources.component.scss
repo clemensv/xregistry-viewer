@@ -1,5 +1,122 @@
+@use '../shared-variables' as vars;
+@use '../_vertical-bars' as vbars;
+@use '../../../styles/theme' as *;
+
 /* Component-specific overrides for resources */
 /* These will take precedence over global styles due to component encapsulation */
+
+/* Container styling */
+.resources {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+}
+
+/* Full-width header wrapper */
+.header-outer {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  background: bg('card');
+}
+
+/* New Page Header Layout */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem 0 0.5rem 0;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: c(dark);
+}
+
+.page-header .view-toggle {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.page-header .view-toggle button {
+  background: none;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+
+  &:hover {
+    background: #f8f9fa;
+    color: #495057;
+  }
+
+  &.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+/* Pagination header styling */
+.pagination-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0.5rem 0 1rem 0;
+  border-bottom: 1px solid fg('divider');
+  margin-bottom: 1.5rem;
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.results-count {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Ensure pagination component is full width */
+app-pagination {
+  width: 100%;
+}
+
+/* Header styling */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.header-divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  width: 100%;
+  margin-top: 0.5rem;
+}
 
 .resources h2 {
   margin-bottom: 1.2rem;
@@ -7,14 +124,44 @@
   font-weight: 600;
 }
 
-.grid-container {
+.view-toggle {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  justify-content: flex-start;
-  padding: 0.6rem;
-  max-width: 100%;
-  overflow-x: hidden;
+  gap: 0.5rem;
+
+  button {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+
+    &.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #0069d9;
+    }
+  }
+}
+
+/* Improved grid container for better space utilization */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  justify-items: stretch;
+  align-items: start;
 }
 
 /* Center the grid container when there's only one item */
@@ -23,18 +170,19 @@
 }
 
 .grid-item {
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e0e0e0;
-  min-width: 300px;
-  max-width: 380px;
-  flex: 1 1 300px;
-  padding: 0.7rem 0.8rem 0.4rem 0.8rem;
+  position: relative;
+  background: white;
+  border-radius: $radius;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid c(neutral);
+  @include chromeline(#9575cd);
   display: flex;
   flex-direction: column;
-  margin-bottom: 0.4rem;
+  min-height: 180px;
+  margin-bottom: 0;
   transition: transform 0.2s, box-shadow 0.2s;
+  @include pad-x(m);
+  @include pad-y(s);
 }
 
 /* Special styling for when there's only one item */
@@ -60,7 +208,55 @@
 
 .grid-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: c(neutral);
+}
+
+/* List view styling */
+.list-view {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.resources-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background-color: #f8f9fa;
+  }
+
+  a {
+    color: #007bff;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 /* Tile styles specific to resources component */
@@ -207,7 +403,7 @@ h4 {
     min-width: 100%;
     max-width: 100%;
   }
-  
+
   /* Keep single item at full width on small screens */
   .grid-item.single-item {
     min-width: 100%;
