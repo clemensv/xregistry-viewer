@@ -2,16 +2,68 @@
 @use '../_vertical-bars' as vbars;
 @use '../../../styles/theme' as *;
 
+// Animation and mixins
 @keyframes flash {
-  0% {
-    background-color: rgba(0, 128, 255, 0.3);
-  }
+  0% { background-color: rgba(0, 128, 255, 0.3); }
+  100% { background-color: transparent; }
+}
 
-  100% {
-    background-color: transparent;
+@mixin item-border($color) {
+  border-left: 3px solid $color;
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -3px;
+    width: 3px;
+    height: 100%;
+    background-color: $color;
+    z-index: 1;
   }
 }
 
+@mixin hover-transition {
+  transition: all 0.2s ease;
+  &:hover:not(:disabled) {
+    background-color: #f1f3f4;
+    border-color: #d0d7de;
+  }
+}
+
+@mixin button-style {
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: #666;
+  font-size: vars.$small-size;
+  @include hover-transition;
+
+  &:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+  }
+
+  i.material-icons {
+    font-size: 14px;
+    line-height: 1;
+  }
+}
+
+@mixin attribute-container($color: #28a745) {
+  background: #fafafa;
+  border-left: 3px solid $color;
+  border-radius: 6px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+// Main component
 .resource-document-item {
   margin: s(xs) 0;
   display: block;
@@ -23,7 +75,7 @@
     margin-bottom: s(xs);
   }
 
-  // Unified row styling for all item types
+  // Unified row styling
   .unified-item-row {
     display: flex;
     flex-direction: row;
@@ -33,45 +85,24 @@
     @include pad-y(xs);
     border-radius: $radius;
     border: 1px solid c(neutral);
-    transition: all 0.2s ease;
     margin-bottom: s(xs);
 
-    &.expanded,
-    &.collapsed {
+    &.expanded, &.collapsed {
       animation: flash 0.5s ease-out;
     }
 
-    // Make rows with simple values non-clickable
+    // Simple row styling
     &.simple-row {
       cursor: default;
       background-color: #fafafa;
-      position: relative;
-      border-left: 3px solid #28a745; // Green tint for simple values
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 3px;
-        height: 100%;
-        background-color: #28a745;
-        /* Match the border-left color */
-        z-index: 1;
-      }
+      @include item-border(#28a745);
     }
 
-    // Make expandable rows clickable
-    &.array-row,
-    &.object-row {
+    // Expandable rows
+    &.array-row, &.object-row {
       cursor: pointer;
       background-color: #f8f9fa;
-
-      &:hover {
-        background-color: #f1f3f4;
-        border-color: #d0d7de;
-      }
+      @include hover-transition;
 
       &.expanded {
         margin-bottom: 0;
@@ -80,24 +111,9 @@
       }
     }
 
-    // Custom styling for arrays
+    // Array-specific styling
     &.array-row {
-      position: relative;
-      border-left: 3px solid #5bc0de;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 3px;
-        height: 100%;
-        background-color: #5bc0de;
-        /* Match the border-left color */
-        z-index: 1;
-      }
-
+      @include item-border(#5bc0de);
       &.expanded {
         background-color: rgba(91, 192, 222, 0.1);
         border-bottom-left-radius: 0;
@@ -105,25 +121,9 @@
       }
     }
 
-    // Custom styling for objects
+    // Object-specific styling
     &.object-row {
-      position: relative;
-      border-left: 3px solid #9575cd;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -3px;
-        /* Match the border-left width */
-        width: 3px;
-        /* Match the border-left width */
-        height: 100%;
-        background-color: #9575cd;
-        /* Match the border-left color */
-        z-index: 1;
-      }
-
+      @include item-border(#9575cd);
       &.expanded {
         background-color: rgba(149, 117, 205, 0.1);
         border-bottom-left-radius: 0;
@@ -149,7 +149,6 @@
       padding: 2px;
       border-radius: $radius;
       z-index: 5;
-      /* Ensure button is clickable */
 
       &:focus-visible {
         outline: 2px solid c(primary);
@@ -158,19 +157,12 @@
 
       i.material-icons {
         font-size: calc($body-size * 1.2);
-        color: c(dark);
+        color: inherit;
         transition: all 0.2s ease;
       }
 
-      /* Force specific colors based on expanded state */
-      .expanded & i.material-icons {
-        color: c(primary);
-      }
-
-      /* Force specific colors based on collapsed state */
-      .collapsed & i.material-icons {
-        color: c(dark);
-      }
+      .expanded & i.material-icons { color: c(primary); }
+      .collapsed & i.material-icons { color: c(dark); }
     }
 
     .item-count {
@@ -198,818 +190,170 @@
       overflow: hidden;
       text-overflow: ellipsis;
       margin-right: auto;
-      max-width: 25%;
-    }
-
-    // Inline simple value display
-    .simple-value-display {
-      margin-left: auto;
-      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-
-      .value-text {
-        padding: 0.1rem 0.25rem;
-        border-radius: 3px;
-        background-color: rgba(40, 167, 69, 0.1); // Light green background
-
-        &.null-value {
-          color: #999;
-          font-style: italic;
-          background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        &.undefined-value {
-          color: #999;
-          font-style: italic;
-          background-color: rgba(0, 0, 0, 0.05);
-        }
-      }
-
-      // String values
-      .value-text:not(.null-value):not(.undefined-value) {
-        color: #0B6E4F;
-      }
-    }
-  }
-
-  // Expanded content container
-  .expanded-content {
-    position: relative;
-    border: 1px solid #e0e0e0;
-    border-top: none;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    margin-bottom: 0.5rem;
-
-    &.array-content {
-      border-left: 3px solid #5bc0de;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -3px;
-        /* Match the border-left width */
-        width: 3px;
-        /* Match the border-left width */
-        height: 100%;
-        background-color: #5bc0de;
-        /* Match the border color */
-        border-bottom-left-radius: 4px;
-        z-index: 1;
-      }
-    }
-
-    &.object-content {
-      border-left: 3px solid #9575cd;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -3px;
-        /* Match the border-left width */
-        width: 3px;
-        /* Match the border-left width */
-        height: 100%;
-        background-color: #9575cd;
-        /* Match the border color */
-        border-bottom-left-radius: 4px;
-        z-index: 1;
-      }
-    }
-  }
-
-  // Array items styling
-  .array-items {
-    padding: 0.25rem;
-
-    .array-item-details {
-      font-size: vars.$small-size;
-      margin-bottom: 0.5rem;
-      padding: 0.5rem;
-      background-color: rgba(91, 192, 222, 0.05);
-      border-radius: 4px;
-
-      .detail-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-
-        .detail-label {
-          color: #666;
-
-          .detail-value {
-            color: #333;
-            font-weight: 500;
-          }
-        }
-      }
-    }
-
-    .empty-notice {
-      color: #999;
-      font-style: italic;
-      padding: 0.25rem;
-    }
-
-    // Style nested document items in arrays
-    app-resource-document-item {
-      position: relative;
-      display: block;
-      margin-bottom: 0.25rem;
-
-      // Ensure items in arrays have minimal indentation
-      ::ng-deep .resource-document-item.nested {
-        padding-left: 0.25rem;
-        margin-bottom: 0.25rem;
-      }
-    }
-  }
-
-  // Object items styling
-  .object-items {
-    padding: 0.25rem;
-
-    .empty-notice {
-      color: #999;
-      font-style: italic;
-      padding: 0.25rem;
-    }
-
-    // Style nested document items in objects
-    app-resource-document-item {
-      position: relative;
-      display: block;
-      margin-bottom: 0.25rem;
-
-      // Ensure items in objects have minimal indentation
-      ::ng-deep .resource-document-item.nested {
-        padding-left: 0.25rem;
-        margin-bottom: 0.25rem;
-      }
-    }
-  }
-
-  // Collapsed preview styling
-  .collapsed-preview {
-    padding: 0.25rem;
-    margin-top: -0.25rem;
-    margin-bottom: 0.5rem;
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid #e0e0e0;
-    border-top: none;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    cursor: pointer;
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-
-    .preview-content {
-      .preview-code {
-        pre {
-          margin: 0;
-          padding: 0.25rem;
-          font-size: vars.$code-size;
-        }
-      }
-
-      .preview-array-items,
-      .preview-object-items {
-        border-left: 2px solid #eee;
-        padding-left: 0.5rem;
-
-        .more-items-notice {
-          display: flex;
-          align-items: center;
-          color: #6c757d;
-          font-size: vars.$small-size;
-          padding: 0.25rem;
-
-          .more-icon {
-            font-size: 1.1rem;
-            margin-right: 0.25rem;
-          }
-        }
-      }
-    }
-  }
-
-  // Styling for the preview elements
-  .preview-item,
-  .preview-property {
-    padding: 0.25rem 0.5rem;
-    margin: 0.25rem 0;
-    background-color: rgba(0, 0, 0, 0.02);
-    border-radius: 3px;
-    font-size: vars.$small-size;
-  }
-
-  // Any-value container styling  .any-value-container {
-  margin-top: 0.5rem;
-
-  app-code-highlight {
-    display: block;
-    font-size: vars.$code-size;
-
-    // Make sure we don't interfere with highlight.js classes
-    ::ng-deep pre.hljs {
-      margin: 0;
-      padding: 0.5rem;
-    }
-  }
-}
-
-// Simple attributes with header and value sections
-.simple-attribute-container {
-  position: relative;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-  border-left: 3px solid #28a745 !important; // Green tint for simple values
-  margin-bottom: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -3px;
-    /* Match the border-left width */
-    width: 3px;
-    /* Match the border-left width */
-    height: 100%;
-    background-color: #28a745;
-    /* Match the border-left color */
-    border-bottom-left-radius: 6px;
-    /* Match the border-radius */
-    z-index: 1;
-    /* Ensure it appears above other elements */
-  }
-
-  .attribute-header {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-    align-items: center;
-
-    strong {
-      font-weight: 600;
-      color: #495057;
-      font-size: 0.9rem;
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-
-    .attribute-type {
-      font-size: 0.75rem;
-      color: #457B9D;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 0.1rem 0.4rem;
-      border-radius: 3px;
-      border: 1px solid #d1ecf1;
-      font-weight: 500;
-    }
-
-    .attribute-description {
-      font-size: 0.8rem;
-      color: #6c757d;
-      font-style: italic;
-      flex-basis: 100%;
-      margin-top: 0.25rem;
-      display: block;
-    }
-  }
-
-  .attribute-value {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    span:not(.copy-btn) {
-      flex: 1;
-      font-size: 0.85rem;
-    color: #333;
-      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 0.3rem 0.5rem;
-      border-radius: 4px;
-      border: 1px solid #dee2e6;
-      word-break: break-all;
-      font-weight: 500;
-
-      &.null-value {
-      color: #808080;
-      font-style: italic;
-    }
-
-      &.undefined-value {
-      color: #7a3e9d;
-      font-style: italic;
-      }
     }
 
     .copy-btn {
-      flex: 0 0 auto;
-      background: none;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      padding: 0.25rem;
-      cursor: pointer;
-      color: #6c757d;
-      display: inline-flex;
-      align-items: center;
-
-      &:hover {
-        background: #f8f9fa;
-        border-color: #007bff;
-        color: #007bff;
+      margin-left: auto;
+      @include button-style;
     }
+  }
 
-      i.material-icons {
-        font-size: 14px;
-        line-height: 1;
-      }
-    }
+  // Expanded content styling
+  .expanded-content {
+    background-color: rgba(240, 240, 240, 0.3);
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 $radius $radius;
+    padding: s(sm);
 
-    // Ensure empty values show properly
-    span:not(.null-value):not(.undefined-value):not(.any-value) {
-      &:empty:after {
-        content: '""';
-        color: #808080;
+    .array-items, .object-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin: 0;
+      padding: 0;
+
+      &:empty::after {
+        content: 'No items to display';
+        grid-column: 1 / -1;
+        text-align: center;
+        color: #6c757d;
         font-style: italic;
+        padding: 2rem;
       }
     }
-  }
-}
 
-// Styling for simplified preview
-.simplified-preview {
-  padding: 0.25rem 0.5rem;
-  margin-left: 0.75rem;
-  border-radius: 0.25rem;
-  background-color: rgba(0, 0, 0, 0.03);
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 0.9em;
-
-  .preview-summary {
-    color: #6c757d; // A standard secondary text color
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    display: inline-block;
-  }
-}
-
-
-// Standalone selectors below
-.preview-array-items {
-  position: relative;
-  padding-left: 0.25rem;
-  border-left: 3px solid #5bc0de;
-  margin-left: 0.25rem;
-  margin-bottom: 0.25rem;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -3px;
-    /* Match the border-left width */
-    width: 3px;
-    /* Match the border-left width */
-    height: 100%;
-    background-color: #5bc0de;
-    /* Match the border color */
-    border-bottom-left-radius: 4px;
-    z-index: 1;
-  }
-
-  .more-items-notice {
-    color: #5f6368;
-    padding: 0.25rem 0.5rem;
-    margin: 0.5rem 0 0.25rem 0;
-    background-color: #f8f9fa;
-    font-size: vars.$small-size;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    width: fit-content;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-    .more-icon {
-      font-size: 16px;
-      margin-right: 4px;
-      color: #5bc0de;
-    }
-  }
-
-  ::ng-deep app-resource-document-item {
-    position: relative;
-    display: block;
-
-    .resource-document-item {
-      margin: 0.25rem 0;
-      padding-left: 0.25rem;
-      /* Minimal nesting indent */
+    .empty-notice {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #6c757d;
+      font-style: italic;
+      padding: 2rem;
     }
 
-    .item-header {
-      padding: 0.25rem;
-      margin-bottom: 0.25rem;
-    }
+    .array-item-details {
+      grid-column: 1 / -1;
+      background: rgba(91, 192, 222, 0.1);
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
 
-    // Match styling for nested simple attributes
-    .simple-attribute-container {
-      margin: 0.25rem 0;
-      box-shadow: none;
-      border-radius: 4px;
-    }
-
-    // Ensure nested items also have minimal indentation
-    .nested {
-      padding-left: 0.25rem !important;
-    }
-  }
-}
-
-.preview-object-items {
-  position: relative;
-  padding-left: 0.25rem;
-  border-left: 3px solid #9575cd;
-  margin-left: 0.25rem;
-  margin-bottom: 0.25rem;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -3px;
-    /* Match the border-left width */
-    width: 3px;
-    /* Match the border-left width */
-    height: 100%;
-    background-color: #9575cd;
-    /* Match the border color */
-    border-bottom-left-radius: 4px;
-    z-index: 1;
-  }
-
-  .more-items-notice {
-    color: #5f6368;
-    padding: 0.25rem 0.5rem;
-    margin: 0.5rem 0 0.25rem 0;
-    background-color: #f8f9fa;
-    font-size: vars.$small-size;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    width: fit-content;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-    .more-icon {
-      font-size: 16px;
-      margin-right: 4px;
-      color: #9575cd;
-    }
-  }
-
-  ::ng-deep app-resource-document-item {
-    position: relative;
-    display: block;
-
-    .resource-document-item {
-      margin: 0.25rem 0;
-      padding-left: 0.25rem;
-      /* Minimal nesting indent */
-    }
-
-    .item-header {
-      padding: 0.25rem;
-      margin-bottom: 0.25rem;
-    }
-
-    // Match styling for nested simple attributes
-    .simple-attribute-container {
-      margin: 0.25rem 0;
-      box-shadow: none;
-      border-radius: 4px;
-    }
-
-    // Ensure nested items also have minimal indentation
-    .nested {
-      padding-left: 0.25rem !important;
-    }
-  }
-}
-
-// Other standalone selectors
-.preview-item,
-.preview-property {
-  padding: 0.15rem 0.25rem;
-  margin: 0.25rem 0;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-radius: 3px;
-  font-size: vars.$small-size;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-}
-
-// Color classes
-.string {
-  color: #008000;
-}
-
-.number {
-  color: #0066cc;
-}
-
-.boolean {
-  color: #b22222;
-}
-
-.null {
-  color: #808080;
-}
-
-.key {
-  color: #0e639c;
-  font-weight: 500;
-}
-
-.special {
-  color: #7a3e9d;
-}
-
-.empty {
-  color: #999;
-  font-style: italic;
-}
-
-// All ::before pseudo-elements that create vertical color bars
-[class*="row"]::before,
-[class*="content"]::before,
-.simple-attribute-container::before,
-.preview-array-items::before,
-.preview-object-items::before {
-  top: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  height: 100% !important;
-  border-bottom-left-radius: 0 !important; // Remove border radius for flush alignment
-  z-index: 1 !important;
-}
-
-.debug-status {
-  background-color: #ff6b6b;
-  color: white;
-  padding: 2px 5px;
-  border-radius: 3px;
-  font-size: 10px;
-  margin-right: 5px;
-  position: absolute;
-  top: -10px;
-  right: 5px;
-  z-index: 10;
-}
-
-// Support for horizontal flow within complex attributes - Using CSS Grid approach
-.object-items,
-.array-items {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-  width: 100%;
-  padding: 0.5rem;
-  align-items: start;
-
-  // Individual nested items
-  app-resource-document-item {
-    width: 100%;
-
-    // Items with simple attribute containers should flow in grid
-    .simple-attribute-container {
-      background: #f8f9fa !important;
-      border: 1px solid #e9ecef !important;
-      border-left: 3px solid #28a745 !important; // Green tint for simple values
-      border-radius: 6px !important;
-      padding: 1rem !important;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-      height: fit-content;
-
-      .attribute-header {
-        margin-bottom: 0.75rem;
-
-        strong {
-          font-size: 0.9rem;
-          color: #495057;
-          font-weight: 600;
-          display: block;
-          margin-bottom: 0.25rem;
-        }
-
-        .attribute-type {
-          font-size: 0.75rem;
-          background: rgba(255, 255, 255, 0.8);
-          border: 1px solid #d1ecf1;
-          padding: 0.1rem 0.4rem;
-          border-radius: 3px;
-        }
-
-        .attribute-description {
-          font-size: 0.8rem;
-          color: #6c757d;
-          font-style: italic;
-          margin-top: 0.25rem;
-          display: block;
-        }
-      }
-
-      .attribute-value {
+      .detail-row {
         display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        gap: 1rem;
+        flex-wrap: wrap;
 
-        span:not(.copy-btn) {
-          flex: 1;
+        .detail-label {
           font-size: 0.85rem;
-          color: #333;
-          font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-          background: rgba(255, 255, 255, 0.9);
-          padding: 0.3rem 0.5rem;
-          border-radius: 4px;
-          border: 1px solid #dee2e6;
-          word-break: break-all;
-          font-weight: 500;
+          color: #495057;
 
-          &.null-value {
-            color: #808080;
-            font-style: italic;
-          }
-
-          &.undefined-value {
-            color: #7a3e9d;
-            font-style: italic;
-          }
-        }
-
-        .copy-btn {
-          flex: 0 0 auto;
-          background: none;
-          border: 1px solid #dee2e6;
-          border-radius: 4px;
-          padding: 0.25rem;
-          cursor: pointer;
-          color: #6c757d;
-          display: inline-flex;
-          align-items: center;
-
-          &:hover {
-            background: #f8f9fa;
-            border-color: #007bff;
-            color: #007bff;
-          }
-
-          i.material-icons {
-            font-size: 14px;
-            line-height: 1;
+          .detail-value {
+            font-weight: 600;
+            color: #333;
           }
         }
       }
     }
+  }
 
-    // Items with complex content (unified-item-row for objects/arrays) should span full width
+  // Simple attribute display
+  .simple-attribute-container {
+    @include attribute-container();
+
+    .attribute-header {
+      margin-bottom: 0.75rem;
+
+      strong {
+        font-size: 0.9rem;
+        color: #495057;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.25rem;
+      }
+
+      .attribute-type {
+        font-size: 0.75rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #d1ecf1;
+        padding: 0.1rem 0.4rem;
+        border-radius: 3px;
+      }
+
+      .attribute-description {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-style: italic;
+        margin-top: 0.25rem;
+        display: block;
+      }
+    }
+
+    .attribute-value {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      span:not(.copy-btn) {
+        flex: 1;
+        font-size: 0.85rem;
+        color: #333;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.3rem 0.5rem;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        word-break: break-all;
+        font-weight: 500;
+
+        &.null-value {
+          color: #808080;
+          font-style: italic;
+        }
+
+        &.undefined-value {
+          color: #7a3e9d;
+          font-style: italic;
+        }
+      }
+
+      .copy-btn {
+        flex: 0 0 auto;
+        @include button-style;
+        display: inline-flex;
+        align-items: center;
+      }
+    }
+  }
+
+  // Grid layout optimizations
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 0.5rem;
+
     .unified-item-row.object-row,
     .unified-item-row.array-row {
-      grid-column: 1 / -1 !important;
-      width: 100% !important;
+      grid-column: 1 / -1;
+      width: 100%;
     }
 
-    // Make sure expanded content also spans full width
     .expanded-content {
-      grid-column: 1 / -1 !important;
-      width: 100% !important;
-
-      // Nested array/object items should also use grid layout
-      .array-items,
-      .object-items {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1rem;
-        padding: 0.5rem;
-      }
+      grid-column: 1 / -1;
+      width: 100%;
     }
   }
 
-  // Empty notice should span full width
-  .empty-notice {
-    grid-column: 1 / -1;
-    text-align: center;
-    color: #6c757d;
-    font-style: italic;
-    padding: 2rem;
-  }
-
-  // Array item details should span full width
-  .array-item-details {
-    grid-column: 1 / -1;
-    background: rgba(91, 192, 222, 0.1);
-    padding: 0.75rem;
-    border-radius: 6px;
-    margin-bottom: 0.5rem;
-
-    .detail-row {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-
-      .detail-label {
-        font-size: 0.85rem;
-        color: #495057;
-
-        .detail-value {
-          font-weight: 600;
-          color: #333;
-        }
-      }
-    }
-  }
-
-  // Mobile responsive
+  // Responsive design
   @media (max-width: 768px) {
-    grid-template-columns: 1fr !important;
-  }
-
-  // Tablet responsive
-  @media (min-width: 769px) and (max-width: 1024px) {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-  }
-}
-
-// Additional specific overrides to ensure grid layout works
-.array-items > app-resource-document-item,
-.object-items > app-resource-document-item {
-  // Force grid item behavior for direct children
-  display: block;
-  width: 100%;
-
-  // Simple items should fit in grid cells
-  .resource-document-item .simple-attribute-container {
-    width: 100% !important;
-    max-width: none !important;
-    box-sizing: border-box;
-  }
-
-  // Complex items should span full width
-  .resource-document-item:has(.unified-item-row.object-row),
-  .resource-document-item:has(.unified-item-row.array-row) {
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
-  }
-
-  // Fallback for complex items without :has() support
-  .unified-item-row.object-row,
-  .unified-item-row.array-row {
-    // Force the parent grid item to span all columns
-    ~ * {
-      grid-column: 1 / -1 !important;
+    .array-items, .object-items, .grid-container {
+      grid-template-columns: 1fr !important;
     }
   }
-}
 
-// Force parent grid behavior when containing complex items
-.array-items:has(.unified-item-row.object-row),
-.array-items:has(.unified-item-row.array-row),
-.object-items:has(.unified-item-row.object-row),
-.object-items:has(.unified-item-row.array-row) {
-  // Switch to single column for complex content
-  grid-template-columns: 1fr !important;
-}
-
-// Alternative approach using attribute selectors for broader support
-app-resource-document-item[data-complex="true"] {
-  grid-column: 1 / -1 !important;
-}
-
-// Simpler grid control using data attributes
-.array-items,
-.object-items {
-  // Simple approach: use CSS Grid with proper targeting
-  app-resource-document-item[data-item-type="simple"] {
-    // Simple items stay in grid flow
-    grid-column: span 1;
-  }
-
-  app-resource-document-item[data-item-type="array"],
-  app-resource-document-item[data-item-type="object"] {
-    // Complex items span full width
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .array-items, .object-items, .grid-container {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    }
   }
 }

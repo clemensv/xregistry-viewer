@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ResourceDocument } from '../../models/registry.model';
-import { CodeHighlightComponent } from '../code-highlight/code-highlight.component';
 import { RegistryService } from '../../services/registry.service';
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
@@ -9,7 +8,7 @@ import { ResourceDocumentItem } from '../../models/resource-document-item.model'
 @Component({
   selector: 'app-resource-document',
   standalone: true,
-  imports: [CommonModule, CodeHighlightComponent, ResourceDocumentItemComponent],
+  imports: [CommonModule, ResourceDocumentItemComponent],
   templateUrl: './resource-document.component.html',
   styleUrl: './resource-document.component.scss'
 })

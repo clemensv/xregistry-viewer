@@ -1,0 +1,30 @@
+@use '../../../styles/_theme' as *;
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: s(xs);
+  margin: s(md) 0;
+
+  .pagination-btn {
+    padding: s(xs) s(sm);
+    border: 1px solid c(neutral);
+    background-color: c(background);
+    color: c(text);
+    border-radius: $radius;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: c(primary);
+      color: c(background);
+      border-color: c(primary);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
