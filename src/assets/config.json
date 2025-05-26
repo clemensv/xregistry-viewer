@@ -1,10 +1,13 @@
 {
   "apiEndpoints": [
-    "https://mcpxreg.org/registry",
+    "https://mcpxreg.com/registry",
+    "https://packages.mcpxreg.com",
     "https://xregistry.soaphub.org",
-    "http://localhost:20996/api/registry"],
-  "modelUris" : [
+    "https://xregistry.soaphub.org/reg-APIs-Guru",
+    "https://xregistry.soaphub.org/reg-DocStore",
+    "https://schemas.mcpxreg.com/api/registry"
   ],
+  "modelUris": [],
   "baseUrl": "/",
   "defaultDocumentView": true,
   "features": {

@@ -1,4 +1,4 @@
-<td><span class="material-icons group-icon-small">folder</span> <a [routerLink]="['/', groupType, group['id']]">{{ group['name'] || group['id'] }}</a></td>
+<td><span class="material-icons group-icon-small">folder</span> <a [routerLink]="getGroupNavigationRoute()">{{ group['name'] || group['id'] }}</a></td>
 <td>{{ group && (group['description'] || '-') }}</td>
 <td>{{ group && group['origin'] ? group['origin'] : '-' }}</td>
 <td>

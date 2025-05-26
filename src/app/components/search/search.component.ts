@@ -56,14 +56,17 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   onInput(): void {
     // Trigger search immediately for any input change
+    console.log('Search input changed:', this.searchTerm);
     this.searchService.setSearchTerm(this.searchTerm);
   }
 
   onSearch(): void {
+    console.log('Search triggered:', this.searchTerm);
     this.searchService.setSearchTerm(this.searchTerm);
   }
 
   clearSearch(): void {
+    console.log('Search cleared');
     this.searchTerm = '';
     this.searchService.clearSearch();
   }

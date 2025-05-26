@@ -5,7 +5,7 @@
   <ng-container *ngIf="breadcrumbs$ | async as breadcrumbs">
     <div *ngFor="let crumb of breadcrumbs; let i = index; let isLast = last" class="breadcrumb-item">
       <ng-container *ngIf="!isLast">
-        <a *ngIf="i === 1" [routerLink]="'/' + breadcrumbs[0].url.split('/')[1]" [fragment]="'group-' + crumb.url.split('/')[2]" class="breadcrumb-link">
+        <a *ngIf="i === 1" [routerLink]="crumb.url" class="breadcrumb-link">
           {{ crumb.label }}
         </a>
         <a *ngIf="i !== 1" [routerLink]="crumb.url" class="breadcrumb-link">

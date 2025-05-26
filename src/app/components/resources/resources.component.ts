@@ -9,6 +9,7 @@ import { ResourceDocumentComponent } from '../resource-document/resource-documen
 import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 import { ResourceRowComponent } from '../resource-row/resource-row.component';
 import { SearchService } from '../../services/search.service';
+import { DebugService } from '../../services/debug.service';
 
 @Component({
   standalone: true,
@@ -38,7 +39,8 @@ export class ResourcesComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private registry: RegistryService,
     private modelService: ModelService,
-    private searchService: SearchService
+    private searchService: SearchService,
+    private debug: DebugService
   ) {}
 
   ngOnInit(): void {
@@ -59,9 +61,11 @@ export class ResourcesComponent implements OnInit, OnDestroy {
       this.searchService.searchState$
         .pipe(takeUntil(this.destroy$))
         .subscribe(state => {
+          this.debug.log('Resources received search state:', state, 'My context:', { groupType: this.groupType, groupId: this.groupId, resourceType: this.resourceType });
           if (state.context?.groupType === this.groupType &&
               state.context?.groupId === this.groupId &&
               state.context?.resourceType === this.resourceType) {
+            this.debug.log('Search context matches, updating search term:', state.searchTerm);
             this.currentSearchTerm = state.searchTerm;
             this.applyClientSideFilter();
           }
@@ -81,7 +85,7 @@ export class ResourcesComponent implements OnInit, OnDestroy {
     const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.listResources(this.groupType, this.groupId, this.resourceType, pageRel, filter)
       .subscribe(page => {
-        console.log('loadResources links:', page.links);
+        this.debug.log('loadResources links:', page.links);
         this.resourcesList = page.items;
           // Process resources to ensure all required fields are present
         this.resourcesList = this.resourcesList.map(resource => {
@@ -99,10 +103,10 @@ export class ResourcesComponent implements OnInit, OnDestroy {
         });
 
         // Debug the actual resources data
-        console.log('Resources loaded:', this.resourcesList);
+        this.debug.log('Resources loaded:', this.resourcesList);
         if (this.resourcesList.length > 0) {
-          console.log('First resource sample:', this.resourcesList[0]);
-          console.log('Resource properties:', Object.keys(this.resourcesList[0]));
+          this.debug.log('First resource sample:', this.resourcesList[0]);
+          this.debug.log('Resource properties:', Object.keys(this.resourcesList[0]));
         }
 
         this.pageLinks = page.links;

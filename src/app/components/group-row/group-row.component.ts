@@ -30,4 +30,31 @@ export class GroupRowComponent implements OnInit {
   objectKeys(obj: any): string[] {
     return obj ? Object.keys(obj) : [];
   }
+
+  /**
+   * Get the navigation route for the group
+   * If there's only one resource type, navigate directly to it
+   * Otherwise, determine the best navigation target
+   */
+  getGroupNavigationRoute(): string[] {
+    if (!this.group || !this.groupType) {
+      return ['/']; // fallback to home
+    }
+
+    // If there are resource types available, navigate to the first one
+    if (this.resourceTypes && this.resourceTypes.length === 1) {
+      const resourceType = this.resourceTypes[0];
+      return ['/', this.groupType, this.group['id'], resourceType.name];
+    }
+
+    // If there are multiple resource types, still go to the first one for consistency
+    // or we could navigate to a group detail page if it existed
+    if (this.resourceTypes && this.resourceTypes.length > 0) {
+      const resourceType = this.resourceTypes[0];
+      return ['/', this.groupType, this.group['id'], resourceType.name];
+    }
+
+    // Fallback: try to navigate to 'schemas' resource type (common case)
+    return ['/', this.groupType, this.group['id'], 'schemas'];
+  }
 }

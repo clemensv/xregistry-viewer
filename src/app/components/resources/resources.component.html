@@ -1,20 +1,28 @@
-<div class="page-container">
-  <div class="page-header">
-    <div class="header-row">
+<div class="resources">
+  <div class="header-outer">
+    <div class="page-header">
       <h2>Resources for {{ resourceType }} in {{ groupType }}/{{ groupId }}</h2>
       <div class="view-toggle">
         <button [class.active]="viewMode === 'cards'" (click)="setViewMode('cards')" title="Card View">
-          <i class="fa fa-th"></i> Cards
+          <i class="material-icons">grid_view</i>
         </button>
         <button [class.active]="viewMode === 'list'" (click)="setViewMode('list')" title="List View">
-          <i class="fa fa-list"></i> List
+          <i class="material-icons">list</i>
         </button>
       </div>
     </div>
-    <div class="header-divider"></div>
   </div>
-  <div class="page-content">
-    <app-pagination *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>    <div *ngIf="!loading; else loadingTpl">
+  <!-- Pagination row within header -->
+  <div class="pagination-header" *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)">
+    <div class="pagination-info">
+      <span class="results-count" *ngIf="filteredResourcesList && filteredResourcesList.length">
+        Showing {{ filteredResourcesList.length }} resources
+      </span>
+    </div>
+    <app-pagination [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>
+  </div>
+
+  <div class="page-content">    <div *ngIf="!loading; else loadingTpl">
       <!-- Cards View -->
       <div *ngIf="viewMode === 'cards'" [ngClass]="{'single-resource': filteredResourcesList.length === 1}">
         <div class="grid-container">

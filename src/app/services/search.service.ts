@@ -30,6 +30,7 @@ export class SearchService {
    */
   setSearchTerm(term: string, context?: SearchState['context']): void {
     const currentState = this.searchStateSubject.value;
+    console.log('SearchService.setSearchTerm:', term, 'Context:', context || currentState.context);
     this.searchStateSubject.next({
       searchTerm: term,
       isActive: term.length > 0,

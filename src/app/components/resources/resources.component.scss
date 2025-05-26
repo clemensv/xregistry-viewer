@@ -8,31 +8,32 @@
 /* Container styling */
 .resources {
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 0;
+  gap: 0.75rem;
 }
 
-/* Full-width header wrapper */
+/* Header outer container - remove excessive spacing and span full width */
 .header-outer {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
   width: 100vw;
-  margin-left: 50%;
-  transform: translateX(-50%);
-  background: bg('card');
+  margin-left: calc(-50vw + 50%);
+  box-sizing: border-box;
 }
 
-/* New Page Header Layout */
+/* Page Header Layout - aligned with breadcrumb */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 1rem 0 0.5rem 0;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
+  margin-bottom: 0.5rem;
+  background-color: var(--bg-card, white);
 }
 
 .page-header h2 {
@@ -81,9 +82,9 @@
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 0.5rem 0 1rem 0;
-  border-bottom: 1px solid fg('divider');
-  margin-bottom: 1.5rem;
+  padding: 0.25rem 1rem;
+  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
+  margin-bottom: 0.5rem;
 }
 
 .pagination-info {
@@ -103,53 +104,12 @@ app-pagination {
   width: 100%;
 }
 
-/* Header styling */
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.header-divider {
-  height: 1px;
-  background-color: #e0e0e0;
-  width: 100%;
-  margin-top: 0.5rem;
-}
-
+/* Resources specific styles */
 .resources h2 {
-  margin-bottom: 1.2rem;
+  margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-}
-
-.view-toggle {
-  display: flex;
-  gap: 0.5rem;
-
-  button {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background-color: #e0e0e0;
-    }
-
-    &.active {
-      background-color: #007bff;
-      color: white;
-      border-color: #0069d9;
-    }
-  }
+  color: var(--fg-text, #333);
 }
 
 /* Improved grid container for better space utilization */
@@ -408,5 +368,10 @@ h4 {
   .grid-item.single-item {
     min-width: 100%;
     max-width: 100%;
+  }
+
+  .page-header,
+  .pagination-header {
+    padding: 0.5rem 0.75rem;
   }
 }

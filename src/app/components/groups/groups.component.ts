@@ -29,6 +29,12 @@ export class GroupsComponent implements OnInit, OnDestroy {
   currentSearchTerm = '';
   private destroy$ = new Subject<void>();
 
+  // Client-side pagination for large datasets
+  private allGroupsCache: Group[] = [];
+  private currentPage = 1;
+  private pageSize = 50;
+  private useClientSidePagination = false;
+
   constructor(
     private route: ActivatedRoute,
     private registry: RegistryService,
@@ -59,7 +65,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
       switchMap(gt => this.modelService.getRegistryModel().pipe(
         map(model => {
           if (!model.groups[gt] || !model.groups[gt].resources) {
-            console.warn(`No resources found for groupType: ${gt}`);
+            this.debug.warn(`No resources found for groupType: ${gt}`);
             return [];
           }
           const resourceTypes = Object.keys(model.groups[gt].resources);
@@ -73,7 +79,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.searchService.searchState$
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
+        this.debug.log('Groups received search state:', state, 'My groupType:', this.groupType);
         if (state.context?.groupType === this.groupType) {
+          this.debug.log('Search context matches, updating search term:', state.searchTerm);
           this.currentSearchTerm = state.searchTerm;
           this.applyClientSideFilter();
         }
@@ -89,25 +97,105 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   /** Load groups with current pagination */
   loadGroups(pageRel: string = ''): void {
+    // If using client-side pagination, handle it locally
+    if (this.useClientSidePagination && pageRel) {
+      this.handleClientSidePagination(pageRel);
+      return;
+    }
+
     const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.listGroups(this.groupType, pageRel, filter)
       .subscribe(page => {
-        this.groupsList = page.items;
-        this.pageLinks = page.links;
+        // Check if server returned pagination links
+        const hasServerPagination = Object.keys(page.links).length > 0;
+
+        if (!hasServerPagination && page.items.length > this.pageSize && !pageRel) {
+          // Server doesn't support pagination but returned large dataset
+          this.enableClientSidePagination(page.items);
+        } else {
+          // Normal server pagination or small dataset
+          this.groupsList = page.items;
+          this.pageLinks = page.links;
+          this.useClientSidePagination = false;
+        }
+
         this.applyClientSideFilter();
 
         // Only set default view mode on initial load (when pageRel is empty)
         if (!pageRel) {
-        if (this.groupsList.length > 20) {
-          this.viewMode = 'list';
-        } else {
-          this.viewMode = 'cards';
+          if (this.groupsList.length > 20) {
+            this.viewMode = 'list';
+          } else {
+            this.viewMode = 'cards';
+          }
         }
-        }
-        // For pagination (pageRel is not empty), preserve current viewMode
 
         this.cdr.markForCheck();
       });
+  }
+
+  private enableClientSidePagination(allItems: Group[]): void {
+    this.allGroupsCache = allItems;
+    this.useClientSidePagination = true;
+    this.currentPage = 1;
+
+    // Create client-side pagination links
+    const totalPages = Math.ceil(allItems.length / this.pageSize);
+    this.pageLinks = {};
+
+    if (this.currentPage > 1) {
+      this.pageLinks['prev'] = 'prev';
+      this.pageLinks['first'] = 'first';
+    }
+
+    if (this.currentPage < totalPages) {
+      this.pageLinks['next'] = 'next';
+      this.pageLinks['last'] = 'last';
+    }
+
+    // Display first page
+    this.groupsList = this.getPageItems();
+  }
+
+  private handleClientSidePagination(pageRel: string): void {
+    const totalPages = Math.ceil(this.allGroupsCache.length / this.pageSize);
+
+    switch (pageRel) {
+      case 'first':
+        this.currentPage = 1;
+        break;
+      case 'prev':
+        this.currentPage = Math.max(1, this.currentPage - 1);
+        break;
+      case 'next':
+        this.currentPage = Math.min(totalPages, this.currentPage + 1);
+        break;
+      case 'last':
+        this.currentPage = totalPages;
+        break;
+    }
+
+    // Update pagination links
+    this.pageLinks = {};
+    if (this.currentPage > 1) {
+      this.pageLinks['prev'] = 'prev';
+      this.pageLinks['first'] = 'first';
+    }
+    if (this.currentPage < totalPages) {
+      this.pageLinks['next'] = 'next';
+      this.pageLinks['last'] = 'last';
+    }
+
+    // Update displayed items
+    this.groupsList = this.getPageItems();
+    this.applyClientSideFilter();
+    this.cdr.markForCheck();
+  }
+
+  private getPageItems(): Group[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.allGroupsCache.slice(startIndex, endIndex);
   }
 
   private applyClientSideFilter(): void {

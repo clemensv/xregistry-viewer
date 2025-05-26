@@ -56,7 +56,7 @@ export class AppComponent implements OnInit {
         console.log('AppComponent: Config has', config?.apiEndpoints?.length || 0, 'API endpoints');
 
         // Clear ModelService cache so it can reload with the new configuration
-        this.modelService.clearCache();
+        this.modelService.clearAllCaches();
         this.configLoaded = true;
 
         // Update base URL

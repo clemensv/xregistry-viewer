@@ -6,6 +6,7 @@ import { map, switchMap, catchError, tap } from 'rxjs/operators';
 import { Group, Resource, ResourceDocument } from '../models/registry.model';
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
+import { DebugService } from './debug.service';
 import { isPlatformBrowser } from '@angular/common';
 import { LRUCache } from '../utils/lru-cache';
 // Removed duplicate import of HttpResponse
@@ -47,6 +48,7 @@ export class RegistryService {
     private http: HttpClient,
     private modelService: ModelService,
     private configService: ConfigService,
+    private debug: DebugService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     // Compute the base URL for the app (from config or fallback to '/')
@@ -139,95 +141,105 @@ export class RegistryService {
     if (apis.length === 0) {
       return { items: [], links: {} };
     }
-    // Use first API; assume consistent paging for all endpoints
-    const api = apis[0];
-    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
 
-    console.log(`Requesting resources from: ${url}`);
-    const response = await lastValueFrom(
-      this.http.get<{ [key: string]: any }>(url, { observe: 'response' as const })
-    );
-    const data = response.body || {};
+    // Try each API endpoint until we find one that works
+    for (const api of apis) {
+      try {
+        const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
 
-    // Parse Link header into links
-    const links: any = {};
-    const linkHeader = response.headers.get('Link') || '';
+        this.debug.log(`Requesting resources from: ${url}`);
+        const response = await lastValueFrom(
+          this.http.get<{ [key: string]: any }>(url, { observe: 'response' as const })
+        );
+        const data = response.body || {};
 
-    if (linkHeader) {
-    // Split by comma and process each part
-      linkHeader.split(',').forEach(part => {
-      const trimmedPart = part.trim();
+        // Parse Link header into links
+        const links: any = {};
+        const linkHeader = response.headers.get('Link') || '';
 
-      // Format: <url>; rel="relation" (standard RFC 5988)
-      const linkMatch = trimmedPart.match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
-      if (linkMatch) {
-        const url = linkMatch[1];
-        const rel = linkMatch[2].toLowerCase(); // Normalize to lowercase
-        links[rel] = url;
-        return; // Continue to next part
+        if (linkHeader) {
+        // Split by comma and process each part
+          linkHeader.split(',').forEach(part => {
+          const trimmedPart = part.trim();
+
+          // Format: <url>; rel="relation" (standard RFC 5988)
+          const linkMatch = trimmedPart.match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+          if (linkMatch) {
+            const url = linkMatch[1];
+            const rel = linkMatch[2].toLowerCase(); // Normalize to lowercase
+            links[rel] = url;
+            return; // Continue to next part
+          }
+
+          // Try a more lenient pattern for the URL and rel attribute
+          const lenientLinkMatch = trimmedPart.match(/<([^>]+)>.*rel="?([a-zA-Z0-9_-]+)"?/i);
+          if (lenientLinkMatch) {
+            const url = lenientLinkMatch[1];
+            const rel = lenientLinkMatch[2].toLowerCase();
+            links[rel] = url;
+            return;
+          }
+
+          // Format: key="value" (metadata fields)
+          const metaMatch = trimmedPart.match(/([a-zA-Z0-9_-]+)="?([^"]+)"?/i);
+          if (metaMatch) {
+            const key = metaMatch[1].toLowerCase();
+            const value = metaMatch[2].replace(/"/g, '');
+            // Store metadata with the same format as links
+            links[key] = value;
+            return; // Continue to next part
+            }
+          });
+          }
+
+        // Map entries to ResourceDocument[]
+        const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };
+        const attrs = resMeta.attributes || {};
+        this.debug.log('Original data entries:', data);
+
+        const items: ResourceDocument[] = Object.values(data).map((entry: any) => {
+          const idKey = resMeta.singular + 'id';
+
+          // First, clone the entry to preserve all original fields
+          const doc: any = { ...entry };
+
+          // Then override with the properly cased and mapped fields
+          doc.id = entry[idKey] || entry.id || entry.name; // Fallback to name if id is missing
+          doc.name = entry.name || entry[idKey] || entry.id; // Fallback to id if name is missing
+          doc.description = entry.description;
+
+          // Explicitly map docs to resourceUrl for the resource-row component
+          if (entry.docs) {
+            doc.resourceUrl = entry.docs;
+            doc.docs = entry.docs; // Make sure both are set
+          }
+
+          // Ensure proper case for timestamp fields
+          doc.createdAt = entry.createdat || entry.createdAt;
+          doc.modifiedAt = entry.modifiedat || entry.modifiedAt;
+          doc.origin = api;
+
+          // Add attributes from the registry model
+          Object.keys(attrs).forEach(key => {
+            if (!['id', 'name', idKey].includes(key) && entry[key] != null) {
+              doc[key] = entry[key];
+            }
+          });
+
+          // Log the mapped document for debugging
+          this.debug.log('Mapped resource:', doc);
+
+          return doc as ResourceDocument;
+        });
+        return { items, links };
+      } catch (err) {
+        this.debug.error(`Failed to list resources from ${api}:`, err);
+        continue;
       }
+    }
 
-      // Try a more lenient pattern for the URL and rel attribute
-      const lenientLinkMatch = trimmedPart.match(/<([^>]+)>.*rel="?([a-zA-Z0-9_-]+)"?/i);
-      if (lenientLinkMatch) {
-        const url = lenientLinkMatch[1];
-        const rel = lenientLinkMatch[2].toLowerCase();
-        links[rel] = url;
-        return;
-      }
-
-      // Format: key="value" (metadata fields)
-      const metaMatch = trimmedPart.match(/([a-zA-Z0-9_-]+)="?([^"]+)"?/i);
-      if (metaMatch) {
-        const key = metaMatch[1].toLowerCase();
-        const value = metaMatch[2].replace(/"/g, '');
-        // Store metadata with the same format as links
-        links[key] = value;
-        return; // Continue to next part
-        }
-      });
-      }
-
-    // Map entries to ResourceDocument[]
-    const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };
-    const attrs = resMeta.attributes || {};
-    console.log('Original data entries:', data);
-
-    const items: ResourceDocument[] = Object.values(data).map((entry: any) => {
-      const idKey = resMeta.singular + 'id';
-
-      // First, clone the entry to preserve all original fields
-      const doc: any = { ...entry };
-
-      // Then override with the properly cased and mapped fields
-      doc.id = entry[idKey] || entry.id || entry.name; // Fallback to name if id is missing
-      doc.name = entry.name || entry[idKey] || entry.id; // Fallback to id if name is missing
-      doc.description = entry.description;
-
-      // Explicitly map docs to resourceUrl for the resource-row component
-      if (entry.docs) {
-        doc.resourceUrl = entry.docs;
-        doc.docs = entry.docs; // Make sure both are set
-      }
-
-      // Ensure proper case for timestamp fields
-      doc.createdAt = entry.createdat || entry.createdAt;
-      doc.modifiedAt = entry.modifiedat || entry.modifiedAt;
-      doc.origin = api;
-
-      // Add attributes from the registry model
-      Object.keys(attrs).forEach(key => {
-        if (!['id', 'name', idKey].includes(key) && entry[key] != null) {
-          doc[key] = entry[key];
-        }
-      });
-
-      // Log the mapped document for debugging
-      console.log('Mapped resource:', doc);
-
-      return doc as ResourceDocument;
-    });
-    return { items, links };
+    // If all APIs failed, return empty result
+    return { items: [], links: {} };
   }
 
   getGroup(groupType: string, groupId: string): Observable<Group> {
@@ -301,7 +313,7 @@ export class RegistryService {
     const resourceMeta = model.groups[groupType]?.resources?.[resourceType];
 
     if (!resourceMeta) {
-      console.error(
+      this.debug.error(
         `Resource type ${resourceType} not found in group type ${groupType}`
       );
       throw new Error(
@@ -484,67 +496,80 @@ export class RegistryService {
     const apis = this.modelService.getApiEndpointsForGroupType(groupType);
     if (apis.length === 0) {
       return { items: [], links: {} };
-    }    // Use first API endpoint for paging
-    const api = apis[0];
-    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
+    }
 
-    console.log(`Requesting versions from: ${url}`);
-    const response = await lastValueFrom(
-      this.http.get<any>(url, { observe: 'response' as const })
-    );
-    const data = response.body || {};    // Parse Link header into relations with improved regex
-    const linkHeader = response.headers.get('Link') || '';
-    console.log(`Link header received for versions: ${linkHeader}`);
+    // Try each API endpoint until we find one that works
+    for (const api of apis) {
+      try {
+        const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
 
-    const links: any = {};
-    // Split by comma and process each part
-    linkHeader.split(',').forEach(part => {
-      const trimmedPart = part.trim();
+        this.debug.log(`Requesting versions from: ${url}`);
+        const response = await lastValueFrom(
+          this.http.get<any>(url, { observe: 'response' as const })
+        );
+        const data = response.body || {};
 
-      // Format: <url>; rel="relation" (standard RFC 5988)
-      const linkMatch = trimmedPart.match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
-      if (linkMatch) {
-        const url = linkMatch[1];
-        const rel = linkMatch[2].toLowerCase(); // Normalize to lowercase
-        links[rel] = url;
-        console.log(`Found version link relation: ${rel} -> ${url}`);
-        return; // Continue to next part
+        // Parse Link header into relations with improved regex
+        const linkHeader = response.headers.get('Link') || '';
+        this.debug.log(`Link header received for versions: ${linkHeader}`);
+
+        const links: any = {};
+        // Split by comma and process each part
+        linkHeader.split(',').forEach(part => {
+          const trimmedPart = part.trim();
+
+          // Format: <url>; rel="relation" (standard RFC 5988)
+          const linkMatch = trimmedPart.match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+          if (linkMatch) {
+            const url = linkMatch[1];
+            const rel = linkMatch[2].toLowerCase(); // Normalize to lowercase
+            links[rel] = url;
+            this.debug.log(`Found version link relation: ${rel} -> ${url}`);
+            return; // Continue to next part
+          }
+
+          // Format: key="value" (metadata fields)
+          const metaMatch = trimmedPart.match(/([a-zA-Z0-9_-]+)="?([^"]+)"?/i);
+          if (metaMatch) {
+            const key = metaMatch[1].toLowerCase();
+            const value = metaMatch[2].replace(/"/g, '');
+            // Store metadata with the same format as links
+            links[key] = value;
+            this.debug.log(`Found version metadata: ${key} -> ${value}`);
+            return; // Continue to next part
+          }
+          // If we reach here, we couldn't parse this part
+          this.debug.log(`Skipping version Link header part (not a link or metadata): ${trimmedPart}`);
+        });
+        // Map entries to ResourceDocument[]
+        const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };
+        const attrs = resMeta.attributes || {};
+        const items: ResourceDocument[] = Object.values(data).map((entry: any) => {
+          const idKey = resMeta.singular + 'id';
+          const doc: any = {
+            id: entry[idKey] || entry.id,
+            name: entry.name,
+            createdAt: entry.createdat,
+            modifiedAt: entry.modifiedat,
+            origin: api,
+            ...entry
+          };
+          Object.keys(attrs).forEach(key => {
+            if (!['id', 'name', idKey].includes(key) && entry[key] != null) {
+              doc[key] = entry[key];
+            }
+          });
+          return doc as ResourceDocument;
+        });
+        return { items, links };
+      } catch (err) {
+        this.debug.error(`Failed to list resource versions from ${api}:`, err);
+        continue;
       }
+    }
 
-      // Format: key="value" (metadata fields)
-      const metaMatch = trimmedPart.match(/([a-zA-Z0-9_-]+)="?([^"]+)"?/i);
-      if (metaMatch) {
-        const key = metaMatch[1].toLowerCase();
-        const value = metaMatch[2].replace(/"/g, '');
-        // Store metadata with the same format as links
-        links[key] = value;
-        console.log(`Found version metadata: ${key} -> ${value}`);
-        return; // Continue to next part
-      }
-        // If we reach here, we couldn't parse this part
-      console.log(`Skipping version Link header part (not a link or metadata): ${trimmedPart}`);
-    });
-    // Map entries to ResourceDocument[]
-    const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };
-    const attrs = resMeta.attributes || {};
-    const items: ResourceDocument[] = Object.values(data).map((entry: any) => {
-      const idKey = resMeta.singular + 'id';
-      const doc: any = {
-        id: entry[idKey] || entry.id,
-        name: entry.name,
-        createdAt: entry.createdat,
-        modifiedAt: entry.modifiedat,
-        origin: api,
-        ...entry
-      };
-      Object.keys(attrs).forEach(key => {
-        if (!['id', 'name', idKey].includes(key) && entry[key] != null) {
-          doc[key] = entry[key];
-        }
-      });
-      return doc as ResourceDocument;
-    });
-    return { items, links };
+    // If all APIs failed, return empty result
+    return { items: [], links: {} };
   }
 
   fetchDocument(url: string): Observable<string> {
@@ -555,7 +580,7 @@ export class RegistryService {
 
     return this.http.get(url, { responseType: 'text' }).pipe(
       catchError((error) => {
-        console.error(`Error fetching document from ${url}:`, error);
+        this.debug.error(`Error fetching document from ${url}:`, error);
         return throwError(() => error);
       })
     );
@@ -580,7 +605,7 @@ export class RegistryService {
     }
 
     // Fallback: Use a reasonable guess if the model doesn't have it
-    console.warn(
+    this.debug.warn(
       `Could not find singular name for ${resourceType} in cached model, using fallback`
     );
     return resourceType.endsWith('s')
@@ -825,11 +850,11 @@ export class RegistryService {
           response['resource'] = parsed;
         }
       } else {
-        console.error(`Error fetching document from ${url}: Status ${xhr.status}`);
+        this.debug.error(`Error fetching document from ${url}: Status ${xhr.status}`);
         response['resourceUrl'] = url;
       }
     } catch (error) {
-      console.error(`Error fetching document from ${url}:`, error);
+      this.debug.error(`Error fetching document from ${url}:`, error);
       response['resourceUrl'] = url;
     }
 
@@ -884,11 +909,11 @@ export class RegistryService {
           response.resource = parsed;
         }
       } else {
-        console.error(`Error fetching document from ${url}: Status ${result.status}`);
+        this.debug.error(`Error fetching document from ${url}: Status ${result.status}`);
         response.resourceUrl = url;
       }
     } catch (error) {
-      console.error(`Error fetching document from ${url}:`, error);
+      this.debug.error(`Error fetching document from ${url}:`, error);
       response.resourceUrl = url;
     }
 
@@ -996,7 +1021,7 @@ export class RegistryService {
           throw error;
         }
       } catch (err) {
-        console.error(`Failed to get resource details from ${api}:`, err);
+        this.debug.error(`Failed to get resource details from ${api}:`, err);
         continue;
       }
     }
@@ -1064,45 +1089,110 @@ export class RegistryService {
     const apis = this.modelService.getApiEndpointsForGroupType(groupType);
     if (apis.length === 0) {
       return { items: [], links: {} };
-    }    const api = apis[0];
-    // Determine full URL: if pagePath is absolute, use as is; otherwise build via getApiUrl
-    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
+    }
 
-    console.log(`Requesting groups from: ${url}`);
-    const response = await lastValueFrom(
-      this.http.get<{ [id: string]: any }>(url, { observe: 'response' as const })
-    );
-    const data = response.body || {};
+    // For absolute URLs (pagination), use the original single-API logic
+    if (pagePath.startsWith('http')) {
+      // Extract the API base from the absolute URL to determine which API to use
+      const targetApi = apis.find(api => pagePath.startsWith(api)) || apis[0];
+      try {
+        const response = await lastValueFrom(
+          this.http.get<{ [id: string]: any }>(pagePath, { observe: 'response' as const })
+        );
+        const data = response.body || {};
 
-    // Parse RFC5988 Link header with improved regex
-    const linkHeader = response.headers.get('Link') || '';
-    console.log(`Link header received for groups: ${linkHeader}`);
+        // Parse RFC5988 Link header
+        const linkHeader = response.headers.get('Link') || '';
+        this.debug.log(`Link header received for groups: ${linkHeader}`);
 
-    const links: any = {};
-    linkHeader.split(',').forEach(part => {
-      // More robust regex to handle various link header formats
-      const match = part.trim().match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
-      if (match) {
-        links[match[2]] = match[1];
-        console.log(`Found link relation: ${match[2]} -> ${match[1]}`);
-      } else {
-        console.warn(`Failed to parse link header part: ${part}`);
+        const links: any = {};
+        linkHeader.split(',').forEach(part => {
+          const match = part.trim().match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+          if (match) {
+            links[match[2]] = match[1];
+            this.debug.log(`Found link relation: ${match[2]} -> ${match[1]}`);
+          } else {
+            this.debug.warn(`Failed to parse link header part: ${part}`);
+          }
+        });
+
+        // Map entries to Group[]
+        const meta = model.groups[groupType] || { singular: groupType, attributes: {} };
+        const groups: Group[] = Object.entries(data).map(([key, entry]: [string, any]) => {
+          const idKey = meta.singular + 'id';
+          return {
+            id: entry[idKey] || entry.id || key,
+            name: entry.name,
+            createdAt: entry.createdat,
+            modifiedAt: entry.modifiedat,
+            origin: targetApi,
+            ...entry
+          } as Group;
+        });
+        return { items: groups, links };
+      } catch (err) {
+        this.debug.error(`Failed to list groups from absolute URL ${pagePath}:`, err);
+        return { items: [], links: {} };
+      }
+    }
+
+    // For relative URLs (initial load), query ALL APIs in parallel and merge results
+    this.debug.log(`Querying ${apis.length} APIs for group type '${groupType}': ${apis.join(', ')}`);
+
+    const apiRequests = apis.map(async (api) => {
+      try {
+        const url = this.getApiUrl(api, pagePath, filter);
+        this.debug.log(`Requesting groups from: ${url}`);
+
+        const response = await lastValueFrom(
+          this.http.get<{ [id: string]: any }>(url, { observe: 'response' as const })
+        );
+        const data = response.body || {};
+
+        // Map entries to Group[] with origin tracking
+        const meta = model.groups[groupType] || { singular: groupType, attributes: {} };
+        const groups: Group[] = Object.entries(data).map(([key, entry]: [string, any]) => {
+          const idKey = meta.singular + 'id';
+          return {
+            id: entry[idKey] || entry.id || key,
+            name: entry.name,
+            createdAt: entry.createdat,
+            modifiedAt: entry.modifiedat,
+            origin: api,
+            ...entry
+          } as Group;
+        });
+
+        this.debug.log(`Successfully loaded ${groups.length} groups from ${api}`);
+        return { api, groups, success: true };
+      } catch (err) {
+        this.debug.error(`Failed to list groups from ${api}:`, err);
+        return { api, groups: [], success: false };
       }
     });
-    // Map entries to Group[]
-    const meta = model.groups[groupType] || { singular: groupType, attributes: {} };
-    const groups: Group[] = Object.entries(data).map(([key, entry]: [string, any]) => {
-      const idKey = meta.singular + 'id';
-      return {
-        id: entry[idKey] || entry.id || key,
-        name: entry.name,
-        createdAt: entry.createdat,
-        modifiedAt: entry.modifiedat,
-        origin: api,
-        ...entry
-      } as Group;
+
+    // Wait for all API requests to complete
+    const results = await Promise.all(apiRequests);
+
+    // Merge all successful results
+    const allGroups: Group[] = [];
+    const successfulApis: string[] = [];
+
+    results.forEach(result => {
+      if (result.success && result.groups.length > 0) {
+        allGroups.push(...result.groups);
+        successfulApis.push(result.api);
+      }
     });
-    return { items: groups, links };
+
+    this.debug.log(`Merged ${allGroups.length} total groups from ${successfulApis.length} successful APIs: ${successfulApis.join(', ')}`);
+
+    // For pagination links, we'll use the first successful API's pattern
+    // In a multi-API scenario, pagination becomes complex as each API has its own pagination
+    // For now, we disable pagination when merging multiple APIs
+    const links: any = {};
+
+    return { items: allGroups, links };
   }
 
 }

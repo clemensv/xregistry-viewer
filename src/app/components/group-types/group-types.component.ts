@@ -22,7 +22,9 @@ export class GroupTypesComponent implements OnInit, OnDestroy {
   filteredGroupTypesList: { groupType: string; model: GroupType }[] = [];
   currentSearchTerm = '';
   loading = true;
+  loadingProgress = true; // Tracks if we're still expecting more data
   private destroy$ = new Subject<void>();
+  private initialLoad = true;
 
   constructor(
     private modelService: ModelService,
@@ -77,29 +79,51 @@ export class GroupTypesComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadData(): void {
-    this.modelService.getRegistryModel()
+    private loadData(): void {
+    this.modelService.getProgressiveRegistryModel()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (model) => {
-          const groupTypes = Object.entries(model.groups || {}).map(([groupType, model]) => ({ groupType, model }));
+        next: (result) => {
+          const groupTypes = Object.entries(result.model.groups || {}).map(([groupType, model]) => ({ groupType, model }));
 
-          this.groupTypesList = groupTypes;
-          this.applyClientSideFilter();
+          // Only update if we have new group types
+          if (groupTypes.length > this.groupTypesList.length ||
+              JSON.stringify(groupTypes.map(gt => gt.groupType).sort()) !==
+              JSON.stringify(this.groupTypesList.map(gt => gt.groupType).sort())) {
 
-          // Set default view mode based on the number of items
-          if (this.groupTypesList.length > 10) {
-            this.viewMode = 'list';
-          } else {
-            this.viewMode = 'cards';
+            this.groupTypesList = groupTypes;
+            this.applyClientSideFilter();
+
+            // Set default view mode based on the number of items (only on first significant load)
+            if (this.initialLoad && this.groupTypesList.length > 0) {
+              if (this.groupTypesList.length > 10) {
+                this.viewMode = 'list';
+              } else {
+                this.viewMode = 'cards';
+              }
+              this.initialLoad = false;
+            }
+
+            this.debug.log(`GroupTypesComponent: Updated with ${this.groupTypesList.length} group types (${result.loadedCount}/${result.totalCount} endpoints loaded)`);
+            this.cdr.markForCheck();
           }
 
-          this.loading = false;
+          // Update loading states
+          this.loadingProgress = !result.isComplete;
+          if (this.loading && this.groupTypesList.length > 0) {
+            this.loading = false;
+          }
+          if (result.isComplete) {
+            this.loading = false;
+            this.loadingProgress = false;
+          }
+
           this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('GroupTypesComponent: Error loading registry model:', error);
           this.loading = false;
+          this.loadingProgress = false;
           this.cdr.markForCheck();
         }
       });

@@ -13,15 +13,26 @@
   gap: 0.75rem;
 }
 
+/* Header outer container - remove excessive spacing and span full width */
+.header-outer {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  box-sizing: border-box;
+}
+
 /* Page Header Layout - aligned with breadcrumb */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0.75rem 0;
+  padding: 0.5rem 1rem;
   border-bottom: 1px solid var(--fg-divider, #e0e0e0);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   background-color: var(--bg-card, white);
 }
 
@@ -71,9 +82,9 @@
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 0.5rem 0 1rem 0;
+  padding: 0.25rem 1rem;
   border-bottom: 1px solid fg('divider');
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .pagination-info {
@@ -451,6 +462,11 @@ h3 {
   .groups {
     padding: 0 0.5rem;
   }
+
+  .page-header,
+  .pagination-header {
+    padding: 0.5rem 0.75rem;
+  }
 }
 
 @media (min-width: 769px) and (max-width: 1000px) {
@@ -498,9 +514,11 @@ h3 {
   min-width: 150px;
 }
 
+/* Origin column - smaller font and size */
 .groups-table th:nth-child(3), .groups-table td:nth-child(3) {
   width: 20%;
   min-width: 140px;
+  font-size: 0.75rem;
 }
 
 .groups-table th:nth-child(4), .groups-table td:nth-child(4) {

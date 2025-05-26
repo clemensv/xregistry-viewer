@@ -1,4 +1,4 @@
-<div *ngIf="searchVisible" class="search-container">
+<div class="search-container">
   <mat-form-field appearance="outline" class="search-field">
     <input
       matInput
@@ -26,7 +26,7 @@
   </mat-form-field>
 </div>
 
-<!-- Debug element - always visible -->
-<div style="display: none;">
-  Search visible: {{searchVisible}}
-</div>
+<!-- Debug element - remove this after testing -->
+<!-- <div style="position: fixed; top: 80px; right: 10px; background: yellow; padding: 5px; z-index: 9999; font-size: 12px;">
+  Search term: '{{searchTerm}}' | Visible: {{searchVisible}}
+</div> -->

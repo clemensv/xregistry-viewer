@@ -19,6 +19,14 @@
       Showing {{ filteredGroupTypesList.length }} group types (filtered from {{ groupTypesList.length }})
     </span>
   </div>
+
+  <!-- Progressive loading indicator -->
+  <div class="loading-progress" *ngIf="loadingProgress && groupTypesList.length > 0">
+    <div class="loading-indicator">
+      <span class="material-icons loading-spinner">sync</span>
+      <span>Loading more group types... ({{ groupTypesList.length }} loaded)</span>
+    </div>
+  </div>
   <div *ngIf="!loading && viewMode === 'cards' && filteredGroupTypesList.length > 0" class="grid-container cards-view">
     <div *ngFor="let gt of filteredGroupTypesList" class="grid-item">
       <div class="card-header">

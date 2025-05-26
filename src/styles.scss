@@ -123,7 +123,7 @@ body.theme-dark {
 
   /* Dark theme Material components */
   .mat-toolbar.mat-primary {
-    background-color: #2d2d2d !important;
+    background-color: var(--bg-elevated, #3d3d3d) !important;
     color: #e0e0e0 !important;
   }
 
@@ -295,15 +295,15 @@ body.theme-light {
   flex: 1 1 auto;
 }
 
-/* Breadcrumb styles */
+/* Breadcrumb styles - unified with header */
 .breadcrumb {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   padding: 0.5rem 0;
-  background-color: var(--bg-card, white);
-  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
-  margin-bottom: 0.75rem;
+  background-color: var(--bg-elevated, #f8f9fa);
+  border-bottom: none;
+  margin-bottom: 0;
 
   &-item {
     display: flex;
@@ -387,6 +387,44 @@ body.theme-light {
   position: relative;
   background-color: var(--bg-app, #fafafa);
   color: var(--fg-text, #333);
+}
+
+/* Unified header section - no visual separation */
+.app-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Remove gap between header and breadcrumb */
+app-header + .layout-container {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Remove space between header-outer and breadcrumb */
+.header-outer + .layout-container,
+.layout-container .breadcrumb {
+  margin-top: 0;
+}
+
+/* Header toolbar and breadcrumb integration */
+.mat-toolbar {
+  box-shadow: none !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+
+/* Unified header background */
+.mat-toolbar.mat-primary,
+.breadcrumb {
+  background-color: var(--bg-elevated, #f8f9fa) !important;
+}
+
+/* Single bottom border for the entire header section */
+.layout-container {
+  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
+  margin-bottom: 0;
 }
 
 /* Global theme-aware element overrides */
@@ -519,8 +557,7 @@ button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-bu
   display: flex;
   flex-direction: column;
   gap: 0.75rem; /* Reduced for higher density */
-  padding: 0.75rem 0;
-  padding-bottom: 80px; /* Account for footer */
+  padding: 0.5rem 0 80px 0; /* Minimal top padding, account for footer */
 }
 
 /* Responsive adjustments */
