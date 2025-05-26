@@ -16,9 +16,9 @@
   <div class="page-content">
     <app-pagination *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>    <div *ngIf="!loading; else loadingTpl">
       <!-- Cards View -->
-      <div *ngIf="viewMode === 'cards'" [ngClass]="{'single-resource': resourcesList.length === 1}">
+      <div *ngIf="viewMode === 'cards'" [ngClass]="{'single-resource': filteredResourcesList.length === 1}">
         <div class="grid-container">
-          <div *ngFor="let res of resourcesList" class="grid-item" [ngClass]="{'single-item': resourcesList.length === 1}">
+          <div *ngFor="let res of filteredResourcesList" class="grid-item" [ngClass]="{'single-item': filteredResourcesList.length === 1}">
             <div class="resource-header">
               <h3>{{ res['name'] }}</h3>
                <a [routerLink]="[res['id']]" class="tile">
@@ -53,7 +53,7 @@
             </tr>
           </thead>          <tbody>
             <!-- Use tr with app-resource-row attribute -->
-            <tr *ngFor="let res of resourcesList"
+            <tr *ngFor="let res of filteredResourcesList"
                 app-resource-row
                 [resource]="res"
                 [resourceType]="resourceType"

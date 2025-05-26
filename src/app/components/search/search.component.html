@@ -5,9 +5,9 @@
       type="text"
       placeholder="Search..."
       [(ngModel)]="searchTerm"
+      (input)="onInput()"
       (keyup.enter)="onSearch()"
       aria-label="Search resources">
-    <mat-hint *ngIf="searchTerm.length > 0 && searchTerm.length < 3">Type at least 3 characters</mat-hint>
     <button
       *ngIf="searchTerm"
       matSuffix
@@ -20,7 +20,6 @@
       matSuffix
       mat-icon-button
       aria-label="Search"
-      [disabled]="searchTerm.length > 0 && searchTerm.length < 3"
       (click)="onSearch()">
       <mat-icon>search</mat-icon>
     </button>

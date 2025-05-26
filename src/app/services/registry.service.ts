@@ -90,11 +90,19 @@ export class RegistryService {
   /**
    * Constructs the API URL based on the resource path and whether we're using a proxy
    */
-  private getApiUrl(api: string, path: string): string {
-    if (this.servedFromServer) {
-      return `/proxy?target=${encodeURIComponent(api + path)}`;
+  private getApiUrl(api: string, path: string, filter?: string): string {
+    let url = `${api}${path}`;
+
+    // Add filter parameter if provided
+    if (filter) {
+      const separator = path.includes('?') ? '&' : '?';
+      url += `${separator}filter=${encodeURIComponent(filter)}`;
     }
-    return `${api}${path}`;
+
+    if (this.servedFromServer) {
+      return `/proxy?target=${encodeURIComponent(url)}`;
+    }
+    return url;
   }
 
   /**
@@ -103,15 +111,17 @@ export class RegistryService {
    * @param groupId the group id
    * @param resourceType the resource type
    * @param pageRel optional Link rel URL or path (first, prev, next, last or empty)
+   * @param filter optional filter string to apply to the query
    */
   listResources(
     groupType: string,
     groupId: string,
     resourceType: string,
-    pageRel: string = ''
+    pageRel: string = '',
+    filter?: string
   ): Observable<Page<ResourceDocument[]>> {
     const pagePath = pageRel || `/${groupType}/${groupId}/${resourceType}`;
-    return from(this.listResourcesAsync(groupType, groupId, resourceType, pagePath));
+    return from(this.listResourcesAsync(groupType, groupId, resourceType, pagePath, filter));
   }
 
   /**
@@ -121,7 +131,8 @@ export class RegistryService {
     groupType: string,
     groupId: string,
     resourceType: string,
-    pagePath: string
+    pagePath: string,
+    filter?: string
   ): Promise<Page<ResourceDocument[]>> {
     const model = await lastValueFrom(this.modelService.getRegistryModel());
     const apis = this.modelService.getApiEndpointsForGroupType(groupType);
@@ -130,7 +141,7 @@ export class RegistryService {
     }
     // Use first API; assume consistent paging for all endpoints
     const api = apis[0];
-    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
+    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
 
     console.log(`Requesting resources from: ${url}`);
     const response = await lastValueFrom(
@@ -439,13 +450,15 @@ export class RegistryService {
    * @param resourceType the resource type
    * @param resourceId the resource id
    * @param pageRel optional Link rel URL or path (first, prev, next, last or empty)
+   * @param filter optional filter string to apply to the query
    */
   getResourceVersions(
     groupType: string,
     groupId: string,
     resourceType: string,
     resourceId: string,
-    pageRel: string = ''
+    pageRel: string = '',
+    filter?: string
   ): Observable<Page<ResourceDocument[]>> {
     const pagePath = pageRel || `/${groupType}/${groupId}/${resourceType}/${resourceId}/versions`;
     return from(
@@ -454,7 +467,8 @@ export class RegistryService {
         groupId,
         resourceType,
         resourceId,
-        pagePath
+        pagePath,
+        filter
       )
     );
   }
@@ -463,7 +477,8 @@ export class RegistryService {
     groupId: string,
     resourceType: string,
     resourceId: string,
-    pagePath: string
+    pagePath: string,
+    filter?: string
   ): Promise<Page<ResourceDocument[]>> {
     const model = await lastValueFrom(this.modelService.getRegistryModel());
     const apis = this.modelService.getApiEndpointsForGroupType(groupType);
@@ -471,7 +486,7 @@ export class RegistryService {
       return { items: [], links: {} };
     }    // Use first API endpoint for paging
     const api = apis[0];
-    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
+    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
 
     console.log(`Requesting versions from: ${url}`);
     const response = await lastValueFrom(
@@ -1034,23 +1049,24 @@ export class RegistryService {
    * List groups using RFC5988 relation-based navigation (first, prev, next, last).
    * @param groupType the type of group to list
    * @param pageRel URL or relation name (e.g. '', 'first', 'next', full path)
+   * @param filter optional filter string to apply to the query
    */
-  listGroups(groupType: string, pageRel: string = ''): Observable<Page<Group[]>> {
+  listGroups(groupType: string, pageRel: string = '', filter?: string): Observable<Page<Group[]>> {
     const pagePath = pageRel || `/${groupType}`;
-    return from(this.listGroupsAsync(groupType, pagePath));
+    return from(this.listGroupsAsync(groupType, pagePath, filter));
   }
 
   /**
    * Async implementation of listGroups with relation-based URL
    */
-  private async listGroupsAsync(groupType: string, pagePath: string): Promise<Page<Group[]>> {
+  private async listGroupsAsync(groupType: string, pagePath: string, filter?: string): Promise<Page<Group[]>> {
     const model = await lastValueFrom(this.modelService.getRegistryModel());
     const apis = this.modelService.getApiEndpointsForGroupType(groupType);
     if (apis.length === 0) {
       return { items: [], links: {} };
     }    const api = apis[0];
     // Determine full URL: if pagePath is absolute, use as is; otherwise build via getApiUrl
-    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
+    const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
 
     console.log(`Requesting groups from: ${url}`);
     const response = await lastValueFrom(

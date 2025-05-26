@@ -4,7 +4,8 @@
     "https://packages.mcpxreg.com",
     "https://xregistry.soaphub.org",
     "https://xregistry.soaphub.org/reg-APIs-Guru",
-    "https://xregistry.soaphub.org/reg-DocStore"
+    "https://xregistry.soaphub.org/reg-DocStore",
+    "https://schemas.mcpxreg.com/api/registry"
   ],
   "modelUris": [],
   "baseUrl": "/",
@@ -15,4 +16,3 @@
     "enableDocDownload": true
   }
 }
-  

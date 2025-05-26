@@ -48,6 +48,35 @@ app-api-info {
   margin-right: 12px;
 }
 
+/* Search container styling */
+.search-container {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+
+  app-search {
+    ::ng-deep .search-field {
+      width: 300px;
+
+      .mat-mdc-form-field-wrapper {
+        padding-bottom: 0;
+      }
+
+      .mat-mdc-text-field-wrapper {
+        height: 36px;
+
+        .mat-mdc-form-field-input-control {
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .mat-mdc-form-field-input-control::placeholder {
+          color: rgba(255, 255, 255, 0.6);
+        }
+      }
+    }
+  }
+}
+
 /* Control group styling */
 .control-group {
   display: flex;

@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
-import { map, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { map, switchMap, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { RegistryService } from '../../services/registry.service';import { ModelService } from '../../services/model.service';import { DebugService } from '../../services/debug.service';import { Group } from '../../models/registry.model';
 import { FormsModule } from '@angular/forms';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';import { LinkSet, PaginationComponent } from '../pagination/pagination.component';import { GroupRowComponent } from '../group-row/group-row.component';
+import { SearchService } from '../../services/search.service';
 
 @Component({
   standalone: true,
@@ -15,17 +16,27 @@ import { ResourceDocumentItem } from '../../models/resource-document-item.model'
   styleUrls: ['./groups.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
-export class GroupsComponent implements OnInit {
+export class GroupsComponent implements OnInit, OnDestroy {
   groupType!: string;
   resourceTypes$!: Observable<string[]>;
   groupAttributes: { [key: string]: any } = {};
   private suppressGroupAttributes = ['groupid', 'self', 'xid', 'epoch', 'createdat', 'modifiedat'];
   registryModel: any = null;
   groupsList: Group[] = [];
+  filteredGroupsList: Group[] = [];
   pageLinks: LinkSet = {};
   viewMode: 'cards' | 'list' = 'cards'; // Default view mode
+  currentSearchTerm = '';
+  private destroy$ = new Subject<void>();
 
-  constructor(    private route: ActivatedRoute,    private registry: RegistryService,    public modelService: ModelService,    private cdr: ChangeDetectorRef,    private debug: DebugService  ) {}
+  constructor(
+    private route: ActivatedRoute,
+    private registry: RegistryService,
+    public modelService: ModelService,
+    private cdr: ChangeDetectorRef,
+    private debug: DebugService,
+    private searchService: SearchService
+  ) {}
 
   ngOnInit(): void {
     this.groupType = this.route.snapshot.paramMap.get('groupType') || '';
@@ -58,14 +69,32 @@ export class GroupsComponent implements OnInit {
       ))
     );
 
+    // Subscribe to search state changes
+    this.searchService.searchState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(state => {
+        if (state.context?.groupType === this.groupType) {
+          this.currentSearchTerm = state.searchTerm;
+          this.applyClientSideFilter();
+        }
+      });
+
     this.loadGroups();
   }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   /** Load groups with current pagination */
   loadGroups(pageRel: string = ''): void {
-    this.registry.listGroups(this.groupType, pageRel)
+    const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
+    this.registry.listGroups(this.groupType, pageRel, filter)
       .subscribe(page => {
         this.groupsList = page.items;
         this.pageLinks = page.links;
+        this.applyClientSideFilter();
 
         // Only set default view mode on initial load (when pageRel is empty)
         if (!pageRel) {
@@ -79,6 +108,10 @@ export class GroupsComponent implements OnInit {
 
         this.cdr.markForCheck();
       });
+  }
+
+  private applyClientSideFilter(): void {
+    this.filteredGroupsList = this.searchService.filterItems(this.groupsList, this.currentSearchTerm);
   }
   onPageChange(pageRel: string): void {
     this.loadGroups(pageRel);

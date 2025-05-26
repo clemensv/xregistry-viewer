@@ -49,14 +49,19 @@ export class ModelService {
   getRegistryModel(): Observable<RegistryModel> {
     // Return cached model if available (keep endpointModels intact)
     if (this.cachedModel) {
+      console.log('ModelService: Returning cached model:', this.cachedModel);
+      console.log('ModelService: Cached model groups:', Object.keys(this.cachedModel.groups || {}));
       return of(this.cachedModel);
     }
     // Reset mapping before fresh fetch
     this.endpointModels = {};
 
     const config = this.configService.getConfig();
+    console.log('ModelService: Got config:', config);
     const modelUris = config?.modelUris || [];
     const apiEndpoints = config?.apiEndpoints || [];
+    console.log('ModelService: Model URIs:', modelUris, 'API Endpoints:', apiEndpoints);
+    console.log('ModelService: servedFromServer:', this.servedFromServer);
 
     // Compute the base URL for the app (from config or fallback to '/')
     const configBaseUrl = (this.configService.getConfig()?.baseUrl || '/').replace(/\/$/, '');
@@ -77,11 +82,15 @@ export class ModelService {
     }
     for (const api of apiEndpoints) {
       const apiToFetch = this.servedFromServer ? proxyUrl(`?target=${encodeURIComponent(api + '/model')}`) : `${api}/model`;
+      console.log(`ModelService: Fetching model from ${api} via URL: ${apiToFetch}`);
       // For each API, tap to save its model if loaded
       modelRequests.push(this.http.get<RegistryModel>(apiToFetch).pipe(
         tap(m => {
           if (m) {
+            console.log(`ModelService: Successfully loaded model from ${api}:`, m);
             this.endpointModels[api] = m;
+          } else {
+            console.log(`ModelService: Received null/empty model from ${api}`);
           }
         }),
         catchError(err => {
@@ -92,11 +101,15 @@ export class ModelService {
     }
 
     if (modelRequests.length === 0) {
+      console.log('ModelService: No model requests to make, returning default model');
       return of(this.getDefaultModel());
     }
 
+    console.log(`ModelService: Making ${modelRequests.length} model requests`);
+
     return forkJoin(modelRequests).pipe(
       map((models: (RegistryModel | null)[]) => {
+        console.log('ModelService: Received models from forkJoin:', models);
         // Deep merge models: merge all groupTypes, resourceTypes, and attributes
         const merged: RegistryModel = {
           specversion: '',
@@ -108,7 +121,11 @@ export class ModelService {
         };
         let foundModel = false;
         for (const model of models) {
-          if (!model) continue;
+          if (!model) {
+            console.log('ModelService: Skipping null model');
+            continue;
+          }
+          console.log('ModelService: Processing model:', model);
           foundModel = true;
           merged.specversion = model.specversion || merged.specversion;
           merged.registryid = model.registryid || merged.registryid;
@@ -155,13 +172,21 @@ export class ModelService {
           }
         }
         if (!foundModel) {
+          console.log('ModelService: No models found, returning default model');
           return this.getDefaultModel();
         }
+        console.log('ModelService: Successfully merged model with groups:', Object.keys(merged.groups));
+        console.log('ModelService: Merged model details:', {
+          groupsCount: Object.keys(merged.groups).length,
+          groupNames: Object.keys(merged.groups),
+          fullModel: merged
+        });
         this.cachedModel = merged;
         return merged;
       }),
       catchError(err => {
         console.error('Error merging registry models:', err);
+        console.log('ModelService: Falling back to default model due to error');
         return of(this.getDefaultModel());
       })
     );
@@ -190,31 +215,73 @@ export class ModelService {
     );
   }
 
+  /**
+   * Clear the cached model to force reload
+   */
+  clearCache(): void {
+    console.log('ModelService: Clearing cached model');
+    this.cachedModel = null;
+    this.endpointModels = {};
+  }
+
   private getDefaultModel(): RegistryModel {
-    // Return a minimal model to allow the application to function during SSR
+    console.log('ModelService: Creating default model for fallback');
+    // Return a more comprehensive model to allow the application to function during development
     return {
       specversion: '1.0',
       registryid: 'default-registry',
       name: 'Default Registry',
-      description: 'Fallback registry for SSR or when API is unavailable',
+      description: 'Fallback registry for development or when API is unavailable',
       capabilities: {
         apis: ['v1'],
         schemas: ['openapi-v3'],
         pagination: false
       },
       groups: {
-        'namespace': {
-          plural: 'namespaces',
-          singular: 'namespace',
-          description: 'Namespace for organizing resources',
+        'messagegroups': {
+          plural: 'messagegroups',
+          singular: 'messagegroup',
+          description: 'Groups for organizing message definitions',
           attributes: {},
           resources: {
-            'schema': {
+            'messages': {
+              plural: 'messages',
+              singular: 'message',
+              description: 'Message definitions',
+              hasdocument: true,
+              maxversions: 0,
+              attributes: {}
+            }
+          }
+        },
+        'schemagroups': {
+          plural: 'schemagroups',
+          singular: 'schemagroup',
+          description: 'Groups for organizing schema definitions',
+          attributes: {},
+          resources: {
+            'schemas': {
               plural: 'schemas',
               singular: 'schema',
-              description: 'Schema definition',
+              description: 'Schema definitions',
               hasdocument: true,
-              maxversions: 1,
+              maxversions: 0,
+              attributes: {}
+            }
+          }
+        },
+        'endpointgroups': {
+          plural: 'endpointgroups',
+          singular: 'endpointgroup',
+          description: 'Groups for organizing API endpoints',
+          attributes: {},
+          resources: {
+            'endpoints': {
+              plural: 'endpoints',
+              singular: 'endpoint',
+              description: 'API endpoint definitions',
+              hasdocument: true,
+              maxversions: 0,
               attributes: {}
             }
           }

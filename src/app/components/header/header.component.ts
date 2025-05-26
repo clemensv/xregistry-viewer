@@ -7,11 +7,12 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { ThemeService, FontSize, Theme } from '../../services/theme.service';
+import { SearchComponent } from '../search/search.component';
 
 @Component({
   standalone: true,
   selector: 'app-header',
-  imports: [MatToolbarModule, MatButtonModule, MatMenuModule, RouterModule, MatIconModule, CommonModule],
+  imports: [MatToolbarModule, MatButtonModule, MatMenuModule, RouterModule, MatIconModule, CommonModule, SearchComponent],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })

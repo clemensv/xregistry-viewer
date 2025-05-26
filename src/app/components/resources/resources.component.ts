@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, map } from 'rxjs';
+import { Observable, map, Subject, takeUntil } from 'rxjs';
 import { RegistryService } from '../../services/registry.service';
 import { ResourceDocument } from '../../models/registry.model';
 import { ModelService } from '../../services/model.service';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 import { ResourceRowComponent } from '../resource-row/resource-row.component';
+import { SearchService } from '../../services/search.service';
 
 @Component({
   standalone: true,
@@ -17,23 +18,27 @@ import { ResourceRowComponent } from '../resource-row/resource-row.component';
   styleUrls: ['./resources.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
-export class ResourcesComponent implements OnInit {
+export class ResourcesComponent implements OnInit, OnDestroy {
   groupType!: string;
   groupId!: string;
   resourceType!: string;
   resourcesList: ResourceDocument[] = [];
+  filteredResourcesList: ResourceDocument[] = [];
   pageLinks: { first?: string; prev?: string; next?: string; last?: string } = {};
   resTypeHasDocument = false;
   resourceAttributes: { [key: string]: any } = {}; // Metadata for attributes
   loading = true; // Add loading property for template reference
   viewMode: 'cards' | 'list' = 'cards'; // Default view mode
+  currentSearchTerm = '';
+  private destroy$ = new Subject<void>();
 
   private suppressAttributes = ['xid', 'self', 'epoch', 'isdefault', 'ancestor', 'versionscount', 'versionsCount', 'versionsurl', 'metaurl', 'createdat', 'modifiedat', 'createdAt', 'modifiedAt'];
 
   constructor(
     private route: ActivatedRoute,
     private registry: RegistryService,
-    private modelService: ModelService
+    private modelService: ModelService,
+    private searchService: SearchService
   ) {}
 
   ngOnInit(): void {
@@ -50,11 +55,31 @@ export class ResourcesComponent implements OnInit {
         this.resourceAttributes = rtModel.attributes || {};
         this.resTypeHasDocument = rtModel.hasdocument;
       });
+      // Subscribe to search state changes
+      this.searchService.searchState$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(state => {
+          if (state.context?.groupType === this.groupType &&
+              state.context?.groupId === this.groupId &&
+              state.context?.resourceType === this.resourceType) {
+            this.currentSearchTerm = state.searchTerm;
+            this.applyClientSideFilter();
+          }
+        });
+
       this.loadResources();
     });
-  }  loadResources(pageRel: string = ''): void {
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadResources(pageRel: string = ''): void {
     this.loading = true;
-    this.registry.listResources(this.groupType, this.groupId, this.resourceType, pageRel)
+    const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
+    this.registry.listResources(this.groupType, this.groupId, this.resourceType, pageRel, filter)
       .subscribe(page => {
         console.log('loadResources links:', page.links);
         this.resourcesList = page.items;
@@ -81,6 +106,7 @@ export class ResourcesComponent implements OnInit {
         }
 
         this.pageLinks = page.links;
+        this.applyClientSideFilter();
         this.loading = false;
 
         // Set default view mode based on the number of items
@@ -90,6 +116,10 @@ export class ResourcesComponent implements OnInit {
           this.viewMode = 'cards';
         }
       });
+  }
+
+  private applyClientSideFilter(): void {
+    this.filteredResourcesList = this.searchService.filterItems(this.resourcesList, this.currentSearchTerm);
   }
 
   onPageChange(pageRel: string): void {

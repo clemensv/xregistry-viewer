@@ -10,8 +10,17 @@
       </button>
     </div>
   </div>
-  <div *ngIf="viewMode === 'cards' && (groupTypes$ | async) as gts" class="grid-container cards-view">
-    <div *ngFor="let gt of gts" class="grid-item">
+
+
+
+  <!-- Search results info -->
+  <div class="search-results-info" *ngIf="currentSearchTerm">
+    <span class="results-count">
+      Showing {{ filteredGroupTypesList.length }} group types (filtered from {{ groupTypesList.length }})
+    </span>
+  </div>
+  <div *ngIf="!loading && viewMode === 'cards' && filteredGroupTypesList.length > 0" class="grid-container cards-view">
+    <div *ngFor="let gt of filteredGroupTypesList" class="grid-item">
       <div class="card-header">
         <span class="material-icons group-type-icon" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
         <h3>{{ gt.model.plural }}</h3>
@@ -53,7 +62,7 @@
   </div>
 
   <!-- List View -->
-  <div *ngIf="viewMode === 'list' && (groupTypes$ | async) as gts" class="list-view">
+  <div *ngIf="!loading && viewMode === 'list' && filteredGroupTypesList.length > 0" class="list-view">
     <table class="group-types-table">
       <thead>
         <tr>
@@ -65,7 +74,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let gt of gts">
+        <tr *ngFor="let gt of filteredGroupTypesList">
           <td>
             <div class="table-group-type">
               <span class="material-icons group-type-icon-small" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
@@ -89,5 +98,20 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-state">
+    <p>Loading group types...</p>
+  </div>
+
+  <!-- Empty search results -->
+  <div *ngIf="!loading && currentSearchTerm && filteredGroupTypesList.length === 0 && groupTypesList.length > 0" class="empty-search-results">
+    <p>No group types match your search criteria.</p>
+  </div>
+
+  <!-- No data state -->
+  <div *ngIf="!loading && !currentSearchTerm && groupTypesList.length === 0" class="no-data-state">
+    <p>No group types available.</p>
   </div>
 </div>

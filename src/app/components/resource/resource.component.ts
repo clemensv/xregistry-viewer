@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, of, switchMap, tap, catchError, map } from 'rxjs';
+import { Observable, of, switchMap, tap, catchError, map, Subject, takeUntil } from 'rxjs';
 import { RegistryService } from '../../services/registry.service';
 import { ModelService } from '../../services/model.service';
+import { SearchService } from '../../services/search.service';
 import { ResourceDocument } from '../../models/registry.model';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
@@ -15,7 +16,7 @@ import { LinkSet, PaginationComponent } from '../pagination/pagination.component
   templateUrl: './resource.component.html',
   styleUrl: './resource.component.scss',
 })
-export class ResourceComponent implements OnInit {
+export class ResourceComponent implements OnInit, OnDestroy {
   groupType!: string;
   groupId!: string;
   resourceType!: string;
@@ -33,12 +34,16 @@ export class ResourceComponent implements OnInit {
   // Add property to expose origin for display
   defaultVersionOrigin?: string;
   versionsList: any[] = [];
+  filteredVersionsList: any[] = [];
   pageLinks: LinkSet = {};
+  currentSearchTerm = '';
+  private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
     private registry: RegistryService,
-    private modelService: ModelService
+    private modelService: ModelService,
+    private searchService: SearchService
   ) {}
   ngOnInit(): void {
     this.loading = true;
@@ -55,6 +60,19 @@ export class ResourceComponent implements OnInit {
           this.groupId = params.get('groupId')!;
           this.resourceType = params.get('resourceType')!;
           this.resourceId = params.get('resourceId')!;
+
+          // Subscribe to search state changes for version searches
+          this.searchService.searchState$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(state => {
+              if (state.context?.groupType === this.groupType &&
+                  state.context?.groupId === this.groupId &&
+                  state.context?.resourceType === this.resourceType &&
+                  state.context?.resourceId === this.resourceId) {
+                this.currentSearchTerm = state.searchTerm;
+                this.applyVersionFilter();
+              }
+            });
         }),
         switchMap(() => this.modelService.getRegistryModel())
       )
@@ -137,20 +155,27 @@ export class ResourceComponent implements OnInit {
    */
   loadVersions(pageRel: string = ''): void {
     this.loading = true;
+    const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.getResourceVersions(
       this.groupType,
       this.groupId,
       this.resourceType,
       this.resourceId,
-      pageRel
+      pageRel,
+      filter
     ).subscribe(page => {
       const items = page.items.sort((a, b) => new Date(b.modifiedAt || b['modifiedat']).getTime() - new Date(a.modifiedAt || a['modifiedat']).getTime());
       // mark default version
       const dv = items.find(v => v.isDefault);
       this.versionsList = items.map(v => ({ ...v, isDefault: dv ? v.id === dv.id : false }));
       this.pageLinks = page.links;
+      this.applyVersionFilter();
       this.loading = false;
     });
+  }
+
+  private applyVersionFilter(): void {
+    this.filteredVersionsList = this.searchService.filterItems(this.versionsList, this.currentSearchTerm);
   }
 
   onVersionPageChange(rel: string): void {
@@ -403,5 +428,10 @@ export class ResourceComponent implements OnInit {
         this.documentError = error.message;
         this.isLoadingDocument = false;
       });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

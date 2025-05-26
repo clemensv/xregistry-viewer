@@ -14,16 +14,17 @@
   <!-- Pagination row within header -->
   <div class="pagination-header" *ngIf="pageLinks">
     <div class="pagination-info">
-      <span class="results-count" *ngIf="groupsList && groupsList.length">
-        Showing {{ groupsList.length }} groups
+      <span class="results-count" *ngIf="filteredGroupsList && filteredGroupsList.length">
+        Showing {{ filteredGroupsList.length }} groups
+        <span *ngIf="currentSearchTerm">(filtered from {{ groupsList.length }})</span>
       </span>
     </div>
     <app-pagination [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>
   </div>
 </div>
 
-<!-- Cards View --><div class="groups">  <div *ngIf="viewMode === 'cards' && groupsList.length > 0" class="grid-container cards-view">
-    <div *ngFor="let group of groupsList" class="grid-item">
+<!-- Cards View --><div class="groups">  <div *ngIf="viewMode === 'cards' && filteredGroupsList.length > 0" class="grid-container cards-view">
+    <div *ngFor="let group of filteredGroupsList" class="grid-item">
       <h3>
         <span class="material-icons group-icon">folder</span>
         {{ group['name'] || group['id'] }}
@@ -63,7 +64,7 @@
   </div>
 
   <!-- List View -->
-  <div *ngIf="viewMode === 'list' && groupsList.length > 0" class="list-view">
+  <div *ngIf="viewMode === 'list' && filteredGroupsList.length > 0" class="list-view">
     <table class="groups-table">
       <thead>
         <tr>
@@ -77,7 +78,7 @@
       </thead>
       <tbody>
         <!-- Use tr with app-group-row attribute -->
-        <tr *ngFor="let group of groupsList"
+        <tr *ngFor="let group of filteredGroupsList"
             app-group-row
             [group]="group"
             [groupType]="groupType"

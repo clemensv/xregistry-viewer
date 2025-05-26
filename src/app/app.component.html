@@ -190,16 +190,26 @@
 </style>
 
 <div class="app-container">
-  <app-header></app-header>
-  <div class="layout-container">
-    <app-breadcrumb></app-breadcrumb>
+  <!-- Debug info -->
+  <div style="background: red; color: white; padding: 5px; position: fixed; top: 0; right: 0; z-index: 9999;">
+    Config Loaded: {{ configLoaded }}
   </div>
-  <main class="main-container">
-    <div class="content-wrapper">
-      <div class="page-structure">
-        <router-outlet></router-outlet>
-      </div>
+
+  <div *ngIf="!configLoaded">
+    <app-bootstrap></app-bootstrap>
+  </div>
+  <div *ngIf="configLoaded" class="app-content">
+    <app-header></app-header>
+    <div class="layout-container">
+      <app-breadcrumb></app-breadcrumb>
     </div>
-  </main>
-  <app-footer></app-footer>
+    <main class="main-container">
+      <div class="content-wrapper">
+        <div class="page-structure">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </main>
+    <app-footer></app-footer>
+  </div>
 </div>
