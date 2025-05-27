@@ -109,6 +109,25 @@ export class RegistryService {
   }
 
   /**
+   * Add filter parameter to any URL (absolute or relative)
+   */
+  private addFilterToUrl(url: string, filter?: string): string {
+    if (!filter) {
+      return url;
+    }
+
+    try {
+      const urlObj = new URL(url);
+      urlObj.searchParams.set('filter', filter);
+      return urlObj.toString();
+    } catch (e) {
+      // If URL parsing fails, fall back to simple string concatenation
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}filter=${encodeURIComponent(filter)}`;
+    }
+  }
+
+  /**
    * List resources using RFC5988 relation-based navigation
    * @param groupType the group type
    * @param groupId the group id
@@ -147,7 +166,12 @@ export class RegistryService {
     for (const api of apis) {
       try {
         this.debug.log(`Processing API: ${api}, pagePath: "${pagePath}", starts with http: ${pagePath.startsWith('http')}`);
-        const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
+                let url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
+
+        // Always add filter to the URL, whether it's absolute or relative
+        url = this.addFilterToUrl(url, filter);
+
+        this.debug.log(`Filter applied: "${filter}", Final URL: ${url}`);
 
         this.debug.log(`Requesting resources from: ${url}`);
         const response = await lastValueFrom(
@@ -528,7 +552,10 @@ export class RegistryService {
     // Try each API endpoint until we find one that works
     for (const api of apis) {
       try {
-        const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
+        let url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
+
+        // Always add filter to the URL, whether it's absolute or relative
+        url = this.addFilterToUrl(url, filter);
 
         this.debug.log(`Requesting versions from: ${url}`);
         const response = await lastValueFrom(

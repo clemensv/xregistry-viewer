@@ -68,8 +68,17 @@ export class ResourcesComponent implements OnInit, OnDestroy {
             state.context?.groupId === this.groupId &&
             state.context?.resourceType === this.resourceType) {
           this.debug.log('Search context matches, updating search term:', state.searchTerm);
+          const previousSearchTerm = this.currentSearchTerm;
           this.currentSearchTerm = state.searchTerm;
-          this.applyClientSideFilter();
+
+          // If search term changed, reload data from backend with new filter
+          if (previousSearchTerm !== this.currentSearchTerm) {
+            this.debug.log('Search term changed, reloading resources from backend with filter');
+            this.loadResources(); // This will use the new search term to generate the filter
+          } else {
+            // If only context changed but not search term, just apply client-side filter
+            this.applyClientSideFilter();
+          }
         }
       });
   }

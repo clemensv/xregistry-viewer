@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SearchService } from '../../services/search.service';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -21,6 +21,8 @@ export class SearchComponent implements OnInit, OnDestroy {
   searchVisible = true; // Always visible in header
   searchTerm = '';
   private destroy$ = new Subject<void>();
+  private searchInput$ = new Subject<string>();
+  private readonly SEARCH_DEBOUNCE_TIME = 500; // 500ms delay after user stops typing
 
   constructor(
     private searchService: SearchService,
@@ -33,6 +35,18 @@ export class SearchComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
         this.searchTerm = state.searchTerm;
+      });
+
+    // Set up debounced search input
+    this.searchInput$
+      .pipe(
+        debounceTime(this.SEARCH_DEBOUNCE_TIME), // Wait after the user stops typing
+        distinctUntilChanged(), // Only trigger if the value actually changed
+        takeUntil(this.destroy$)
+      )
+      .subscribe(searchTerm => {
+        console.log('Debounced search triggered after', this.SEARCH_DEBOUNCE_TIME, 'ms:', searchTerm);
+        this.searchService.setSearchTerm(searchTerm);
       });
 
     // Listen to route changes to update search context
@@ -52,12 +66,13 @@ export class SearchComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.searchInput$.complete();
   }
 
   onInput(): void {
-    // Trigger search immediately for any input change
+    // Send input to debounced stream instead of triggering search immediately
     console.log('Search input changed:', this.searchTerm);
-    this.searchService.setSearchTerm(this.searchTerm);
+    this.searchInput$.next(this.searchTerm);
   }
 
   onSearch(): void {

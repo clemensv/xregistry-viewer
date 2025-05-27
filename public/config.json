@@ -1,7 +1,5 @@
 {
   "apiEndpoints": [
-
-    "http://localhost:3002",
     "https://mcpxreg.com/registry",
     "https://packages.mcpxreg.com",
     "https://xregistry.soaphub.org",

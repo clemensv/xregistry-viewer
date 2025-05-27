@@ -69,8 +69,17 @@ export class GroupsComponent implements OnInit, OnDestroy {
         this.debug.log('Groups received search state:', state, 'My groupType:', this.groupType);
         if (state.context?.groupType === this.groupType) {
           this.debug.log('Search context matches, updating search term:', state.searchTerm);
+          const previousSearchTerm = this.currentSearchTerm;
           this.currentSearchTerm = state.searchTerm;
-          this.applyClientSideFilter();
+
+          // If search term changed, reload data from backend with new filter
+          if (previousSearchTerm !== this.currentSearchTerm) {
+            this.debug.log('Search term changed, reloading groups from backend with filter');
+            this.loadGroups(); // This will use the new search term to generate the filter
+          } else {
+            // If only context changed but not search term, just apply client-side filter
+            this.applyClientSideFilter();
+          }
         }
       });
   }
