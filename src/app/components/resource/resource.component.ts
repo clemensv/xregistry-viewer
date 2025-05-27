@@ -1,18 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, of, switchMap, tap, catchError, map, Subject, takeUntil } from 'rxjs';
+import { Observable, of, switchMap, tap, catchError, map, Subject, takeUntil, interval } from 'rxjs';
 import { RegistryService } from '../../services/registry.service';
 import { ModelService } from '../../services/model.service';
 import { SearchService } from '../../services/search.service';
 import { ResourceDocument } from '../../models/registry.model';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
+import { PageHeaderComponent } from '../page-header/page-header.component';
+import { ConfigService } from '../../services/config.service';
 
 @Component({
   selector: 'app-resource',
   standalone: true,
-  imports: [CommonModule, RouterModule, ResourceDocumentComponent, PaginationComponent],
+  imports: [CommonModule, RouterModule, ResourceDocumentComponent, PaginationComponent, PageHeaderComponent],
   templateUrl: './resource.component.html',
   styleUrl: './resource.component.scss',
 })
@@ -38,76 +40,118 @@ export class ResourceComponent implements OnInit, OnDestroy {
   pageLinks: LinkSet = {};
   currentSearchTerm = '';
   private destroy$ = new Subject<void>();
+  private initialLoad = true;
+  loadingProgress = true; // Tracks if we're still expecting more data
 
   constructor(
     private route: ActivatedRoute,
     private registry: RegistryService,
     private modelService: ModelService,
-    private searchService: SearchService
+    private searchService: SearchService,
+    private configService: ConfigService
   ) {}
+
   ngOnInit(): void {
-    this.loading = true;
-    // Reset document state when initializing
-    this.isLoadingDocument = false;
-    this.documentError = null;
-    this.cachedDocumentContent = null;
-    this.cachedResourceId = null;
+    this.route.paramMap.subscribe(params => {
+      this.groupType = params.get('groupType')!;
+      this.groupId = params.get('groupId')!;
+      this.resourceType = params.get('resourceType')!;
+      this.resourceId = params.get('resourceId')!;
 
-    this.route.paramMap
-      .pipe(
-        tap((params) => {
-          this.groupType = params.get('groupType')!;
-          this.groupId = params.get('groupId')!;
-          this.resourceType = params.get('resourceType')!;
-          this.resourceId = params.get('resourceId')!;
+      // Wait for configuration to be loaded before subscribing to ModelService
+      this.waitForConfigAndLoadData();
+    });
 
-          // Subscribe to search state changes for version searches
-          this.searchService.searchState$
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(state => {
-              if (state.context?.groupType === this.groupType &&
-                  state.context?.groupId === this.groupId &&
-                  state.context?.resourceType === this.resourceType &&
-                  state.context?.resourceId === this.resourceId) {
-                this.currentSearchTerm = state.searchTerm;
-                this.applyVersionFilter();
-              }
-            });
-        }),
-        switchMap(() => this.modelService.getRegistryModel())
-      )
-      .subscribe({
-        next: (model) => {
-          if (
-            !model.groups[this.groupType] ||
-            !model.groups[this.groupType].resources[this.resourceType]
-          ) {
-            console.error(
-              `Resource type ${this.resourceType} not found in group type ${this.groupType}`
-            );
-            return;
-          }
-
-          this.resourceTypeData =
-            model.groups[this.groupType].resources[this.resourceType];
-          this.resourceAttributes = this.resourceTypeData.attributes || {};
-
-          // Check if this resource type supports multiple versions
-          // According to xRegistry spec, maxversions property determines version storage count
-          this.hasMultipleVersions = this.resourceTypeData.maxversions != 1;
-
-          if (this.hasMultipleVersions) {
-            this.loadDefaultVersion();
-            this.loadVersions();
-          } else {
-            // Load only default version when single version is supported
-            this.loadDefaultVersion();
-          }
-        },
-        error: (err) => {
-          console.error('Error loading registry model:', err);
-        },
+    // Subscribe to search state changes
+    this.searchService.searchState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(state => {
+        if (state.context?.groupType === this.groupType &&
+            state.context?.groupId === this.groupId &&
+            state.context?.resourceType === this.resourceType &&
+            state.context?.resourceId === this.resourceId) {
+          this.currentSearchTerm = state.searchTerm;
+          this.applyVersionFilter();
+        }
       });
+  }
+
+  private waitForConfigAndLoadData(): void {
+    // Check if config is already loaded
+    const config = this.configService.getConfig();
+    if (config && config.apiEndpoints && config.apiEndpoints.length > 0) {
+      this.loadModelAndResource();
+      return;
+    }
+
+    // Config not loaded yet, wait for it
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+
+    const checkInterval = interval(100).pipe(takeUntil(this.destroy$)).subscribe(() => {
+      attempts++;
+      const currentConfig = this.configService.getConfig();
+
+      if (currentConfig && currentConfig.apiEndpoints && currentConfig.apiEndpoints.length > 0) {
+        checkInterval.unsubscribe();
+        this.loadModelAndResource();
+      } else if (attempts >= maxAttempts) {
+        console.error('ResourceComponent: Timeout waiting for config, proceeding anyway');
+        checkInterval.unsubscribe();
+        this.loadModelAndResource();
+      }
+    });
+  }
+
+  private loadModelAndResource(): void {
+    // Load resource type metadata using progressive loading
+    this.modelService.getProgressiveRegistryModel()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          const model = result.model;
+
+          if (model.groups && model.groups[this.groupType] &&
+              model.groups[this.groupType].resources &&
+              model.groups[this.groupType].resources[this.resourceType]) {
+
+            this.resourceTypeData = model.groups[this.groupType].resources[this.resourceType];
+            this.resourceAttributes = this.resourceTypeData.attributes || {};
+
+            // Load resource on initial model load or when model is complete
+            if (this.initialLoad || result.isComplete) {
+              this.loadResource();
+              if (this.initialLoad) {
+                this.initialLoad = false;
+              }
+            }
+          }
+
+          // Update loading states
+          this.loadingProgress = !result.isComplete;
+
+          console.log(`ResourceComponent: Updated model (${result.loadedCount}/${result.totalCount} endpoints loaded)`);
+        },
+        error: (error) => {
+          console.error('ResourceComponent: Error loading registry model:', error);
+          this.loading = false;
+          this.loadingProgress = false;
+        }
+      });
+  }
+
+  private loadResource(): void {
+    // Check if this resource type supports multiple versions
+    // According to xRegistry spec, maxversions property determines version storage count
+    this.hasMultipleVersions = this.resourceTypeData.maxversions != 1;
+
+    if (this.hasMultipleVersions) {
+      this.loadDefaultVersion();
+      this.loadVersions();
+    } else {
+      // Load only default version when single version is supported
+      this.loadDefaultVersion();
+    }
   }
 
   /**
@@ -154,7 +198,6 @@ export class ResourceComponent implements OnInit, OnDestroy {
    * Loads paginated version history using relation-based links
    */
   loadVersions(pageRel: string = ''): void {
-    this.loading = true;
     const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.getResourceVersions(
       this.groupType,
@@ -163,14 +206,25 @@ export class ResourceComponent implements OnInit, OnDestroy {
       this.resourceId,
       pageRel,
       filter
-    ).subscribe(page => {
-      const items = page.items.sort((a, b) => new Date(b.modifiedAt || b['modifiedat']).getTime() - new Date(a.modifiedAt || a['modifiedat']).getTime());
-      // mark default version
-      const dv = items.find(v => v.isDefault);
-      this.versionsList = items.map(v => ({ ...v, isDefault: dv ? v.id === dv.id : false }));
-      this.pageLinks = page.links;
-      this.applyVersionFilter();
-      this.loading = false;
+    ).subscribe({
+      next: (page) => {
+        const items = page.items.sort((a, b) => new Date(b.modifiedAt || b['modifiedat']).getTime() - new Date(a.modifiedAt || a['modifiedat']).getTime());
+        // mark default version
+        const dv = items.find(v => v.isDefault);
+        this.versionsList = items.map(v => ({ ...v, isDefault: dv ? v.id === dv.id : false }));
+        this.pageLinks = page.links;
+        this.applyVersionFilter();
+
+        // Update loading state
+        if (this.loading && this.versionsList.length > 0) {
+          this.loading = false;
+        }
+      },
+      error: (error) => {
+        console.error('ResourceComponent: Error loading versions:', error);
+        this.loading = false;
+        this.loadingProgress = false;
+      }
     });
   }
 

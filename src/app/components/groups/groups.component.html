@@ -1,25 +1,22 @@
-<div class="header-outer">
-  <div class="page-header">
-    <h2>{{ (modelService.getRegistryModel() | async)?.groups?.[groupType]?.plural || 'Registry Groups' }}</h2>
-    <div class="view-toggle">
-      <button [class.active]="viewMode === 'cards'" (click)="setViewMode('cards')" title="Card View">
-        <i class="material-icons">grid_view</i>
-      </button>
-      <button [class.active]="viewMode === 'list'" (click)="setViewMode('list')" title="List View">
-        <i class="material-icons">list</i>
-      </button>
-    </div>
-  </div>
+<app-page-header
+  [title]="(modelService.getRegistryModel() | async)?.groups?.[groupType]?.plural || 'Registry Groups'"
+  [showViewToggle]="true"
+  [currentViewMode]="viewMode"
+  [showPagination]="true"
+  [pageLinks]="pageLinks"
+  [resultsCount]="filteredGroupsList?.length || 0"
+  [totalCount]="useClientSidePagination ? allGroupsCache?.length || 0 : 0"
+  [resultsText]="'groups'"
+  [searchResultsText]="currentSearchTerm ? 'Showing ' + (filteredGroupsList?.length || 0) + ' groups (filtered from ' + (groupsList?.length || 0) + ')' : ''"
+  (viewModeChange)="setViewMode($event)"
+  (pageChange)="onPageChange($event)">
+</app-page-header>
 
-  <!-- Pagination row within header -->
-  <div class="pagination-header" *ngIf="pageLinks">
-    <div class="pagination-info">
-      <span class="results-count" *ngIf="filteredGroupsList && filteredGroupsList.length">
-        Showing {{ filteredGroupsList.length }} groups
-        <span *ngIf="currentSearchTerm">(filtered from {{ groupsList.length }})</span>
-      </span>
-    </div>
-    <app-pagination [links]="pageLinks" (pageChange)="onPageChange($event)"></app-pagination>
+<!-- Progressive loading indicator -->
+<div class="loading-progress" *ngIf="loadingProgress && groupsList.length > 0">
+  <div class="loading-indicator">
+    <span class="material-icons loading-spinner">sync</span>
+    <span>Loading more groups... ({{ groupsList.length }} loaded)</span>
   </div>
 </div>
 

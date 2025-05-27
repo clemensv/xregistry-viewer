@@ -1,0 +1,65 @@
+<div class="page-header-outer">
+  <div class="page-header-main">
+    <h2 class="page-title">{{ title }}</h2>
+    <div class="page-header-controls">
+      <!-- Results info -->
+      <div *ngIf="getResultsDisplayText()" class="results-info">
+        <span class="results-text">{{ getResultsDisplayText() }}</span>
+      </div>
+
+      <!-- Pagination buttons styled like view toggle -->
+      <div *ngIf="showPagination && pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" class="pagination-toggle">
+        <button
+          type="button"
+          class="toggle-btn pagination-btn"
+          (click)="onPageChange('first')"
+          [disabled]="!pageLinks.first"
+          title="First page">
+          <i class="material-icons">first_page</i>
+        </button>
+        <button
+          type="button"
+          class="toggle-btn pagination-btn"
+          (click)="onPageChange('prev')"
+          [disabled]="!pageLinks.prev"
+          title="Previous page">
+          <i class="material-icons">chevron_left</i>
+        </button>
+        <button
+          type="button"
+          class="toggle-btn pagination-btn"
+          (click)="onPageChange('next')"
+          [disabled]="!pageLinks.next"
+          title="Next page">
+          <i class="material-icons">chevron_right</i>
+        </button>
+        <button
+          type="button"
+          class="toggle-btn pagination-btn"
+          (click)="onPageChange('last')"
+          [disabled]="!pageLinks.last"
+          title="Last page">
+          <i class="material-icons">last_page</i>
+        </button>
+      </div>
+
+      <!-- View toggle -->
+      <div *ngIf="showViewToggle" class="view-toggle">
+        <button
+          [class.active]="currentViewMode === 'cards'"
+          (click)="setViewMode('cards')"
+          title="Card View"
+          class="toggle-btn view-btn">
+          <i class="material-icons">grid_view</i>
+        </button>
+        <button
+          [class.active]="currentViewMode === 'list'"
+          (click)="setViewMode('list')"
+          title="List View"
+          class="toggle-btn view-btn">
+          <i class="material-icons">list</i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

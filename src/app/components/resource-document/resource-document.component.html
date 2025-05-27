@@ -64,5 +64,40 @@
         <p>Error loading document: {{ documentError }}</p>
       </div>
     </section>
+
+    <!-- Document section -->
+    <section *ngIf="showDocument && hasDocument()" class="document-section">
+      <h3>
+        <span class="material-icons doc-icon">description</span>
+        Document
+      </h3>
+
+      <!-- Show cached document content -->
+      <div *ngIf="getDocumentContent() && !isLoadingDocument" class="document-content">
+        <app-code-highlight
+          [code]="formatDocumentContent(getDocumentContent()!)"
+          [language]="'json'">
+        </app-code-highlight>
+      </div>
+
+      <!-- Show download link if base64 encoded document is available -->
+      <div *ngIf="hasBase64Document()" class="action-buttons">
+        <button (click)="downloadBase64Document()" class="download-btn">
+          <span class="material-icons">download</span> Download Document
+        </button>
+      </div>
+
+      <!-- Show loading message if fetching from URL -->
+      <div *ngIf="isLoadingDocument" class="loading-document">
+        <span class="material-icons loading-icon">sync</span>
+        <p>Loading document content...</p>
+      </div>
+
+      <!-- Show error message if document fetch failed -->
+      <div *ngIf="documentError" class="document-error">
+        <span class="material-icons error-icon">error</span>
+        <p>Error loading document: {{ documentError }}</p>
+      </div>
+    </section>
   </div>
 </div>

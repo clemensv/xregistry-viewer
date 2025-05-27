@@ -1,20 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, map, Subject, takeUntil } from 'rxjs';
+import { Observable, Subject, interval } from 'rxjs';
+import { map, switchMap, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { RegistryService } from '../../services/registry.service';
-import { ResourceDocument } from '../../models/registry.model';
 import { ModelService } from '../../services/model.service';
+import { DebugService } from '../../services/debug.service';
+import { Resource } from '../../models/registry.model';
+import { FormsModule } from '@angular/forms';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 import { ResourceRowComponent } from '../resource-row/resource-row.component';
 import { SearchService } from '../../services/search.service';
-import { DebugService } from '../../services/debug.service';
+import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
+import { ConfigService } from '../../services/config.service';
 
 @Component({
   standalone: true,
   selector: 'app-resources',
-  imports: [CommonModule, RouterModule, ResourceDocumentComponent, PaginationComponent, ResourceRowComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, ResourceRowComponent, ResourceDocumentComponent, PageHeaderComponent],
   templateUrl: './resources.component.html',
   styleUrls: ['./resources.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
@@ -23,101 +27,172 @@ export class ResourcesComponent implements OnInit, OnDestroy {
   groupType!: string;
   groupId!: string;
   resourceType!: string;
-  resourcesList: ResourceDocument[] = [];
-  filteredResourcesList: ResourceDocument[] = [];
-  pageLinks: { first?: string; prev?: string; next?: string; last?: string } = {};
-  resTypeHasDocument = false;
-  resourceAttributes: { [key: string]: any } = {}; // Metadata for attributes
-  loading = true; // Add loading property for template reference
-  viewMode: 'cards' | 'list' = 'cards'; // Default view mode
+  resourceAttributes: { [key: string]: any } = {};
+  private suppressResourceAttributes = ['resourceid', 'self', 'xid', 'epoch', 'createdat', 'modifiedat'];
+  resourcesList: Resource[] = [];
+  filteredResourcesList: Resource[] = [];
+  pageLinks: LinkSet = {};
+  viewMode: ViewMode = 'cards'; // Default view mode
   currentSearchTerm = '';
+  loading = true;
+  loadingProgress = true; // Tracks if we're still expecting more data
+  resTypeHasDocument = false;
   private destroy$ = new Subject<void>();
-
-  private suppressAttributes = ['xid', 'self', 'epoch', 'isdefault', 'ancestor', 'versionscount', 'versionsCount', 'versionsurl', 'metaurl', 'createdat', 'modifiedat', 'createdAt', 'modifiedAt'];
+  private initialLoad = true;
 
   constructor(
     private route: ActivatedRoute,
     private registry: RegistryService,
     private modelService: ModelService,
+    private cdr: ChangeDetectorRef,
+    private debug: DebugService,
     private searchService: SearchService,
-    private debug: DebugService
+    private configService: ConfigService
   ) {}
 
   ngOnInit(): void {
-    this.loading = true;
-    this.route.paramMap.subscribe(params => {
-      this.groupType = params.get('groupType')!;
-      this.groupId = params.get('groupId')!;
-      this.resourceType = params.get('resourceType')!;
+    this.groupType = this.route.snapshot.paramMap.get('groupType') || '';
+    this.groupId = this.route.snapshot.paramMap.get('groupId') || '';
+    this.resourceType = this.route.snapshot.paramMap.get('resourceType') || '';
 
-      // Load resource type metadata
-      this.modelService.getRegistryModel().pipe(
-        map(m => m.groups[this.groupType].resources[this.resourceType])
-      ).subscribe(rtModel => {
-        this.resourceAttributes = rtModel.attributes || {};
-        this.resTypeHasDocument = rtModel.hasdocument;
+    // Wait for configuration to be loaded before subscribing to ModelService
+    this.waitForConfigAndLoadData();
+
+    // Subscribe to search state changes
+    this.searchService.searchState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(state => {
+        this.debug.log('Resources received search state:', state, 'My context:', { groupType: this.groupType, groupId: this.groupId, resourceType: this.resourceType });
+        if (state.context?.groupType === this.groupType &&
+            state.context?.groupId === this.groupId &&
+            state.context?.resourceType === this.resourceType) {
+          this.debug.log('Search context matches, updating search term:', state.searchTerm);
+          this.currentSearchTerm = state.searchTerm;
+          this.applyClientSideFilter();
+        }
       });
-      // Subscribe to search state changes
-      this.searchService.searchState$
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(state => {
-          this.debug.log('Resources received search state:', state, 'My context:', { groupType: this.groupType, groupId: this.groupId, resourceType: this.resourceType });
-          if (state.context?.groupType === this.groupType &&
-              state.context?.groupId === this.groupId &&
-              state.context?.resourceType === this.resourceType) {
-            this.debug.log('Search context matches, updating search term:', state.searchTerm);
-            this.currentSearchTerm = state.searchTerm;
-            this.applyClientSideFilter();
-          }
-        });
+  }
 
-      this.loadResources();
+  private waitForConfigAndLoadData(): void {
+    // Check if config is already loaded
+    const config = this.configService.getConfig();
+    if (config && config.apiEndpoints && config.apiEndpoints.length > 0) {
+      this.loadModelAndResources();
+      return;
+    }
+
+    // Config not loaded yet, wait for it
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+
+    const checkInterval = interval(100).pipe(takeUntil(this.destroy$)).subscribe(() => {
+      attempts++;
+      const currentConfig = this.configService.getConfig();
+
+      if (currentConfig && currentConfig.apiEndpoints && currentConfig.apiEndpoints.length > 0) {
+        checkInterval.unsubscribe();
+        this.loadModelAndResources();
+      } else if (attempts >= maxAttempts) {
+        console.error('ResourcesComponent: Timeout waiting for config, proceeding anyway');
+        checkInterval.unsubscribe();
+        this.loadModelAndResources();
+      }
     });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  private loadModelAndResources(): void {
+    // Load resource metadata attributes using progressive loading
+    this.modelService.getProgressiveRegistryModel()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          const model = result.model;
+
+          if (model.groups && model.groups[this.groupType] &&
+              model.groups[this.groupType].resources &&
+              model.groups[this.groupType].resources[this.resourceType]) {
+
+            const resourceModel = model.groups[this.groupType].resources[this.resourceType];
+            this.resourceAttributes = resourceModel.attributes || {};
+            this.resTypeHasDocument = resourceModel.hasdocument || false;
+
+            // Load resources on initial model load or when model is complete
+            if (this.initialLoad || result.isComplete) {
+              this.loadResources();
+              if (this.initialLoad) {
+                this.initialLoad = false;
+              }
+            }
+          }
+
+          // Update loading states
+          this.loadingProgress = !result.isComplete;
+
+          this.debug.log(`ResourcesComponent: Updated model (${result.loadedCount}/${result.totalCount} endpoints loaded)`);
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('ResourcesComponent: Error loading registry model:', error);
+          this.loading = false;
+          this.loadingProgress = false;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   loadResources(pageRel: string = ''): void {
-    this.loading = true;
     const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.listResources(this.groupType, this.groupId, this.resourceType, pageRel, filter)
-      .subscribe(page => {
-        this.debug.log('loadResources links:', page.links);
-        this.resourcesList = page.items;
+      .subscribe({
+        next: (page) => {
+          this.debug.log('loadResources links:', page.links);
+          this.resourcesList = page.items;
           // Process resources to ensure all required fields are present
-        this.resourcesList = this.resourcesList.map(resource => {
-          // Ensure name is available
-          if (!resource['name'] && resource['id']) {
-            resource['name'] = resource['id'];
+          this.resourcesList = this.resourcesList.map(resource => {
+            // Ensure name is available
+            if (!resource['name'] && resource['id']) {
+              resource['name'] = resource['id'];
+            }
+
+            // Ensure resourceUrl is mapped from docs
+            if (!resource['resourceUrl'] && resource['docs']) {
+              resource['resourceUrl'] = resource['docs'];
+            }
+
+            return resource;
+          });
+
+          // Debug the actual resources data
+          this.debug.log('Resources loaded:', this.resourcesList);
+          if (this.resourcesList.length > 0) {
+            this.debug.log('First resource sample:', this.resourcesList[0]);
+            this.debug.log('Resource properties:', Object.keys(this.resourcesList[0]));
           }
 
-          // Ensure resourceUrl is mapped from docs
-          if (!resource['resourceUrl'] && resource['docs']) {
-            resource['resourceUrl'] = resource['docs'];
+          this.pageLinks = page.links;
+          this.applyClientSideFilter();
+
+          // Set default view mode based on the number of items (only on initial load)
+          if (!pageRel && this.initialLoad) {
+            if (this.resourcesList.length > 20) {
+              this.viewMode = 'list';
+            } else {
+              this.viewMode = 'cards';
+            }
           }
 
-          return resource;
-        });
+          // Update loading state
+          if (this.loading && this.resourcesList.length > 0) {
+            this.loading = false;
+          }
 
-        // Debug the actual resources data
-        this.debug.log('Resources loaded:', this.resourcesList);
-        if (this.resourcesList.length > 0) {
-          this.debug.log('First resource sample:', this.resourcesList[0]);
-          this.debug.log('Resource properties:', Object.keys(this.resourcesList[0]));
-        }
-
-        this.pageLinks = page.links;
-        this.applyClientSideFilter();
-        this.loading = false;
-
-        // Set default view mode based on the number of items
-        if (this.resourcesList.length > 20) {
-          this.viewMode = 'list';
-        } else {
-          this.viewMode = 'cards';
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('ResourcesComponent: Error loading resources:', error);
+          this.loading = false;
+          this.loadingProgress = false;
+          this.cdr.markForCheck();
         }
       });
   }
@@ -130,7 +205,7 @@ export class ResourcesComponent implements OnInit, OnDestroy {
     this.loadResources(pageRel);
   }
 
-  setViewMode(mode: 'cards' | 'list'): void {
+  setViewMode(mode: ViewMode): void {
     this.viewMode = mode;
   }
 
@@ -138,7 +213,12 @@ export class ResourcesComponent implements OnInit, OnDestroy {
   // Keeping displayAttributes for backward compatibility, but we'll no longer use it in the template
   get displayAttributes(): string[] {
     return Object.keys(this.resourceAttributes || {}).filter(
-      key => !this.suppressAttributes.includes(key)
+      key => !this.suppressResourceAttributes.includes(key)
     );
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

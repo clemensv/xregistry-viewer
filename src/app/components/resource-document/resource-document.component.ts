@@ -4,11 +4,12 @@ import { ResourceDocument } from '../../models/registry.model';
 import { RegistryService } from '../../services/registry.service';
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
+import { CodeHighlightComponent } from '../code-highlight/code-highlight.component';
 
 @Component({
   selector: 'app-resource-document',
   standalone: true,
-  imports: [CommonModule, ResourceDocumentItemComponent],
+  imports: [CommonModule, ResourceDocumentItemComponent, CodeHighlightComponent],
   templateUrl: './resource-document.component.html',
   styleUrl: './resource-document.component.scss'
 })

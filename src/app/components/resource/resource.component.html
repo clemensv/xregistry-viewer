@@ -1,8 +1,25 @@
 <div class="resource-container">
+  <!-- Page header for consistency with other pages -->
+  <app-page-header
+    [title]="'Resource: ' + resourceId"
+    [showViewToggle]="false"
+    [showPagination]="false"
+    [resultsCount]="hasMultipleVersions ? filteredVersionsList?.length || 0 : 1"
+    [totalCount]="hasMultipleVersions ? versionsList?.length || 0 : 1"
+    [resultsText]="hasMultipleVersions ? 'versions' : 'version'"
+    [searchResultsText]="hasMultipleVersions && currentSearchTerm ? 'Showing ' + (filteredVersionsList?.length || 0) + ' versions (filtered from ' + (versionsList?.length || 0) + ')' : ''">
+  </app-page-header>
+
+  <!-- Progressive loading indicator -->
+  <div class="loading-progress" *ngIf="loadingProgress && (versionsList.length > 0 || (defaultVersion$ | async))">
+    <div class="loading-indicator">
+      <span class="material-icons loading-spinner">sync</span>
+      <span>Loading resource data from additional endpoints...</span>
+    </div>
+  </div>
+
   <!-- Multiple versions mode with sidebar layout -->
   <ng-container *ngIf="hasMultipleVersions">
-    <h2>Resource: {{ resourceId }}</h2>
-
     <div class="resource-layout">
       <!-- Main content area -->
       <div class="main-content">
@@ -66,7 +83,6 @@
 
   <!-- Single version mode -->
   <ng-container *ngIf="!hasMultipleVersions && (defaultVersion$ | async) as version">
-    <h2>Resource: {{ resourceId }}</h2>
     <div class="version-detail">
       <h3>Version: {{ version.id }}</h3>
 

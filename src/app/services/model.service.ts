@@ -1,27 +1,48 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, forkJoin, BehaviorSubject, merge } from 'rxjs';
+import { Observable, of, forkJoin, BehaviorSubject, merge, timer } from 'rxjs';
 import { RegistryModel } from '../models/registry.model';
-import { map, catchError, tap, startWith, scan, shareReplay } from 'rxjs/operators';
+import { map, catchError, tap, startWith, scan, shareReplay, timeout, race } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment';
 import { ConfigService } from '../services/config.service';
 import { DebugService } from '../services/debug.service';
 
+// Interface for tracking endpoint load status
+interface EndpointStatus {
+  model: RegistryModel | null;
+  status: 'loading' | 'success' | 'failed' | 'timeout';
+  loadTime?: number;
+  error?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ModelService {
-    private servedFromServer: boolean;
-  private cachedModel: RegistryModel | null = null;
-  // Map API endpoint URL to loaded RegistryModel
-  private endpointModels: { [endpoint: string]: RegistryModel } = {};
+  private servedFromServer: boolean;
 
-  // Subject for progressive model updates
-  private progressiveModelSubject!: BehaviorSubject<RegistryModel>;
+  // Persistent cache that survives navigation
+  private static cachedModel: RegistryModel | null = null;
+  private static endpointCache: { [endpoint: string]: EndpointStatus } = {};
+  private static progressiveCache: BehaviorSubject<{
+    model: RegistryModel;
+    isComplete: boolean;
+    loadedCount: number;
+    totalCount: number;
+  }> | null = null;
 
-  // Cache for ongoing getRegistryModel request to prevent multiple requests
+  // Cache for ongoing requests to prevent duplicates
   private ongoingModelRequest: Observable<RegistryModel> | null = null;
+  private ongoingProgressiveRequest: Observable<{
+    model: RegistryModel;
+    isComplete: boolean;
+    loadedCount: number;
+    totalCount: number;
+  }> | null = null;
+
+  // Constants
+  private readonly MAX_LOAD_TIME = 15000; // 15 seconds
 
   constructor(
     private http: HttpClient,
@@ -29,19 +50,16 @@ export class ModelService {
     private configService: ConfigService,
     private debug: DebugService
   ) {
-    // Initialize progressive model subject after dependencies are injected
-    this.progressiveModelSubject = new BehaviorSubject<RegistryModel>(this.getDefaultModel());
     // Compute the base URL for the app (from config or fallback to '/')
     const configBaseUrl = (this.configService.getConfig()?.baseUrl || '/').replace(/\/$/, '');
     function proxyUrl(path: string) {
       return `${configBaseUrl}/proxy${path}`;
     }
+
     // Detect if running in a server context by checking for /proxy API
-    // (servedFromServer = true if /proxy is available)
     this.servedFromServer = false;
     if (isPlatformBrowser(this.platformId)) {
       // Browser: check if /proxy endpoint is available (relative to baseUrl)
-      // Use synchronous XHR to ensure completion before constructor exits
       try {
         const xhr = new XMLHttpRequest();
         xhr.open('OPTIONS', proxyUrl(''), false); // false = synchronous
@@ -56,11 +74,11 @@ export class ModelService {
     }
   }
 
-    getRegistryModel(): Observable<RegistryModel> {
-    // Return cached model if available (keep endpointModels intact)
-    if (this.cachedModel) {
-      // Cache hit - suppress logging for cache hits
-      return of(this.cachedModel);
+  getRegistryModel(): Observable<RegistryModel> {
+    // Return cached model if available
+    if (ModelService.cachedModel) {
+      this.debug.log('ModelService: Returning cached model');
+      return of(ModelService.cachedModel);
     }
 
     // Return ongoing request if there is one to prevent multiple simultaneous requests
@@ -69,15 +87,10 @@ export class ModelService {
       return this.ongoingModelRequest;
     }
 
-    // Keep existing endpointModels - don't reset the cache
-
     const config = this.configService.getConfig();
-    this.debug.log('ModelService: Got config:', config);
     const modelUris = config?.modelUris || [];
     const apiEndpoints = config?.apiEndpoints || [];
     this.debug.log('ModelService: Model URIs:', modelUris, 'API Endpoints:', apiEndpoints);
-    this.debug.log('ModelService: servedFromServer:', this.servedFromServer);
-    // Cache status logging suppressed to reduce noise
 
     // Compute the base URL for the app (from config or fallback to '/')
     const configBaseUrl = (this.configService.getConfig()?.baseUrl || '/').replace(/\/$/, '');
@@ -88,69 +101,119 @@ export class ModelService {
     // Fetch all models from modelUris and all /model endpoints
     const modelRequests: Observable<RegistryModel>[] = [];
 
-    // Only fetch modelUris that haven't been cached yet
+    // Process model URIs
     for (const uri of modelUris) {
-      if (this.endpointModels[uri]) {
-        // Cache hit - suppress logging for cache hits
-        modelRequests.push(of(this.endpointModels[uri]));
+      const cached = ModelService.endpointCache[uri];
+      if (cached && (cached.status === 'success' || cached.status === 'failed' || cached.status === 'timeout')) {
+        // Use cached result (success, failed, or timeout)
+        if (cached.status === 'success' && cached.model) {
+          modelRequests.push(of(cached.model));
+        } else {
+          this.debug.log(`ModelService: Skipping ${uri} - previous ${cached.status}: ${cached.error || 'unknown'}`);
+          modelRequests.push(of(null as any));
+        }
       } else {
+        // Need to load this endpoint
         this.debug.log(`ModelService: Fetching new model for URI ${uri}`);
+        ModelService.endpointCache[uri] = { model: null, status: 'loading' };
+
         const uriToFetch = this.servedFromServer ? proxyUrl(`?target=${encodeURIComponent(uri)}`) : uri;
-        modelRequests.push(this.http.get<RegistryModel>(uriToFetch).pipe(
-          tap(m => {
-            if (m) {
-              this.debug.log(`ModelService: Successfully loaded model from ${uri}:`, m);
-              this.endpointModels[uri] = m;
-            } else {
-              this.debug.log(`ModelService: Received null/empty model from ${uri}`);
-            }
-          }),
-          catchError(err => {
-            this.debug.error('Failed to load model from', uri, err);
-            return of(null as any);
-          })
-        ));
+        const startTime = Date.now();
+
+                        modelRequests.push(
+          this.http.get<RegistryModel>(uriToFetch).pipe(
+            timeout(this.MAX_LOAD_TIME),
+            tap(m => {
+              const loadTime = Date.now() - startTime;
+              if (m) {
+                this.debug.log(`ModelService: Successfully loaded model from ${uri} (${loadTime}ms)`);
+                ModelService.endpointCache[uri] = { model: m, status: 'success', loadTime };
+              } else {
+                this.debug.log(`ModelService: Received null/empty model from ${uri}`);
+                ModelService.endpointCache[uri] = { model: null, status: 'failed', error: 'Empty model', loadTime };
+              }
+            }),
+            catchError(err => {
+              const loadTime = Date.now() - startTime;
+              if (err.name === 'TimeoutError') {
+                this.debug.warn(`ModelService: Timeout loading model from ${uri} after ${this.MAX_LOAD_TIME}ms`);
+                ModelService.endpointCache[uri] = {
+                  model: null,
+                  status: 'timeout',
+                  error: `Timeout after ${this.MAX_LOAD_TIME}ms`,
+                  loadTime: this.MAX_LOAD_TIME
+                };
+              } else {
+                this.debug.error('Failed to load model from', uri, err);
+                ModelService.endpointCache[uri] = {
+                  model: null,
+                  status: 'failed',
+                  error: `HTTP ${err.status}: ${err.statusText}`,
+                  loadTime
+                };
+              }
+              return of(null as any);
+            })
+          )
+        );
       }
     }
-    // Only fetch API endpoints that haven't been cached yet
+
+    // Process API endpoints
     for (const api of apiEndpoints) {
-      if (this.endpointModels[api]) {
-        // Cache hit - suppress logging for cache hits
-        modelRequests.push(of(this.endpointModels[api]));
-      } else {
-        this.debug.log(`ModelService: Fetching new model for API ${api}`);
-        const apiToFetch = this.servedFromServer ? proxyUrl(`?target=${encodeURIComponent(api + '/model')}`) : `${api}/model`;
-        this.debug.log(`ModelService: Fetching model from ${api} via URL: ${apiToFetch}`);
-        this.debug.log(`ModelService: servedFromServer=${this.servedFromServer}, original API=${api}`);
-
-        // Special handling for schemas.mcpxreg.com
-        if (api.includes('schemas.mcpxreg.com')) {
-          this.debug.log(`ModelService: Processing schemas.mcpxreg.com endpoint`);
-          this.debug.log(`ModelService: Full URL will be: ${apiToFetch}`);
+      const cached = ModelService.endpointCache[api];
+      if (cached && (cached.status === 'success' || cached.status === 'failed' || cached.status === 'timeout')) {
+        // Use cached result (success, failed, or timeout)
+        if (cached.status === 'success' && cached.model) {
+          modelRequests.push(of(cached.model));
+        } else {
+          this.debug.log(`ModelService: Skipping ${api} - previous ${cached.status}: ${cached.error || 'unknown'}`);
+          modelRequests.push(of(null as any));
         }
+      } else {
+                // Need to load this endpoint
+        this.debug.log(`ModelService: Fetching new model for API ${api}`);
+        ModelService.endpointCache[api] = { model: null, status: 'loading' };
 
-        // For each API, tap to save its model if loaded
-        modelRequests.push(this.http.get<RegistryModel>(apiToFetch).pipe(
-          tap(m => {
-            if (m) {
-              this.debug.log(`ModelService: Successfully loaded model from ${api}:`, m);
-              this.debug.log(`ModelService: Model groups for ${api}:`, Object.keys(m.groups || {}));
-              this.endpointModels[api] = m;
-            } else {
-              this.debug.log(`ModelService: Received null/empty model from ${api}`);
-            }
-          }),
-          catchError(err => {
-            this.debug.error(`Failed to load model from ${api}:`, err);
-            this.debug.error(`Error details for ${api}:`, {
-              status: err.status,
-              statusText: err.statusText,
-              message: err.message,
-              url: err.url
-            });
-            return of(null as any);
-          })
-        ));
+        const apiToFetch = this.servedFromServer ? proxyUrl(`?target=${encodeURIComponent(api + '/model')}`) : `${api}/model`;
+        const startTime = Date.now();
+
+        modelRequests.push(
+          this.http.get<RegistryModel>(apiToFetch).pipe(
+            timeout(this.MAX_LOAD_TIME),
+            tap(m => {
+              const loadTime = Date.now() - startTime;
+              if (m) {
+                this.debug.log(`ModelService: Successfully loaded model from ${api} (${loadTime}ms)`);
+                ModelService.endpointCache[api] = { model: m, status: 'success', loadTime };
+              } else {
+                this.debug.log(`ModelService: Received null/empty model from ${api}`);
+                ModelService.endpointCache[api] = { model: null, status: 'failed', error: 'Empty model', loadTime };
+              }
+            }),
+            catchError(err => {
+              const loadTime = Date.now() - startTime;
+              if (err.name === 'TimeoutError') {
+                this.debug.warn(`ModelService: Timeout loading model from ${api} after ${this.MAX_LOAD_TIME}ms`);
+                ModelService.endpointCache[api] = {
+                  model: null,
+                  status: 'timeout',
+                  error: `Timeout after ${this.MAX_LOAD_TIME}ms`,
+                  loadTime: this.MAX_LOAD_TIME
+                };
+              } else {
+                this.debug.error(`Failed to load model from ${api}:`, err);
+                ModelService.endpointCache[api] = {
+                  model: null,
+                  status: 'failed',
+                  error: `HTTP ${err.status}: ${err.statusText}`,
+                  loadTime
+                };
+              }
+              return of(null as any);
+            })
+          )
+        );
       }
     }
 
@@ -159,23 +222,12 @@ export class ModelService {
       return of(this.getDefaultModel());
     }
 
-    // Count cached vs new requests (cache hit details suppressed)
-    const totalEndpoints = modelUris.length + apiEndpoints.length;
-    const cachedCount = Object.keys(this.endpointModels).filter(key =>
-      modelUris.includes(key) || apiEndpoints.includes(key)
-    ).length;
-    const newRequests = totalEndpoints - cachedCount;
-
-    // Only log if there are new requests to avoid cache hit spam
-    if (newRequests > 0) {
-      this.debug.log(`ModelService: Processing ${totalEndpoints} total endpoints - ${newRequests} new requests`);
-    }
-
     // Cache the observable to prevent multiple simultaneous requests
     this.ongoingModelRequest = forkJoin(modelRequests).pipe(
       map((models: (RegistryModel | null)[]) => {
         this.debug.log('ModelService: Received models from forkJoin:', models);
-        // Deep merge models: merge all groupTypes, resourceTypes, and attributes
+
+        // Deep merge models
         const merged: RegistryModel = {
           specversion: '',
           registryid: '',
@@ -184,22 +236,21 @@ export class ModelService {
           capabilities: { apis: [], schemas: [], pagination: false },
           groups: {}
         };
+
         let foundModel = false;
         for (const model of models) {
-          if (!model) {
-            this.debug.log('ModelService: Skipping null model');
-            continue;
-          }
-          this.debug.log('ModelService: Processing model:', model);
+          if (!model) continue;
           foundModel = true;
           merged.specversion = model.specversion || merged.specversion;
           merged.registryid = model.registryid || merged.registryid;
           merged.name = model.name || merged.name;
           merged.description = model.description || merged.description;
-          // Merge capabilities (union arrays, last wins for bool)
+
+          // Merge capabilities
           merged.capabilities.apis = Array.from(new Set([...merged.capabilities.apis, ...(model.capabilities?.apis || [])]));
           merged.capabilities.schemas = Array.from(new Set([...merged.capabilities.schemas, ...(model.capabilities?.schemas || [])]));
           merged.capabilities.pagination = model.capabilities?.pagination ?? merged.capabilities.pagination;
+
           // Deep merge groups
           if (model.groups) {
             for (const groupType of Object.keys(model.groups)) {
@@ -207,13 +258,13 @@ export class ModelService {
               if (!merged.groups[groupType]) {
                 merged.groups[groupType] = JSON.parse(JSON.stringify(group));
               } else {
-                // Merge groupType fields
+                // Merge existing group
                 const mergedGroup = merged.groups[groupType];
                 mergedGroup.plural = group.plural || mergedGroup.plural;
                 mergedGroup.singular = group.singular || mergedGroup.singular;
                 mergedGroup.description = group.description || mergedGroup.description;
-                // Merge group attributes
                 mergedGroup.attributes = { ...(mergedGroup.attributes || {}), ...(group.attributes || {}) };
+
                 // Merge resources
                 mergedGroup.resources = mergedGroup.resources || {};
                 for (const resourceType of Object.keys(group.resources || {})) {
@@ -221,14 +272,12 @@ export class ModelService {
                   if (!mergedGroup.resources[resourceType]) {
                     mergedGroup.resources[resourceType] = JSON.parse(JSON.stringify(resource));
                   } else {
-                    // Merge resourceType fields
                     const mergedResource = mergedGroup.resources[resourceType];
                     mergedResource.plural = resource.plural || mergedResource.plural;
                     mergedResource.singular = resource.singular || mergedResource.singular;
                     mergedResource.description = resource.description || mergedResource.description;
                     mergedResource.hasdocument = resource.hasdocument ?? mergedResource.hasdocument;
                     mergedResource.maxversions = resource.maxversions ?? mergedResource.maxversions;
-                    // Merge resource attributes
                     mergedResource.attributes = { ...(mergedResource.attributes || {}), ...(resource.attributes || {}) };
                   }
                 }
@@ -236,30 +285,23 @@ export class ModelService {
             }
           }
         }
-        if (!foundModel) {
-          this.debug.log('ModelService: No models found, returning default model');
-          return this.getDefaultModel();
-        }
-        this.debug.log('ModelService: Successfully merged model with groups:', Object.keys(merged.groups));
-        this.debug.log('ModelService: Merged model details:', {
-          groupsCount: Object.keys(merged.groups).length,
-          groupNames: Object.keys(merged.groups),
-          fullModel: merged
-        });
-        this.cachedModel = merged;
-        // Clear the ongoing request cache since we're done
+
+        const finalModel = foundModel ? merged : this.getDefaultModel();
+
+        // Cache the final model persistently
+        ModelService.cachedModel = finalModel;
+        this.debug.log('ModelService: Cached final merged model with', Object.keys(finalModel.groups).length, 'group types');
+
+        // Clear ongoing request
         this.ongoingModelRequest = null;
-        // Model cached for future requests (cache hit logging suppressed)
-        return merged;
+
+        return finalModel;
       }),
-      catchError(err => {
-        this.debug.error('Error merging registry models:', err);
-        this.debug.log('ModelService: Falling back to default model due to error');
-        // Clear the ongoing request cache on error too
-        this.ongoingModelRequest = null;
-        return of(this.getDefaultModel());
+      tap(() => {
+        // Log cache status
+        this.logCacheStatus();
       }),
-      shareReplay(1) // Share the result with multiple subscribers
+      shareReplay(1)
     );
 
     return this.ongoingModelRequest;
@@ -270,14 +312,16 @@ export class ModelService {
    * This method emits updated models as each endpoint responds, rather than waiting for all
    */
   getProgressiveRegistryModel(): Observable<{ model: RegistryModel; isComplete: boolean; loadedCount: number; totalCount: number }> {
-    // Return cached model if available
-    if (this.cachedModel) {
-      return of({
-        model: this.cachedModel,
-        isComplete: true,
-        loadedCount: 1,
-        totalCount: 1
-      });
+    // Return cached progressive model if available
+    if (ModelService.progressiveCache) {
+      this.debug.log('ModelService: Returning cached progressive model');
+      return ModelService.progressiveCache.asObservable();
+    }
+
+    // Return ongoing progressive request if there is one
+    if (this.ongoingProgressiveRequest) {
+      this.debug.log('ModelService: Returning ongoing progressive request');
+      return this.ongoingProgressiveRequest;
     }
 
     const config = this.configService.getConfig();
@@ -287,12 +331,14 @@ export class ModelService {
 
     if (totalEndpoints === 0) {
       const defaultModel = this.getDefaultModel();
-      return of({
+      const result = {
         model: defaultModel,
         isComplete: true,
         loadedCount: 1,
         totalCount: 1
-      });
+      };
+      ModelService.progressiveCache = new BehaviorSubject(result);
+      return of(result);
     }
 
     // Compute the base URL for the app (from config or fallback to '/')
@@ -306,21 +352,40 @@ export class ModelService {
 
     // Add model URIs
     for (const uri of modelUris) {
-      if (this.endpointModels[uri]) {
-        modelStreams.push(of({ endpoint: uri, model: this.endpointModels[uri] }));
+      if (ModelService.endpointCache[uri] && (ModelService.endpointCache[uri].status === 'success' || ModelService.endpointCache[uri].status === 'failed' || ModelService.endpointCache[uri].status === 'timeout')) {
+        modelStreams.push(of({ endpoint: uri, model: ModelService.endpointCache[uri].model }));
       } else {
         const uriToFetch = this.servedFromServer ? proxyUrl(`?target=${encodeURIComponent(uri)}`) : uri;
+        const startTime = Date.now();
         modelStreams.push(
           this.http.get<RegistryModel>(uriToFetch).pipe(
+            timeout(this.MAX_LOAD_TIME),
             tap(model => {
               if (model) {
                 this.debug.log(`Progressive ModelService: Loaded model from ${uri}`);
-                this.endpointModels[uri] = model;
+                ModelService.endpointCache[uri] = { model: model, status: 'success', loadTime: Date.now() - startTime };
               }
             }),
             map(model => ({ endpoint: uri, model })),
             catchError(err => {
-              this.debug.error(`Progressive ModelService: Failed to load model from ${uri}:`, err);
+              const loadTime = Date.now() - startTime;
+              if (err.name === 'TimeoutError') {
+                this.debug.warn(`Progressive ModelService: Timeout loading model from ${uri} after ${this.MAX_LOAD_TIME}ms`);
+                ModelService.endpointCache[uri] = {
+                  model: null,
+                  status: 'timeout',
+                  error: `Timeout after ${this.MAX_LOAD_TIME}ms`,
+                  loadTime: this.MAX_LOAD_TIME
+                };
+              } else {
+                this.debug.error(`Progressive ModelService: Failed to load model from ${uri}:`, err);
+                ModelService.endpointCache[uri] = {
+                  model: null,
+                  status: 'failed',
+                  error: `HTTP ${err.status}: ${err.statusText}`,
+                  loadTime
+                };
+              }
               return of({ endpoint: uri, model: null });
             })
           )
@@ -330,21 +395,40 @@ export class ModelService {
 
     // Add API endpoints
     for (const api of apiEndpoints) {
-      if (this.endpointModels[api]) {
-        modelStreams.push(of({ endpoint: api, model: this.endpointModels[api] }));
+      if (ModelService.endpointCache[api] && (ModelService.endpointCache[api].status === 'success' || ModelService.endpointCache[api].status === 'failed' || ModelService.endpointCache[api].status === 'timeout')) {
+        modelStreams.push(of({ endpoint: api, model: ModelService.endpointCache[api].model }));
       } else {
         const apiToFetch = this.servedFromServer ? proxyUrl(`?target=${encodeURIComponent(api + '/model')}`) : `${api}/model`;
+        const startTime = Date.now();
         modelStreams.push(
           this.http.get<RegistryModel>(apiToFetch).pipe(
+            timeout(this.MAX_LOAD_TIME),
             tap(model => {
               if (model) {
                 this.debug.log(`Progressive ModelService: Loaded model from ${api}`);
-                this.endpointModels[api] = model;
+                ModelService.endpointCache[api] = { model: model, status: 'success', loadTime: Date.now() - startTime };
               }
             }),
             map(model => ({ endpoint: api, model })),
             catchError(err => {
-              this.debug.error(`Progressive ModelService: Failed to load model from ${api}:`, err);
+              const loadTime = Date.now() - startTime;
+              if (err.name === 'TimeoutError') {
+                this.debug.warn(`Progressive ModelService: Timeout loading model from ${api} after ${this.MAX_LOAD_TIME}ms`);
+                ModelService.endpointCache[api] = {
+                  model: null,
+                  status: 'timeout',
+                  error: `Timeout after ${this.MAX_LOAD_TIME}ms`,
+                  loadTime: this.MAX_LOAD_TIME
+                };
+              } else {
+                this.debug.error(`Progressive ModelService: Failed to load model from ${api}:`, err);
+                ModelService.endpointCache[api] = {
+                  model: null,
+                  status: 'failed',
+                  error: `HTTP ${err.status}: ${err.statusText}`,
+                  loadTime
+                };
+              }
               return of({ endpoint: api, model: null });
             })
           )
@@ -352,8 +436,8 @@ export class ModelService {
       }
     }
 
-        // Merge all streams and accumulate models progressively
-    return merge(...modelStreams).pipe(
+    // Merge all streams and accumulate models progressively
+    this.ongoingProgressiveRequest = merge(...modelStreams).pipe(
       scan((accumulator: { mergedModel: RegistryModel; loadedEndpoints: Set<string> }, current) => {
         // Add the current endpoint to loaded endpoints
         const newLoadedEndpoints = new Set(accumulator.loadedEndpoints);
@@ -376,18 +460,23 @@ export class ModelService {
         loadedEndpoints: new Set<string>()
       }),
       map(result => {
-        // Cache the final model when all endpoints are loaded
-        const isComplete = result.loadedEndpoints.size === totalEndpoints;
-        if (isComplete) {
-          this.cachedModel = result.mergedModel;
-          this.debug.log('Progressive ModelService: All endpoints loaded, caching final model');
-        }
-        return {
+        // Prepare the current result
+        const currentResult = {
           model: result.mergedModel,
-          isComplete,
+          isComplete: result.loadedEndpoints.size === totalEndpoints,
           loadedCount: result.loadedEndpoints.size,
           totalCount: totalEndpoints
         };
+
+        // Cache the progressive model when complete
+        if (currentResult.isComplete) {
+          ModelService.progressiveCache = new BehaviorSubject(currentResult);
+          ModelService.cachedModel = result.mergedModel; // Also cache the final model
+          this.debug.log('Progressive ModelService: All endpoints loaded, caching final model');
+          this.ongoingProgressiveRequest = null; // Clear ongoing request
+        }
+
+        return currentResult;
       }),
       startWith({
         model: this.getDefaultModel(),
@@ -396,6 +485,8 @@ export class ModelService {
         totalCount: totalEndpoints
       }) // Start with default model
     );
+
+    return this.ongoingProgressiveRequest;
   }
 
   /**
@@ -473,8 +564,8 @@ export class ModelService {
 
     this.debug.log(`ModelService.getApiEndpointsForGroupType('${groupType}'):`);
     this.debug.log('  - Available API endpoints:', apiEndpoints);
-    this.debug.log('  - Loaded endpoint models:', Object.keys(this.endpointModels));
-    this.debug.log('  - Full endpointModels:', this.endpointModels);
+    this.debug.log('  - Loaded endpoint models:', Object.keys(ModelService.endpointCache));
+    this.debug.log('  - Full endpointModels:', ModelService.endpointCache);
 
     // Special case for pythonregistries: only use localhost:3000
     if (groupType === 'pythonregistries') {
@@ -487,11 +578,11 @@ export class ModelService {
 
     // For other group types, return all available endpoints
     const filteredEndpoints = apiEndpoints.filter(api => {
-      const hasModel = this.endpointModels[api];
-      const hasGroupType = hasModel && this.endpointModels[api].groups?.hasOwnProperty(groupType);
+      const hasModel = ModelService.endpointCache[api];
+      const hasGroupType = hasModel && ModelService.endpointCache[api].model && ModelService.endpointCache[api].model.groups?.hasOwnProperty(groupType);
       this.debug.log(`  - Endpoint ${api}: hasModel=${!!hasModel}, hasGroupType=${hasGroupType}`);
-      if (hasModel && hasModel.groups) {
-        this.debug.log(`    - Available group types: ${Object.keys(hasModel.groups)}`);
+      if (hasModel && hasModel.model && hasModel.model.groups) {
+        this.debug.log(`    - Available group types: ${Object.keys(hasModel.model.groups)}`);
       }
       return hasGroupType;
     });
@@ -512,7 +603,8 @@ export class ModelService {
    */
   clearCache(): void {
     // Cache clear operation - logging suppressed to reduce noise
-    this.cachedModel = null;
+    ModelService.cachedModel = null;
+    ModelService.endpointCache = {};
     this.ongoingModelRequest = null;
   }
 
@@ -521,8 +613,9 @@ export class ModelService {
    */
   clearAllCaches(): void {
     // All cache clear operation - logging suppressed to reduce noise
-    this.cachedModel = null;
-    this.endpointModels = {};
+    ModelService.cachedModel = null;
+    ModelService.endpointCache = {};
+    ModelService.progressiveCache = null;
     this.ongoingModelRequest = null;
   }
 
@@ -531,9 +624,9 @@ export class ModelService {
    */
   getCacheStatus(): { mergedModelCached: boolean; endpointModelCount: number; cachedEndpoints: string[] } {
     return {
-      mergedModelCached: !!this.cachedModel,
-      endpointModelCount: Object.keys(this.endpointModels).length,
-      cachedEndpoints: Object.keys(this.endpointModels)
+      mergedModelCached: !!ModelService.cachedModel,
+      endpointModelCount: Object.keys(ModelService.endpointCache).length,
+      cachedEndpoints: Object.keys(ModelService.endpointCache)
     };
   }
 
@@ -601,5 +694,9 @@ export class ModelService {
         }
       }
     } as RegistryModel;
+  }
+
+  private logCacheStatus(): void {
+    this.debug.log('ModelService: Current cache status:', this.getCacheStatus());
   }
 }

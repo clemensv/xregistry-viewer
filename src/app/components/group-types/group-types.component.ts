@@ -7,17 +7,18 @@ import { DebugService } from '../../services/debug.service';
 import { SearchService } from '../../services/search.service';
 import { ConfigService } from '../../services/config.service';
 import { GroupType } from '../../models/registry.model';
+import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
 
 @Component({
   standalone: true,
   selector: 'app-group-types',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PageHeaderComponent],
   templateUrl: './group-types.component.html',
   styleUrls: ['./group-types.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
 export class GroupTypesComponent implements OnInit, OnDestroy {
-  viewMode: 'cards' | 'list' = 'cards'; // Default view mode
+  viewMode: ViewMode = 'cards'; // Default view mode
   groupTypesList: { groupType: string; model: GroupType }[] = [];
   filteredGroupTypesList: { groupType: string; model: GroupType }[] = [];
   currentSearchTerm = '';
@@ -156,7 +157,7 @@ export class GroupTypesComponent implements OnInit, OnDestroy {
     }
   }
 
-  setViewMode(mode: 'cards' | 'list'): void {
+  setViewMode(mode: ViewMode): void {
     this.viewMode = mode;
   }
 

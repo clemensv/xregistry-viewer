@@ -1,0 +1,204 @@
+@use '../../../styles/theme' as *;
+
+/* Global Page Header Styles */
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Outer container - work within existing layout system */
+.page-header-outer {
+  margin: 0 0 1rem 0;
+  padding: 0;
+  border: none;
+  background: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Main header section with title and controls */
+.page-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
+  margin-bottom: 0.5rem;
+  background-color: var(--bg-card, white);
+  border-radius: 6px 6px 0 0;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Page title styling */
+.page-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--fg-text, #333);
+  flex: 1;
+  min-width: 140px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.3;
+}
+
+/* Controls container */
+.page-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+/* Results info styling */
+.results-info {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.results-text {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Unified button styling for both pagination and view toggle */
+.toggle-btn {
+  background: none;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+
+  &:hover:not(:disabled) {
+    background: #f8f9fa;
+    color: #495057;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+/* View toggle specific styling */
+.view-btn.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+/* Pagination and view toggle containers */
+.pagination-toggle,
+.view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .page-header-main {
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-title {
+    font-size: 1.1rem;
+    min-width: auto;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-header-controls {
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .results-info {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pagination-toggle {
+    order: 2;
+    justify-content: center;
+  }
+
+  .view-toggle {
+    order: 3;
+    justify-content: center;
+  }
+
+  .results-text {
+    font-size: 0.8rem;
+  }
+
+  .toggle-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Medium screen adjustments */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .page-header-main {
+    padding: 0.75rem;
+  }
+
+  .page-title {
+    font-size: 1.15rem;
+    min-width: 130px;
+  }
+
+  .page-header-controls {
+    gap: 0.75rem;
+  }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 480px) {
+  .page-header-main {
+    padding: 0.5rem;
+  }
+
+  .page-title {
+    font-size: 1rem;
+  }
+
+  .toggle-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    min-width: 36px;
+  }
+
+  .results-text {
+    font-size: 0.75rem;
+  }
+
+  .page-header-controls {
+    gap: 0.5rem;
+  }
+}

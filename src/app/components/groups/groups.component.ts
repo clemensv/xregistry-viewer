@@ -1,17 +1,25 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, interval } from 'rxjs';
 import { map, switchMap, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { RegistryService } from '../../services/registry.service';import { ModelService } from '../../services/model.service';import { DebugService } from '../../services/debug.service';import { Group } from '../../models/registry.model';
+import { RegistryService } from '../../services/registry.service';
+import { ModelService } from '../../services/model.service';
+import { DebugService } from '../../services/debug.service';
+import { Group } from '../../models/registry.model';
 import { FormsModule } from '@angular/forms';
-import { ResourceDocumentItem } from '../../models/resource-document-item.model';import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';import { LinkSet, PaginationComponent } from '../pagination/pagination.component';import { GroupRowComponent } from '../group-row/group-row.component';
+import { ResourceDocumentItem } from '../../models/resource-document-item.model';
+import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
+import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
+import { GroupRowComponent } from '../group-row/group-row.component';
 import { SearchService } from '../../services/search.service';
+import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
+import { ConfigService } from '../../services/config.service';
 
 @Component({
   standalone: true,
   selector: 'app-groups',
-  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, GroupRowComponent, ResourceDocumentItemComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, GroupRowComponent, ResourceDocumentItemComponent, PageHeaderComponent],
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
@@ -25,15 +33,18 @@ export class GroupsComponent implements OnInit, OnDestroy {
   groupsList: Group[] = [];
   filteredGroupsList: Group[] = [];
   pageLinks: LinkSet = {};
-  viewMode: 'cards' | 'list' = 'cards'; // Default view mode
+  viewMode: ViewMode = 'cards'; // Default view mode
   currentSearchTerm = '';
+  loading = true;
+  loadingProgress = true; // Tracks if we're still expecting more data
   private destroy$ = new Subject<void>();
+  private initialLoad = true;
 
   // Client-side pagination for large datasets
-  private allGroupsCache: Group[] = [];
+  allGroupsCache: Group[] = [];
   private currentPage = 1;
   private pageSize = 50;
-  private useClientSidePagination = false;
+  useClientSidePagination = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -41,24 +52,98 @@ export class GroupsComponent implements OnInit, OnDestroy {
     public modelService: ModelService,
     private cdr: ChangeDetectorRef,
     private debug: DebugService,
-    private searchService: SearchService
+    private searchService: SearchService,
+    private configService: ConfigService
   ) {}
 
   ngOnInit(): void {
     this.groupType = this.route.snapshot.paramMap.get('groupType') || '';
 
-    // Load group metadata attributes
-    this.modelService.getRegistryModel().pipe(
-      map(m => m.groups[this.groupType])
-    ).subscribe(gtModel => {
-      this.groupAttributes = gtModel.attributes || {};
-    });
+    // Wait for configuration to be loaded before subscribing to ModelService
+    this.waitForConfigAndLoadData();
 
-    // Save the full registry model for resource type info
-    this.modelService.getRegistryModel().subscribe(model => {
-      this.registryModel = model;
-    });
+    // Subscribe to search state changes
+    this.searchService.searchState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(state => {
+        this.debug.log('Groups received search state:', state, 'My groupType:', this.groupType);
+        if (state.context?.groupType === this.groupType) {
+          this.debug.log('Search context matches, updating search term:', state.searchTerm);
+          this.currentSearchTerm = state.searchTerm;
+          this.applyClientSideFilter();
+        }
+      });
+  }
 
+  private waitForConfigAndLoadData(): void {
+    // Check if config is already loaded
+    const config = this.configService.getConfig();
+    if (config && config.apiEndpoints && config.apiEndpoints.length > 0) {
+      this.loadModelAndGroups();
+      return;
+    }
+
+    // Config not loaded yet, wait for it
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+
+    const checkInterval = interval(100).pipe(takeUntil(this.destroy$)).subscribe(() => {
+      attempts++;
+      const currentConfig = this.configService.getConfig();
+
+      if (currentConfig && currentConfig.apiEndpoints && currentConfig.apiEndpoints.length > 0) {
+        checkInterval.unsubscribe();
+        this.loadModelAndGroups();
+      } else if (attempts >= maxAttempts) {
+        console.error('GroupsComponent: Timeout waiting for config, proceeding anyway');
+        checkInterval.unsubscribe();
+        this.loadModelAndGroups();
+      }
+    });
+  }
+
+  private loadModelAndGroups(): void {
+    // Load group metadata attributes using progressive loading
+    this.modelService.getProgressiveRegistryModel()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          const model = result.model;
+
+          if (model.groups && model.groups[this.groupType]) {
+            this.groupAttributes = model.groups[this.groupType].attributes || {};
+            this.registryModel = model;
+
+            // Update resource types observable
+            if (model.groups[this.groupType] && model.groups[this.groupType].resources) {
+              const resourceTypes = Object.keys(model.groups[this.groupType].resources);
+              this.debug.log('Extracted resourceTypes:', resourceTypes);
+            }
+
+            // Load groups on initial model load or when model is complete
+            if (this.initialLoad || result.isComplete) {
+              this.loadGroups();
+              if (this.initialLoad) {
+                this.initialLoad = false;
+              }
+            }
+          }
+
+          // Update loading states
+          this.loadingProgress = !result.isComplete;
+
+          this.debug.log(`GroupsComponent: Updated model (${result.loadedCount}/${result.totalCount} endpoints loaded)`);
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('GroupsComponent: Error loading registry model:', error);
+          this.loading = false;
+          this.loadingProgress = false;
+          this.cdr.markForCheck();
+        }
+      });
+
+    // Set up resource types observable
     this.resourceTypes$ = this.route.paramMap.pipe(
       map(params => params.get('groupType')!),
       distinctUntilChanged(),
@@ -74,20 +159,6 @@ export class GroupsComponent implements OnInit, OnDestroy {
         })
       ))
     );
-
-    // Subscribe to search state changes
-    this.searchService.searchState$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(state => {
-        this.debug.log('Groups received search state:', state, 'My groupType:', this.groupType);
-        if (state.context?.groupType === this.groupType) {
-          this.debug.log('Search context matches, updating search term:', state.searchTerm);
-          this.currentSearchTerm = state.searchTerm;
-          this.applyClientSideFilter();
-        }
-      });
-
-    this.loadGroups();
   }
 
   ngOnDestroy(): void {
@@ -105,32 +176,45 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
     const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.listGroups(this.groupType, pageRel, filter)
-      .subscribe(page => {
-        // Check if server returned pagination links
-        const hasServerPagination = Object.keys(page.links).length > 0;
+      .subscribe({
+        next: (page) => {
+          // Check if server returned pagination links
+          const hasServerPagination = Object.keys(page.links).length > 0;
 
-        if (!hasServerPagination && page.items.length > this.pageSize && !pageRel) {
-          // Server doesn't support pagination but returned large dataset
-          this.enableClientSidePagination(page.items);
-        } else {
-          // Normal server pagination or small dataset
-          this.groupsList = page.items;
-          this.pageLinks = page.links;
-          this.useClientSidePagination = false;
-        }
-
-        this.applyClientSideFilter();
-
-        // Only set default view mode on initial load (when pageRel is empty)
-        if (!pageRel) {
-          if (this.groupsList.length > 20) {
-            this.viewMode = 'list';
+          if (!hasServerPagination && page.items.length > this.pageSize && !pageRel) {
+            // Server doesn't support pagination but returned large dataset
+            this.enableClientSidePagination(page.items);
           } else {
-            this.viewMode = 'cards';
+            // Normal server pagination or small dataset
+            this.groupsList = page.items;
+            this.pageLinks = page.links;
+            this.useClientSidePagination = false;
           }
-        }
 
-        this.cdr.markForCheck();
+          this.applyClientSideFilter();
+
+          // Only set default view mode on initial load (when pageRel is empty)
+          if (!pageRel && this.initialLoad) {
+            if (this.groupsList.length > 20) {
+              this.viewMode = 'list';
+            } else {
+              this.viewMode = 'cards';
+            }
+          }
+
+          // Update loading state
+          if (this.loading && this.groupsList.length > 0) {
+            this.loading = false;
+          }
+
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('GroupsComponent: Error loading groups:', error);
+          this.loading = false;
+          this.loadingProgress = false;
+          this.cdr.markForCheck();
+        }
       });
   }
 
@@ -205,7 +289,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.loadGroups(pageRel);
   }
 
-  setViewMode(mode: 'cards' | 'list'): void {
+  setViewMode(mode: ViewMode): void {
     this.viewMode = mode;
   }
 

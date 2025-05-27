@@ -15,54 +15,7 @@
   box-sizing: border-box;
 }
 
-/* Page Header Layout - aligned with breadcrumb */
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
-  margin-bottom: 0.75rem;
-  background-color: var(--bg-card, white);
-}
-
-.page-header h2 {
-  margin: 0;
-  font-weight: 600;
-  color: var(--fg-text, #333);
-}
-
-.page-header .view-toggle {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.page-header .view-toggle button {
-  background: none;
-  border: 1px solid #dee2e6;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #6c757d;
-  transition: all 0.2s ease;
-  font-size: 1rem;
-
-  &:hover {
-    background: #f8f9fa;
-    color: #495057;
-  }
-
-  &.active {
-    background: #007bff;
-    border-color: #007bff;
-    color: white;
-  }
-
-  i {
-    font-size: 1rem;
-  }
-}
+/* Header styles now handled by global PageHeaderComponent */
 
 // Grid container - no overlap guaranteed, equal row heights
 .grid-container.cards-view {
@@ -77,9 +30,9 @@
 
   // Default (medium) sizing - ensure proper spacing with max width
   grid-template-columns: repeat(auto-fit, minmax(240px, 320px)); /* Max 320px to prevent over-growth */
-  gap: 1.5rem; /* Increased gap to prevent overlap */
-  grid-row-gap: 1.5rem; /* Explicit row gap for clarity */
-  grid-column-gap: 1.5rem; /* Explicit column gap for clarity */
+  gap: 1.5rem 2rem; /* Increased horizontal gap from 1.5rem to 2rem */
+  grid-row-gap: 1.5rem; /* Keep vertical gap same */
+  grid-column-gap: 2rem; /* Explicit horizontal gap increased */
 
   // Ensure no margin/padding on grid items that could cause overlap
   > * {
@@ -94,18 +47,18 @@
 :host-context(body.font-size-small) .grid-container.cards-view {
   grid-template-columns: repeat(auto-fit, minmax(120px, 160px)); /* Max 160px to prevent over-growth */
   grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
-  gap: 0.75rem; /* Increased for better separation */
-  grid-row-gap: 0.75rem; /* Identical vertical gap */
-  grid-column-gap: 0.75rem; /* Identical horizontal gap */
+  gap: 0.75rem 1rem; /* Increased horizontal gap from 0.75rem to 1rem */
+  grid-row-gap: 0.75rem; /* Keep vertical gap same */
+  grid-column-gap: 1rem; /* Explicit horizontal gap increased */
 }
 
 // Large font size layout - consistent spacing
 :host-context(body.font-size-large) .grid-container.cards-view {
   grid-template-columns: repeat(auto-fit, minmax(240px, 400px)); /* Max 400px to prevent over-growth */
   grid-auto-rows: minmax(200px, auto); /* Equal row heights for large cards */
-  gap: 1.75rem; /* Increased gap to prevent overlap */
-  grid-row-gap: 1.75rem; /* Explicit vertical gap */
-  grid-column-gap: 1.75rem; /* Explicit horizontal gap */
+  gap: 1.75rem 2.25rem; /* Increased horizontal gap from 1.75rem to 2.25rem */
+  grid-row-gap: 1.75rem; /* Keep vertical gap same */
+  grid-column-gap: 2.25rem; /* Explicit horizontal gap increased */
 }
 
 // Grid items - no overlap with proper spacing
@@ -554,19 +507,21 @@
   .grid-container.cards-view {
     grid-template-columns: 1fr;
     grid-auto-rows: minmax(180px, auto); /* Equal row heights */
-    gap: 1.5rem; /* Increased spacing on mobile */
+    gap: 1.5rem 2rem; /* Increased horizontal spacing on mobile */
     grid-row-gap: 1.5rem;
-    grid-column-gap: 1.5rem;
+    grid-column-gap: 2rem;
   }
+
+  /* Page header responsive styles handled by global PageHeaderComponent */
 
   // Small font size on mobile - 2 columns with proper spacing
   :host-context(body.font-size-small) {
     .grid-container.cards-view {
       grid-template-columns: repeat(2, 1fr);
       grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
-      gap: 0.75rem; /* Increased for better separation */
+      gap: 0.75rem 1rem; /* Increased horizontal gap for better separation */
       grid-row-gap: 0.75rem;
-      grid-column-gap: 0.75rem;
+      grid-column-gap: 1rem;
     }
   }
 }
@@ -577,9 +532,9 @@
     .grid-container.cards-view {
       grid-template-columns: repeat(auto-fit, minmax(100px, 150px)); /* Max 150px to prevent over-growth */
       grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
-      gap: 0.75rem; /* Increased for better separation */
+      gap: 0.75rem 1rem; /* Increased horizontal gap for better separation */
       grid-row-gap: 0.75rem;
-      grid-column-gap: 0.75rem;
+      grid-column-gap: 1rem;
     }
   }
 }
@@ -590,9 +545,9 @@
     .grid-container.cards-view {
       grid-template-columns: repeat(auto-fit, minmax(120px, 160px)); /* Max 160px to prevent over-growth */
       grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
-      gap: 0.75rem; /* Increased for better separation */
+      gap: 0.75rem 1rem; /* Increased horizontal gap for better separation */
       grid-row-gap: 0.75rem;
-      grid-column-gap: 0.75rem;
+      grid-column-gap: 1rem;
     }
   }
 }
