@@ -12,7 +12,7 @@
         <button
           type="button"
           class="toggle-btn pagination-btn"
-          (click)="onPageChange('first')"
+          (click)="onPageChange(pageLinks.first!)"
           [disabled]="!pageLinks.first"
           title="First page">
           <i class="material-icons">first_page</i>
@@ -20,7 +20,7 @@
         <button
           type="button"
           class="toggle-btn pagination-btn"
-          (click)="onPageChange('prev')"
+          (click)="onPageChange(pageLinks.prev!)"
           [disabled]="!pageLinks.prev"
           title="Previous page">
           <i class="material-icons">chevron_left</i>
@@ -28,7 +28,7 @@
         <button
           type="button"
           class="toggle-btn pagination-btn"
-          (click)="onPageChange('next')"
+          (click)="onPageChange(pageLinks.next!)"
           [disabled]="!pageLinks.next"
           title="Next page">
           <i class="material-icons">chevron_right</i>
@@ -36,7 +36,7 @@
         <button
           type="button"
           class="toggle-btn pagination-btn"
-          (click)="onPageChange('last')"
+          (click)="onPageChange(pageLinks.last!)"
           [disabled]="!pageLinks.last"
           title="Last page">
           <i class="material-icons">last_page</i>

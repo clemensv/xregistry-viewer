@@ -30,6 +30,9 @@ export interface Page<T> {
     next?: string;
     last?: string;
   };
+  totalCount?: number;
+  currentPage?: number;
+  pageSize?: number;
 }
 
 @Injectable({
@@ -101,9 +104,7 @@ export class RegistryService {
       url += `${separator}filter=${encodeURIComponent(filter)}`;
     }
 
-    if (this.servedFromServer) {
-      return `/proxy?target=${encodeURIComponent(url)}`;
-    }
+    // Always return direct URL for now since proxy configuration is not working
     return url;
   }
 
@@ -145,6 +146,7 @@ export class RegistryService {
     // Try each API endpoint until we find one that works
     for (const api of apis) {
       try {
+        this.debug.log(`Processing API: ${api}, pagePath: "${pagePath}", starts with http: ${pagePath.startsWith('http')}`);
         const url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath, filter);
 
         this.debug.log(`Requesting resources from: ${url}`);
@@ -153,44 +155,55 @@ export class RegistryService {
         );
         const data = response.body || {};
 
-        // Parse Link header into links
+        // Parse Link header into links and metadata
         const links: any = {};
+        let totalCount: number | undefined;
+        let pageSize: number | undefined;
         const linkHeader = response.headers.get('Link') || '';
 
         if (linkHeader) {
-        // Split by comma and process each part
-          linkHeader.split(',').forEach(part => {
-          const trimmedPart = part.trim();
+          this.debug.log(`Parsing Link header: ${linkHeader}`);
+          // Split by comma and process each part
+          linkHeader.split(',').forEach((part, index) => {
+            const trimmedPart = part.trim();
+            this.debug.log(`  Part ${index}: "${trimmedPart}"`);
 
-          // Format: <url>; rel="relation" (standard RFC 5988)
-          const linkMatch = trimmedPart.match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
-          if (linkMatch) {
-            const url = linkMatch[1];
-            const rel = linkMatch[2].toLowerCase(); // Normalize to lowercase
-            links[rel] = url;
-            return; // Continue to next part
-          }
-
-          // Try a more lenient pattern for the URL and rel attribute
-          const lenientLinkMatch = trimmedPart.match(/<([^>]+)>.*rel="?([a-zA-Z0-9_-]+)"?/i);
-          if (lenientLinkMatch) {
-            const url = lenientLinkMatch[1];
-            const rel = lenientLinkMatch[2].toLowerCase();
-            links[rel] = url;
-            return;
-          }
-
-          // Format: key="value" (metadata fields)
-          const metaMatch = trimmedPart.match(/([a-zA-Z0-9_-]+)="?([^"]+)"?/i);
-          if (metaMatch) {
-            const key = metaMatch[1].toLowerCase();
-            const value = metaMatch[2].replace(/"/g, '');
-            // Store metadata with the same format as links
-            links[key] = value;
-            return; // Continue to next part
+            // Format: <url>; rel="relation" (standard RFC 5988)
+            const linkMatch = trimmedPart.match(/<([^>]+)>;\s*rel="?([a-zA-Z0-9_-]+)"?/i);
+            if (linkMatch) {
+              const url = linkMatch[1];
+              const rel = linkMatch[2].toLowerCase(); // Normalize to lowercase
+              links[rel] = url;
+              this.debug.log(`    Matched link: ${rel} -> ${url}`);
+              return; // Continue to next part
             }
+
+            // Format: key="value" (standalone metadata fields like count="640302", per-page="50")
+            const metaMatch = trimmedPart.match(/^([a-zA-Z0-9_-]+)="?([^"]+)"?$/i);
+            if (metaMatch) {
+              const key = metaMatch[1].toLowerCase();
+              const value = metaMatch[2].replace(/"/g, '');
+
+              // Extract count and per-page information
+              if (key === 'count') {
+                totalCount = parseInt(value, 10);
+                this.debug.log(`    Found total count: ${totalCount}`);
+              } else if (key === 'per-page') {
+                pageSize = parseInt(value, 10);
+                this.debug.log(`    Found page size: ${pageSize}`);
+              }
+
+              // Store metadata with the same format as links for backward compatibility
+              links[key] = value;
+              this.debug.log(`    Matched metadata: ${key} = ${value}`);
+              return; // Continue to next part
+            }
+
+            this.debug.warn(`    Could not parse Link header part: "${trimmedPart}"`);
           });
-          }
+
+          this.debug.log(`Final parsed links object:`, links);
+        }
 
         // Map entries to ResourceDocument[]
         const resMeta = model.groups[groupType]?.resources?.[resourceType] || { singular: resourceType, attributes: {} };
@@ -231,7 +244,21 @@ export class RegistryService {
 
           return doc as ResourceDocument;
         });
-        return { items, links };
+
+        // Calculate current page if possible
+        let currentPage: number | undefined;
+        if (pageSize && links.next) {
+          try {
+            const nextUrl = new URL(links.next);
+            const nextOffset = parseInt(nextUrl.searchParams.get('offset') || '0', 10);
+            currentPage = Math.floor(nextOffset / pageSize);
+          } catch (e) {
+            this.debug.warn('Could not parse current page from next link:', e);
+          }
+        }
+
+        this.debug.log(`Returning page with ${items.length} items, totalCount: ${totalCount}, pageSize: ${pageSize}, currentPage: ${currentPage}`);
+        return { items, links, totalCount, pageSize, currentPage };
       } catch (err) {
         this.debug.error(`Failed to list resources from ${api}:`, err);
         continue;
@@ -239,7 +266,7 @@ export class RegistryService {
     }
 
     // If all APIs failed, return empty result
-    return { items: [], links: {} };
+    return { items: [], links: {}, totalCount: 0 };
   }
 
   getGroup(groupType: string, groupId: string): Observable<Group> {

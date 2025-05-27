@@ -32,6 +32,7 @@ export class ResourcesComponent implements OnInit, OnDestroy {
   resourcesList: Resource[] = [];
   filteredResourcesList: Resource[] = [];
   pageLinks: LinkSet = {};
+  totalCount = 0; // Total number of resources from backend pagination
   viewMode: ViewMode = 'cards'; // Default view mode
   currentSearchTerm = '';
   loading = true;
@@ -170,6 +171,8 @@ export class ResourcesComponent implements OnInit, OnDestroy {
           }
 
           this.pageLinks = page.links;
+          this.totalCount = page.totalCount || 0;
+          this.debug.log(`Pagination info: totalCount=${this.totalCount}, pageSize=${page.pageSize}, currentPage=${page.currentPage}`);
           this.applyClientSideFilter();
 
           // Set default view mode based on the number of items (only on initial load)
@@ -202,6 +205,9 @@ export class ResourcesComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pageRel: string): void {
+    this.debug.log(`ResourcesComponent: onPageChange called with pageRel: "${pageRel}"`);
+    this.debug.log(`ResourcesComponent: pageRel type: ${typeof pageRel}`);
+    this.debug.log(`ResourcesComponent: pageRel startsWith http: ${pageRel.startsWith('http')}`);
     this.loadResources(pageRel);
   }
 

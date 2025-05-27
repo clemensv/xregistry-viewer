@@ -1,7 +1,7 @@
 {
-  "/proxy/*": {
+  "/proxy": {
     "target": "http://localhost:3001",
-    "secure": true,
+    "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   }

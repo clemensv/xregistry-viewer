@@ -6,7 +6,7 @@
     [showPagination]="true"
     [pageLinks]="pageLinks"
     [resultsCount]="filteredResourcesList?.length || 0"
-    [totalCount]="0"
+    [totalCount]="totalCount"
     [resultsText]="'resources'"
     [searchResultsText]="currentSearchTerm ? 'Showing ' + (filteredResourcesList?.length || 0) + ' resources (filtered)' : ''"
     (viewModeChange)="setViewMode($event)"
