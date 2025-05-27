@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ModelService } from '../../services/model.service';
 import { RegistryService } from '../../services/registry.service';
+import { RoutePersistenceService } from '../../services/route-persistence.service';
 
 @Component({
   standalone: true,
@@ -25,6 +26,7 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
     private router: Router,
     private modelService: ModelService,
     private registryService: RegistryService,
+    private routePersistenceService: RoutePersistenceService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -76,10 +78,19 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
       })
     );
   }
+
   ngAfterViewInit(): void {
     if (this.isBrowser) {
       console.log('Breadcrumb structure:', document.querySelector('app-breadcrumb'));
       console.log('Breadcrumb items:', document.querySelectorAll('.breadcrumb-item'));
     }
+  }
+
+  /**
+   * Handle navigation to home - clear stored route so users stay on home
+   */
+  onHomeClick(): void {
+    this.routePersistenceService.clearStoredRoute();
+    this.router.navigate(['/']);
   }
 }

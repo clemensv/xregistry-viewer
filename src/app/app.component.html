@@ -75,11 +75,11 @@
   .main-container {
    display: flex;
    flex-direction: column;
-   align-items: center;
-   justify-content: top;
+   align-items: stretch;
+   justify-content: flex-start;
     width: 100%;
     min-height: calc(100vh - 4rem);
-    padding: 0 1rem;
+    padding: 0;
     box-sizing: border-box;
     position: relative;
   }
@@ -199,11 +199,7 @@
       <app-breadcrumb></app-breadcrumb>
     </div>
     <main class="main-container">
-      <div class="content-wrapper">
-        <div class="page-structure">
-          <router-outlet></router-outlet>
-        </div>
-      </div>
+      <router-outlet></router-outlet>
     </main>
     <app-footer></app-footer>
   </div>

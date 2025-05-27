@@ -1,7 +1,7 @@
 {
   "apiEndpoints": [
     "https://mcpxreg.com/registry",
-    "https://packages.mcpxreg.com",
+    "https://xreg-pkg-int.gentlesmoke-49027eba.westeurope.azurecontainerapps.io/",
     "https://xregistry.soaphub.org",
     "https://xregistry.soaphub.org/reg-APIs-Guru",
     "https://xregistry.soaphub.org/reg-DocStore",

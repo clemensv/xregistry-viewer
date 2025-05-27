@@ -1,5 +1,12 @@
 <div class="version-detail" *ngIf="version$ | async as version; else loading">
   <div *ngIf="version; else noData" class="version-content">
+    <!-- Documentation Viewer (if available) -->
+    <app-documentation-viewer
+      *ngIf="documentationUrl"
+      [documentationUrl]="documentationUrl"
+      [resourceId]="resourceId">
+    </app-documentation-viewer>
+
     <h2>Version: {{ version['id'] }}</h2>
     <div class="origin-field" *ngIf="version.origin">Origin: {{ version.origin }}</div>
     <!-- Use our shared component -->

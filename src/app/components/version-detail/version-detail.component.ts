@@ -8,11 +8,12 @@ import { ResourceDocument } from '../../models/registry.model';
 import { combineLatest } from 'rxjs';
 import { ModelService } from '../../services/model.service';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
+import { DocumentationViewerComponent } from '../documentation-viewer/documentation-viewer.component';
 
 @Component({
   standalone: true,
   selector: 'app-version-detail',
-  imports: [CommonModule, ResourceDocumentComponent],
+  imports: [CommonModule, ResourceDocumentComponent, DocumentationViewerComponent],
   templateUrl: './version-detail.component.html',
   styleUrls: ['./version-detail.component.scss']
 })
@@ -30,6 +31,7 @@ export class VersionDetailComponent implements OnInit {
   documentError: string | null = null;
   cachedDocumentContent: string | null = null;
   versionOrigin?: string;
+  documentationUrl?: string;
 
   constructor(private route: ActivatedRoute, private registry: RegistryService, private modelService: ModelService) {}  ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -51,7 +53,7 @@ export class VersionDetailComponent implements OnInit {
         tap((resourceTypeModel: any) => {
           if (resourceTypeModel) {
             this.resourceAttributes = resourceTypeModel.attributes || {};
-            this.resTypeHasDocument = resourceTypeModel.hasdocument || false;
+            this.resTypeHasDocument = resourceTypeModel.hasdocument !== false;
             console.log(`Resource type ${this.resourceType} document support: ${this.resTypeHasDocument}`);
             this.documentMetadataLoaded = true;
           } else {
@@ -74,6 +76,7 @@ export class VersionDetailComponent implements OnInit {
         tap((versionDetail: ResourceDocument) => {
           console.log('Version detail loaded:', versionDetail);
           this.versionOrigin = versionDetail?.origin;
+          this.documentationUrl = versionDetail?.['documentation'];
         })
       );
     });
@@ -312,7 +315,7 @@ export class VersionDetailComponent implements OnInit {
       map(m => m.groups[this.groupType]?.resources[this.resourceType])
     ).subscribe(rtModel => {
       this.resourceAttributes = rtModel?.attributes || {};
-      this.resTypeHasDocument = rtModel?.hasdocument || false;
+      this.resTypeHasDocument = rtModel?.hasdocument !== false;
 
       console.info(`Resource type ${this.resourceType} document support: ${this.resTypeHasDocument}`);
     }, error => {

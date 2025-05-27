@@ -20,6 +20,7 @@
   </div>
   <div *ngIf="!loading && viewMode === 'cards' && filteredGroupTypesList.length > 0" class="grid-container cards-view">
     <div *ngFor="let gt of filteredGroupTypesList" class="grid-item">
+      <a [routerLink]="getResourceCollectionRoute(gt)" class="card-link">
       <div class="card-header">
         <span class="material-icons group-type-icon" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
         <h3>{{ gt.model.plural }}</h3>
@@ -33,30 +34,8 @@
         <div class="description no-description" *ngIf="!gt.model.description">
           No description available for this group type.
         </div>
-
-        <div class="resource-types-section" *ngIf="getResourceTypesCount(gt.model) > 0">
-          <div class="section-header">
-            <strong class="auxiliary-text">Resource Types</strong>
-            <span class="count-badge">{{ getResourceTypesCount(gt.model) }}</span>
-          </div>
-          <div class="resource-types-list">
-            <span *ngFor="let rt of getResourceTypesList(gt.model)" class="resource-type-tag auxiliary-text">
-              {{ rt }}
-            </span>
-          </div>
         </div>
-
-        <div class="no-resources" *ngIf="getResourceTypesCount(gt.model) === 0">
-          <span class="no-resources-text auxiliary-text">No resource types defined</span>
-        </div>
-      </div>
-
-      <div class="card-footer">
-        <a [routerLink]="[gt.groupType]" class="browse-link">
-          <span class="material-icons">arrow_forward</span>
-          Browse
         </a>
-      </div>
     </div>
   </div>
 
@@ -69,7 +48,6 @@
           <th>Plural Name</th>
           <th>Description</th>
           <th>Resource Types</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -77,7 +55,7 @@
           <td>
             <div class="table-group-type">
               <span class="material-icons group-type-icon-small" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
-              <span class="group-type-name">{{ gt.groupType }}</span>
+              <a [routerLink]="getResourceCollectionRoute(gt)" class="group-type-name">{{ gt.groupType }}</a>
             </div>
           </td>
           <td class="plural-name">{{ gt.model.plural }}</td>
@@ -88,29 +66,43 @@
             </div>
             <span *ngIf="getResourceTypesCount(gt.model) === 0" class="no-resources-indicator">-</span>
           </td>
-          <td>
-            <a [routerLink]="[gt.groupType]" class="table-action-button">
-              <span class="material-icons">arrow_forward</span>
-              Browse
-            </a>
-          </td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <!-- Loading state -->
-  <div *ngIf="loading" class="loading-state">
-    <p>Loading group types...</p>
+  <div *ngIf="loading" class="empty-state">
+    <div class="empty-state-content">
+      <span class="material-icons empty-state-icon loading-spinner">sync</span>
+      <h3 class="empty-state-title">Loading Group Types</h3>
+      <p class="empty-state-message">
+        Please wait while we load the available group types from the registry...
+      </p>
+    </div>
   </div>
 
   <!-- Empty search results -->
-  <div *ngIf="!loading && currentSearchTerm && filteredGroupTypesList.length === 0 && groupTypesList.length > 0" class="empty-search-results">
-    <p>No group types match your search criteria.</p>
+  <div *ngIf="!loading && currentSearchTerm && filteredGroupTypesList.length === 0 && groupTypesList.length > 0" class="empty-state">
+    <div class="empty-state-content">
+      <span class="material-icons empty-state-icon">search_off</span>
+      <h3 class="empty-state-title">No Matching Group Types</h3>
+      <p class="empty-state-message">
+        No group types match your search criteria "{{ currentSearchTerm }}".
+        Try adjusting your search terms or browse all available group types.
+      </p>
+    </div>
   </div>
 
   <!-- No data state -->
-  <div *ngIf="!loading && !currentSearchTerm && groupTypesList.length === 0" class="no-data-state">
-    <p>No group types available.</p>
+  <div *ngIf="!loading && !currentSearchTerm && groupTypesList.length === 0" class="empty-state">
+    <div class="empty-state-content">
+      <span class="material-icons empty-state-icon">inbox</span>
+      <h3 class="empty-state-title">No Group Types Available</h3>
+      <p class="empty-state-message">
+        There are currently no group types configured in this registry.
+        Group types define the structure and organization of resources.
+      </p>
+    </div>
   </div>
 </div>

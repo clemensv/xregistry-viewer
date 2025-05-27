@@ -58,7 +58,7 @@
   background: #fafafa;
   border-left: 3px solid $color;
   border-radius: 6px;
-  padding: 1rem;
+  padding: 0.75rem; // Reduced from 1rem for compactness
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   height: fit-content;
 }
@@ -74,7 +74,6 @@
     padding-left: s(xs);
     margin-bottom: s(xs);
   }
-
   // Unified row styling
   .unified-item-row {
     display: flex;
@@ -85,7 +84,7 @@
     @include pad-y(xs);
     border-radius: $radius;
     border: 1px solid c(neutral);
-    margin-bottom: s(xs);
+    margin-bottom: calc(s(xs) * 0.5); // Reduced spacing for compactness
 
     &.expanded, &.collapsed {
       animation: flash 0.5s ease-out;
@@ -197,19 +196,18 @@
       @include button-style;
     }
   }
-
   // Expanded content styling
   .expanded-content {
     background-color: rgba(240, 240, 240, 0.3);
     border: 1px solid #ddd;
     border-top: none;
     border-radius: 0 0 $radius $radius;
-    padding: s(sm);
+    padding: s(xs); // Reduced from s(sm) for compactness
 
     .array-items, .object-items {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem;
+      gap: 0.75rem; // Reduced from 1rem for compactness
       margin: 0;
       padding: 0;
 
@@ -219,28 +217,26 @@
         text-align: center;
         color: #6c757d;
         font-style: italic;
-        padding: 2rem;
+        padding: 1.5rem; // Reduced from 2rem for compactness
       }
-    }
-
-    .empty-notice {
+    }    .empty-notice {
       grid-column: 1 / -1;
       text-align: center;
       color: #6c757d;
       font-style: italic;
-      padding: 2rem;
+      padding: 1.5rem; // Reduced from 2rem for compactness
     }
 
     .array-item-details {
       grid-column: 1 / -1;
       background: rgba(91, 192, 222, 0.1);
-      padding: 0.75rem;
+      padding: 0.5rem; // Reduced from 0.75rem for compactness
       border-radius: 6px;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.25rem; // Reduced from 0.5rem for compactness
 
       .detail-row {
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem; // Reduced from 1rem for compactness
         flex-wrap: wrap;
 
         .detail-label {
@@ -254,21 +250,19 @@
         }
       }
     }
-  }
-
-  // Simple attribute display
+  }  // Simple attribute display
   .simple-attribute-container {
     @include attribute-container();
 
     .attribute-header {
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem; // Reduced from 0.75rem for compactness
 
       strong {
         font-size: 0.9rem;
         color: #495057;
         font-weight: 600;
         display: block;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.15rem; // Reduced from 0.25rem for compactness
       }
 
       .attribute-type {
@@ -283,7 +277,7 @@
         font-size: 0.8rem;
         color: #6c757d;
         font-style: italic;
-        margin-top: 0.25rem;
+        margin-top: 0.15rem; // Reduced from 0.25rem for compactness
         display: block;
       }
     }
@@ -297,7 +291,6 @@
         flex: 1;
         font-size: 0.85rem;
         color: #333;
-        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         background: rgba(255, 255, 255, 0.9);
         padding: 0.3rem 0.5rem;
         border-radius: 4px;
@@ -314,6 +307,10 @@
           color: #7a3e9d;
           font-style: italic;
         }
+
+        &.any-value {
+          font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
       }
 
       .copy-btn {
@@ -324,13 +321,12 @@
       }
     }
   }
-
   // Grid layout optimizations
   .grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
-    padding: 0.5rem;
+    gap: 0.75rem; // Reduced from 1rem for compactness
+    padding: 0.25rem; // Reduced from 0.5rem for compactness
 
     .unified-item-row.object-row,
     .unified-item-row.array-row {

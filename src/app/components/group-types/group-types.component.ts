@@ -1,11 +1,12 @@
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, interval } from 'rxjs';
 import { ModelService } from '../../services/model.service';
 import { DebugService } from '../../services/debug.service';
 import { SearchService } from '../../services/search.service';
 import { ConfigService } from '../../services/config.service';
+import { RoutePersistenceService } from '../../services/route-persistence.service';
 import { GroupType } from '../../models/registry.model';
 import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
 
@@ -17,7 +18,7 @@ import { PageHeaderComponent, ViewMode } from '../page-header/page-header.compon
   styleUrls: ['./group-types.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
-export class GroupTypesComponent implements OnInit, OnDestroy {
+export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
   viewMode: ViewMode = 'cards'; // Default view mode
   groupTypesList: { groupType: string; model: GroupType }[] = [];
   filteredGroupTypesList: { groupType: string; model: GroupType }[] = [];
@@ -26,16 +27,23 @@ export class GroupTypesComponent implements OnInit, OnDestroy {
   loadingProgress = true; // Tracks if we're still expecting more data
   private destroy$ = new Subject<void>();
   private initialLoad = true;
+  private userHasChangedView = false; // Track if user manually changed view mode
 
   constructor(
     private modelService: ModelService,
     private cdr: ChangeDetectorRef,
     private debug: DebugService,
     private searchService: SearchService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private elementRef: ElementRef,
+    private routePersistenceService: RoutePersistenceService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    // Clear stored route since this is the home page - users who navigated here intentionally
+    // shouldn't be redirected back to a previous deep link
+    this.routePersistenceService.clearStoredRoute();
 
     // Wait for configuration to be loaded before subscribing to ModelService
     this.waitForConfigAndLoadData();
@@ -95,15 +103,14 @@ export class GroupTypesComponent implements OnInit, OnDestroy {
             this.groupTypesList = groupTypes;
             this.applyClientSideFilter();
 
-            // Set default view mode based on the number of items (only on first significant load)
-            if (this.initialLoad && this.groupTypesList.length > 0) {
-              if (this.groupTypesList.length > 10) {
-                this.viewMode = 'list';
-              } else {
-                this.viewMode = 'cards';
-              }
+            // Set default view mode based on smart logic (only on first significant load and if user hasn't manually changed view)
+            if (this.initialLoad && this.groupTypesList.length > 0 && !this.userHasChangedView) {
+              this.setSmartViewMode();
               this.initialLoad = false;
             }
+
+            // Auto-forward if only one group type
+            this.checkAutoForward();
 
             this.debug.log(`GroupTypesComponent: Updated with ${this.groupTypesList.length} group types (${result.loadedCount}/${result.totalCount} endpoints loaded)`);
             this.cdr.markForCheck();
@@ -135,11 +142,20 @@ export class GroupTypesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  ngAfterViewInit(): void {
+    // Trigger smart view mode after view is initialized if we already have data
+    if (!this.loading && this.groupTypesList.length > 0 && !this.userHasChangedView) {
+      setTimeout(() => this.setSmartViewMode(), 0);
+    }
+  }
+
   private applyClientSideFilter(): void {
     if (!this.groupTypesList || this.groupTypesList.length === 0) {
       this.filteredGroupTypesList = [];
       return;
     }
+
+    const previousCount = this.filteredGroupTypesList.length;
 
     if (!this.currentSearchTerm || this.currentSearchTerm.trim().length === 0) {
       this.filteredGroupTypesList = [...this.groupTypesList];
@@ -155,10 +171,62 @@ export class GroupTypesComponent implements OnInit, OnDestroy {
         return searchableText.includes(term);
       });
     }
+
+    // If user hasn't manually changed view and the filtered count changed, update view mode
+    if (!this.userHasChangedView && previousCount !== this.filteredGroupTypesList.length && this.filteredGroupTypesList.length > 0) {
+      setTimeout(() => this.setSmartViewMode(), 0);
+    }
   }
 
   setViewMode(mode: ViewMode): void {
     this.viewMode = mode;
+    this.userHasChangedView = true;
+  }
+
+  /**
+   * Set smart view mode based on item count and viewport constraints
+   */
+  private setSmartViewMode(): void {
+    const itemCount = this.filteredGroupTypesList.length;
+
+    // If more than 8 items, use list view
+    if (itemCount > 8) {
+      this.viewMode = 'list';
+      return;
+    }
+
+    // If 8 or fewer items, check if they fit in viewport
+    this.viewMode = 'cards';
+
+    // Use setTimeout to ensure DOM is rendered before checking viewport
+    setTimeout(() => {
+      if (this.checkViewportOverflow()) {
+        this.viewMode = 'list';
+        this.cdr.markForCheck();
+      }
+    }, 100);
+  }
+
+  /**
+   * Check if the grid view would overflow the viewport
+   */
+  private checkViewportOverflow(): boolean {
+    try {
+      const gridContainer = this.elementRef.nativeElement.querySelector('.grid-container.cards-view');
+      if (!gridContainer) {
+        return false;
+      }
+
+      const containerRect = gridContainer.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const pageHeaderHeight = 120; // Approximate height for page header
+      const availableHeight = viewportHeight - pageHeaderHeight;
+
+      return containerRect.height > availableHeight;
+    } catch (error) {
+      this.debug.log('Error checking viewport overflow:', error);
+      return false;
+    }
   }
 
   /**
@@ -189,5 +257,31 @@ export class GroupTypesComponent implements OnInit, OnDestroy {
     return 'icon-group-type';
   }
 
+  /**
+   * Get the resource collection route for a group type
+   * Navigates to the groups page for browsing available groups and their resources
+   */
+  getResourceCollectionRoute(groupTypeItem: { groupType: string; model: GroupType }): string[] {
+    return [groupTypeItem.groupType];
+  }
 
+  /**
+   * Check if auto-forwarding should occur when there's only one group type
+   */
+  private checkAutoForward(): void {
+    // Only auto-forward if:
+    // 1. We have exactly one group type
+    // 2. We're not searching (currentSearchTerm is empty)
+    // 3. The data loading is complete (not expecting more data)
+    if (!this.loadingProgress &&
+        !this.currentSearchTerm &&
+        this.groupTypesList.length === 1) {
+
+      const singleGroupType = this.groupTypesList[0];
+      this.debug.log('GroupTypesComponent: Auto-forwarding to single group type:', singleGroupType.groupType);
+
+      // Navigate to the groups page for this group type
+      this.router.navigate([singleGroupType.groupType]);
+    }
+  }
 }

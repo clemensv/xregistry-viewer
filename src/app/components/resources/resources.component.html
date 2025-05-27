@@ -21,59 +21,93 @@
     </div>
   </div>
 
-  <div class="page-content">    <div *ngIf="!loading; else loadingTpl">
-      <!-- Cards View -->
-      <div *ngIf="viewMode === 'cards'" [ngClass]="{'single-resource': filteredResourcesList.length === 1}">
-        <div class="grid-container">
-          <div *ngFor="let res of filteredResourcesList" class="grid-item" [ngClass]="{'single-item': filteredResourcesList.length === 1}">
-            <div class="resource-header">
-              <h3>{{ res['name'] }}</h3>
-               <a [routerLink]="[res['id']]" class="tile">
+  <div class="page-content">
+    <!-- Cards View -->
+    <div *ngIf="!loading && viewMode === 'cards' && filteredResourcesList.length > 0" [ngClass]="{'single-resource': filteredResourcesList.length === 1}">
+      <div class="grid-container">
+        <div *ngFor="let res of filteredResourcesList" class="grid-item" [ngClass]="{'single-item': filteredResourcesList.length === 1}">
+          <div class="resource-header">
+            <h3>{{ res['name'] }}</h3>
+            <a [routerLink]="[res['id']]" class="tile">
               View Details
             </a>
-              <span *ngIf="res['versionsCount'] > 1" class="version-badge"
-                [title]="res['versionsCount'] + ' versions available'">{{ res['versionsCount'] }}</span>
-            </div> <!-- Use the shared resource document component -->
-            <app-resource-document [resourceDocument]="res" [resourceType]="resourceType"
-              [resourceAttributes]="resourceAttributes" [hasDocumentSupport]="resTypeHasDocument" [showAttributes]="true"
-              [showDocument]="false" [initialExpanded]="false">
-            </app-resource-document>
-            <div style="margin-top: auto; margin-bottom: -5px;" class="resource-footer">              <footer class="tile-footer">
-                <small>
-                  <span>Created: {{ res?.createdAt ? (res.createdAt | date:'short') : '-' }}</span>&nbsp;|
-                  <span>Modified: {{ res?.modifiedAt ? (res.modifiedAt | date:'short') : '-' }}</span>
-                </small>
-              </footer>
-            </div>
+            <span *ngIf="res['versionsCount'] > 1" class="version-badge"
+              [title]="res['versionsCount'] + ' versions available'">{{ res['versionsCount'] }}</span>
+          </div>
+          <!-- Use the shared resource document component -->
+          <app-resource-document [resourceDocument]="res" [resourceType]="resourceType"
+            [resourceAttributes]="resourceAttributes" [hasDocumentSupport]="resTypeHasDocument" [showAttributes]="true"
+            [showDocument]="false" [initialExpanded]="false">
+          </app-resource-document>
+          <div style="margin-top: auto; margin-bottom: -5px;" class="resource-footer">
+            <footer class="tile-footer">
+              <small>
+                <span [title]="getFullText(formatDateShort(res?.createdAt))">Created: {{ formatDateShort(res?.createdAt) }}</span>&nbsp;|
+                <span [title]="getFullText(formatDateShort(res?.modifiedAt))">Modified: {{ formatDateShort(res?.modifiedAt) }}</span>
+              </small>
+            </footer>
           </div>
         </div>
-      </div>      <!-- List View -->
-      <div *ngIf="viewMode === 'list'" class="list-view">
-        <table class="resources-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Description</th>
-              <th>Docs</th>
-              <th>Created At</th>
-              <th>Modified At</th>
-            </tr>
-          </thead>          <tbody>
-            <!-- Use tr with app-resource-row attribute -->
-            <tr *ngFor="let res of filteredResourcesList"
-                app-resource-row
-                [resource]="res"
-                [resourceType]="resourceType"
-                [hasDocumentSupport]="resTypeHasDocument">
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
-    <ng-template #loadingTpl>
-      <div class="content-loading">
-        <div class="loading-spinner"></div>
+
+    <!-- List View -->
+    <div *ngIf="!loading && viewMode === 'list' && filteredResourcesList.length > 0" class="list-view">
+      <table class="resources-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Documentation</th>
+            <th>Created At</th>
+            <th>Modified At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Use tr with app-resource-row attribute -->
+          <tr *ngFor="let res of filteredResourcesList"
+              app-resource-row
+              [resource]="res"
+              [resourceType]="resourceType"
+              [hasDocumentSupport]="resTypeHasDocument">
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="loading" class="empty-state">
+      <div class="empty-state-content">
+        <span class="material-icons empty-state-icon loading-spinner">sync</span>
+        <h3 class="empty-state-title">Loading Resources</h3>
+        <p class="empty-state-message">
+          Please wait while we load the available resources from the registry...
+        </p>
       </div>
-    </ng-template>
+    </div>
+
+    <!-- Empty search results -->
+    <div *ngIf="!loading && currentSearchTerm && filteredResourcesList.length === 0 && resourcesList.length > 0" class="empty-state">
+      <div class="empty-state-content">
+        <span class="material-icons empty-state-icon">search_off</span>
+        <h3 class="empty-state-title">No Matching Resources</h3>
+        <p class="empty-state-message">
+          No resources match your search criteria "{{ currentSearchTerm }}".
+          Try adjusting your search terms or browse all available resources.
+        </p>
+      </div>
+    </div>
+
+    <!-- No data state -->
+    <div *ngIf="!loading && !currentSearchTerm && resourcesList.length === 0" class="empty-state">
+      <div class="empty-state-content">
+        <span class="material-icons empty-state-icon">description</span>
+        <h3 class="empty-state-title">No Resources Available</h3>
+        <p class="empty-state-message">
+          There are currently no {{ resourceType }} resources in {{ groupType }}/{{ groupId }}.
+          Resources are the core entities managed by this registry.
+        </p>
+      </div>
+    </div>
   </div>
 </div>

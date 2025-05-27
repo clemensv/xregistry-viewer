@@ -241,6 +241,18 @@ export class ModelService {
         for (const model of models) {
           if (!model) continue;
           foundModel = true;
+
+          // Debug logging for packages.mcpxreg.com
+          const modelDesc = model.description || 'no description';
+          if (modelDesc.includes('container registries')) {
+            this.debug.log('ModelService: Processing packages.mcpxreg.com model:');
+            this.debug.log('  - Groups available:', model.groups ? Object.keys(model.groups) : 'none');
+            this.debug.log('  - Has specversion:', !!model.specversion);
+            this.debug.log('  - Has registryid:', !!model.registryid);
+            this.debug.log('  - Has name:', !!model.name);
+            this.debug.log('  - Has capabilities:', !!model.capabilities);
+          }
+
           merged.specversion = model.specversion || merged.specversion;
           merged.registryid = model.registryid || merged.registryid;
           merged.name = model.name || merged.name;
@@ -255,6 +267,14 @@ export class ModelService {
           if (model.groups) {
             for (const groupType of Object.keys(model.groups)) {
               const group = model.groups[groupType];
+
+              // Debug logging for packages.mcpxreg.com groups
+              if (modelDesc.includes('container registries')) {
+                this.debug.log(`ModelService: Adding group type '${groupType}' from packages.mcpxreg.com`);
+                this.debug.log(`  - Group description: ${group.description || 'none'}`);
+                this.debug.log(`  - Group resources: ${group.resources ? Object.keys(group.resources) : 'none'}`);
+              }
+
               if (!merged.groups[groupType]) {
                 merged.groups[groupType] = JSON.parse(JSON.stringify(group));
               } else {
@@ -291,6 +311,12 @@ export class ModelService {
         // Cache the final model persistently
         ModelService.cachedModel = finalModel;
         this.debug.log('ModelService: Cached final merged model with', Object.keys(finalModel.groups).length, 'group types');
+        this.debug.log('ModelService: Final group types:', Object.keys(finalModel.groups));
+
+        // Debug: Check if packages.mcpxreg.com groups are present
+        const packageGroups = ['noderegistries', 'pythonregistries', 'javaregistries', 'dotnetregistries', 'containerregistries'];
+        const foundPackageGroups = packageGroups.filter(gt => finalModel.groups[gt]);
+        this.debug.log('ModelService: packages.mcpxreg.com groups in final model:', foundPackageGroups);
 
         // Clear ongoing request
         this.ongoingModelRequest = null;

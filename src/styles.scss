@@ -113,12 +113,16 @@ body.theme-dark {
   --fg-tertiary-text: #888888;
   --fg-divider: #404040;
   --fg-border: #404040;
-  --primary-color: #6d9eeb;
+  --primary-color: #6c757d; /* Elegant gray instead of blue */
+  --primary-hover-color: #5a6268; /* Darker gray for hover */
+  --primary-light-color: #868e96; /* Lighter gray */
+  --secondary-color: #495057;
   --success-color: #90ee90;
   --warning-color: #ffd700;
   --error-color: #ff6b6b;
   --info-color: #87ceeb;
-  --link-color: #6d9eeb;
+  --link-color: #6c757d; /* Elegant gray for links */
+  --link-hover-color: #5a6268;
   --code-bg: #1d1d1d;
 
   /* Dark theme Material components */
@@ -286,7 +290,7 @@ body.theme-light {
   --warning-color: #ffc107;
   --error-color: #dc3545;
   --info-color: #17a2b8;
-  --link-color: #007bff;
+  --link-color: #6c757d;
   --code-bg: #f8f9fa;
 }
 
@@ -437,7 +441,7 @@ app-header + .layout-container {
 
 /* Theme-aware link styling */
 a:not(.mat-mdc-button):not(.mat-mdc-tab-link) {
-  color: var(--link-color, #007bff) !important;
+  color: var(--link-color, #6c757d) !important;
 
   &:hover {
     opacity: 0.8;
@@ -518,7 +522,7 @@ button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-bu
   }
 
   &.primary {
-    background-color: var(--primary-color, #007bff) !important;
+    background-color: var(--primary-color, #6c757d) !important;
     color: white !important;
   }
 }
@@ -526,10 +530,9 @@ button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-bu
 /* Global layout constraints - prevent ultra-wide stretching */
 .layout-container {
   width: 100%;
-  max-width: 1440px; /* Maximum width for ultra-wide screens */
   margin: 0 auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: 0;
+  padding-right: 0;
   box-sizing: border-box;
 }
 
@@ -541,14 +544,26 @@ button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-bu
   flex: 1;
   min-height: 0; /* Allow flex shrinking */
   overflow-y: auto;
+  
+  /* 16:9 aspect ratio constraint for main content area */
+  max-width: 100vw;
+  aspect-ratio: 16 / 9;
+  max-height: calc(100vh - 200px); /* Account for header and footer space */
+}
+
+/* Content area wrapper with aspect ratio enforcement */
+.main-container > * {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Consistent inner content width */
 .content-wrapper {
   width: 100%;
-  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -558,6 +573,7 @@ button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-bu
   flex-direction: column;
   gap: 0.75rem; /* Reduced for higher density */
   padding: 0.5rem 0 80px 0; /* Minimal top padding, account for footer */
+  width: 100%;
 }
 
 /* Responsive adjustments */
@@ -1110,22 +1126,7 @@ h4 {  font-size: 1.02rem;
 
 .groups {
   width: 100%;
-  max-width: 1000px;
   margin: 0 auto;
-  // Center the entire block horizontally
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  // Center the content (list/grid) inside the container
-  .list-view,
-  .groups-table,
-  .grid-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
 }
 
 /* Make footer sticky at bottom */

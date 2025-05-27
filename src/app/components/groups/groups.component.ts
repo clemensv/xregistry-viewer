@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit } from '@angular/core';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Observable, Subject, interval } from 'rxjs';
 import { map, switchMap, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { RegistryService } from '../../services/registry.service';
@@ -10,21 +10,21 @@ import { Group } from '../../models/registry.model';
 import { FormsModule } from '@angular/forms';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
-import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 import { GroupRowComponent } from '../group-row/group-row.component';
 import { SearchService } from '../../services/search.service';
 import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
 import { ConfigService } from '../../services/config.service';
+import { truncateText, truncateDescription, formatDateShort, getFullText } from '../../utils/text.utils';
 
 @Component({
   standalone: true,
   selector: 'app-groups',
-  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, GroupRowComponent, ResourceDocumentItemComponent, PageHeaderComponent],
+  imports: [CommonModule, RouterModule, FormsModule, GroupRowComponent, ResourceDocumentItemComponent, PageHeaderComponent],
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
-export class GroupsComponent implements OnInit, OnDestroy {
+export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
   groupType!: string;
   resourceTypes$!: Observable<string[]>;
   groupAttributes: { [key: string]: any } = {};
@@ -32,19 +32,28 @@ export class GroupsComponent implements OnInit, OnDestroy {
   registryModel: any = null;
   groupsList: Group[] = [];
   filteredGroupsList: Group[] = [];
-  pageLinks: LinkSet = {};
   viewMode: ViewMode = 'cards'; // Default view mode
   currentSearchTerm = '';
   loading = true;
   loadingProgress = true; // Tracks if we're still expecting more data
   private destroy$ = new Subject<void>();
   private initialLoad = true;
+  private userHasChangedView = false; // Track if user manually changed view mode
 
   // Client-side pagination for large datasets
   allGroupsCache: Group[] = [];
   private currentPage = 1;
   private pageSize = 50;
   useClientSidePagination = false;
+
+  // Pagination links object
+  pageLinks: { [key: string]: string } = {};
+
+  // Utility functions for template
+  truncateText = truncateText;
+  truncateDescription = truncateDescription;
+  formatDateShort = formatDateShort;
+  getFullText = getFullText;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,7 +62,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private debug: DebugService,
     private searchService: SearchService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private elementRef: ElementRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -175,6 +186,13 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  ngAfterViewInit(): void {
+    // Trigger smart view mode after view is initialized if we already have data
+    if (!this.loading && this.groupsList.length > 0 && !this.userHasChangedView) {
+      setTimeout(() => this.setSmartViewMode(), 0);
+    }
+  }
+
   /** Load groups with current pagination */
   loadGroups(pageRel: string = ''): void {
     // If using client-side pagination, handle it locally
@@ -202,19 +220,18 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
           this.applyClientSideFilter();
 
-          // Only set default view mode on initial load (when pageRel is empty)
-          if (!pageRel && this.initialLoad) {
-            if (this.groupsList.length > 20) {
-              this.viewMode = 'list';
-            } else {
-              this.viewMode = 'cards';
-            }
+          // Only set default view mode on initial load and if user hasn't manually changed view (when pageRel is empty)
+          if (!pageRel && this.initialLoad && !this.userHasChangedView) {
+            this.setSmartViewMode();
           }
 
           // Update loading state
           if (this.loading && this.groupsList.length > 0) {
             this.loading = false;
           }
+
+          // Auto-forward if only one group
+          this.checkAutoForward();
 
           this.cdr.markForCheck();
         },
@@ -292,7 +309,13 @@ export class GroupsComponent implements OnInit, OnDestroy {
   }
 
   private applyClientSideFilter(): void {
+    const previousCount = this.filteredGroupsList.length;
     this.filteredGroupsList = this.searchService.filterItems(this.groupsList, this.currentSearchTerm);
+
+    // If user hasn't manually changed view and the filtered count changed, update view mode
+    if (!this.userHasChangedView && previousCount !== this.filteredGroupsList.length && this.filteredGroupsList.length > 0) {
+      setTimeout(() => this.setSmartViewMode(), 0);
+    }
   }
   onPageChange(pageRel: string): void {
     this.loadGroups(pageRel);
@@ -300,6 +323,53 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   setViewMode(mode: ViewMode): void {
     this.viewMode = mode;
+    this.userHasChangedView = true;
+  }
+
+  /**
+   * Set smart view mode based on item count and viewport constraints
+   */
+  private setSmartViewMode(): void {
+    const itemCount = this.filteredGroupsList.length;
+
+    // If more than 8 items, use list view
+    if (itemCount > 8) {
+      this.viewMode = 'list';
+      return;
+    }
+
+    // If 8 or fewer items, check if they fit in viewport
+    this.viewMode = 'cards';
+
+    // Use setTimeout to ensure DOM is rendered before checking viewport
+    setTimeout(() => {
+      if (this.checkViewportOverflow()) {
+        this.viewMode = 'list';
+        this.cdr.markForCheck();
+      }
+    }, 100);
+  }
+
+  /**
+   * Check if the grid view would overflow the viewport
+   */
+  private checkViewportOverflow(): boolean {
+    try {
+      const gridContainer = this.elementRef.nativeElement.querySelector('.grid-container');
+      if (!gridContainer) {
+        return false;
+      }
+
+      const containerRect = gridContainer.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const pageHeaderHeight = 120; // Approximate height for page header
+      const availableHeight = viewportHeight - pageHeaderHeight;
+
+      return containerRect.height > availableHeight;
+    } catch (error) {
+      this.debug.log('Error checking viewport overflow:', error);
+      return false;
+    }
   }
 
   get displayGroupAttributes(): string[] {
@@ -371,5 +441,61 @@ export class GroupsComponent implements OnInit, OnDestroy {
       itemModel,
       isExpanded: false
     };
+  }
+
+  /**
+   * Check if auto-forwarding should occur when there's only one group
+   */
+  private checkAutoForward(): void {
+    // Only auto-forward if:
+    // 1. We have exactly one group
+    // 2. We're not searching (currentSearchTerm is empty)
+    // 3. We're not using pagination (groupsList contains all groups)
+    if (!this.currentSearchTerm &&
+        this.groupsList.length === 1 &&
+        !this.useClientSidePagination &&
+        Object.keys(this.pageLinks).length === 0) {
+
+      const singleGroup = this.groupsList[0];
+      this.debug.log('GroupsComponent: Auto-forwarding to single group:', singleGroup);
+
+      // Need to determine resource type to navigate to - check if there's a single resource type
+      if (this.registryModel?.groups?.[this.groupType]?.resources) {
+        const resourceTypes = Object.keys(this.registryModel.groups[this.groupType].resources);
+
+        if (resourceTypes.length === 1) {
+          // Navigate directly to the single resource type
+          const singleResourceType = resourceTypes[0];
+          this.debug.log('GroupsComponent: Auto-forwarding to single resource type:', singleResourceType);
+          this.router.navigate([this.groupType, singleGroup.id, singleResourceType]);
+        } else {
+          // Multiple resource types - just navigate to the group detail (which redirects to group list with highlight)
+          this.router.navigate([this.groupType, singleGroup.id]);
+        }
+      }
+    }
+  }
+
+  getTopLevelAttributes(group: any) {
+    // Return only top-level attributes, deduplicated
+    if (!group || !group.attributes) return [];
+    // Filter out resource collection attributes if present
+    return group.attributes.filter((attr: any) => !attr.isResourceCollection);
+  }
+
+  navigateToResourceCollection(group: any, rc: any) {
+    // Navigate to the resource collection view for this group and resource type
+    this.router.navigate(['/groups', group.id, 'resources', rc.type]);
+  }
+
+  navigateToGroup(group: any) {
+    this.router.navigate(['/groups', group.id]);
+  }
+
+  /**
+   * Check if an attribute value is a simple primitive type
+   */
+  isSimpleAttribute(value: any): boolean {
+    return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
   }
 }

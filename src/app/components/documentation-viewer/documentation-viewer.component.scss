@@ -1,0 +1,113 @@
+.documentation-viewer {
+  margin-bottom: 2rem;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .documentation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .pop-out-btn {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 4px;
+      color: var(--primary-color, #6c757d);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: rgba(108, 117, 125, 0.1);
+        color: var(--primary-hover-color, #5a6268);
+      }
+
+      &:focus {
+        outline: 2px solid var(--primary-color, #6c757d);
+        outline-offset: 2px;
+      }
+
+      .material-icons {
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .documentation-content {
+    padding: 0;
+    position: relative;
+    /* A4 portrait aspect ratio: 210mm × 297mm ≈ 1:1.414 */
+    /* Using a comfortable viewing height and maintaining aspect ratio */
+    height: 600px; /* Comfortable height for viewing */
+  }
+
+  .documentation-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0 0 8px 8px;
+
+    /* Set zoom level for better visibility */
+    zoom: 0.75;
+    transform-origin: 0 0;
+
+    /* For browsers that don't support zoom */
+    -moz-transform: scale(0.75);
+    -moz-transform-origin: 0 0;
+    -webkit-transform: scale(0.75);
+    -webkit-transform-origin: 0 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .documentation-viewer {
+    .documentation-content {
+      height: 400px; /* Smaller height on mobile */
+    }
+
+    .documentation-iframe {
+      zoom: 0.6;
+      -moz-transform: scale(0.6);
+      -webkit-transform: scale(0.6);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .documentation-viewer {
+    .documentation-header {
+      padding: 0.75rem 1rem;
+
+      h3 {
+        font-size: 1rem;
+      }
+    }
+
+    .documentation-content {
+      height: 300px;
+    }
+
+    .documentation-iframe {
+      zoom: 0.5;
+      -moz-transform: scale(0.5);
+      -webkit-transform: scale(0.5);
+    }
+  }
+}

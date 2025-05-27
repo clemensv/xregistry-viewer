@@ -9,6 +9,7 @@ import { ThemeService } from './services/theme.service';
 import { ConfigService } from './services/config.service';
 import { BaseUrlService } from './services/base-url.service';
 import { ModelService } from './services/model.service';
+import { RoutePersistenceService } from './services/route-persistence.service';
 import { CommonModule } from '@angular/common';
 import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
 
@@ -31,6 +32,7 @@ export class AppComponent implements OnInit {
     private configService: ConfigService,
     private baseUrlService: BaseUrlService,
     private modelService: ModelService,
+    private routePersistenceService: RoutePersistenceService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -61,12 +63,26 @@ export class AppComponent implements OnInit {
 
         // Update base URL
         this.baseUrlService.updateBaseHref();
+
+        // Restore route after configuration is loaded (delay to ensure router has processed initial navigation)
+        if (this.isBrowser) {
+          setTimeout(() => {
+            this.routePersistenceService.restoreRoute();
+          }, 500);
+        }
       })
       .catch(err => {
         this.configError = 'Failed to load application configuration.';
         console.error('Error loading configuration:', err);
         // Use default config to allow app to function
         this.configLoaded = true;
+
+        // Still try to restore route even with default config
+        if (this.isBrowser) {
+          setTimeout(() => {
+            this.routePersistenceService.restoreRoute();
+          }, 500);
+        }
       });
   }
 }

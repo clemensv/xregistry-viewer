@@ -5,90 +5,27 @@
 /* Component-specific overrides for resources */
 /* These will take precedence over global styles due to component encapsulation */
 
-/* Container styling */
+/* Container styling - override global constraints */
 .resources {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: block;
 }
 
-/* Header styles now handled by global PageHeaderComponent */
-
-/* Resources specific styles */
-.resources h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--fg-text, #333);
-}
-
-/* Improved grid container for better space utilization */
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 1rem;
+/* Override global layout constraints to allow full width tables */
+:host {
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  justify-items: stretch;
-  align-items: start;
+  max-width: none !important;
 }
 
-/* Center the grid container when there's only one item */
-.single-resource .grid-container {
-  justify-content: center;
-}
-
-.grid-item {
-  position: relative;
-  background: white;
-  border-radius: $radius;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  border: 1px solid c(neutral);
-  @include chromeline(#9575cd);
-  display: flex;
-  flex-direction: column;
-  min-height: 180px;
-  margin-bottom: 0;
-  transition: transform 0.2s, box-shadow 0.2s;
-  @include pad-x(m);
-  @include pad-y(s);
-}
-
-/* Special styling for when there's only one item */
-.grid-item.single-item {
-  min-width: 450px;  /* 1.5 * 300px */
-  max-width: 570px;  /* 1.5 * 380px */
-  flex: 1 1 450px;   /* 1.5 * 300px */
-  margin: 0 auto;    /* Center the single item */
-}
-
-/* Larger text for single items */
-.grid-item.single-item h3 {
-  font-size: 1.05rem;
-}
-
-.grid-item.single-item h4 {
-  font-size: 0.93rem;
-}
-
-.grid-item.single-item .attribute {
-  font-size: 0.88rem;
-}
-
-.grid-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: c(neutral);
-}
-
-/* List view styling */
+/* List view - full width without breakout */
 .list-view {
   width: 100%;
   overflow-x: auto;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
+/* Ensure table takes full available width within the viewport container */
 .resources-table {
   width: 100%;
   border-collapse: collapse;
@@ -96,38 +33,82 @@
   background-color: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
+  table-layout: auto;
+}
 
-  th, td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+.resources-table th, .resources-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resources-table th:first-child, .resources-table td:first-child {
+  width: 25%;
+  min-width: 120px;
+}
+
+.resources-table th:nth-child(2), .resources-table td:nth-child(2) {
+  width: 30%;
+  min-width: 120px;
+}
+
+.resources-table th:nth-child(3), .resources-table td:nth-child(3) {
+  width: 15%;
+  min-width: 120px;
+}
+
+.resources-table th:nth-child(4), .resources-table td:nth-child(4) {
+  width: 15%;
+  min-width: 120px;
+}
+
+.resources-table th:nth-child(5), .resources-table td:nth-child(5) {
+  width: 15%;
+  min-width: 120px;
+}
+
+.resources-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.resources-table tr:last-child td {
+  border-bottom: none;
+}
+
+.resources-table tr:hover td {
+  background-color: #f8f9fa;
+}
+
+.resources-table a {
+  color: #6c757d;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
+}
 
-  th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #495057;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
+/* Override global styles for full width */
+.resources .list-view,
+:host .list-view {
+  width: 100% !important;
+  max-width: none !important;
+}
 
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  tr:hover td {
-    background-color: #f8f9fa;
-  }
-
-  a {
-    color: #007bff;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
+.resources .resources-table,
+:host .resources-table {
+  width: 100% !important;
+  max-width: none !important;
 }
 
 /* Tile styles specific to resources component */
@@ -135,7 +116,7 @@
   display: inline-block;
   margin-top: 10px;
   padding: 6px 12px;
-  background-color: #007bff;
+      background-color: #6c757d;
   color: #fff !important; /* Force white text color */
   text-decoration: none;
   border-radius: 3px;
@@ -290,6 +271,93 @@ h4 {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Empty state styling */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty-state-content {
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.empty-state-icon {
+  font-size: 4rem !important;
+  color: var(--fg-secondary-text, #6c757d);
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--fg-text, #2c3e50);
+  margin: 0;
+}
+
+.empty-state-message {
+  font-size: 1rem;
+  color: var(--fg-secondary-text, #6c757d);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive empty state */
+@media (max-width: 768px) {
+  .empty-state {
+    min-height: 300px;
+    padding: 1.5rem;
+  }
+
+  .empty-state-icon {
+    font-size: 3rem !important;
+  }
+
+  .empty-state-title {
+    font-size: 1.25rem;
+  }
+
+  .empty-state-message {
+    font-size: 0.9rem;
+  }
+}
+
+/* Font size specific adjustments */
+:host-context(body.font-size-small) {
+  .empty-state-icon {
+    font-size: 3rem !important;
+  }
+
+  .empty-state-title {
+    font-size: 1.1rem;
+  }
+
+  .empty-state-message {
+    font-size: 0.8rem;
+  }
+}
+
+:host-context(body.font-size-large) {
+  .empty-state-icon {
+    font-size: 5rem !important;
+  }
+
+  .empty-state-title {
+    font-size: 1.75rem;
+  }
+
+  .empty-state-message {
+    font-size: 1.1rem;
+  }
 }
 
 /* Responsive adjustments */

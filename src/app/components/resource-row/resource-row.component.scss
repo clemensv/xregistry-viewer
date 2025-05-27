@@ -1,9 +1,41 @@
 /* filepath: c:\git\xregistry-viewer\src\app\components\resource-row\resource-row.component.scss */
-.docs-link {
+/* Resource row styling */
+:host {
+  display: table-row;
+}
+
+/* No-wrap styling for most columns */
+.no-wrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0; /* Force ellipsis to work in table cells */
+}
+
+/* Description cell allows wrapping */
+.description-cell {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  max-width: 300px; /* Limit description width */
+}
+
+/* Links styling */
+a {
   color: #007bff;
   text-decoration: none;
-
+  
   &:hover {
     text-decoration: underline;
+    color: #0056b3;
+  }
+}
+
+.documentation-link {
+  color: #6c757d;
+  
+  &:hover {
+    color: #495057;
   }
 }

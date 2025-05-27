@@ -5,41 +5,107 @@
 /* Component-specific overrides for groups */
 /* These will take precedence over global styles due to component encapsulation */
 
-/* Container styling - remove centering */
+
+/* Container styling */
 .groups {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-/* Header styles now handled by global PageHeaderComponent */
-
-// Improved grid container for better space utilization
-.grid-container.cards-view {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 1rem;
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  justify-items: stretch;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
 }
 
-// Improved grid items - remove fixed height constraints
+/* Full-width header wrapper */
+.header-outer {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  background: bg('card');
+}
+
+/* New Page Header Layout */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1rem 2.5vw;
+  border-bottom: 1px solid fg('divider');
+  margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: c(dark);
+}
+
+.page-header .view-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Ensure pagination component is full width */
+app-pagination {
+  width: 100%;
+}
+
+// The global grid-container is now provided by _layout.scss
+// Add component-specific overrides for grid-container if needed
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); // Increased min width for group tiles
+  gap: 1.5rem 2rem;
+  grid-row-gap: 1.5rem;
+  grid-column-gap: 2rem;
+  width: 100%;
+  margin: 0 auto;
+  justify-items: stretch;
+  align-items: start; // Changed from start to allow tiles to determine their own height
+  grid-auto-rows: auto; // Changed from minmax to auto to allow tiles to expand as needed
+  // Removed overflow and max-height constraints to allow vertical expansion
+  box-sizing: border-box;
+  padding: 0.5rem;
+}
+
+.groups-container, .list-container {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 24px 24px 24px;
+  box-sizing: border-box;
+}
+
+.grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 32px 24px;
+  align-items: start; // Changed from stretch to start to allow tiles to size based on content
+}
+
 .grid-item {
+  width: 100%;
+  height: auto; // Changed from 100% to auto to allow content-based sizing
+  align-self: start; // Changed from stretch to start
+  display: flex;
+  flex-direction: column;
   position: relative;
   background: white;
   border-radius: $radius;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   border: 1px solid c(neutral);
-  @include chromeline(#9575cd);
-  display: flex;
-  flex-direction: column;
-  min-height: 180px;
+  @include chromeline(#9575cd); /* Purple for group objects */
+  min-height: 210px; // Keep minimum height for consistency
+  // Removed max-height and fixed height to allow vertical expansion
   margin-bottom: 0;
   transition: transform 0.2s, box-shadow 0.2s;
+  overflow: visible; // Changed from hidden to visible to show all content
   @include pad-x(m);
   @include pad-y(s);
 }
@@ -59,66 +125,38 @@
 }
 
 .grid-item .attribute {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem; // Reduced from 1rem for compactness
+  width: 100%; // Ensure attributes fill parent grid item
+  box-sizing: border-box; // Include padding and border in width calculation
 
   &.simple-attribute {
     display: flex;
     flex-direction: column;
+    width: 100%; // Ensure simple attribute containers fill parent
 
     .attribute-header {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.25rem;
+      gap: 0.25rem; // Reduced from 0.5rem for compactness
+      margin-bottom: 0.25rem; // Reduced from 0.5rem for compactness
       align-items: center;
+      width: 100%; // Ensure header fills container
 
       strong {
         font-weight: 600;
         color: #2c3e50;
         font-size: vars.$content-size;
       }
-    }
-
-    .attribute-value {
+    }    .attribute-value {
       font-size: $body-size;
       color: c(text);
       word-break: break-word;
       padding: s(xs) 0;
-    }
-  }
-
-  // Special styling for resource document items inside cards
-  app-resource-document-item {
-    width: 100%;
-    flex: 1;
-  }
-}
-
-// Optimize space usage for embedded resource document items
-.grid-item app-resource-document-item {
-  ::ng-deep {
-    .resource-document-item {
-      margin-bottom: 0.5rem;
-    }
-
-    .attribute-header {
-      margin-bottom: 0.25rem;
-    }
-
-    .attribute-value {
-      font-size: 0.9rem;
-      line-height: 1.3;
-      padding: 0.25rem 0;
-    }
-
-    .collapsed-preview {
-      font-size: 0.85rem;
-      line-height: 1.2;
-    }
-
-    .toggle-button {
-      font-size: 0.8rem;
-      padding: 0.1rem 0.3rem;
+      // Removed line-clamp and overflow restrictions to allow full content display
+      overflow: visible;
+      text-overflow: unset;
+      width: 100%; // Make attribute values fill parent horizontally
+      flex: 1; // Allow attribute values to expand within flex containers
     }
   }
 }
@@ -166,27 +204,37 @@
   display: inline-block;
   margin-top: 16px;
   padding: 8px 15px;
-  background-color: #3498db;
-  color: #fff !important;
+  background-color: #3498db; /* Match the download button from resource document */
+  color: #fff !important; /* Force white text color */
   text-decoration: none;
   border-radius: 5px;
   transition: background-color 0.2s ease;
   align-self: flex-start;
   font-weight: 500;
-  font-size: vars.$content-size;
+  font-size: vars.$content-size; /* Use shared variable for consistency */
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
 .tile:hover {
-  background-color: #2980b9;
+  background-color: #2980b9; /* Match hover color from resource document */
   text-decoration: none !important;
 }
 
 .tile-footer-container {
-  margin-top: auto;
+  margin-top: auto; /* Push to bottom of flex container */
   width: 100%;
+}
+
+.tile-footer {
+  margin-top: 8px;
+  font-size: vars.$small-size;
+  color: #6c757d; /* Match text color from resource document */
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tile-footer {
@@ -194,13 +242,14 @@
   border-top: 1px solid #ececec;
   padding-top: 0.5em;
   color: #888;
-  font-size: 0.8rem;
+  font-size: 0.8rem; /* Smaller font for footer text */
   display: flex;
   justify-content: flex-end;
-  width: 100%;
+  width: 100%; /* Ensure footer spans full width */
 }
 
 /* Attribute styles */
+
 h3 {
   font-size: 1.15rem;
   font-weight: 700;
@@ -209,9 +258,9 @@ h3 {
   word-break: break-all;
 }
 
-/* Resource Types section styles */
+/* Resource Types section styles - styled like arrays in resource document */
 .resource-types {
-  margin-bottom: s(m);
+  margin-bottom: s(s); // Reduced from s(m) for compactness
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -219,31 +268,34 @@ h3 {
   .attribute-value {
     position: relative;
     padding-left: s(xs);
-    @include chromeline(c(info));
+    @include chromeline(c(info)); /* Blue vertical bar like arrays */
     margin-top: s(xs);
     margin-bottom: s(xs);
     background-color: rgba(91, 192, 222, 0.05);
     border-radius: 0 $radius $radius 0;
-    max-height: 120px;
-    overflow-y: auto;
+    // Removed max-height restriction to allow full content display
+    overflow: visible;
+    width: 100%; // Ensure resource types fill parent horizontally
+    box-sizing: border-box; // Include padding and border in width calculation
   }
 }
 
+// Remove extra left padding and margin from resource-types-list and resource-type-row
 .resource-types-list {
   position: relative;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem; // Reduced from 0.5rem for compactness
   padding-left: 0.25rem !important;
   margin-left: 0 !important;
-  border-left: 3px solid #5bc0de;
+  border-left: 3px solid #5bc0de; /* Blue vertical bar like arrays */
 
   &::before {
     content: '';
     position: absolute;
     top: 0;
-    left: -3px;
-    width: 3px;
+    left: -3px; /* Match the border-left width */
+    width: 3px; /* Match the border-left width */
     height: 100%;
-    background-color: #5bc0de;
+    background-color: #5bc0de; /* Match the border color */
     border-bottom-left-radius: 4px;
     z-index: 1;
   }
@@ -264,12 +316,15 @@ h3 {
   margin-left: 0 !important;
 }
 
+// Ensure .attribute-value.resource-types-list has proper styling with vertical bar
 .attribute-value.resource-types-list {
   position: relative;
   padding-left: 0.5rem !important;
   margin-left: 0 !important;
   background-color: rgba(91, 192, 222, 0.05);
   border-radius: 0 $radius $radius 0;
+  width: 100%; // Ensure resource types list fills parent horizontally
+  box-sizing: border-box; // Include padding and border in width calculation
 }
 
 .resource-list {
@@ -314,13 +369,13 @@ h3 {
 
 .group-icon {
   font-size: vars.$content-size * 1.5;
-  color: #9575cd;
+  color: #9575cd; /* Match the vertical bar color */
   margin-right: 0.5rem;
 }
 
 .resource-type-icon {
   font-size: vars.$content-size * 1.1;
-  color: #5bc0de;
+  color: #5bc0de; /* Match the array bar color */
   margin-right: 0.25rem;
   vertical-align: middle;
 }
@@ -329,17 +384,6 @@ h3 {
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid #e9ecef;
-}
-
-/* Group attributes styling */
-.group-attributes {
-  margin-bottom: s(s);
-
-  .attribute-value {
-    padding-left: s(xs);
-    border-left: 2px solid #e9ecef;
-    margin-top: s(xs);
-  }
 }
 
 /* Added styles for array-like appearance */
@@ -358,28 +402,87 @@ h3 {
   font-weight: 500;
 }
 
+/* Additional styles for vertical expansion */
+.group-tile {
+  min-height: 180px;
+  height: auto; // Allow tile to expand based on content
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  overflow: visible; // Allow content to be visible
+  padding: 16px;
+  gap: 12px; // Add consistent spacing between sections
+}
+
+.group-header {
+  flex-shrink: 0; // Don't compress the header
+}
+
+.group-attributes {
+  flex-grow: 0; // Don't expand unless needed
+  flex-shrink: 0; // Don't compress
+  overflow: visible; // Show all attributes
+}
+
+.group-resources {
+  flex-grow: 0; // Don't expand unless needed
+  flex-shrink: 0; // Don't compress
+  margin-top: auto; // Push to bottom if needed
+}
+
+.resource-collections-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.attribute-row {
+  margin-bottom: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.attribute-key {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 80px;
+}
+
+.attribute-type {
+  font-size: 0.85em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #e9ecef;
+  color: #495057;
+}
+
+.attribute-value {
+  flex: 1;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  width: 100%; // Ensure attribute values fill parent horizontally
+  box-sizing: border-box; // Include padding and border in width calculation
+}
+
+.list-table {
+  width: 100%;
+  table-layout: auto;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .grid-container.cards-view {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
   .grid-item {
     min-width: 100%;
     max-width: 100%;
   }
 
+  /* Reduce padding on small screens */
   .groups {
     padding: 0 0.5rem;
-  }
-
-  /* Page header responsive styles handled by global PageHeaderComponent */
-}
-
-@media (min-width: 769px) and (max-width: 1000px) {
-  .grid-container.cards-view {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }
 
@@ -404,48 +507,16 @@ h3 {
 }
 
 .groups-table th, .groups-table td {
-  padding: 0.75rem;
+  padding: 0.6rem 0.7rem;
   text-align: left;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid fg('divider');
   vertical-align: top;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   word-break: break-word;
 }
 
-.groups-table th:first-child, .groups-table td:first-child {
-  width: 15%;
-  min-width: 120px;
-}
-
-.groups-table th:nth-child(2), .groups-table td:nth-child(2) {
-  width: 25%;
-  min-width: 150px;
-}
-
-/* Origin column - smaller font and size */
-.groups-table th:nth-child(3), .groups-table td:nth-child(3) {
-  width: 20%;
-  min-width: 140px;
-  font-size: 0.75rem;
-}
-
-.groups-table th:nth-child(4), .groups-table td:nth-child(4) {
-  width: 20%;
-  min-width: 120px;
-}
-
-.groups-table th:nth-child(5), .groups-table td:nth-child(5) {
-  width: 10%;
-  min-width: 100px;
-}
-
-.groups-table th:nth-child(6), .groups-table td:nth-child(6) {
-  width: 10%;
-  min-width: 100px;
-}
-
 .groups-table th {
-  background: #f8f9fa;
+  background: bg('hover');
   font-weight: 600;
   color: #495057;
   position: sticky;
@@ -461,6 +532,8 @@ h3 {
   background-color: #f8f9fa;
 }
 
+
+
 a {
   color: #007bff;
   text-decoration: none;
@@ -468,32 +541,4 @@ a {
   &:hover {
     text-decoration: underline;
   }
-}
-
-/* Progressive loading indicator */
-.loading-progress {
-  background-color: var(--bg-elevated, #f8f9fa);
-  border: 1px solid var(--fg-border, #dee2e6);
-  border-radius: 4px;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.loading-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: var(--fg-secondary-text, #666);
-  font-size: 0.9rem;
-}
-
-.loading-spinner {
-  animation: spin 1.5s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }

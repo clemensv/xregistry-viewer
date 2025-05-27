@@ -1,37 +1,69 @@
 @use '../shared-variables' as vars;
 @use '../../../styles/theme' as *;
 
+/* Group row styling */
+:host {
+  display: table-row;
+}
+
+/* No-wrap styling for most columns */
+.no-wrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0; /* Force ellipsis to work in table cells */
+}
+
+/* Description cell allows wrapping */
+.description-cell {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  max-width: 300px; /* Limit description width */
+}
+
+/* Group icon styling */
 .group-icon-small {
-  font-size: 1rem;
-  color: #9575cd; /* Match the vertical bar color */
-  margin-right: 0.3rem;
+  font-size: 1.2rem !important;
+  color: #6c757d;
+  margin-right: 0.5rem;
   vertical-align: middle;
 }
 
-.resource-types-compact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem 0.5rem;
-  max-width: 100%;
-}
-
-.resource-link-small {
-  color: #457B9D;
+/* Links styling */
+a {
+  color: #007bff;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.85rem;
 
   &:hover {
     text-decoration: underline;
+    color: #0056b3;
+  }
+}
+
+/* Resource types styling */
+.resource-types-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.resource-link-small {
+  color: #6c757d;
+  font-size: 0.85rem;
+
+  &:hover {
+    color: #495057;
   }
 }
 
 .resource-count-small {
-  color: #6c757d;
-  font-size: 0.75rem;
+  font-weight: 500;
+  color: #495057;
 }
 
 .resource-separator {
-  color: #6c757d;
-  font-size: 0.85rem;
+  color: #adb5bd;
 }

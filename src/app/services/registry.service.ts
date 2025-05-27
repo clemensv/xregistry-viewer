@@ -245,11 +245,11 @@ export class RegistryService {
           doc.name = entry.name || entry[idKey] || entry.id; // Fallback to id if name is missing
           doc.description = entry.description;
 
-          // Explicitly map docs to resourceUrl for the resource-row component
-          if (entry.docs) {
-            doc.resourceUrl = entry.docs;
-            doc.docs = entry.docs; // Make sure both are set
-          }
+                  // Explicitly map documentation to resourceUrl for the resource-row component
+        if (entry.documentation) {
+          doc.resourceUrl = entry.documentation;
+          doc.documentation = entry.documentation; // Make sure both are set
+        }
 
           // Ensure proper case for timestamp fields
           doc.createdAt = entry.createdat || entry.createdAt;
@@ -372,8 +372,8 @@ export class RegistryService {
       );
     }
 
-    // Determine if this resource type has document support
-    const hasDocument = resourceMeta.hasdocument === true;
+    // Determine if this resource type has document support (defaults to true per xRegistry spec)
+    const hasDocument = resourceMeta.hasdocument !== false;
 
     // Get resource details
     return this.getResourceDetailAsync(
@@ -1026,7 +1026,7 @@ export class RegistryService {
 
         // Construct URLs for regular and $details endpoints
         const regularUrl = this.getApiUrl(api, basePath);
-        const detailsUrl = this.getApiUrl(api, `${basePath}/$details`);
+        const detailsUrl = this.getApiUrl(api, `${basePath}$details`);
 
         // Choose primary URL based on document support
         const primaryUrl = hasDocument ? detailsUrl : regularUrl;

@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Group } from '../../models/registry.model';
+import { truncateText, truncateDescription, formatDateShort, getFullText } from '../../utils/text.utils';
 
 @Component({
   // Use a property selector instead of an element selector
@@ -16,6 +17,12 @@ export class GroupRowComponent implements OnInit {
   @Input() group!: Group;
   @Input() groupType!: string;
   @Input() resourceTypes: any[] = [];
+
+  // Utility functions for template
+  truncateText = truncateText;
+  truncateDescription = truncateDescription;
+  formatDateShort = formatDateShort;
+  getFullText = getFullText;
 
   ngOnInit() {
     // Debug: Log the group to see what data is available

@@ -7,6 +7,7 @@ import { ModelService } from '../../services/model.service';
 import { SearchService } from '../../services/search.service';
 import { ResourceDocument } from '../../models/registry.model';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
+import { DocumentationViewerComponent } from '../documentation-viewer/documentation-viewer.component';
 import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ConfigService } from '../../services/config.service';
@@ -14,7 +15,7 @@ import { ConfigService } from '../../services/config.service';
 @Component({
   selector: 'app-resource',
   standalone: true,
-  imports: [CommonModule, RouterModule, ResourceDocumentComponent, PaginationComponent, PageHeaderComponent],
+  imports: [CommonModule, RouterModule, ResourceDocumentComponent, DocumentationViewerComponent, PaginationComponent, PageHeaderComponent],
   templateUrl: './resource.component.html',
   styleUrl: './resource.component.scss',
 })
@@ -35,6 +36,7 @@ export class ResourceComponent implements OnInit, OnDestroy {
   cachedResourceId: string | null = null;
   // Add property to expose origin for display
   defaultVersionOrigin?: string;
+  documentationUrl?: string;
   versionsList: any[] = [];
   filteredVersionsList: any[] = [];
   pageLinks: LinkSet = {};
@@ -164,13 +166,14 @@ export class ResourceComponent implements OnInit, OnDestroy {
         this.groupId,
         this.resourceType,
         this.resourceId,
-        this.resourceTypeData?.hasdocument || false
+this.resourceTypeData?.hasdocument !== false
       )
       .pipe(
         tap((version) => {
           // Set loading to false when the default version is loaded
           this.loading = false;
           this.defaultVersionOrigin = version?.origin;
+          this.documentationUrl = version?.['documentation'];
 
           // Debug: log the version details to see what document fields we're getting
           console.log('Default version loaded:', version);
@@ -178,12 +181,13 @@ export class ResourceComponent implements OnInit, OnDestroy {
             hasResource: !!version.resource,
             hasResourceUrl: !!version.resourceUrl,
             hasResourceBase64: !!version.resourceBase64,
+            hasDocumentation: !!version['documentation'],
             hasDocument:
               !!version.resource ||
               !!version.resourceBase64 ||
               !!version.resourceUrl,
             resourceType: this.resourceType,
-            hasDocumentSupport: this.resourceTypeData?.hasdocument || false,
+            hasDocumentSupport: this.resourceTypeData?.hasdocument !== false,
           });
         }),
         catchError((err) => {

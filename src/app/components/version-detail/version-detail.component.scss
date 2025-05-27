@@ -236,7 +236,7 @@ section:has(h3:contains("Document")) {
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background-color: #007bff;
+    background-color: #6c757d;
     color: white;
     border: none;
     border-radius: 4px;
@@ -465,25 +465,24 @@ section > h3 {
 }
 
 .download-btn {
-    background-color: #3498db;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    transition: background-color 0.2s ease;
-}
+  background-color: #6c757d;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease;
 
-.download-btn:hover {
-    background-color: #2980b9;
-}
+  &:hover {
+    background-color: #5a6268;
+  }
 
-.download-btn .material-icons {
-    font-size: 1.2rem;
+  .material-icons {
+    font-size: 1.1rem;
+  }
 }
 
 /* Ensure <pre> inside app-code-highlight takes full width and scrolls */

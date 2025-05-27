@@ -1,10 +1,23 @@
-<td><a [routerLink]="[resource && (resource['id'] || resource['name'] || '')]">{{ resource && (resource['name'] || resource['id'] || 'Unknown') }}</a></td>
-<td>{{ resource && (resource['description'] || '-') }}</td>
-<td>
-  <a *ngIf="hasDocumentSupport && resource && (resource['docs'] || resource['resourceUrl'])" [href]="resource && (resource['docs'] || resource['resourceUrl'])" target="_blank" class="docs-link">
-    View Docs
+<td class="no-wrap" [title]="getFullText(resource?.name || resource?.id)">
+  <a [routerLink]="[resource && (resource['id'] || resource['name'] || '')]">
+    {{ truncateText(resource?.name || resource?.id || 'Unknown') }}
   </a>
-  <span *ngIf="!hasDocumentSupport || !resource || (!resource['docs'] && !resource['resourceUrl'])">-</span>
 </td>
-<td>{{ resource && resource['createdAt'] ? (resource['createdAt'] | date:'short') : '-' }}</td>
-<td>{{ resource && resource['modifiedAt'] ? (resource['modifiedAt'] | date:'short') : '-' }}</td>
+<td class="description-cell" [title]="getFullText(resource?.description)">
+  {{ truncateDescription(resource?.description) }}
+</td>
+<td class="no-wrap" [title]="hasDocumentSupport && resource && (resource['documentation'] || resource['resourceUrl']) ? (resource['documentation'] || resource['resourceUrl']) : ''">
+  <a *ngIf="hasDocumentSupport && resource && (resource['documentation'] || resource['resourceUrl'])" 
+     [href]="resource && (resource['documentation'] || resource['resourceUrl'])" 
+     target="_blank" 
+     class="documentation-link">
+    {{ truncateText('View Documentation', 20) }}
+  </a>
+  <span *ngIf="!hasDocumentSupport || !resource || (!resource['documentation'] && !resource['resourceUrl'])">-</span>
+</td>
+<td class="no-wrap" [title]="getFullText(formatDateShort(resource?.createdAt))">
+  {{ formatDateShort(resource?.createdAt) }}
+</td>
+<td class="no-wrap" [title]="getFullText(formatDateShort(resource?.modifiedAt))">
+  {{ formatDateShort(resource?.modifiedAt) }}
+</td>

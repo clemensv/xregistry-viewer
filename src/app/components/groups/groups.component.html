@@ -2,12 +2,12 @@
   [title]="(modelService.getRegistryModel() | async)?.groups?.[groupType]?.plural || 'Registry Groups'"
   [showViewToggle]="true"
   [currentViewMode]="viewMode"
-  [showPagination]="true"
+  [showPagination]="useClientSidePagination"
   [pageLinks]="pageLinks"
-  [resultsCount]="filteredGroupsList?.length || 0"
-  [totalCount]="useClientSidePagination ? allGroupsCache?.length || 0 : 0"
+  [resultsCount]="filteredGroupsList.length || 0"
+  [totalCount]="useClientSidePagination ? allGroupsCache.length || 0 : 0"
   [resultsText]="'groups'"
-  [searchResultsText]="currentSearchTerm ? 'Showing ' + (filteredGroupsList?.length || 0) + ' groups (filtered from ' + (groupsList?.length || 0) + ')' : ''"
+  [searchResultsText]="currentSearchTerm ? 'Showing ' + (filteredGroupsList.length || 0) + ' groups (filtered from ' + (groupsList.length || 0) + ')' : ''"
   (viewModeChange)="setViewMode($event)"
   (pageChange)="onPageChange($event)">
 </app-page-header>
@@ -28,14 +28,11 @@
       </h3>
       <div class="origin-field" *ngIf="group.origin">Origin: {{ group.origin }}</div>
       <div class="attribute simple-attribute description-attribute" *ngIf="group['description']">
-        <div class="attribute-header">
-          <strong>Description</strong>
-        </div>
         <div class="attribute-value">
           {{ group['description'] }}
         </div>
       </div>
-            <div class="attribute simple-attribute" *ngIf="group['labels']">        <div class="attribute-header">          <strong>Labels</strong>        </div>        <div class="attribute-value">          <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">            <span class="label-key">{{ label }}</span>:            <span class="label-value">{{ group['labels'][label] }}</span>          </div>        </div>      </div>      <!-- Group Attributes Display -->      <ng-container *ngFor="let attrName of displayGroupAttributes">        <div class="attribute simple-attribute group-attributes" *ngIf="hasValue(group[attrName])">          <div class="attribute-header">            <strong>{{ attrName }}</strong>            <span class="attribute-type" *ngIf="groupAttributes[attrName]?.type">{{ groupAttributes[attrName].type }}</span>          </div>          <div class="attribute-value">            <app-resource-document-item               [item]="{                key: attrName,                value: group[attrName],                type: groupAttributes[attrName]?.type || typeof group[attrName],                description: groupAttributes[attrName]?.description,                itemModel: groupAttributes[attrName],                isExpanded: false              }"              [nestingLevel]="0"              [initialExpanded]="false">            </app-resource-document-item>          </div>        </div>      </ng-container>        <!-- Resource Types Section - optimized formatting -->
+            <div class="attribute simple-attribute" *ngIf="group['labels']">        <div class="attribute-value">          <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">            <span class="label-key">{{ label }}</span>:            <span class="label-value">{{ group['labels'][label] }}</span>          </div>        </div>      </div>      <!-- Group Attributes Display -->      <ng-container *ngFor="let attrName of displayGroupAttributes">        <div class="attribute simple-attribute group-attributes" *ngIf="hasValue(group[attrName])">          <!-- Only show attribute header for complex attributes -->          <div class="attribute-header" *ngIf="!isSimpleAttribute(group[attrName])">            <strong>{{ attrName }}</strong>            <span class="attribute-type" *ngIf="groupAttributes[attrName]?.type">{{ groupAttributes[attrName].type }}</span>          </div>          <div class="attribute-value">            <app-resource-document-item               [item]="{                key: attrName,                value: group[attrName],                type: groupAttributes[attrName]?.type || typeof group[attrName],                description: groupAttributes[attrName]?.description,                itemModel: groupAttributes[attrName],                isExpanded: false              }"              [nestingLevel]="0"              [initialExpanded]="false">            </app-resource-document-item>          </div>        </div>      </ng-container>        <!-- Resource Types Section - optimized formatting -->
       <div class="attribute simple-attribute resource-types">
         <div class="attribute-header unified-item-row array-row">
           <strong>Resource Types</strong>
@@ -53,8 +50,8 @@
       <div class="tile-footer-container">
         <footer class="tile-footer">
           <small>
-            <span>Created: {{ group['createdAt'] | date:'short' }}</span>&nbsp;|
-            <span>Modified: {{ group['modifiedAt'] | date:'short' }}</span>
+            <span [title]="getFullText(formatDateShort(group['createdAt']))">Created: {{ formatDateShort(group['createdAt']) }}</span>&nbsp;|
+            <span [title]="getFullText(formatDateShort(group['modifiedAt']))">Modified: {{ formatDateShort(group['modifiedAt']) }}</span>
           </small>
         </footer>      </div>
     </div>
@@ -83,5 +80,40 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="empty-state">
+    <div class="empty-state-content">
+      <span class="material-icons empty-state-icon loading-spinner">sync</span>
+      <h3 class="empty-state-title">Loading Groups</h3>
+      <p class="empty-state-message">
+        Please wait while we load the available groups from the registry...
+      </p>
+    </div>
+  </div>
+
+  <!-- Empty search results -->
+  <div *ngIf="!loading && currentSearchTerm && filteredGroupsList.length === 0 && groupsList.length > 0" class="empty-state">
+    <div class="empty-state-content">
+      <span class="material-icons empty-state-icon">search_off</span>
+      <h3 class="empty-state-title">No Matching Groups</h3>
+      <p class="empty-state-message">
+        No groups match your search criteria "{{ currentSearchTerm }}".
+        Try adjusting your search terms or browse all available groups.
+      </p>
+    </div>
+  </div>
+
+  <!-- No data state -->
+  <div *ngIf="!loading && !currentSearchTerm && groupsList.length === 0" class="empty-state">
+    <div class="empty-state-content">
+      <span class="material-icons empty-state-icon">folder_open</span>
+      <h3 class="empty-state-title">No Groups Available</h3>
+      <p class="empty-state-message">
+        There are currently no groups of type "{{ groupType }}" in this registry.
+        Groups contain resources and define their organizational structure.
+      </p>
+    </div>
   </div>
 </div>

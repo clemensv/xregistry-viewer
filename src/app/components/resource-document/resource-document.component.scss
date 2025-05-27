@@ -90,7 +90,7 @@
     }
 
     .download-btn {
-      background-color: #3498db;
+      background-color: #6c757d;
       color: white;
       padding: 10px 15px;
       border: none;
@@ -103,7 +103,7 @@
       transition: background-color 0.2s ease;
 
       &:hover {
-        background-color: #2980b9;
+        background-color: #5a6268;
       }
 
       .material-icons {
@@ -158,24 +158,24 @@
 
     /* Simple Attributes Section */
     .simple-attributes-section {
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem; // Reduced from 2rem for compactness
     }
 
     .simple-attributes-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
+      gap: 0.75rem; // Reduced from 1rem for compactness
       width: 100%;
     }
 
     /* Complex Attributes Section */
     .complex-attributes-section {
-      margin-top: 2rem;
+      margin-top: 1.5rem; // Reduced from 2rem for compactness
     }
 
     .attributes-separator {
       position: relative;
-      margin: 2rem 0;
+      margin: 1.5rem 0; // Reduced from 2rem for compactness
       text-align: center;
 
       hr {
@@ -265,8 +265,8 @@
       .attribute-header {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        gap: 0.25rem; // Reduced from 0.5rem for compactness
+        margin-bottom: 0.25rem; // Reduced from 0.5rem for compactness
         align-items: center;
 
         strong {
@@ -290,7 +290,7 @@
           color: #6c757d;
           font-style: italic;
           flex-basis: 100%;
-          margin-top: 0.25rem;
+          margin-top: 0.15rem; // Reduced from 0.25rem for compactness
         }
       }
 
@@ -324,8 +324,8 @@
 
         &:hover {
           background: #f8f9fa;
-          border-color: #007bff;
-          color: #007bff;
+                  border-color: #6c757d;
+        color: #6c757d;
         }
 
         .material-icons {

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit } from '@angular/core';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Observable, Subject, interval } from 'rxjs';
 import { map, switchMap, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { RegistryService } from '../../services/registry.service';
@@ -14,6 +14,7 @@ import { ResourceRowComponent } from '../resource-row/resource-row.component';
 import { SearchService } from '../../services/search.service';
 import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
 import { ConfigService } from '../../services/config.service';
+import { truncateText, truncateDescription, formatDateShort, getFullText } from '../../utils/text.utils';
 
 @Component({
   standalone: true,
@@ -23,7 +24,7 @@ import { ConfigService } from '../../services/config.service';
   styleUrls: ['./resources.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
-export class ResourcesComponent implements OnInit, OnDestroy {
+export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
   groupType!: string;
   groupId!: string;
   resourceType!: string;
@@ -40,6 +41,13 @@ export class ResourcesComponent implements OnInit, OnDestroy {
   resTypeHasDocument = false;
   private destroy$ = new Subject<void>();
   private initialLoad = true;
+  private userHasChangedView = false; // Track if user manually changed view mode
+
+  // Utility functions for template
+  truncateText = truncateText;
+  truncateDescription = truncateDescription;
+  formatDateShort = formatDateShort;
+  getFullText = getFullText;
 
   constructor(
     private route: ActivatedRoute,
@@ -48,7 +56,9 @@ export class ResourcesComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private debug: DebugService,
     private searchService: SearchService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private elementRef: ElementRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -124,7 +134,7 @@ export class ResourcesComponent implements OnInit, OnDestroy {
 
             const resourceModel = model.groups[this.groupType].resources[this.resourceType];
             this.resourceAttributes = resourceModel.attributes || {};
-            this.resTypeHasDocument = resourceModel.hasdocument || false;
+            this.resTypeHasDocument = resourceModel.hasdocument !== false;
 
             // Load resources on initial model load or when model is complete
             if (this.initialLoad || result.isComplete) {
@@ -164,9 +174,9 @@ export class ResourcesComponent implements OnInit, OnDestroy {
               resource['name'] = resource['id'];
             }
 
-            // Ensure resourceUrl is mapped from docs
-            if (!resource['resourceUrl'] && resource['docs']) {
-              resource['resourceUrl'] = resource['docs'];
+            // Ensure resourceUrl is mapped from documentation
+            if (!resource['resourceUrl'] && resource['documentation']) {
+              resource['resourceUrl'] = resource['documentation'];
             }
 
             return resource;
@@ -184,19 +194,18 @@ export class ResourcesComponent implements OnInit, OnDestroy {
           this.debug.log(`Pagination info: totalCount=${this.totalCount}, pageSize=${page.pageSize}, currentPage=${page.currentPage}`);
           this.applyClientSideFilter();
 
-          // Set default view mode based on the number of items (only on initial load)
-          if (!pageRel && this.initialLoad) {
-            if (this.resourcesList.length > 20) {
-              this.viewMode = 'list';
-            } else {
-              this.viewMode = 'cards';
-            }
+          // Set default view mode based on smart logic (only on initial load and if user hasn't manually changed view)
+          if (!pageRel && this.initialLoad && !this.userHasChangedView) {
+            this.setSmartViewMode();
           }
 
           // Update loading state
           if (this.loading && this.resourcesList.length > 0) {
             this.loading = false;
           }
+
+          // Auto-forward if only one resource
+          this.checkAutoForward();
 
           this.cdr.markForCheck();
         },
@@ -210,7 +219,13 @@ export class ResourcesComponent implements OnInit, OnDestroy {
   }
 
   private applyClientSideFilter(): void {
+    const previousCount = this.filteredResourcesList.length;
     this.filteredResourcesList = this.searchService.filterItems(this.resourcesList, this.currentSearchTerm);
+
+    // If user hasn't manually changed view and the filtered count changed, update view mode
+    if (!this.userHasChangedView && previousCount !== this.filteredResourcesList.length && this.filteredResourcesList.length > 0) {
+      setTimeout(() => this.setSmartViewMode(), 0);
+    }
   }
 
   onPageChange(pageRel: string): void {
@@ -222,6 +237,53 @@ export class ResourcesComponent implements OnInit, OnDestroy {
 
   setViewMode(mode: ViewMode): void {
     this.viewMode = mode;
+    this.userHasChangedView = true;
+  }
+
+  /**
+   * Set smart view mode based on item count and viewport constraints
+   */
+  private setSmartViewMode(): void {
+    const itemCount = this.filteredResourcesList.length;
+
+    // If more than 8 items, use list view
+    if (itemCount > 8) {
+      this.viewMode = 'list';
+      return;
+    }
+
+    // If 8 or fewer items, check if they fit in viewport
+    this.viewMode = 'cards';
+
+    // Use setTimeout to ensure DOM is rendered before checking viewport
+    setTimeout(() => {
+      if (this.checkViewportOverflow()) {
+        this.viewMode = 'list';
+        this.cdr.markForCheck();
+      }
+    }, 100);
+  }
+
+  /**
+   * Check if the grid view would overflow the viewport
+   */
+  private checkViewportOverflow(): boolean {
+    try {
+      const gridContainer = this.elementRef.nativeElement.querySelector('.grid-container');
+      if (!gridContainer) {
+        return false;
+      }
+
+      const containerRect = gridContainer.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const pageHeaderHeight = 120; // Approximate height for page header
+      const availableHeight = viewportHeight - pageHeaderHeight;
+
+      return containerRect.height > availableHeight;
+    } catch (error) {
+      this.debug.log('Error checking viewport overflow:', error);
+      return false;
+    }
   }
 
   // These methods are now handled by the ResourceDocumentComponent
@@ -235,5 +297,32 @@ export class ResourcesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ngAfterViewInit(): void {
+    // Trigger smart view mode after view is initialized if we already have data
+    if (!this.loading && this.resourcesList.length > 0 && !this.userHasChangedView) {
+      setTimeout(() => this.setSmartViewMode(), 0);
+    }
+  }
+
+  /**
+   * Check if auto-forwarding should occur when there's only one resource
+   */
+  private checkAutoForward(): void {
+    // Only auto-forward if:
+    // 1. We have exactly one resource
+    // 2. We're not searching (currentSearchTerm is empty)
+    // 3. We're not using pagination (pageLinks is empty)
+    if (!this.currentSearchTerm &&
+        this.resourcesList.length === 1 &&
+        Object.keys(this.pageLinks).length === 0) {
+
+      const singleResource = this.resourcesList[0];
+      this.debug.log('ResourcesComponent: Auto-forwarding to single resource:', singleResource);
+
+      // Navigate to the resource detail page
+      this.router.navigate([this.groupType, this.groupId, this.resourceType, singleResource.id]);
+    }
   }
 }
