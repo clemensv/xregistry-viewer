@@ -34,6 +34,7 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
   filteredGroupsList: Group[] = [];
   viewMode: ViewMode = 'cards'; // Default view mode
   currentSearchTerm = '';
+  currentOriginFilter = ''; // Add origin filter
   loading = true;
   loadingProgress = true; // Tracks if we're still expecting more data
   private destroy$ = new Subject<void>();
@@ -69,6 +70,21 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.groupType = this.route.snapshot.paramMap.get('groupType') || '';
+
+    // Check for origin filter in query parameters
+    this.currentOriginFilter = this.route.snapshot.queryParamMap.get('origin') || '';
+
+    // Subscribe to query parameter changes
+    this.route.queryParamMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(queryParams => {
+        const newOriginFilter = queryParams.get('origin') || '';
+        if (newOriginFilter !== this.currentOriginFilter) {
+          this.currentOriginFilter = newOriginFilter;
+          this.applyClientSideFilter();
+          this.cdr.markForCheck();
+        }
+      });
 
     // Wait for configuration to be loaded before subscribing to ModelService
     this.waitForConfigAndLoadData();
@@ -115,7 +131,7 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         checkInterval.unsubscribe();
         this.loadModelAndGroups();
       } else if (attempts >= maxAttempts) {
-        console.error('GroupsComponent: Timeout waiting for config, proceeding anyway');
+        this.debug.log('GroupsComponent: Timeout waiting for config, proceeding anyway');
         checkInterval.unsubscribe();
         this.loadModelAndGroups();
       }
@@ -309,13 +325,36 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private applyClientSideFilter(): void {
-    const previousCount = this.filteredGroupsList.length;
-    this.filteredGroupsList = this.searchService.filterItems(this.groupsList, this.currentSearchTerm);
+    const sourceList = this.useClientSidePagination ? this.getPageItems() : this.groupsList;
 
-    // If user hasn't manually changed view and the filtered count changed, update view mode
-    if (!this.userHasChangedView && previousCount !== this.filteredGroupsList.length && this.filteredGroupsList.length > 0) {
-      setTimeout(() => this.setSmartViewMode(), 0);
+    if (!sourceList || sourceList.length === 0) {
+      this.filteredGroupsList = [];
+      return;
     }
+
+    let filtered = [...sourceList];
+
+    // Apply search term filter
+    if (this.currentSearchTerm && this.currentSearchTerm.trim().length > 0) {
+      const term = this.currentSearchTerm.toLowerCase().trim();
+      filtered = filtered.filter(group => {
+        const searchableText = [
+          group.name || '',
+          group.id || '',
+          group.description || ''
+        ].join(' ').toLowerCase();
+        return searchableText.includes(term);
+      });
+    }
+
+    // Apply origin filter
+    if (this.currentOriginFilter && this.currentOriginFilter.trim().length > 0) {
+      filtered = filtered.filter(group => {
+        return group.origin === this.currentOriginFilter;
+      });
+    }
+
+    this.filteredGroupsList = filtered;
   }
   onPageChange(pageRel: string): void {
     this.loadGroups(pageRel);

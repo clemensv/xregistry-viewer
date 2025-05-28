@@ -25,7 +25,7 @@
 a {
   color: #007bff;
   text-decoration: none;
-  
+
   &:hover {
     text-decoration: underline;
     color: #0056b3;
@@ -34,8 +34,55 @@ a {
 
 .documentation-link {
   color: #6c757d;
-  
+
   &:hover {
     color: #495057;
+  }
+}
+
+/* Font size specific adjustments */
+:host-context(body.font-size-small) {
+  /* Ensure all table cells use consistent small font size */
+  :host {
+    font-size: 0.75rem;
+  }
+
+  .no-wrap, .description-cell {
+    font-size: 0.75rem;
+  }
+
+  a, .documentation-link {
+    font-size: 0.75rem;
+  }
+}
+
+:host-context(body.font-size-medium) {
+  /* Ensure all table cells use consistent medium font size */
+  :host {
+    font-size: 0.9rem;
+  }
+
+  .no-wrap, .description-cell {
+    font-size: 0.9rem;
+  }
+
+  a, .documentation-link {
+    font-size: 0.9rem;
+  }
+}
+
+:host-context(body.font-size-large) {
+  /* Ensure all table cells use consistent large font size */
+  :host {
+    font-size: 0.95rem;
+  }
+
+  .no-wrap, .description-cell {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  a, .documentation-link {
+    font-size: 0.95rem;
   }
 }

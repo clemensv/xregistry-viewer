@@ -21,21 +21,114 @@
   <div *ngIf="!loading && viewMode === 'cards' && filteredGroupTypesList.length > 0" class="grid-container cards-view">
     <div *ngFor="let gt of filteredGroupTypesList" class="grid-item">
       <a [routerLink]="getResourceCollectionRoute(gt)" class="card-link">
-      <div class="card-header">
-        <span class="material-icons group-type-icon" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
-        <h3>{{ gt.model.plural }}</h3>
+        <div class="card-header">
+          <span class="material-icons group-type-icon" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
+          <h3>{{ gt.model.plural }}</h3>
+          <button class="details-expander"
+                  (click)="$event.preventDefault(); $event.stopPropagation(); toggleDetails(gt.groupType)"
+                  [class.expanded]="isDetailsExpanded(gt.groupType)"
+                  title="Show details">
+            <span class="material-icons">{{ isDetailsExpanded(gt.groupType) ? 'info' : 'info_outline' }}</span>
+          </button>
+        </div>
+
+        <div class="card-content">
+          <!-- Description under title -->
+          <div class="description" *ngIf="gt.model.description">
+            {{ gt.model.description }}
+          </div>
+          <div class="description no-description" *ngIf="!gt.model.description">
+            No description available for this group type.
+          </div>
+
+          <!-- Horizontal divider -->
+          <hr class="content-divider">
+
+          <!-- Origins section -->
+          <div class="origins-section" *ngIf="getOriginsForGroupType(gt.groupType).length > 0">
+            <div class="section-label">Origins</div>
+            <div class="origins-list">
+              <span *ngFor="let origin of getOriginsForGroupType(gt.groupType)"
+                    class="origin-tag"
+                    (click)="$event.preventDefault(); $event.stopPropagation(); navigateToGroupsByOrigin(gt.groupType, origin)"
+                    [title]="'Filter ' + gt.groupType + ' by origin: ' + origin">
+                {{ origin }}
+              </span>
+            </div>
+          </div>
+          <div class="origins-section" *ngIf="getOriginsForGroupType(gt.groupType).length === 0">
+            <div class="section-label">Origins</div>
+            <div class="no-data">No origins available</div>
+          </div>
+
+          <!-- Horizontal divider -->
+          <hr class="content-divider">
+
+          <!-- Resource types section -->
+          <div class="resource-types-section" *ngIf="getResourceTypesCount(gt.model) > 0">
+            <div class="section-label">Resource Types</div>
+            <div class="resource-types-list">
+              <div *ngFor="let rt of getResourceTypesWithDescriptions(gt.model)" class="resource-type-item">
+                <span class="resource-type-name">{{ rt.name }}</span>
+                <span class="resource-type-description" *ngIf="rt.description">{{ rt.description }}</span>
+                <span class="resource-type-description no-description" *ngIf="!rt.description">No description</span>
+              </div>
+            </div>
+          </div>
+          <div class="resource-types-section" *ngIf="getResourceTypesCount(gt.model) === 0">
+            <div class="section-label">Resource Types</div>
+            <div class="no-data">No resource types available</div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Centered popup overlay -->
+  <div class="popup-overlay"
+       *ngIf="expandedDetails.size > 0"
+       (click)="closeAllDetails()">
+    <div class="popup-container"
+         (click)="$event.stopPropagation()"
+         *ngFor="let groupType of getExpandedGroupTypes()">
+      <div class="popup-header">
+        <span class="material-icons group-type-icon" [class]="getIconClass(groupType)">{{ getIconName(groupType) }}</span>
+        <h3>{{ getGroupTypeModel(groupType)?.model?.plural }}</h3>
+        <button class="close-button" (click)="closeAllDetails()" title="Close">
+          <span class="material-icons">close</span>
+        </button>
       </div>
 
-      <div class="card-content">
-        <div class="description" *ngIf="gt.model.description">
-          {{ gt.model.description }}
+      <div class="popup-content">
+        <!-- Simple items in a grid -->
+        <div class="simple-items-section" *ngIf="getFilteredSimpleItems(getGroupTypeModel(groupType)!).length > 0">
+          <div class="simple-items-grid">
+            <app-resource-document-item
+              *ngFor="let item of getFilteredSimpleItems(getGroupTypeModel(groupType)!)"
+              [item]="item"
+              [nestingLevel]="0"
+              [initialExpanded]="false">
+            </app-resource-document-item>
+          </div>
         </div>
 
-        <div class="description no-description" *ngIf="!gt.model.description">
-          No description available for this group type.
+        <!-- Separator if both simple and complex items exist -->
+        <div class="items-separator" *ngIf="getFilteredSimpleItems(getGroupTypeModel(groupType)!).length > 0 && getComplexItems(getGroupTypeModel(groupType)!).length > 0">
+          <hr>
         </div>
+
+        <!-- Complex items stacked vertically -->
+        <div class="complex-items-section" *ngIf="getComplexItems(getGroupTypeModel(groupType)!).length > 0">
+          <div class="complex-items-container">
+            <app-resource-document-item
+              *ngFor="let item of getComplexItems(getGroupTypeModel(groupType)!)"
+              [item]="item"
+              [nestingLevel]="0"
+              [initialExpanded]="false">
+            </app-resource-document-item>
+          </div>
         </div>
-        </a>
+      </div>
     </div>
   </div>
 
@@ -45,8 +138,9 @@
       <thead>
         <tr>
           <th>Group Type</th>
-          <th>Plural Name</th>
+          <th>Model</th>
           <th>Description</th>
+          <th>Origins</th>
           <th>Resource Types</th>
         </tr>
       </thead>
@@ -58,8 +152,21 @@
               <a [routerLink]="getResourceCollectionRoute(gt)" class="group-type-name">{{ gt.groupType }}</a>
             </div>
           </td>
-          <td class="plural-name">{{ gt.model.plural }}</td>
+          <td>
+            <a [routerLink]="getModelRoute(gt)" class="model-link">{{ gt.model.plural }}</a>
+          </td>
           <td class="description-cell">{{ gt.model.description || '-' }}</td>
+          <td>
+            <div *ngIf="getOriginsForGroupType(gt.groupType).length > 0" class="origins-compact">
+              <button *ngFor="let origin of getOriginsForGroupType(gt.groupType); let last = last"
+                      class="origin-pill"
+                      (click)="navigateToGroupsByOrigin(gt.groupType, origin)"
+                      [title]="'Filter ' + gt.groupType + ' by origin: ' + origin">
+                {{ origin }}
+              </button>
+            </div>
+            <span *ngIf="getOriginsForGroupType(gt.groupType).length === 0" class="no-origins-indicator">-</span>
+          </td>
           <td>
             <div *ngIf="getResourceTypesCount(gt.model) > 0" class="resource-types-compact">
               <span *ngFor="let rt of getResourceTypesList(gt.model)" class="resource-type-pill">{{ rt }}</span>

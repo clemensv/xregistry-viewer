@@ -1,0 +1,363 @@
+@use '../shared-variables' as vars;
+@use '../../../styles/theme' as *;
+
+.model-page {
+  min-height: 100vh;
+  background: var(--bg-app, #f8f9fa);
+  padding: 2rem;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  .material-icons {
+    font-size: 3rem !important;
+    color: var(--primary-color, #007bff);
+  }
+}
+
+.loading-text {
+  font-size: 1.1rem;
+  color: var(--fg-secondary-text, #6c757d);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.model-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--fg-divider, #e9ecef);
+
+  .section-icon {
+    font-size: 2rem !important;
+    color: var(--primary-color, #007bff);
+  }
+
+  h1, h2 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--fg-text, #2c3e50);
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  .count-badge {
+    background: var(--primary-color, #6c757d);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-left: auto;
+  }
+}
+
+.registry-overview {
+  background: var(--bg-card, white);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--fg-divider, #e9ecef);
+}
+
+.registry-info {
+  margin-bottom: 2rem;
+}
+
+.registry-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--fg-text, #2c3e50);
+  }
+
+  .registry-id {
+    background: var(--bg-hover, #f8f9fa);
+    color: var(--fg-secondary-text, #6c757d);
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    border: 1px solid var(--fg-divider, #dee2e6);
+  }
+}
+
+.registry-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--fg-secondary-text, #495057);
+  margin: 0;
+}
+
+.registry-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.group-types-section {
+  background: var(--bg-card, white);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--fg-divider, #e9ecef);
+}
+
+.group-types-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.group-type-container {
+  scroll-margin-top: 100px; /* Account for fixed header */
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  gap: 1rem;
+
+  .error-icon {
+    font-size: 4rem !important;
+    color: var(--error-color, #dc3545);
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--fg-text, #2c3e50);
+  }
+
+  p {
+    color: var(--fg-secondary-text, #6c757d);
+    max-width: 500px;
+    line-height: 1.6;
+  }
+}
+
+.progress-indicator {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: var(--bg-card, white);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--fg-divider, #e9ecef);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--fg-secondary-text, #6c757d);
+
+  .material-icons {
+    font-size: 1.2rem !important;
+    color: var(--primary-color, #6c757d);
+  }
+}
+
+/* Font size specific adjustments */
+:host-context(body.font-size-small) {
+  .model-page {
+    padding: 1rem;
+  }
+
+  .model-content {
+    gap: 2rem;
+  }
+
+  .section-header {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+
+    .section-icon {
+      font-size: 1.5rem !important;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .count-badge {
+      padding: 0.15rem 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  .registry-overview, .group-types-section {
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+
+  .registry-title {
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .registry-id {
+      padding: 0.15rem 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  .registry-description {
+    font-size: 1rem;
+  }
+
+  .group-types-list {
+    gap: 1.5rem;
+  }
+
+  .progress-indicator {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+:host-context(body.font-size-large) {
+  .model-page {
+    padding: 3rem;
+  }
+
+  .model-content {
+    gap: 4rem;
+  }
+
+  .section-header {
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+
+    .section-icon {
+      font-size: 2.5rem !important;
+    }
+
+    h1 {
+      font-size: 3rem;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+    }
+
+    .count-badge {
+      padding: 0.35rem 1rem;
+      font-size: 1rem;
+      border-radius: 16px;
+    }
+  }
+
+  .registry-overview, .group-types-section {
+    padding: 3rem;
+    border-radius: 16px;
+  }
+
+  .registry-info {
+    margin-bottom: 3rem;
+  }
+
+  .registry-title {
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      font-size: 2rem;
+    }
+
+    .registry-id {
+      padding: 0.35rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+  }
+
+  .registry-description {
+    font-size: 1.2rem;
+    line-height: 1.7;
+  }
+
+  .group-types-list {
+    gap: 3rem;
+  }
+
+  .progress-indicator {
+    padding: 1.25rem 2rem;
+    font-size: 1rem;
+    border-radius: 12px;
+
+    .material-icons {
+      font-size: 1.4rem !important;
+    }
+  }
+
+  .loading-spinner .material-icons {
+    font-size: 4rem !important;
+  }
+
+  .loading-text {
+    font-size: 1.3rem;
+  }
+
+  .error-state {
+    .error-icon {
+      font-size: 5rem !important;
+    }
+
+    h2 {
+      font-size: 2rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+    }
+  }
+}

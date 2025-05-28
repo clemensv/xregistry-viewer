@@ -9,6 +9,7 @@ import { combineLatest } from 'rxjs';
 import { ModelService } from '../../services/model.service';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 import { DocumentationViewerComponent } from '../documentation-viewer/documentation-viewer.component';
+import { DebugService } from '../../services/debug.service';
 
 @Component({
   standalone: true,
@@ -33,7 +34,14 @@ export class VersionDetailComponent implements OnInit {
   versionOrigin?: string;
   documentationUrl?: string;
 
-  constructor(private route: ActivatedRoute, private registry: RegistryService, private modelService: ModelService) {}  ngOnInit(): void {
+  constructor(
+    private route: ActivatedRoute,
+    private registry: RegistryService,
+    private modelService: ModelService,
+    private debug: DebugService
+  ) {}
+
+  ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.groupType = params.get('groupType')!;
       this.groupId = params.get('groupId')!;
@@ -41,29 +49,31 @@ export class VersionDetailComponent implements OnInit {
       this.resourceId = params.get('resourceId')!;
       this.versionId = params.get('versionId')!;
 
-      console.log(`Version Detail Component initialized with:`, {
+      this.debug.log(`Version Detail Component initialized with:`, {
         groupType: this.groupType,
         groupId: this.groupId,
         resourceType: this.resourceType,
         resourceId: this.resourceId,
         versionId: this.versionId
-      });      // First load metadata, then load the version details
+      });
+
+      // First load metadata, then load the version details
       this.version$ = this.modelService.getRegistryModel().pipe(
         map(model => model.groups[this.groupType]?.resources[this.resourceType]),
         tap((resourceTypeModel: any) => {
           if (resourceTypeModel) {
             this.resourceAttributes = resourceTypeModel.attributes || {};
             this.resTypeHasDocument = resourceTypeModel.hasdocument !== false;
-            console.log(`Resource type ${this.resourceType} document support: ${this.resTypeHasDocument}`);
+            this.debug.log(`Resource type ${this.resourceType} document support: ${this.resTypeHasDocument}`);
             this.documentMetadataLoaded = true;
           } else {
-            console.warn(`Resource type model not found for ${this.resourceType}`);
+            this.debug.warn(`Resource type model not found for ${this.resourceType}`);
             this.resourceAttributes = {};
             this.resTypeHasDocument = false;
           }
         }),
         switchMap(() => {
-          console.log(`Loading version detail with document support: ${this.resTypeHasDocument}`);
+          this.debug.log(`Loading version detail with document support: ${this.resTypeHasDocument}`);
           return this.registry.getVersionDetail(
             this.groupType,
             this.groupId,
@@ -74,7 +84,7 @@ export class VersionDetailComponent implements OnInit {
           );
         }),
         tap((versionDetail: ResourceDocument) => {
-          console.log('Version detail loaded:', versionDetail);
+          this.debug.log('Version detail loaded:', versionDetail);
           this.versionOrigin = versionDetail?.origin;
           this.documentationUrl = versionDetail?.['documentation'];
         })
@@ -84,7 +94,7 @@ export class VersionDetailComponent implements OnInit {
 
   objectKeys(obj: any): string[] {
     if (!obj || typeof obj !== 'object') {
-      console.warn('Invalid object passed to objectKeys:', obj);
+      this.debug.warn('Invalid object passed to objectKeys:', obj);
       return [];
     }
     return Object.keys(obj);
@@ -171,8 +181,6 @@ export class VersionDetailComponent implements OnInit {
       return this.cachedDocumentContent;
     }
 
-
-
     return null;
   }
 
@@ -195,7 +203,7 @@ export class VersionDetailComponent implements OnInit {
       return;
     }
 
-   const base64Data = version.resourceBase64;
+    const base64Data = version.resourceBase64;
 
     if (!base64Data) {
       return;
@@ -219,7 +227,7 @@ export class VersionDetailComponent implements OnInit {
       // Clean up
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      console.error('Error downloading document:', error);
+      this.debug.error('Error downloading document:', error);
       this.documentError = 'Failed to download document';
     }
   }
@@ -236,7 +244,7 @@ export class VersionDetailComponent implements OnInit {
         this.isLoadingDocument = false;
       },
       error: (err) => {
-        console.error('Error fetching document:', err);
+        this.debug.error('Error fetching document:', err);
         this.documentError = err.message || 'Failed to load document from URL.';
         this.isLoadingDocument = false;
       }
@@ -299,30 +307,12 @@ export class VersionDetailComponent implements OnInit {
    * Track whether we've tried to load document metadata
    */
   private documentMetadataLoaded = false;
-    /**
-   * Load document metadata - no longer used, logic moved to ngOnInit
-   * This method is kept for reference, but is never called.
+
+  /**
+   * @deprecated This method is no longer needed as metadata loading is handled in ngOnInit
    */
-  private loadDocumentMetadata(): void {
-    console.warn('loadDocumentMetadata() is deprecated, metadata loading is handled in ngOnInit');
-    if (this.documentMetadataLoaded) {
-      return;
-    }
-
-    this.documentMetadataLoaded = true;
-
-    this.modelService.getRegistryModel().pipe(
-      map(m => m.groups[this.groupType]?.resources[this.resourceType])
-    ).subscribe(rtModel => {
-      this.resourceAttributes = rtModel?.attributes || {};
-      this.resTypeHasDocument = rtModel?.hasdocument !== false;
-
-      console.info(`Resource type ${this.resourceType} document support: ${this.resTypeHasDocument}`);
-    }, error => {
-      console.error('Error fetching registry model:', error);
-      this.resourceAttributes = {};
-      this.resTypeHasDocument = false;
-    });
+  loadDocumentMetadata(): void {
+    this.debug.warn('loadDocumentMetadata() is deprecated, metadata loading is handled in ngOnInit');
   }
 
   // Add these helper methods for attribute display

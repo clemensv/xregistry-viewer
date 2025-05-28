@@ -1,0 +1,301 @@
+@use '../shared-variables' as vars;
+@use '../../../styles/theme' as *;
+
+.group-type-model {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: var(--bg-card, white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--fg-divider, #e9ecef);
+}
+
+.model-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--fg-divider, #e9ecef);
+}
+
+.model-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  .model-icon {
+    font-size: 2rem !important;
+    color: var(--primary-color, #6c757d);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--fg-text, #2c3e50);
+  }
+}
+
+.model-subtitle {
+  margin-left: 2.75rem; /* Align with title text */
+
+  .group-type-name {
+    font-size: 1rem;
+    color: var(--fg-secondary-text, #6c757d);
+    font-weight: 500;
+    background: var(--bg-hover, #f8f9fa);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--fg-divider, #dee2e6);
+  }
+}
+
+.model-content {
+  margin-bottom: 1rem;
+}
+
+.simple-items-section {
+  margin-bottom: 0.75rem;
+}
+
+.simple-items-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+
+  // Target the resource-document-item components to make them tile-like
+  app-resource-document-item {
+    flex: 0 0 auto;
+    width: fit-content;
+    min-width: 180px;
+    max-width: 400px;
+
+    // Style the simple attribute containers within
+    ::ng-deep .simple-attribute-grid {
+      background: var(--bg-card, white);
+      border-radius: 6px;
+      border: 1px solid var(--fg-divider, #e0e0e0);
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+      height: 100%;
+    }
+  }
+}
+
+.items-separator {
+  position: relative;
+  margin: 0.75rem 0;
+  text-align: center;
+
+  hr {
+    border: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--fg-divider, #e9ecef) 20%, var(--fg-divider, #e9ecef) 80%, transparent);
+    margin: 0;
+  }
+
+  .separator-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-card, white);
+    padding: 0 0.75rem;
+    color: var(--fg-secondary-text, #6c757d);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+}
+
+.complex-items-section {
+  margin-top: 0.75rem;
+}
+
+.complex-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  // Complex items should take full width
+  app-resource-document-item {
+    width: 100%;
+  }
+}
+
+.model-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--fg-divider, #e9ecef);
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+
+  &.primary {
+    background: var(--primary-color, #6c757d);
+    color: white;
+
+    &:hover {
+      background: var(--primary-hover-color, #5a6268);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+    }
+  }
+
+  .material-icons {
+    font-size: 1.2rem !important;
+  }
+}
+
+/* Font size specific adjustments */
+:host-context(body.font-size-small) {
+  .group-type-model {
+    padding: 1rem;
+  }
+
+  .model-title {
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+
+    .model-icon {
+      font-size: 1.5rem !important;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+  }
+
+  .model-subtitle {
+    margin-left: 2rem;
+
+    .group-type-name {
+      font-size: 0.85rem;
+      padding: 0.15rem 0.35rem;
+    }
+  }
+
+  .simple-items-grid {
+    gap: 0.5rem;
+
+    app-resource-document-item {
+      min-width: 150px;
+      max-width: 300px;
+
+      ::ng-deep .simple-attribute-grid {
+        padding: 0.75rem;
+      }
+    }
+  }
+
+  .items-separator {
+    margin: 1.5rem 0;
+
+    .separator-label {
+      font-size: 0.8rem;
+      padding: 0 0.75rem;
+    }
+  }
+
+  .complex-items-container {
+    gap: 0.75rem;
+  }
+
+  .action-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+
+    .material-icons {
+      font-size: 1rem !important;
+    }
+  }
+}
+
+:host-context(body.font-size-large) {
+  .group-type-model {
+    padding: 2rem;
+    border-radius: 12px;
+  }
+
+  .model-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .model-title {
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+
+    .model-icon {
+      font-size: 2.5rem !important;
+    }
+
+    h2 {
+      font-size: 2rem;
+    }
+  }
+
+  .model-subtitle {
+    margin-left: 3.5rem;
+
+    .group-type-name {
+      font-size: 1.1rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+    }
+  }
+
+  .model-content {
+    margin-bottom: 2.5rem;
+  }
+
+  .simple-items-grid {
+    gap: 1rem;
+
+    app-resource-document-item {
+      min-width: 220px;
+      max-width: 500px;
+
+      ::ng-deep .simple-attribute-grid {
+        padding: 1.25rem;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .items-separator {
+    margin: 1.5rem 0;
+
+    .separator-label {
+      font-size: 1rem;
+      padding: 0 1.25rem;
+    }
+  }
+
+  .complex-items-container {
+    gap: 1.25rem;
+  }
+
+  .action-button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+
+    .material-icons {
+      font-size: 1.4rem !important;
+    }
+  }
+}

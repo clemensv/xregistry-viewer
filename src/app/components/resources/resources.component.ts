@@ -113,7 +113,7 @@ export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
         checkInterval.unsubscribe();
         this.loadModelAndResources();
       } else if (attempts >= maxAttempts) {
-        console.error('ResourcesComponent: Timeout waiting for config, proceeding anyway');
+        this.debug.log('ResourcesComponent: Timeout waiting for config, proceeding anyway');
         checkInterval.unsubscribe();
         this.loadModelAndResources();
       }

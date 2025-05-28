@@ -7,19 +7,11 @@
       <div *ngIf="getPrimitiveAttributes().length > 0" class="simple-attributes-section">
         <div class="simple-attributes-grid">
           <ng-container *ngFor="let attr of getPrimitiveAttributes()">
-            <div class="attribute-tile simple-attribute">
-              <div class="attribute-header">
-                <strong>{{ attr.key }}</strong>
-                <span class="attribute-type">{{ attr.type | titlecase }}</span>
-                <span *ngIf="attr.description" class="attribute-description">{{ attr.description }}</span>
-              </div>
-              <div class="attribute-value-row">
-                <div class="attribute-value" [title]="attr.value">{{ attr.value }}</div>
-                <button class="copy-btn" title="Copy value" (click)="copyToClipboard(attr.value); $event.stopPropagation();">
-                  <span class="material-icons">content_copy</span>
-                </button>
-              </div>
-            </div>
+            <app-resource-document-item
+              [item]="attr"
+              [nestingLevel]="0"
+              [initialExpanded]="false">
+            </app-resource-document-item>
           </ng-container>
         </div>
       </div>

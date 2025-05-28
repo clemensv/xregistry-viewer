@@ -1,14 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SearchService } from '../../services/search.service';
+import { DebugService } from '../../services/debug.service';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -17,35 +18,40 @@ import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']
 })
-export class SearchComponent implements OnInit, OnDestroy {
+export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('searchInput', { static: false }) searchInput!: ElementRef<HTMLInputElement>;
+
   searchVisible = true; // Always visible in header
   searchTerm = '';
   private destroy$ = new Subject<void>();
-  private searchInput$ = new Subject<string>();
-  private readonly SEARCH_DEBOUNCE_TIME = 500; // 500ms delay after user stops typing
+  private searchSubject = new Subject<string>();
+  private readonly SEARCH_DEBOUNCE_TIME = 300; // milliseconds
 
   constructor(
     private searchService: SearchService,
+    private debug: DebugService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
-    // Subscribe to search state changes
+    // Subscribe to search state changes to sync with external updates
     this.searchService.searchState$
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
-        this.searchTerm = state.searchTerm;
+        if (state.searchTerm !== this.searchTerm) {
+          this.searchTerm = state.searchTerm;
+        }
       });
 
-    // Set up debounced search input
-    this.searchInput$
+    // Set up debounced search
+    this.searchSubject
       .pipe(
-        debounceTime(this.SEARCH_DEBOUNCE_TIME), // Wait after the user stops typing
-        distinctUntilChanged(), // Only trigger if the value actually changed
+        debounceTime(this.SEARCH_DEBOUNCE_TIME),
+        distinctUntilChanged(),
         takeUntil(this.destroy$)
       )
       .subscribe(searchTerm => {
-        console.log('Debounced search triggered after', this.SEARCH_DEBOUNCE_TIME, 'ms:', searchTerm);
+        this.debug.log('Debounced search triggered after', this.SEARCH_DEBOUNCE_TIME, 'ms:', searchTerm);
         this.searchService.setSearchTerm(searchTerm);
       });
 
@@ -63,27 +69,37 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.updateSearchContext(this.router.url);
   }
 
+  ngAfterViewInit(): void {
+    // Focus the search input when the component is initialized
+    if (this.searchInput) {
+      setTimeout(() => {
+        this.searchInput.nativeElement.focus();
+      }, 100);
+    }
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    this.searchInput$.complete();
   }
 
-  onInput(): void {
-    // Send input to debounced stream instead of triggering search immediately
-    console.log('Search input changed:', this.searchTerm);
-    this.searchInput$.next(this.searchTerm);
+  onSearchInput(): void {
+    this.debug.log('Search input changed:', this.searchTerm);
+    this.searchSubject.next(this.searchTerm);
   }
 
-  onSearch(): void {
-    console.log('Search triggered:', this.searchTerm);
+  onSearchSubmit(): void {
+    this.debug.log('Search triggered:', this.searchTerm);
     this.searchService.setSearchTerm(this.searchTerm);
   }
 
   clearSearch(): void {
-    console.log('Search cleared');
+    this.debug.log('Search cleared');
     this.searchTerm = '';
     this.searchService.clearSearch();
+    if (this.searchInput) {
+      this.searchInput.nativeElement.focus();
+    }
   }
 
   private updateSearchContext(url: string): void {

@@ -17,9 +17,6 @@
   height: 26px;
   margin: 0;
   max-width: 180px;
-  background-color: white;
-  padding: 1px 5px;
-  border-radius: 3px;
 }
 
 /* Title logo SVG height fix */
@@ -91,5 +88,74 @@ app-api-info {
 
   .mat-icon {
     color: #6c757d;
+  }
+}
+
+/* Font size specific adaptations */
+:host-context(body.font-size-small) {
+  .logo {
+    height: 20px;
+  }
+
+  .title-logo {
+    height: 16px;
+  }
+
+  svg.title-logo {
+    height: 18px;
+  }
+
+  .search-container {
+    margin-right: 8px;
+
+    app-search ::ng-deep .search-field {
+      width: 250px;
+
+      .mat-mdc-text-field-wrapper {
+        height: 28px;
+      }
+    }
+  }
+
+  .control-group {
+    margin-right: 2px;
+  }
+
+  app-api-info {
+    margin-right: 8px;
+  }
+}
+
+:host-context(body.font-size-large) {
+  .logo {
+    height: 32px;
+  }
+
+  .title-logo {
+    height: 26px;
+  }
+
+  svg.title-logo {
+    height: 30px;
+  }
+
+  .search-container {
+    margin-right: 24px;
+
+    app-search ::ng-deep .search-field {
+      width: 350px;
+
+      .mat-mdc-text-field-wrapper {
+        height: 44px;
+      }
+    }
+  }
+
+  .control-group {
+    margin-right: 8px;
+  }
+
+  app-api-info {
+    margin-right: 16px;
   }
 }

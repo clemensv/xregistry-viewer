@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  debugMode: true,
+  debugMode: false,
   apiBaseUrl: 'http://localhost:8080',
   baseUrl: '/'
 };

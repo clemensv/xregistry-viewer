@@ -10,6 +10,7 @@ import { ConfigService } from './services/config.service';
 import { BaseUrlService } from './services/base-url.service';
 import { ModelService } from './services/model.service';
 import { RoutePersistenceService } from './services/route-persistence.service';
+import { DebugService } from './services/debug.service';
 import { CommonModule } from '@angular/common';
 import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
 
@@ -33,6 +34,7 @@ export class AppComponent implements OnInit {
     private baseUrlService: BaseUrlService,
     private modelService: ModelService,
     private routePersistenceService: RoutePersistenceService,
+    private debug: DebugService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -54,8 +56,8 @@ export class AppComponent implements OnInit {
   private loadConfiguration(): void {
     this.configService.loadConfigFromJson('/config.json')
       .then(config => {
-        console.log('AppComponent: Configuration loaded successfully:', config);
-        console.log('AppComponent: Config has', config?.apiEndpoints?.length || 0, 'API endpoints');
+        this.debug.log('AppComponent: Configuration loaded successfully:', config);
+        this.debug.log('AppComponent: Config has', config?.apiEndpoints?.length || 0, 'API endpoints');
 
         // Clear ModelService cache so it can reload with the new configuration
         this.modelService.clearAllCaches();
@@ -73,7 +75,7 @@ export class AppComponent implements OnInit {
       })
       .catch(err => {
         this.configError = 'Failed to load application configuration.';
-        console.error('Error loading configuration:', err);
+        this.debug.error('Error loading configuration:', err);
         // Use default config to allow app to function
         this.configLoaded = true;
 

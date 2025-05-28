@@ -22,7 +22,7 @@
     width: 100%;
     display: flex;
     flex-direction: column; // Default stacked layout for mobile
-    gap: 1.5rem;
+    gap: 1rem;
       // Responsive layout for desktop (width > 541px)
     @media (min-width: 800px) {
       &.has-document {
@@ -63,7 +63,7 @@
 
   section {
     margin-top: 0; // Remove top margin as we're using gap in the container
-    padding: 1.5rem;
+    padding: 1rem;
     background-color: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #dee2e6;
@@ -158,24 +158,43 @@
 
     /* Simple Attributes Section */
     .simple-attributes-section {
-      margin-bottom: 1.5rem; // Reduced from 2rem for compactness
+      margin-bottom: 0.5rem;
     }
 
     .simple-attributes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 0.75rem; // Reduced from 1rem for compactness
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
       width: 100%;
+      align-items: flex-start;
+
+      // Target the resource-document-item components to make them tile-like
+      app-resource-document-item {
+        flex: 0 0 auto;
+        width: fit-content;
+        min-width: 180px;
+        max-width: 400px;
+
+        // Style the simple attribute containers within
+        ::ng-deep .simple-attribute-grid {
+          background: var(--bg-card, white);
+          border-radius: 6px;
+          border: 1px solid var(--fg-divider, #e0e0e0);
+          padding: 1rem;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+          height: 100%;
+        }
+      }
     }
 
     /* Complex Attributes Section */
     .complex-attributes-section {
-      margin-top: 1.5rem; // Reduced from 2rem for compactness
+      margin-top: 0.25rem;
     }
 
     .attributes-separator {
       position: relative;
-      margin: 1.5rem 0; // Reduced from 2rem for compactness
+      margin: 0.25rem 0;
       text-align: center;
 
       hr {
@@ -203,7 +222,8 @@
     .complex-attributes-container {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1rem;
+      width: 100%;
     }
 
     .complex-attribute-tile {
@@ -211,7 +231,7 @@
       background: white;
       border-radius: 8px;
       border: 1px solid #e0e0e0;
-      padding: 1.5rem;
+      padding: 1rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 
       // Make complex attributes span full width
@@ -219,120 +239,58 @@
         display: block;
         width: 100%;
 
-        // Allow simple attributes within complex attributes to flow horizontally
-        ::ng-deep .attribute-tile.simple-attribute {
-          display: inline-block;
-          width: auto;
-          min-width: 200px;
-          margin-right: 1rem;
-          margin-bottom: 0.5rem;
-          vertical-align: top;
-        }
+        // Ensure object and array types fill their parent horizontally
+        ::ng-deep .resource-document-item {
+          width: 100%;
 
-        // For object/array content, create horizontal flow for simple children
-        ::ng-deep .object-content,
-        ::ng-deep .array-content {
-          .simple-attribute-container {
-            display: inline-flex;
-            flex-direction: column;
-            width: auto;
-            min-width: 180px;
-            max-width: 250px;
-            margin-right: 1rem;
-            margin-bottom: 0.75rem;
-            padding: 0.75rem;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
-            vertical-align: top;
+          &[data-item-type="object"],
+          &[data-item-type="array"] {
+            width: 100%;
+
+            .unified-item-row {
+              width: 100%;
+            }
+
+            .expanded-content {
+              width: 100%;
+
+              .simple-items-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 0.75rem;
+                width: 100%;
+              }
+
+              .complex-items-container {
+                width: 100%;
+
+                .resource-document-item {
+                  width: 100%;
+                }
+              }
+            }
           }
         }
-      }
-    }
 
-    .attribute-tile {
-      background: white;
-      border-radius: 6px;
-      border: 1px solid #e0e0e0;
-      padding: 1rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-    }
-
-    .simple-attribute {
-      display: flex;
-      flex-direction: column;
-
-      .attribute-header {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.25rem; // Reduced from 0.5rem for compactness
-        margin-bottom: 0.25rem; // Reduced from 0.5rem for compactness
-        align-items: center;
-
-        strong {
-          font-weight: 600;
-          color: #2c3e50;
-          font-size: 1rem;
-        }
-
-        .attribute-type {
-          font-size: vars.$small-size;
-          color: #457B9D;
-          background-color: #F1FAEE;
-          padding: 2px 6px;
-          border-radius: 4px;
-          border: 1px solid #A8DADC;
-          font-weight: 500;
-        }
-
-        .attribute-description {
-          font-size: vars.$small-size;
-          color: #6c757d;
-          font-style: italic;
-          flex-basis: 100%;
-          margin-top: 0.15rem; // Reduced from 0.25rem for compactness
-        }
-      }
-
-      .attribute-value-row {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .attribute-value {
-        font-size: vars.$content-size * 1.1;
-        color: #333;
-        word-break: break-word;
-        padding: 0.25rem 0;
-        flex: 1;
-      }
-
-      .copy-btn {
-        background: none;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        padding: 0.25rem;
-        cursor: pointer;
-        color: #6c757d;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-
-        &:hover {
-          background: #f8f9fa;
-                  border-color: #6c757d;
-        color: #6c757d;
-        }
-
-        .material-icons {
-          font-size: 14px;
+        // Allow simple attributes within complex attributes to flow horizontally
+        ::ng-deep .simple-attribute-grid {
+          display: flex;
+          flex-direction: column;
+          width: auto;
+          min-width: 180px;
+          max-width: 250px;
+          margin-right: 1rem;
+          margin-bottom: 0.75rem;
+          padding: 0.75rem;
+          background: var(--bg-hover, #f8f9fa);
+          border-radius: 6px;
+          border: 1px solid var(--fg-divider, #e9ecef);
+          vertical-align: top;
         }
       }
     }
+
+    // Old attribute-tile and simple-attribute classes removed - now using resource-document-item components
 
     // Remove old styles that are now redundant
     .attributes-grid {
@@ -374,7 +332,7 @@
         }
 
         // Ensure color bars extend to the bottom in all nested items
-        ::ng-deep .simple-attribute-container::before,
+        ::ng-deep .simple-attribute-grid::before,
         ::ng-deep .unified-item-row.array-row::before,
         ::ng-deep .unified-item-row.object-row::before,
         ::ng-deep .unified-item-row.simple-row::before,
@@ -409,5 +367,83 @@ app-code-highlight {
 
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Font size specific adjustments for complex attributes layout */
+:host-context(body.font-size-small) {
+  .attributes-section {
+    .simple-attributes-grid {
+      gap: 0.5rem;
+
+      app-resource-document-item {
+        min-width: 150px;
+        max-width: 300px;
+      }
+    }
+
+    .complex-attribute-tile {
+      padding: 1rem;
+
+      app-resource-document-item {
+        ::ng-deep .simple-items-grid {
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+          gap: 0.5rem;
+        }
+
+        ::ng-deep .simple-attribute-grid {
+          min-width: 140px;
+          max-width: 200px;
+          padding: 0.5rem;
+          margin-right: 0.75rem;
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+}
+
+:host-context(body.font-size-medium) {
+  .attributes-section {
+    .simple-attributes-grid {
+      gap: 0.75rem;
+
+      app-resource-document-item {
+        min-width: 180px;
+        max-width: 400px;
+      }
+    }
+  }
+}
+
+:host-context(body.font-size-large) {
+  .attributes-section {
+    .simple-attributes-grid {
+      gap: 1rem;
+
+      app-resource-document-item {
+        min-width: 220px;
+        max-width: 500px;
+      }
+    }
+
+    .complex-attribute-tile {
+      padding: 2rem;
+
+      app-resource-document-item {
+        ::ng-deep .simple-items-grid {
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+          gap: 1rem;
+        }
+
+        ::ng-deep .simple-attribute-grid {
+          min-width: 220px;
+          max-width: 300px;
+          padding: 1rem;
+          margin-right: 1.5rem;
+          margin-bottom: 1rem;
+        }
+      }
+    }
   }
 }

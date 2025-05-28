@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfigService } from '../../services/config.service';
 import { BaseUrlService } from '../../services/base-url.service';
+import { DebugService } from '../../services/debug.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -88,6 +89,7 @@ export class BootstrapComponent implements OnInit {
   constructor(
     private configService: ConfigService,
     private baseUrlService: BaseUrlService,
+    private debug: DebugService,
     private router: Router
   ) {}
 
@@ -96,7 +98,7 @@ export class BootstrapComponent implements OnInit {
     this.configService.loadConfigFromJson('/config.json')
       .then(config => {
         this.configLoaded = true;
-        console.log('Configuration loaded successfully:', config);
+        this.debug.log('Configuration loaded successfully:', config);
 
         // Update base URL
         this.baseUrlService.updateBaseHref();
@@ -108,7 +110,7 @@ export class BootstrapComponent implements OnInit {
       })
       .catch(err => {
         this.error = 'Failed to load application configuration. Please try again.';
-        console.error('Error loading configuration:', err);
+        this.debug.error('Error loading configuration:', err);
       });
   }
 }

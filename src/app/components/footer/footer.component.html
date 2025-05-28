@@ -8,6 +8,11 @@
   <span class="spacer"></span>
   <span>APIs: </span>
   <ng-container *ngIf="capabilities$ | async as cap">
-    <a *ngFor="let api of cap.apis" href="{{ api }}" target="_blank">{{ api }}</a>
+    <ng-container *ngFor="let api of cap.apis">
+      <!-- Internal router links for specific API endpoints -->
+      <a *ngIf="isInternalRoute(api)" [routerLink]="getInternalRoute(api)">{{ api }}</a>
+      <!-- External links for other APIs -->
+      <a *ngIf="!isInternalRoute(api)" [href]="getExternalApiUrl(api)" target="_blank">{{ api }}</a>
+    </ng-container>
   </ng-container>
 </mat-toolbar>

@@ -38,15 +38,13 @@
     </span>
   </div>
 
-  <!-- Simple attributes with header and value sections -->
-  <div *ngIf="isSimpleValue(item.value)" class="simple-attribute-container">
-    <div class="attribute-header">
-      <strong>{{ item.key }}</strong>
-      <span class="attribute-type">
-        {{ item.itemModel?.type ? getDisplayType() : typeof item.value | titlecase }}
-      </span>
-      <span *ngIf="item.description" class="attribute-description">{{ item.description }}</span>
+  <!-- Simple attribute display -->
+  <div *ngIf="isSimpleValue(item.value)" class="simple-attribute-grid">
+    <div class="attribute-name">{{ item.key }}</div>
+    <div class="attribute-type">
+      {{ item.itemModel?.type ? getDisplayType() : typeof item.value | titlecase }}
     </div>
+    <div *ngIf="item.description" class="attribute-description">{{ item.description }}</div>
     <div class="attribute-value">
       <span *ngIf="isAnyType() && item.value !== null && item.value !== undefined" class="any-value">
         <app-code-highlight
@@ -57,11 +55,34 @@
       <span *ngIf="!isAnyType()"
             [class.null-value]="item.value === null"
             [class.undefined-value]="item.value === undefined">
-        {{ item.value === null ? 'null' : (item.value === undefined ? 'undefined' : item.value) }}
+        <!-- URL link -->
+        <a *ngIf="isUrl(item.value)"
+           [href]="item.value"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="url-link"
+           title="Open URL in new tab">
+          {{ item.value }}
+          <span class="material-icons external-link-icon">open_in_new</span>
+        </a>
+        <!-- XID link -->
+        <a *ngIf="isXid(item)"
+           [routerLink]="getXidRoute(item.value)"
+           class="xid-link"
+           title="Navigate to {{ item.value }} in this registry">
+          {{ item.value }}
+          <span class="material-icons internal-link-icon">link</span>
+        </a>
+        <!-- Regular value -->
+        <span *ngIf="!isUrl(item.value) && !isXid(item)">
+          {{ item.value === null ? 'null' : (item.value === undefined ? 'undefined' : item.value) }}
         </span>
-        <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
+      </span>
+    </div>
+    <div class="attribute-actions">
+      <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
         <i class="material-icons">content_copy</i>
-        </button>
+      </button>
     </div>
   </div>  <!-- Expanded content for arrays and objects -->
   <div *ngIf="isExpandable() && isExpanded()"
@@ -81,14 +102,35 @@
         </div>
       </div>
 
-      <!-- Display array items -->
+      <!-- Display array items with new layout -->
       <ng-container *ngIf="!isAnyType()">
-        <ng-container *ngFor="let arrayItem of getArrayItems(); let i = index">
-          <app-resource-document-item
-            [item]="arrayItem"
-            [nestingLevel]="nestingLevel + 1">
-          </app-resource-document-item>
-        </ng-container>
+        <!-- Simple attributes section -->
+        <div *ngIf="getSimpleArrayItems().length > 0" class="simple-items-section">
+          <div class="simple-items-grid">
+            <ng-container *ngFor="let arrayItem of getSimpleArrayItems(); let i = index">
+              <app-resource-document-item
+                [item]="arrayItem"
+                [nestingLevel]="nestingLevel + 1">
+              </app-resource-document-item>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Complex attributes section -->
+        <div *ngIf="getComplexArrayItems().length > 0" class="complex-items-section">
+          <div *ngIf="getSimpleArrayItems().length > 0" class="items-separator">
+            <hr>
+            <span class="separator-label">Complex Items</span>
+          </div>
+          <div class="complex-items-container">
+            <ng-container *ngFor="let arrayItem of getComplexArrayItems(); let i = index">
+              <app-resource-document-item
+                [item]="arrayItem"
+                [nestingLevel]="nestingLevel + 1">
+              </app-resource-document-item>
+            </ng-container>
+          </div>
+        </div>
       </ng-container>
 
       <!-- Display JSON for 'any' type array content -->
@@ -104,14 +146,34 @@
     <div *ngIf="isObject(item.value)" class="object-items">
       <div *ngIf="Object.keys(item.value).length === 0" class="empty-notice">No properties</div>
 
-      <!-- Display object properties -->
+      <!-- Display object properties with new layout -->
       <ng-container *ngIf="!isAnyType()">
-        <ng-container *ngFor="let objItem of getObjectItems()">
-          <app-resource-document-item
-            [item]="objItem"
-            [nestingLevel]="nestingLevel + 1">
-          </app-resource-document-item>
-        </ng-container>
+        <!-- Simple attributes section -->
+        <div *ngIf="getSimpleObjectItems().length > 0" class="simple-items-section">
+          <div class="simple-items-grid">
+            <ng-container *ngFor="let objItem of getSimpleObjectItems()">
+              <app-resource-document-item
+                [item]="objItem"
+                [nestingLevel]="nestingLevel + 1">
+              </app-resource-document-item>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Complex attributes section -->
+        <div *ngIf="getComplexObjectItems().length > 0" class="complex-items-section">
+          <div *ngIf="getSimpleObjectItems().length > 0" class="items-separator">
+            <hr>
+          </div>
+          <div class="complex-items-container">
+            <ng-container *ngFor="let objItem of getComplexObjectItems()">
+              <app-resource-document-item
+                [item]="objItem"
+                [nestingLevel]="nestingLevel + 1">
+              </app-resource-document-item>
+            </ng-container>
+          </div>
+        </div>
       </ng-container>
 
       <!-- Display JSON for 'any' type object content -->

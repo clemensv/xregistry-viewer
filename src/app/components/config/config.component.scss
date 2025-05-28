@@ -144,3 +144,128 @@ button[mat-icon-button]:hover:not([disabled]) {
     align-items: stretch;
   }
 }
+
+/* Font size specific adjustments */
+:host-context(body.font-size-small) {
+  .config-page-container {
+    padding-top: 1rem;
+  }
+
+  .config-card {
+    padding: 0.8rem 1rem;
+    gap: 0.8rem;
+  }
+
+  mat-card-header {
+    margin-bottom: 0.4rem;
+  }
+
+  mat-card-title {
+    font-size: 1.1rem;
+  }
+
+  mat-card-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .endpoint-section {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .endpoint-section h3 {
+    margin-bottom: 0.2rem;
+    font-size: 0.9rem;
+  }
+
+  .endpoint-row {
+    gap: 0.3rem;
+    margin-bottom: 0;
+  }
+
+  mat-form-field input {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.15rem;
+  }
+
+  .button-row {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  button[mat-stroked-button], button[mat-raised-button], button[mat-button] {
+    min-width: 90px;
+    font-size: 0.85rem;
+    height: 32px;
+  }
+
+  button[mat-icon-button] {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+:host-context(body.font-size-large) {
+  .config-page-container {
+    padding-top: 3rem;
+  }
+
+  .config-card {
+    padding: 1.5rem 2rem;
+    gap: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    border-radius: 16px;
+  }
+
+  mat-card-header {
+    margin-bottom: 1rem;
+  }
+
+  mat-card-title {
+    font-size: 1.5rem;
+  }
+
+  mat-card-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .endpoint-section {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    gap: 1rem;
+    border-radius: 12px;
+  }
+
+  .endpoint-section h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    gap: 0.75rem;
+  }
+
+  .endpoint-row {
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  mat-form-field input {
+    font-size: 1.1rem;
+    padding: 0.5rem 0.3rem;
+  }
+
+  .button-row {
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  button[mat-stroked-button], button[mat-raised-button], button[mat-button] {
+    min-width: 130px;
+    font-size: 1.1rem;
+    height: 44px;
+  }
+
+  button[mat-icon-button] {
+    width: 44px;
+    height: 44px;
+  }
+}

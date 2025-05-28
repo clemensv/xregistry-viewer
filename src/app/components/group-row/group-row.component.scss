@@ -67,3 +67,94 @@ a {
 .resource-separator {
   color: #adb5bd;
 }
+
+/* Font size specific adjustments */
+:host-context(body.font-size-small) {
+  /* Ensure all table cells use consistent small font size */
+  :host {
+    font-size: 0.75rem;
+  }
+
+  .no-wrap, .description-cell {
+    font-size: 0.75rem;
+  }
+
+  a {
+    font-size: 0.75rem;
+  }
+
+  .group-icon-small {
+    font-size: 1rem !important;
+  }
+
+  .resource-link-small {
+    font-size: 0.7rem;
+  }
+
+  .resource-count-small {
+    font-size: 0.65rem;
+  }
+
+  .resource-types-compact {
+    gap: 0.15rem;
+  }
+}
+
+:host-context(body.font-size-medium) {
+  /* Ensure all table cells use consistent medium font size */
+  :host {
+    font-size: 0.9rem;
+  }
+
+  .no-wrap, .description-cell {
+    font-size: 0.9rem;
+  }
+
+  a {
+    font-size: 0.9rem;
+  }
+
+  .group-icon-small {
+    font-size: 1.2rem !important;
+  }
+
+  .resource-link-small {
+    font-size: 0.85rem;
+  }
+
+  .resource-count-small {
+    font-size: 0.8rem;
+  }
+}
+
+:host-context(body.font-size-large) {
+  /* Ensure all table cells use consistent large font size */
+  :host {
+    font-size: 0.95rem;
+  }
+
+  .no-wrap, .description-cell {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  a {
+    font-size: 0.95rem;
+  }
+
+  .group-icon-small {
+    font-size: 1.4rem !important;
+  }
+
+  .resource-link-small {
+    font-size: 0.9rem;
+  }
+
+  .resource-count-small {
+    font-size: 0.85rem;
+  }
+
+  .resource-types-compact {
+    gap: 0.4rem;
+  }
+}

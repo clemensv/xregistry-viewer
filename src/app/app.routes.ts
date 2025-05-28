@@ -1,16 +1,19 @@
 import { Routes } from '@angular/router';
 import { GroupTypesComponent } from './components/group-types/group-types.component';
 import { GroupsComponent } from './components/groups/groups.component';
-  import { ResourcesComponent } from './components/resources/resources.component';
+import { ResourcesComponent } from './components/resources/resources.component';
 import { ResourceComponent } from './components/resource/resource.component';
 import { VersionDetailComponent } from './components/version-detail/version-detail.component';
 import { ConfigComponent } from './components/config/config.component';
 import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
+import { ModelComponent } from './components/model/model.component';
 
 export const routes: Routes = [
   { path: '', component: GroupTypesComponent },
   { path: 'bootstrap', component: BootstrapComponent },
   { path: 'config', component: ConfigComponent },
+  { path: 'model', component: ModelComponent },
+  { path: 'model/:groupType', component: ModelComponent },
   { path: ':groupType', component: GroupsComponent },
   // Redirect group detail route to grid view with highlight param
   { path: ':groupType/:groupId', redirectTo: ':groupType?highlight=:groupId', pathMatch: 'full' },

@@ -1,0 +1,77 @@
+<div class="model-page">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner">
+      <span class="material-icons spinning">refresh</span>
+    </div>
+    <div class="loading-text">Loading registry model...</div>
+  </div>
+
+  <!-- Model Content -->
+  <div *ngIf="!loading && registryModel" class="model-content">
+
+    <!-- Registry Overview -->
+    <section class="registry-overview">
+      <div class="section-header">
+        <span class="material-icons section-icon">hub</span>
+        <h1>Registry Model</h1>
+      </div>
+
+      <div class="registry-info">
+        <div class="registry-title">
+          <h2>{{ registryModel.name }}</h2>
+          <span class="registry-id">{{ registryModel.registryid }}</span>
+        </div>
+        <p class="registry-description" *ngIf="registryModel.description">
+          {{ registryModel.description }}
+        </p>
+      </div>
+
+      <div class="registry-details">
+        <app-resource-document-item
+          *ngFor="let item of registryDocumentItems"
+          [item]="item"
+          [nestingLevel]="0"
+          [initialExpanded]="item.isExpanded || false">
+        </app-resource-document-item>
+      </div>
+    </section>
+
+    <!-- Group Types -->
+    <section class="group-types-section">
+      <div class="section-header">
+        <span class="material-icons section-icon">category</span>
+        <h2>Group Types</h2>
+        <span class="count-badge">{{ groupTypes.length }}</span>
+      </div>
+
+      <div class="group-types-list">
+        <div
+          *ngFor="let gt of groupTypes"
+          class="group-type-container"
+          [id]="'group-type-' + gt.groupType">
+
+          <app-group-type-model
+            [groupType]="gt.groupType"
+            [model]="gt.model"
+            [origins]="gt.origins">
+          </app-group-type-model>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && !registryModel" class="error-state">
+    <span class="material-icons error-icon">error_outline</span>
+    <h2>Unable to Load Registry Model</h2>
+    <p>There was an error loading the registry model. Please check your configuration and try again.</p>
+  </div>
+
+  <!-- Loading Progress -->
+  <div *ngIf="loadingProgress && !loading" class="progress-indicator">
+    <span class="material-icons spinning">sync</span>
+    <span>Loading additional endpoints...</span>
+  </div>
+</div>

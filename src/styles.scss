@@ -55,46 +55,288 @@ body {
 }
 
 /* Font size system for high information density */
-/* Small font size variant */
+/* Small font size variant - Optimized for information density */
 body.font-size-small {
-  h1 {font-size: 1.2rem;}
-  h2 {font-size: 1.0rem;}
-  h3 {font-size: 0.9rem;}
-  h4 {font-size: 0.8rem;}
-  h5 {font-size: 0.75rem;}
-  h6 {font-size: 0.7rem;}
+  /* Typography */
+  h1 {font-size: 1.2rem; margin: 0.5rem 0;}
+  h2 {font-size: 1.0rem; margin: 0.4rem 0;}
+  h3 {font-size: 0.9rem; margin: 0.3rem 0;}
+  h4 {font-size: 0.8rem; margin: 0.25rem 0;}
+  h5 {font-size: 0.75rem; margin: 0.2rem 0;}
+  h6 {font-size: 0.7rem; margin: 0.15rem 0;}
   p, div, span, a, input, button, select, textarea {font-size: 0.75rem;}
-  .auxiliary-text {font-size: 0.6rem;} /* 8pt equivalent */
+  .auxiliary-text {font-size: 0.6rem;}
   .table-text {font-size: 0.7rem;}
   .card-text {font-size: 0.72rem;}
+
+  /* Spacing and Layout Density */
+  --spacing-xs: 0.125rem;
+  --spacing-sm: 0.25rem;
+  --spacing-md: 0.375rem;
+  --spacing-lg: 0.5rem;
+  --spacing-xl: 0.75rem;
+
+  /* Reduced padding and margins */
+  .mat-toolbar {
+    min-height: 48px !important;
+    padding: 0 0.5rem !important;
+  }
+
+  .mat-mdc-button, .mat-mdc-icon-button {
+    height: 32px !important;
+    line-height: 32px !important;
+    padding: 0 0.5rem !important;
+  }
+
+  .mat-mdc-menu-item {
+    min-height: 36px !important;
+    padding: 0 0.75rem !important;
+  }
+
+  /* Compact cards and containers */
+  .mat-mdc-card, .section-container, .grid-item {
+    padding: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Compact tables */
+  .mat-mdc-table {
+    .mat-mdc-row, .mat-mdc-header-row {
+      height: 36px !important;
+    }
+    .mat-mdc-cell, .mat-mdc-header-cell {
+      padding: 0 0.5rem !important;
+    }
+  }
+
+  /* Compact form fields */
+  .mat-mdc-form-field {
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Breadcrumb compact */
+  .breadcrumb {
+    padding: 0.25rem 0.5rem !important; /* Match small header padding */
+    &-link, &-current {
+      padding: 0.125rem 0.25rem !important;
+    }
+    &-separator {
+      margin: 0 0.25rem !important;
+    }
+  }
+
+  /* Page sections */
+  .page-container {
+    padding: 0.5rem !important;
+  }
+
+  /* Reduce gaps in flex containers */
+  .flex-container {
+    gap: 0.25rem !important;
+  }
+
+  /* Compact pagination */
+  .pagination {
+    gap: 0.125rem !important;
+    button {
+      padding: 0.25rem 0.5rem !important;
+      margin: 0 0.125rem !important;
+    }
+  }
 }
 
-/* Medium font size variant (default) */
+/* Medium font size variant (default) - Balanced layout */
 body.font-size-medium {
-  h1 {font-size: 1.4rem;}
-  h2 {font-size: 1.15rem;}
-  h3 {font-size: 1.0rem;}
-  h4 {font-size: 0.9rem;}
-  h5 {font-size: 0.8rem;}
-  h6 {font-size: 0.75rem;}
+  /* Typography */
+  h1 {font-size: 1.4rem; margin: 1rem 0;}
+  h2 {font-size: 1.15rem; margin: 0.875rem 0;}
+  h3 {font-size: 1.0rem; margin: 0.75rem 0;}
+  h4 {font-size: 0.9rem; margin: 0.625rem 0;}
+  h5 {font-size: 0.8rem; margin: 0.5rem 0;}
+  h6 {font-size: 0.75rem; margin: 0.375rem 0;}
   p, div, span, a, input, button, select, textarea {font-size: 0.85rem;}
-  .auxiliary-text {font-size: 0.7rem;} /* 8pt equivalent */
+  .auxiliary-text {font-size: 0.7rem;}
   .table-text {font-size: 0.8rem;}
   .card-text {font-size: 0.82rem;}
+
+  /* Spacing and Layout */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+
+  /* Standard Material Design spacing */
+  .mat-toolbar {
+    min-height: 56px !important;
+    padding: 0 1rem !important;
+  }
+
+  .mat-mdc-button, .mat-mdc-icon-button {
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+
+  .mat-mdc-menu-item {
+    min-height: 48px !important;
+    padding: 0 1rem !important;
+  }
+
+  /* Standard cards and containers */
+  .mat-mdc-card, .section-container, .grid-item {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Standard tables */
+  .mat-mdc-table {
+    .mat-mdc-row, .mat-mdc-header-row {
+      height: 48px !important;
+    }
+    .mat-mdc-cell, .mat-mdc-header-cell {
+      padding: 0 0.75rem !important;
+    }
+  }
+
+  /* Standard form fields */
+  .mat-mdc-form-field {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Breadcrumb standard */
+  .breadcrumb {
+    padding: 0.5rem 1rem !important; /* Match medium header padding */
+    &-link, &-current {
+      padding: 0.25rem 0.5rem !important;
+    }
+    &-separator {
+      margin: 0 0.5rem !important;
+    }
+  }
+
+  /* Page sections */
+  .page-container {
+    padding: 1rem !important;
+  }
+
+  /* Standard gaps in flex containers */
+  .flex-container {
+    gap: 0.5rem !important;
+  }
+
+  /* Standard pagination */
+  .pagination {
+    gap: 0.25rem !important;
+    button {
+      padding: 0.5rem 0.75rem !important;
+      margin: 0 0.25rem !important;
+    }
+  }
 }
 
-/* Large font size variant */
+/* Large font size variant - Accessibility focused with generous spacing */
 body.font-size-large {
-  h1 {font-size: 1.6rem;}
-  h2 {font-size: 1.3rem;}
-  h3 {font-size: 1.1rem;}
-  h4 {font-size: 0.95rem;}
-  h5 {font-size: 0.85rem;}
-  h6 {font-size: 0.8rem;}
-  p, div, span, a, input, button, select, textarea {font-size: 0.9rem;}
-  .auxiliary-text {font-size: 0.75rem;} /* 8pt equivalent */
+  /* Typography */
+  h1 {font-size: 1.6rem; margin: 1.5rem 0;}
+  h2 {font-size: 1.3rem; margin: 1.25rem 0;}
+  h3 {font-size: 1.1rem; margin: 1rem 0;}
+  h4 {font-size: 0.95rem; margin: 0.875rem 0;}
+  h5 {font-size: 0.85rem; margin: 0.75rem 0;}
+  h6 {font-size: 0.8rem; margin: 0.625rem 0;}
+  p, div, span, a, input, button, select, textarea {font-size: 0.9rem; line-height: 1.6;}
+  .auxiliary-text {font-size: 0.75rem;}
   .table-text {font-size: 0.85rem;}
   .card-text {font-size: 0.87rem;}
+
+  /* Spacing and Layout - Generous whitespace */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Larger toolbar and controls */
+  .mat-toolbar {
+    min-height: 64px !important;
+    padding: 0 1.5rem !important;
+  }
+
+  .mat-mdc-button, .mat-mdc-icon-button {
+    height: 44px !important;
+    line-height: 44px !important;
+    padding: 0 1rem !important;
+    min-width: 44px !important;
+  }
+
+  .mat-mdc-menu-item {
+    min-height: 56px !important;
+    padding: 0 1.5rem !important;
+  }
+
+  /* Spacious cards and containers */
+  .mat-mdc-card, .section-container, .grid-item {
+    padding: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* Spacious tables */
+  .mat-mdc-table {
+    .mat-mdc-row, .mat-mdc-header-row {
+      height: 56px !important;
+    }
+    .mat-mdc-cell, .mat-mdc-header-cell {
+      padding: 0 1rem !important;
+    }
+  }
+
+  /* Spacious form fields */
+  .mat-mdc-form-field {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Breadcrumb spacious */
+  .breadcrumb {
+    padding: 0.75rem 1.5rem !important; /* Match large header padding */
+    &-link, &-current {
+      padding: 0.375rem 0.75rem !important;
+    }
+    &-separator {
+      margin: 0 0.75rem !important;
+    }
+  }
+
+  /* Page sections with extra padding */
+  .page-container {
+    padding: 1.5rem !important;
+  }
+
+  /* Larger gaps in flex containers */
+  .flex-container {
+    gap: 1rem !important;
+  }
+
+  /* Spacious pagination */
+  .pagination {
+    gap: 0.5rem !important;
+    button {
+      padding: 0.75rem 1rem !important;
+      margin: 0 0.375rem !important;
+      min-width: 44px !important;
+      min-height: 44px !important;
+    }
+  }
+
+  /* Increase touch targets */
+  button, a, .clickable {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Extra spacing between sections */
+  section + section {
+    margin-top: 2rem !important;
+  }
 }
 
 /* Dark theme */
@@ -206,9 +448,9 @@ body.theme-dark {
   .grid-item,
   .registry-card,
   .page-container {
-    background-color: #2d2d2d !important;
-    color: #e0e0e0 !important;
-    border-color: #404040 !important;
+    background-color: var(--bg-card, #2d2d2d) !important;
+    color: var(--fg-text, #e0e0e0) !important;
+    border-color: var(--fg-border, #404040) !important;
   }
 
   /* Pagination and navigation */
@@ -268,6 +510,193 @@ body.theme-dark {
   .divider {
     border-color: #404040 !important;
   }
+
+  /* Resource and group table overrides */
+  .resources-table,
+  .group-types-table {
+    background-color: var(--bg-card, #2d2d2d) !important;
+    color: var(--fg-text, #e0e0e0) !important;
+
+    th, td {
+      border-color: var(--fg-divider, #404040) !important;
+      color: var(--fg-text, #e0e0e0) !important;
+    }
+
+    th {
+      background-color: var(--bg-elevated, #3d3d3d) !important;
+      color: var(--fg-secondary-text, #b0b0b0) !important;
+    }
+
+    tr:hover td {
+      background-color: var(--bg-hover, #3d3d3d) !important;
+    }
+
+    a {
+      color: var(--link-color, #6d9eeb) !important;
+    }
+  }
+
+  /* Attribute and object styling */
+  .attribute {
+    color: var(--fg-text, #e0e0e0) !important;
+
+    strong {
+      color: var(--fg-text, #e0e0e0) !important;
+    }
+
+    span {
+      color: var(--fg-text, #e0e0e0) !important;
+    }
+
+    pre {
+      background-color: var(--code-bg, #1d1d1d) !important;
+      color: var(--fg-text, #e0e0e0) !important;
+      border-color: var(--fg-border, #404040) !important;
+    }
+
+    .object-array {
+      background-color: var(--bg-hover, #3d3d3d) !important;
+      border-color: var(--fg-border, #404040) !important;
+      color: var(--fg-text, #e0e0e0) !important;
+
+      .object-item {
+        border-color: var(--fg-divider, #404040) !important;
+      }
+
+      .detail-label {
+        color: var(--fg-secondary-text, #b0b0b0) !important;
+
+        .detail-value {
+          color: var(--fg-text, #e0e0e0) !important;
+        }
+      }
+    }
+  }
+
+  /* Document item styling */
+  .resource-document-item {
+    .unified-item-row {
+      background-color: var(--bg-elevated, #3d3d3d) !important;
+      border-color: var(--fg-border, #404040) !important;
+      color: var(--fg-text, #e0e0e0) !important;
+
+      strong {
+        color: var(--fg-text, #e0e0e0) !important;
+      }
+
+      .item-count,
+      .item-description {
+        color: var(--fg-secondary-text, #b0b0b0) !important;
+      }
+
+      .item-model-type {
+        background-color: var(--bg-hover, #3d3d3d) !important;
+        border-color: var(--fg-border, #404040) !important;
+        color: var(--info-color, #87ceeb) !important;
+      }
+    }
+
+    .expanded-content {
+      background-color: var(--bg-elevated, #3d3d3d) !important;
+      border-color: var(--fg-border, #404040) !important;
+
+      .empty-notice {
+        color: var(--fg-secondary-text, #b0b0b0) !important;
+      }
+    }
+
+    .simple-attribute-container {
+      background-color: var(--bg-elevated, #3d3d3d) !important;
+
+      .attribute-header {
+        strong {
+          color: var(--fg-secondary-text, #b0b0b0) !important;
+        }
+
+        .attribute-type {
+          background-color: var(--bg-card, #2d2d2d) !important;
+          border-color: var(--fg-border, #404040) !important;
+          color: var(--fg-text, #e0e0e0) !important;
+        }
+
+        .attribute-description {
+          color: var(--fg-secondary-text, #b0b0b0) !important;
+        }
+      }
+
+      .attribute-value {
+        span:not(.copy-btn) {
+          background-color: var(--bg-card, #2d2d2d) !important;
+          border-color: var(--fg-border, #404040) !important;
+          color: var(--fg-text, #e0e0e0) !important;
+
+          &.null-value {
+            color: var(--fg-tertiary-text, #888888) !important;
+          }
+
+          &.undefined-value {
+            color: var(--primary-color, #6d9eeb) !important;
+          }
+        }
+      }
+    }
+  }
+
+  /* Tile styling */
+  .tile {
+    background-color: var(--primary-color, #6d9eeb) !important;
+    color: #1a1a1a !important;
+
+    &:hover {
+      background-color: var(--primary-hover-color, #5a6268) !important;
+    }
+  }
+
+  .tile-footer {
+    border-color: var(--fg-divider, #404040) !important;
+    color: var(--fg-secondary-text, #b0b0b0) !important;
+  }
+
+  /* Resource type pills */
+  .resource-type-pill {
+    background-color: var(--bg-hover, #3d3d3d) !important;
+    color: var(--fg-secondary-text, #b0b0b0) !important;
+  }
+
+  /* Section styling */
+  section {
+    background-color: var(--bg-elevated, #3d3d3d) !important;
+    color: var(--fg-text, #e0e0e0) !important;
+
+    h3 {
+      color: var(--fg-text, #e0e0e0) !important;
+    }
+
+    pre {
+      background-color: var(--code-bg, #1d1d1d) !important;
+      color: var(--fg-text, #e0e0e0) !important;
+      border-color: var(--fg-border, #404040) !important;
+    }
+
+    .loading-document {
+      background-color: var(--bg-hover, #3d3d3d) !important;
+      color: var(--info-color, #87ceeb) !important;
+    }
+
+    .document-error {
+      background-color: var(--bg-hover, #3d3d3d) !important;
+      color: var(--error-color, #ff6b6b) !important;
+    }
+
+    .download-btn {
+      background-color: var(--primary-color, #6d9eeb) !important;
+      color: #1a1a1a !important;
+
+      &:hover {
+        background-color: var(--primary-hover-color, #5a6268) !important;
+      }
+    }
+  }
 }
 
 /* Light theme (default) */
@@ -304,7 +733,7 @@ body.theme-light {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  padding: 0.5rem 0;
+  padding: 0.5rem 1rem; /* Match header padding */
   background-color: var(--bg-elevated, #f8f9fa);
   border-bottom: none;
   margin-bottom: 0;
@@ -370,7 +799,7 @@ body.theme-light {
 // Responsive breadcrumb adjustments
 @media (max-width: 768px) {
   .breadcrumb {
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem; /* Reduced but still aligned */
 
     &-separator {
       margin: 0 0.25rem;
@@ -499,9 +928,12 @@ code {
 
 /* Override section containers */
 .section-container {
-  background-color: var(--bg-card, white) !important;
-  color: var(--fg-text, #333) !important;
-  border-color: var(--fg-border, #dee2e6) !important;
+  width: 100%;
+  background-color: var(--bg-card, #fff);
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  padding: 0.9rem;
+  margin-bottom: 0.9rem;
 }
 
 /* Override grid items */
@@ -543,20 +975,22 @@ button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-bu
   flex-direction: column;
   flex: 1;
   min-height: 0; /* Allow flex shrinking */
-  overflow-y: auto;
-  
-  /* 16:9 aspect ratio constraint for main content area */
-  max-width: 100vw;
-  aspect-ratio: 16 / 9;
-  max-height: calc(100vh - 200px); /* Account for header and footer space */
+  overflow: visible; /* Allow popups to overflow */
 }
 
 /* Content area wrapper with aspect ratio enforcement */
 .main-container > * {
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
   box-sizing: border-box;
+  flex: 1; /* Allow components to fill available height */
+}
+
+/* Router outlet content should fill available height */
+router-outlet + * {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Consistent inner content width */
@@ -1056,11 +1490,11 @@ h4 {  font-size: 1.02rem;
 }
 
 .tile-success {
-  background-color: #4CAF50;  // Green 500
+  background-color: var(--success-color, #4CAF50);  // Green 500
   color: white;
 
   &:hover {
-    background-color: #388E3C;  // Green 700
+    background-color: var(--success-color, #388E3C);  // Green 700
   }
 }
 
@@ -1103,7 +1537,7 @@ h4 {  font-size: 1.02rem;
   margin-left: 4px;
   cursor: pointer;
   vertical-align: middle;
-  color: #888;
+  color: var(--fg-secondary-text, #888);
   border-radius: 3px;
   font-size: 1em;
   line-height: 1;
@@ -1118,8 +1552,8 @@ h4 {  font-size: 1.02rem;
   }
 
   &:hover, &:focus {
-    background: #f0f0f0;
-    color: #222;
+    background: var(--bg-hover, #f0f0f0);
+    color: var(--fg-text, #222);
     outline: none;
   }
 }
@@ -1139,4 +1573,144 @@ app-footer {
   background: white;
   border-top: 1px solid #e0e0e0;
   box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+}
+
+/* Utility classes for responsive spacing */
+.mb-xs { margin-bottom: var(--spacing-xs) !important; }
+.mb-sm { margin-bottom: var(--spacing-sm) !important; }
+.mb-md { margin-bottom: var(--spacing-md) !important; }
+.mb-lg { margin-bottom: var(--spacing-lg) !important; }
+.mb-xl { margin-bottom: var(--spacing-xl) !important; }
+
+.mt-xs { margin-top: var(--spacing-xs) !important; }
+.mt-sm { margin-top: var(--spacing-sm) !important; }
+.mt-md { margin-top: var(--spacing-md) !important; }
+.mt-lg { margin-top: var(--spacing-lg) !important; }
+.mt-xl { margin-top: var(--spacing-xl) !important; }
+
+.p-xs { padding: var(--spacing-xs) !important; }
+.p-sm { padding: var(--spacing-sm) !important; }
+.p-md { padding: var(--spacing-md) !important; }
+.p-lg { padding: var(--spacing-lg) !important; }
+.p-xl { padding: var(--spacing-xl) !important; }
+
+.gap-xs { gap: var(--spacing-xs) !important; }
+.gap-sm { gap: var(--spacing-sm) !important; }
+.gap-md { gap: var(--spacing-md) !important; }
+.gap-lg { gap: var(--spacing-lg) !important; }
+.gap-xl { gap: var(--spacing-xl) !important; }
+
+/* List and item spacing adjustments */
+body.font-size-small {
+  ul, ol {
+    padding-left: 1rem;
+    margin: 0.25rem 0;
+
+    li {
+      margin-bottom: 0.125rem;
+    }
+  }
+
+  dl {
+    margin: 0.25rem 0;
+
+    dt {
+      margin-top: 0.25rem;
+    }
+
+    dd {
+      margin-left: 0.75rem;
+      margin-bottom: 0.125rem;
+    }
+  }
+}
+
+body.font-size-large {
+  ul, ol {
+    padding-left: 2rem;
+    margin: 1rem 0;
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  dl {
+    margin: 1rem 0;
+
+    dt {
+      margin-top: 0.75rem;
+    }
+
+    dd {
+      margin-left: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+}
+
+/* Dialog and modal adjustments */
+body.font-size-small {
+  .mat-mdc-dialog-container {
+    padding: 0.75rem !important;
+  }
+
+  .mat-mdc-dialog-title {
+    margin: 0 0 0.5rem 0 !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 0.5rem !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 0.5rem !important;
+    gap: 0.25rem !important;
+  }
+}
+
+body.font-size-large {
+  .mat-mdc-dialog-container {
+    padding: 2rem !important;
+  }
+
+  .mat-mdc-dialog-title {
+    margin: 0 0 1.5rem 0 !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 1.5rem !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 1.5rem !important;
+    gap: 1rem !important;
+  }
+}
+
+/* Chip and badge density adjustments */
+body.font-size-small {
+  .mat-mdc-chip {
+    height: 24px !important;
+    padding: 0 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .badge, .chip, .status-badge {
+    padding: 0.125rem 0.375rem !important;
+    font-size: 0.65rem !important;
+  }
+}
+
+body.font-size-large {
+  .mat-mdc-chip {
+    height: 36px !important;
+    padding: 0 1rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .badge, .chip, .status-badge {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
 }

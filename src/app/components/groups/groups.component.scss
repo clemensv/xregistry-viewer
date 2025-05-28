@@ -96,10 +96,10 @@ app-pagination {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: white;
+  background: var(--bg-card, white);
   border-radius: $radius;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  border: 1px solid c(neutral);
+  border: 1px solid var(--fg-divider, c(neutral));
   @include chromeline(#9575cd); /* Purple for group objects */
   min-height: 210px; // Keep minimum height for consistency
   // Removed max-height and fixed height to allow vertical expansion
@@ -113,13 +113,13 @@ app-pagination {
 .grid-item:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: c(neutral);
+  border-color: var(--fg-divider, c(neutral));
 }
 
 .grid-item h3 {
   font-size: $heading-size;
   font-weight: 600;
-  color: c(dark);
+  color: var(--fg-text, c(dark));
   margin-top: 0;
   margin-bottom: s(s);
 }
@@ -144,12 +144,12 @@ app-pagination {
 
       strong {
         font-weight: 600;
-        color: #2c3e50;
+        color: var(--fg-text, #2c3e50);
         font-size: vars.$content-size;
       }
     }    .attribute-value {
       font-size: $body-size;
-      color: c(text);
+      color: var(--fg-text, c(text));
       word-break: break-word;
       padding: s(xs) 0;
       // Removed line-clamp and overflow restrictions to allow full content display
@@ -165,12 +165,12 @@ app-pagination {
   margin-bottom: 0.25rem;
 
   .label-key {
-    color: #457B9D;
+    color: var(--info-color, #457B9D);
     font-weight: 500;
   }
 
   .label-value {
-    color: #333;
+    color: var(--fg-text, #333);
     margin-left: 0.25rem;
   }
 }
@@ -184,7 +184,7 @@ app-pagination {
   }
 
   .resource-link {
-    color: #457B9D;
+    color: var(--info-color, #457B9D);
     text-decoration: none;
     font-weight: 500;
 
@@ -194,7 +194,7 @@ app-pagination {
   }
 
   .resource-count {
-    color: #6c757d;
+    color: var(--fg-secondary-text, #6c757d);
     font-size: vars.$small-size;
   }
 }
@@ -204,7 +204,7 @@ app-pagination {
   display: inline-block;
   margin-top: 16px;
   padding: 8px 15px;
-  background-color: #3498db; /* Match the download button from resource document */
+  background-color: var(--primary-color, #3498db); /* Match the download button from resource document */
   color: #fff !important; /* Force white text color */
   text-decoration: none;
   border-radius: 5px;
@@ -218,7 +218,7 @@ app-pagination {
 }
 
 .tile:hover {
-  background-color: #2980b9; /* Match hover color from resource document */
+  background-color: var(--primary-hover-color, #2980b9); /* Match hover color from resource document */
   text-decoration: none !important;
 }
 
@@ -230,7 +230,7 @@ app-pagination {
 .tile-footer {
   margin-top: 8px;
   font-size: vars.$small-size;
-  color: #6c757d; /* Match text color from resource document */
+  color: var(--fg-secondary-text, #6c757d); /* Match text color from resource document */
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -239,9 +239,9 @@ app-pagination {
 
 .tile-footer {
   margin-top: 1.1em;
-  border-top: 1px solid #ececec;
+  border-top: 1px solid var(--fg-divider, #ececec);
   padding-top: 0.5em;
-  color: #888;
+  color: var(--fg-secondary-text, #888);
   font-size: 0.8rem; /* Smaller font for footer text */
   display: flex;
   justify-content: flex-end;
@@ -254,7 +254,7 @@ h3 {
   font-size: 1.15rem;
   font-weight: 700;
   margin-bottom: 0.7rem;
-  color: #2c3e50;
+  color: var(--fg-text, #2c3e50);
   word-break: break-all;
 }
 
@@ -362,7 +362,7 @@ h3 {
 }
 
 .resource-count {
-  color: #6c757d;
+  color: var(--fg-secondary-text, #6c757d);
   font-size: 0.98rem;
   margin-left: 2px;
 }
@@ -383,12 +383,12 @@ h3 {
 .description-attribute {
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--fg-divider, #e9ecef);
 }
 
 /* Added styles for array-like appearance */
 .item-count {
-  color: #6c757d;
+  color: var(--fg-secondary-text, #6c757d);
   font-size: vars.$small-size;
   margin-right: 0.5rem;
   font-weight: normal;
@@ -448,7 +448,7 @@ h3 {
 
 .attribute-key {
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--fg-text, #2c3e50);
   min-width: 80px;
 }
 
@@ -456,8 +456,8 @@ h3 {
   font-size: 0.85em;
   padding: 2px 6px;
   border-radius: 3px;
-  background: #e9ecef;
-  color: #495057;
+  background: var(--bg-hover, #e9ecef);
+  color: var(--fg-secondary-text, #495057);
 }
 
 .attribute-value {
@@ -500,25 +500,55 @@ h3 {
   max-width: 1000px;
   border-collapse: collapse;
   border-spacing: 0;
-  background-color: #fff;
+  background-color: var(--bg-card, #fff);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .groups-table th, .groups-table td {
   padding: 0.6rem 0.7rem;
   text-align: left;
-  border-bottom: 1px solid fg('divider');
+  border-bottom: 1px solid var(--fg-divider, fg('divider'));
   vertical-align: top;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   word-break: break-word;
 }
 
+.groups-table th:first-child, .groups-table td:first-child {
+  width: 20%;
+  min-width: 120px;
+}
+
+.groups-table th:nth-child(2), .groups-table td:nth-child(2) {
+  width: 25%;
+  min-width: 150px;
+}
+
+.groups-table th:nth-child(3), .groups-table td:nth-child(3) {
+  width: 15%;
+  min-width: 100px;
+}
+
+.groups-table th:nth-child(4), .groups-table td:nth-child(4) {
+  width: 20%;
+  min-width: 120px;
+}
+
+.groups-table th:nth-child(5), .groups-table td:nth-child(5) {
+  width: 10%;
+  min-width: 80px;
+}
+
+.groups-table th:nth-child(6), .groups-table td:nth-child(6) {
+  width: 10%;
+  min-width: 80px;
+}
+
 .groups-table th {
-  background: bg('hover');
+  background: var(--bg-elevated, bg('hover'));
   font-weight: 600;
-  color: #495057;
+  color: var(--fg-secondary-text, #495057);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -529,16 +559,161 @@ h3 {
 }
 
 .groups-table tr:hover td {
-  background-color: #f8f9fa;
+  background-color: var(--bg-hover, #f8f9fa);
 }
 
-
-
 a {
-  color: #007bff;
+  color: var(--link-color, #007bff);
   text-decoration: none;
 
   &:hover {
     text-decoration: underline;
+  }
+}
+
+/* Font size specific adjustments */
+:host-context(body.font-size-small) {
+  /* Compact list view */
+  .groups-table {
+    th, td {
+      padding: 0.4rem 0.5rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Compact grid items */
+  .grid-item {
+    min-height: 150px;
+    padding: 0.5rem;
+    gap: 0.5rem;
+
+    h3 {
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .attribute {
+      margin-bottom: 0.25rem;
+      font-size: 0.75rem;
+
+      .attribute-header strong {
+        font-size: 0.75rem;
+      }
+
+      .attribute-value {
+        font-size: 0.75rem;
+        padding: 0.125rem 0;
+      }
+    }
+
+    .item-count {
+      font-size: 0.65rem;
+    }
+
+    .resource-type-icon {
+      font-size: 0.8rem;
+    }
+  }
+
+  .label-item {
+    margin-bottom: 0.15rem;
+    font-size: 0.75rem;
+  }
+
+  .resource-list {
+    padding-left: 0.5rem;
+    margin: 0.15rem 0;
+
+    li {
+      margin-bottom: 0.2rem;
+      font-size: 0.75rem;
+    }
+
+    .resource-count {
+      font-size: 0.65rem;
+    }
+  }
+}
+
+:host-context(body.font-size-medium) {
+  /* Standard list view */
+  .groups-table {
+    th, td {
+      padding: 0.6rem 0.7rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+:host-context(body.font-size-large) {
+  /* Spacious list view */
+  .groups-table {
+    th, td {
+      padding: 1rem 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  /* Spacious grid items */
+  .grid-item {
+    min-height: 250px;
+    padding: 1.5rem;
+    gap: 1rem;
+    border-radius: 8px;
+
+    h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .attribute {
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+
+      .attribute-header strong {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .attribute-value {
+        font-size: 0.9rem;
+        padding: 0.25rem 0;
+        line-height: 1.5;
+      }
+    }
+
+    .item-count {
+      font-size: 0.8rem;
+    }
+
+    .resource-type-icon {
+      font-size: 1rem;
+    }
+  }
+
+  .label-item {
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+
+    .label-key, .label-value {
+      font-size: 0.9rem;
+    }
+  }
+
+  .resource-list {
+    padding-left: 1.5rem;
+    margin: 0.4rem 0;
+
+    li {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .resource-count {
+      font-size: 0.8rem;
+    }
   }
 }

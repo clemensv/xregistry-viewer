@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, interval } from 'rxjs';
@@ -9,11 +9,12 @@ import { ConfigService } from '../../services/config.service';
 import { RoutePersistenceService } from '../../services/route-persistence.service';
 import { GroupType } from '../../models/registry.model';
 import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
+import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 
 @Component({
   standalone: true,
   selector: 'app-group-types',
-  imports: [CommonModule, RouterModule, PageHeaderComponent],
+  imports: [CommonModule, RouterModule, PageHeaderComponent, ResourceDocumentItemComponent],
   templateUrl: './group-types.component.html',
   styleUrls: ['./group-types.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
@@ -28,6 +29,7 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
   private initialLoad = true;
   private userHasChangedView = false; // Track if user manually changed view mode
+  expandedDetails = new Set<string>(); // Track which group types have expanded details (public for template)
 
   constructor(
     private modelService: ModelService,
@@ -81,7 +83,7 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
         checkInterval.unsubscribe();
         this.loadData();
       } else if (attempts >= maxAttempts) {
-        console.error('GroupTypesComponent: Timeout waiting for config, proceeding anyway');
+        this.debug.log('GroupTypesComponent: Timeout waiting for config, proceeding anyway');
         checkInterval.unsubscribe();
         this.loadData();
       }
@@ -244,6 +246,20 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
+   * Get resource types with their descriptions for a group type
+   */
+  getResourceTypesWithDescriptions(groupType: GroupType): { name: string; description?: string }[] {
+    if (!groupType.resources) {
+      return [];
+    }
+
+    return Object.entries(groupType.resources).map(([name, resource]) => ({
+      name,
+      description: resource.description
+    }));
+  }
+
+  /**
    * Get a generic icon name for group types
    */
   getIconName(groupType: string): string {
@@ -266,22 +282,194 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
+   * Get the model route for a group type
+   * Navigates to the model page with the specific group type scrolled into view
+   */
+  getModelRoute(groupTypeItem: { groupType: string; model: GroupType }): string[] {
+    return ['/model', groupTypeItem.groupType];
+  }
+
+  /**
+   * Get the list of origins (API endpoints) that support this group type
+   */
+  getOriginsForGroupType(groupType: string): string[] {
+    return this.modelService.getApiEndpointsForGroupType(groupType);
+  }
+
+  /**
+   * Navigate to groups filtered by origin
+   */
+  navigateToGroupsByOrigin(groupType: string, origin: string): void {
+    this.router.navigate([groupType], { queryParams: { origin: origin } });
+  }
+
+  /**
    * Check if auto-forwarding should occur when there's only one group type
    */
   private checkAutoForward(): void {
-    // Only auto-forward if:
-    // 1. We have exactly one group type
-    // 2. We're not searching (currentSearchTerm is empty)
-    // 3. The data loading is complete (not expecting more data)
-    if (!this.loadingProgress &&
-        !this.currentSearchTerm &&
-        this.groupTypesList.length === 1) {
+    // Auto-forward to the single group type if only one exists
+    if (this.filteredGroupTypesList.length === 1 && !this.currentSearchTerm) {
+      const singleGroupType = this.filteredGroupTypesList[0];
+      this.router.navigate(this.getResourceCollectionRoute(singleGroupType));
+    }
+  }
 
-      const singleGroupType = this.groupTypesList[0];
-      this.debug.log('GroupTypesComponent: Auto-forwarding to single group type:', singleGroupType.groupType);
+  /**
+   * Transform group type data into resource document items for consistent display
+   */
+  getGroupTypeItems(groupTypeItem: { groupType: string; model: GroupType }): any[] {
+    const items: any[] = [];
 
-      // Navigate to the groups page for this group type
-      this.router.navigate([singleGroupType.groupType]);
+    // Group Type Name
+    items.push({
+      key: 'groupType',
+      name: 'Group Type',
+      type: 'String',
+      description: 'The identifier for this group type',
+      value: groupTypeItem.groupType,
+      isComplex: false
+    });
+
+    // Plural Name
+    items.push({
+      key: 'plural',
+      name: 'Plural Name',
+      type: 'String',
+      description: 'The plural form of the group type name',
+      value: groupTypeItem.model.plural,
+      isComplex: false
+    });
+
+    // Description
+    if (groupTypeItem.model.description) {
+      items.push({
+        key: 'description',
+        name: 'Description',
+        type: 'String',
+        description: 'Description of this group type',
+        value: groupTypeItem.model.description,
+        isComplex: false
+      });
+    }
+
+    // Origins
+    const origins = this.getOriginsForGroupType(groupTypeItem.groupType);
+    if (origins.length > 0) {
+      items.push({
+        key: 'origins',
+        name: 'Origins',
+        type: 'Array[String]',
+        description: `Available origins for this group type (${origins.length})`,
+        value: origins,
+        isComplex: true,
+        isArray: true,
+        arrayItems: origins.map(origin => ({
+          key: origin,
+          name: origin,
+          type: 'String',
+          value: origin,
+          isComplex: false,
+          clickAction: () => this.navigateToGroupsByOrigin(groupTypeItem.groupType, origin)
+        }))
+      });
+    }
+
+    // Resource Types
+    const resourceTypes = this.getResourceTypesList(groupTypeItem.model);
+    if (resourceTypes.length > 0) {
+      items.push({
+        key: 'resourceTypes',
+        name: 'Resource Types',
+        type: 'Array[String]',
+        description: `Available resource types for this group type (${resourceTypes.length})`,
+        value: resourceTypes,
+        isComplex: true,
+        isArray: true,
+        arrayItems: resourceTypes.map(rt => ({
+          key: rt,
+          name: rt,
+          type: 'String',
+          value: rt,
+          isComplex: false
+        }))
+      });
+    }
+
+    return items;
+  }
+
+  /**
+   * Get simple items for a group type (non-complex attributes)
+   */
+  getSimpleItems(groupTypeItem: { groupType: string; model: GroupType }): any[] {
+    return this.getGroupTypeItems(groupTypeItem).filter(item => !item.isComplex);
+  }
+
+  /**
+   * Get complex items for a group type (arrays, objects)
+   */
+  getComplexItems(groupTypeItem: { groupType: string; model: GroupType }): any[] {
+    return this.getGroupTypeItems(groupTypeItem).filter(item => item.isComplex);
+  }
+
+  /**
+   * Get filtered simple items (excluding groupType, plural, and description)
+   */
+  getFilteredSimpleItems(groupTypeItem: { groupType: string; model: GroupType }): any[] {
+    const excludedKeys = ['groupType', 'plural', 'description'];
+    return this.getSimpleItems(groupTypeItem).filter(item => !excludedKeys.includes(item.key));
+  }
+
+  /**
+   * Toggle details expansion for a group type
+   */
+  toggleDetails(groupType: string): void {
+    // Close all other details first (only one popup at a time)
+    this.expandedDetails.clear();
+
+    // Then open the requested one
+    this.expandedDetails.add(groupType);
+  }
+
+  /**
+   * Check if details are expanded for a group type
+   */
+  isDetailsExpanded(groupType: string): boolean {
+    return this.expandedDetails.has(groupType);
+  }
+
+  /**
+   * Close all expanded details
+   */
+  closeAllDetails(): void {
+    this.expandedDetails.clear();
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Get array of expanded group types for template iteration
+   */
+  getExpandedGroupTypes(): string[] {
+    return Array.from(this.expandedDetails);
+  }
+
+  /**
+   * Get group type model by group type name
+   */
+  getGroupTypeModel(groupType: string): { groupType: string; model: GroupType } | undefined {
+    return this.filteredGroupTypesList.find(gt => gt.groupType === groupType);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      // Close all expanded details when Escape is pressed
+      if (this.expandedDetails.size > 0) {
+        this.expandedDetails.clear();
+        this.cdr.markForCheck();
+        event.preventDefault();
+        event.stopPropagation();
+      }
     }
   }
 }

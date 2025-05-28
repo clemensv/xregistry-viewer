@@ -30,7 +30,7 @@
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
-  background-color: #fff;
+  background-color: var(--bg-card, #fff);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   table-layout: auto;
@@ -39,7 +39,7 @@
 .resources-table th, .resources-table td {
   padding: 0.75rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--fg-divider, #dee2e6);
   vertical-align: top;
   font-size: 0.9rem;
   white-space: nowrap;
@@ -73,9 +73,9 @@
 }
 
 .resources-table th {
-  background-color: #f8f9fa;
+  background-color: var(--bg-elevated, #f8f9fa);
   font-weight: 600;
-  color: #495057;
+  color: var(--fg-secondary-text, #495057);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -86,11 +86,11 @@
 }
 
 .resources-table tr:hover td {
-  background-color: #f8f9fa;
+  background-color: var(--bg-hover, #f8f9fa);
 }
 
 .resources-table a {
-  color: #6c757d;
+  color: var(--link-color, #6c757d);
   text-decoration: none;
 
   &:hover {
@@ -116,7 +116,7 @@
   display: inline-block;
   margin-top: 10px;
   padding: 6px 12px;
-      background-color: #6c757d;
+  background-color: var(--primary-color, #6c757d);
   color: #fff !important; /* Force white text color */
   text-decoration: none;
   border-radius: 3px;
@@ -127,15 +127,15 @@
 }
 
 .tile:hover {
-  background-color: #0056b3;
+  background-color: var(--primary-hover-color, #0056b3);
   text-decoration: none !important;
 }
 
 .tile-footer {
   margin-top: 0.7em;
-  border-top: 1px solid #ececec;
+  border-top: 1px solid var(--fg-divider, #ececec);
   padding-top: 0.4em;
-  color: #888;
+  color: var(--fg-secondary-text, #888);
   font-size: 0.78em;
   display: flex;
   justify-content: flex-end;
@@ -155,7 +155,7 @@
 
 .attribute strong {
   font-weight: 600;
-  color: #222;
+  color: var(--fg-text, #222);
   margin-right: 0.3em;
   text-align: left;
   min-width: unset;
@@ -171,7 +171,7 @@
   max-height: 200px;
   overflow: auto;
   white-space: pre-wrap;
-  background-color: #f8f9fa;
+  background-color: var(--code-bg, #f8f9fa);
   padding: 6px;
   border-radius: 3px;
   margin-top: 3px;
@@ -179,7 +179,7 @@
 }
 
 .attribute span {
-  color: #333;
+  color: var(--fg-text, #333);
   margin: 0;
   background: none;
   border: none;
@@ -192,12 +192,12 @@
 }
 
 .object-array {
-  background: #f7f7f7;
+  background: var(--bg-hover, #f7f7f7);
   border-radius: 3px;
   padding: 0.4em 0.6em;
   margin: 0.15em 0 0.4em 0;
   font-size: 0.82rem;
-  border: 1px solid #ececec;
+  border: 1px solid var(--fg-divider, #ececec);
   width: 92%;
   max-width: 92%;
 }
@@ -211,7 +211,7 @@ h3 {
   font-size: 0.95rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  color: #2c3e50;
+  color: var(--fg-text, #2c3e50);
   word-break: break-all;
 }
 
@@ -219,7 +219,7 @@ h4 {
   font-size: 0.88rem;
   font-weight: 600;
   margin: 0.5em 0 0.15em 0;
-  color: #3a3a3a;
+  color: var(--fg-text, #3a3a3a);
 }
 
 .resource-header {
@@ -344,6 +344,104 @@ h4 {
   .empty-state-message {
     font-size: 0.8rem;
   }
+
+  /* Compact list view */
+  .list-view {
+    padding: 0.5rem;
+  }
+
+  .resources-table {
+    th, td {
+      padding: 0.4rem 0.5rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Compact tiles */
+  .tile {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    margin-top: 6px;
+  }
+
+  .tile-footer {
+    margin-top: 0.4rem;
+    padding-top: 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  /* Compact attributes */
+  .attribute {
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+
+    strong {
+      font-size: 0.75rem;
+    }
+
+    span {
+      font-size: 0.75rem;
+    }
+
+    pre {
+      padding: 4px;
+      margin-top: 2px;
+      font-size: 0.7rem;
+      max-height: 150px;
+    }
+  }
+
+  .object-array {
+    padding: 0.25rem 0.4rem;
+    margin: 0.1rem 0 0.25rem 0;
+    font-size: 0.75rem;
+  }
+
+  .object-field {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+  }
+
+  h3 {
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+  }
+
+  h4 {
+    font-size: 0.8rem;
+    margin: 0.3rem 0 0.1rem 0;
+  }
+
+  .resource-header {
+    margin-bottom: 0.25rem;
+  }
+
+  .version-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+  .resource-footer {
+    padding-top: 0.3rem;
+    margin-top: 0.4rem;
+  }
+
+  /* Compact loading indicator */
+  .loading-progress {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .loading-indicator {
+    font-size: 0.8rem;
+    gap: 0.25rem;
+  }
+
+  /* Compact empty state */
+  .empty-state {
+    min-height: 250px;
+    padding: 1rem;
+  }
 }
 
 :host-context(body.font-size-large) {
@@ -357,6 +455,118 @@ h4 {
 
   .empty-state-message {
     font-size: 1.1rem;
+  }
+
+  /* Spacious list view */
+  .list-view {
+    padding: 1.5rem;
+  }
+
+  .resources-table {
+    th, td {
+      padding: 1rem 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  /* Spacious tiles */
+  .tile {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    margin-top: 12px;
+    border-radius: 4px;
+  }
+
+  .tile-footer {
+    margin-top: 1rem;
+    padding-top: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  /* Spacious attributes */
+  .attribute {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+
+    strong {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    span {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre {
+      padding: 10px;
+      margin-top: 6px;
+      font-size: 0.85rem;
+      max-height: 250px;
+      border-radius: 4px;
+    }
+  }
+
+  .object-array {
+    padding: 0.6rem 0.8rem;
+    margin: 0.25rem 0 0.6rem 0;
+    font-size: 0.85rem;
+    border-radius: 4px;
+  }
+
+  .object-field {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  h4 {
+    font-size: 0.95rem;
+    margin: 0.75rem 0 0.25rem 0;
+  }
+
+  .resource-header {
+    margin-bottom: 0.6rem;
+  }
+
+  .version-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+  }
+
+  .resource-footer {
+    padding-top: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  /* Spacious loading indicator */
+  .loading-progress {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+  }
+
+  .loading-indicator {
+    font-size: 1rem;
+    gap: 0.75rem;
+  }
+
+  /* Spacious empty state */
+  .empty-state {
+    min-height: 500px;
+    padding: 3rem;
+  }
+
+  .empty-state-content {
+    gap: 1.5rem;
   }
 }
 
