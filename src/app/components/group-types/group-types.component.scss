@@ -32,7 +32,7 @@
   margin: 0 auto;
   justify-items: stretch;
   align-items: start;
-  grid-auto-rows: minmax(140px, auto); /* Reduced from 180px for more compact tiles */
+  grid-auto-rows: minmax(140px, 270px); /* Reduced from 180px for more compact tiles */
 
   /* Overflow protection and aspect ratio compatibility */
   overflow: visible; /* Allow popups to overflow */
@@ -866,7 +866,7 @@
   :host-context(body.font-size-small) {
     .grid-container.cards-view {
       grid-template-columns: repeat(auto-fit, minmax(120px, 160px)); /* Max 160px to prevent over-growth */
-      grid-auto-rows: minmax(100px, auto); /* Equal row heights for small cards */
+      grid-auto-rows: minmax(100px, 150px); /* Equal row heights for small cards */
       gap: 0.75rem 1rem; /* Increased horizontal gap for better separation */
       grid-row-gap: 0.75rem;
       grid-column-gap: 1rem;

@@ -365,9 +365,8 @@
     }
 
     .attribute-value {
-      grid-area: value;
-      font-family: 'Courier New', monospace;
-      background: var(--bg-hover, #f8f9fa);
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
       padding: 0.25rem 0.5rem;
       border-radius: 3px;
       border: 1px solid var(--fg-divider, #e0e0e0);
@@ -377,18 +376,24 @@
       display: flex;
       align-items: center;
 
-      .null-value, .undefined-value {
-        color: var(--fg-tertiary-text, #999);
-        font-style: italic;
-      }
-
       .any-value {
         width: 100%;
+        font-family: 'Courier New', monospace;
+        background: var(--bg-hover, #f8f9fa);
+        border-radius: 3px;
+        display: block;
+        padding: 0;
+        margin: 0;
 
         app-code-highlight {
           width: 100%;
           display: block;
         }
+      }
+
+      .null-value, .undefined-value {
+        color: var(--fg-tertiary-text, #999);
+        font-style: italic;
       }
 
       /* URL link styling */
@@ -435,9 +440,9 @@
 
     .attribute-actions {
       grid-column: 2 / 3;
-      grid-row: 3;
+      grid-row: 2 / 3;
       justify-self: end;
-      align-self: start;
+      align-self: end;
 
       .copy-btn {
         @include button-style;

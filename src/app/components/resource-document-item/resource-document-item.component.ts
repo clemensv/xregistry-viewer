@@ -218,7 +218,7 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
                   typeof val;
 
       // Try to find a meaningful name for the item
-      let itemName = `Item ${index + 1}`;
+      let itemName = `[${index + 1}]`;
 
       // Look for common identifier properties in object items
       if (val && typeof val === 'object' && val !== null) {
@@ -233,8 +233,8 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
         }
 
         // If no identifier was found but there's a type property, include it
-        if (itemName === `Item ${index + 1}` && val.type) {
-          itemName = `Item ${index + 1} (${val.type})`;
+        if (itemName === `[${index + 1}]` && val.type) {
+          itemName = `[${index + 1}] (${val.type})`;
         }
       }
 

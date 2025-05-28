@@ -17,6 +17,15 @@
   // Add a dark gray left border to the resource-document
   border-left: 3px solid #444;
 
+  // Ensure page header stays at top during loading
+  ::ng-deep .page-header-main {
+    position: static !important;
+    align-self: flex-start !important;
+    justify-self: flex-start !important;
+    margin-top: 0 !important;
+    top: 0 !important;
+  }
+
   // Container to allow flex layout for responsive design
   .resource-document-container {
     width: 100%;
@@ -108,6 +117,162 @@
 
       .material-icons {
         font-size: vars.$icon-size;
+      }
+    }
+
+    // Version history button styles
+    .version-history-btn,
+    .btn-primary,
+    .btn-secondary {
+      color: white !important;
+      text-decoration: none;
+      
+      &:hover,
+      &:focus,
+      &:active {
+        color: white !important;
+      }
+    }
+
+    // Ensure button text has proper contrast
+    button {
+      &.btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white !important;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #0056b3;
+          border-color: #0056b3;
+          color: white !important;
+        }
+      }
+      
+      &.btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white !important;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #545b62;
+          border-color: #545b62;
+          color: white !important;
+        }
+      }
+
+      // Additional button contrast improvements for version history
+      &.btn-outline-primary {
+        color: #007bff !important;
+        border-color: #007bff;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #007bff !important;
+          border-color: #007bff !important;
+          color: white !important;
+        }
+      }
+      
+      &.btn-outline-secondary {
+        color: #6c757d !important;
+        border-color: #6c757d;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #6c757d !important;
+          border-color: #6c757d !important;
+          color: white !important;
+        }
+      }
+      
+      &.btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white !important;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #218838;
+          border-color: #1e7e34;
+          color: white !important;
+        }
+      }
+      
+      &.btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+        color: white !important;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #138496;
+          border-color: #117a8b;
+          color: white !important;
+        }
+      }
+      
+      &.btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529 !important;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #e0a800;
+          border-color: #d39e00;
+          color: #212529 !important;
+        }
+      }
+      
+      &.btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white !important;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #c82333;
+          border-color: #bd2130;
+          color: white !important;
+        }
+      }
+      
+      &.btn-light {
+        background-color: #f8f9fa;
+        border-color: #f8f9fa;
+        color: #212529 !important;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #e2e6ea;
+          border-color: #dae0e5;
+          color: #212529 !important;
+        }
+      }
+      
+      &.btn-dark {
+        background-color: #343a40;
+        border-color: #343a40;
+        color: white !important;
+        
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: #23272b;
+          border-color: #1d2124;
+          color: white !important;
+        }
       }
     }
 
