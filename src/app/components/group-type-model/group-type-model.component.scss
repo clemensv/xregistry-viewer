@@ -1,5 +1,6 @@
 @use '../shared-variables' as vars;
 @use '../../../styles/theme' as *;
+@use '../shared-design-tokens' as tokens;
 
 .group-type-model {
   width: 100%;
@@ -7,8 +8,8 @@
   margin: 0 auto;
   padding: 1.5rem;
   background: var(--bg-card, white);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @include tokens.radius('lg');
+  @include tokens.shadow('md');
   border: 1px solid var(--fg-divider, #e9ecef);
 }
 
@@ -46,8 +47,9 @@
     font-weight: 500;
     background: var(--bg-hover, #f8f9fa);
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    @include tokens.radius('sm');
     border: 1px solid var(--fg-divider, #dee2e6);
+    @include tokens.transition('all');
   }
 }
 
@@ -73,7 +75,7 @@
     max-width: 400px;
 
     // Style the simple attribute containers within
-    ::ng-deep .simple-attribute-grid {
+    ::ng-deep .field-group {
       background: var(--bg-card, white);
       border-radius: 6px;
       border: 1px solid var(--fg-divider, #e0e0e0);
@@ -195,7 +197,7 @@
       min-width: 150px;
       max-width: 300px;
 
-      ::ng-deep .simple-attribute-grid {
+      ::ng-deep .field-group {
         padding: 0.75rem;
       }
     }
@@ -269,7 +271,7 @@
       min-width: 220px;
       max-width: 500px;
 
-      ::ng-deep .simple-attribute-grid {
+      ::ng-deep .field-group {
         padding: 1.25rem;
         border-radius: 8px;
       }

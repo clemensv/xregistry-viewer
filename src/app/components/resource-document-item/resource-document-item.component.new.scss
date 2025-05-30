@@ -228,91 +228,145 @@
         }
       }
     }
-  }  
-  // Field-group layout inheriting from global specification
-  .field-group {
+  }
+
+  // Simple attribute display  
+  .simple-attribute-grid {
     @include attribute-container();
-    // Inherit all base styles from global field-group specification
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto auto; /* Four rows to accommodate description when present */
+    gap: 0.25rem;
+    width: 100%;
+    box-sizing: border-box;
+
+    .attribute-name {
+      grid-column: 1 / 2;
+      grid-row: 1;
+      font-weight: 600;
+      color: var(--fg-text, #2c3e50);
+      font-size: 0.9rem;
+    }
+
+    .attribute-type {
+      grid-column: 2 / 3;
+      grid-row: 1;
+      font-size: 0.75rem;
+      background: var(--bg-card, rgba(255, 255, 255, 0.8));
+      border: 1px solid var(--fg-border, #d1ecf1);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      color: var(--info-color, #457B9D);
+      justify-self: end;
+      align-self: start;
+    }    
+
+    .attribute-description {
+      grid-column: 1 / 3;
+      grid-row: 2;
+      font-size: 0.8rem;
+      color: var(--fg-secondary-text, #6c757d);
+      font-style: italic;
+      margin-top: 0.5rem; /* Added vertical space above description */
+      margin-bottom: 0.5rem; /* Added vertical space below description */
+    }
     
-    // Component-specific modifications for backward compatibility
-    .input-wrapper {
-      // Ensure minimum height for layout consistency
-      min-height: 2.5rem;
+    .attribute-value {
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+      padding: 0.25rem 0.5rem;
+      @include tokens.radius('sm');
+      border: 1px solid var(--fg-divider, #e0e0e0);
+      word-break: break-all;
+      overflow-wrap: break-word;
+      min-height: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
 
-      // Numeric input specific styling (component-specific feature)
-      .numeric-input {
-        text-align: right;
-        font-family: 'Courier New', monospace;
-      }
+    /* When description exists, value needs to be in row 3 */
+    .attribute-description ~ .attribute-value {
+      grid-row: 3 / 4;
+    }
 
-      // Type pill positioning override for this component
-      .type-pill {
-        position: absolute;
-        top: -0.5rem;
-        right: 0.5rem;
-        z-index: 2;
-        pointer-events: none;
-        // Use global styling but override position
-        background: #28a745;
-        color: white;
-      }
+    .any-value {
+      width: 100%;
+      font-family: 'Courier New', monospace;
+      background: var(--bg-hover, #f8f9fa);
+      @include tokens.radius('sm');
+      display: block;
+      padding: 0;
+      margin: 0;
 
-      // Any-type JSON display (component-specific feature)
-      .any-value {
+      app-code-highlight {
         width: 100%;
-        font-family: 'Courier New', monospace;
-        background: var(--bg-hover, #f8f9fa);
-        border-radius: 4px;
         display: block;
-        padding: 0.5rem;
-        border: 1px solid var(--fg-divider, #e0e0e0);
-        min-height: 2.5rem;
-        box-sizing: border-box;
-
-        app-code-highlight {
-          width: 100%;
-          display: block;
-        }
-      }
-
-      // Null/undefined value styling (component-specific feature)
-      .null-value,
-      .undefined-value {
-        color: var(--fg-tertiary-text, #999);
-        font-style: italic;
       }
     }
 
-    // Copy button styling (component-specific feature)
-    .input-row .copy-btn {
+    .null-value, .undefined-value {
+      color: var(--fg-tertiary-text, #999);
+      font-style: italic;
+    }      
+
+    /* URL link styling */
+    .url-link {
+      color: colors.primary();
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      @include tokens.transition('colors');
+
+      &:hover {
+        color: var(--primary-hover-color, #0056b3);
+        text-decoration: underline;
+      }
+
+      .external-link-icon {
+        font-size: 0.8rem !important;
+        opacity: 0.7;
+      }
+    }      
+    
+    /* XID link styling */
+    .xid-link {
+      color: var(--secondary-color, #6c757d);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 500;
+      @include tokens.transition('colors');
+
+      &:hover {
+        color: colors.primary();
+        text-decoration: underline;
+      }
+
+      .internal-link-icon {
+        font-size: 0.8rem !important;
+        opacity: 0.7;
+      }
+    }
+
+    .attribute-actions {
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+      justify-self: end;
+      align-self: end;
+    }
+    
+    /* When description exists, actions need to be in row 3 */
+    .attribute-description ~ .attribute-actions {
+      grid-row: 3 / 4;
+    }
+
+    .copy-btn {
       @include button-style;
       display: inline-flex;
       align-items: center;
-      flex-shrink: 0;
-      height: 2.5rem;
-      padding: 0.5rem;
-      margin-top: 0;
-
-      i.material-icons {
-        font-size: 16px;
-      }
-    }
-
-    // Field description styling (component-specific feature)
-    .field-desc {
-      font-size: 0.85rem;
-      color: var(--fg-secondary-text, #6c757d);
-      font-style: italic;
-      margin: 0;
-      line-height: 1.4;
-    }
-
-    // Full-width layout modifications (component-specific feature)
-    &.full {
-      .input-wrapper .type-pill {
-        top: 0.5rem;
-        right: 0.5rem;
-      }
+      margin-left: 0.5rem;
     }
   }
 
@@ -357,22 +411,20 @@
   }
 }
 
-/* Component-specific font size adjustments (complement global field-group) */
+/* Font size specific adjustments for new layout */
 :host-context(body.font-size-small) {
-  .field-group {
-    .input-row .copy-btn {
-      height: 2rem;
-      padding: 0.375rem;
-    }
+  .simple-attribute-grid {
+    .attribute-value {
+      padding: 0.15rem 0.3rem;
+      font-size: 0.7rem;
 
-    .field-desc {
-      font-size: 0.75rem;
-    }
+      .url-link, .xid-link {
+        font-size: 0.7rem;
+        gap: 0.15rem;
 
-    .input-wrapper {
-      .any-value {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
+        .external-link-icon, .internal-link-icon {
+          font-size: 0.6rem !important;
+        }
       }
     }
   }
@@ -383,10 +435,10 @@
 
       .simple-items-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 0.25rem;        
-        
+        gap: 0.25rem;
+
         app-resource-document-item {
-          ::ng-deep .field-group {
+          ::ng-deep .simple-attribute-grid {
             padding: 0.25rem;
           }
         }
@@ -417,10 +469,10 @@
 
       .simple-items-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 0.5rem;        
-        
+        gap: 0.5rem;
+
         app-resource-document-item {
-          ::ng-deep .field-group {
+          ::ng-deep .simple-attribute-grid {
             padding: 0.5rem;
           }
         }
@@ -434,23 +486,19 @@
 }
 
 :host-context(body.font-size-large) {
-  .field-group {
-    .input-row .copy-btn {
-      height: 3rem;
-      padding: 0.75rem;
-    }
-
-    .field-desc {
+  .simple-attribute-grid {
+    .attribute-value {
+      padding: 0.35rem 0.75rem;
       font-size: 0.95rem;
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
+      min-height: 2rem;
 
-    .input-wrapper {
-      .any-value {
-        padding: 0.35rem 0.75rem;
+      .url-link, .xid-link {
         font-size: 0.95rem;
-        min-height: 2rem;
+        gap: 0.35rem;
+
+        .external-link-icon, .internal-link-icon {
+          font-size: 1rem !important;
+        }
       }
     }
   }
@@ -461,10 +509,10 @@
 
       .simple-items-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 0.75rem;        
-        
+        gap: 0.75rem;
+
         app-resource-document-item {
-          ::ng-deep .field-group {
+          ::ng-deep .simple-attribute-grid {
             padding: 0.75rem;
           }
         }

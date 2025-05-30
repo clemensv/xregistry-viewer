@@ -131,6 +131,50 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   }
 
   /**
+   * Check if the current item type is numeric
+   */
+  isNumericType(): boolean {
+    const itemType = this.item.itemModel?.type || typeof this.item.value;
+    return itemType === 'number' || itemType === 'integer' || typeof this.item.value === 'number';
+  }
+
+  /**
+   * Determine if the field should use full width layout
+   */
+  shouldUseFullWidth(): boolean {
+    // Use full width for strings longer than a certain threshold, arrays, objects, or URLs
+    if (this.isUrl(this.item.value) || this.isXid(this.item) || this.isAnyType()) {
+      return true;
+    }
+    
+    if (typeof this.item.value === 'string' && this.item.value.length > 30) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Generate a unique field ID for accessibility
+   */
+  getFieldId(): string {
+    return `field-${this.item.key}-${this.nestingLevel}`;
+  }
+
+  /**
+   * Get the display value for non-special cases
+   */
+  getDisplayValue(): string {
+    if (this.item.value === null) {
+      return 'null';
+    }
+    if (this.item.value === undefined) {
+      return 'undefined';
+    }
+    return String(this.item.value);
+  }
+
+  /**
    * Determines if the value is a simple primitive type
    */
   isSimpleValue(value: any): boolean {

@@ -3,6 +3,7 @@
   Make edit fields flex to use available space, improve proportions and spacing for a more modern look.
   Reduce vertical spacing in the config card and make input placeholders low-contrast for clarity.
 */
+@use '../shared-design-tokens' as tokens;
 
 .config-page-container {
   width: 100vw;
@@ -20,9 +21,9 @@
   max-width: 900px;
   min-width: 340px;
   margin: 0 auto;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  border-radius: 14px;
-  background: #fafbfc;
+  @include tokens.shadow('xl');
+  @include tokens.radius('2xl');
+  background: var(--bg-card, #fafbfc);
   padding: 1.2rem 1.5rem 1rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -46,12 +47,12 @@ mat-card-subtitle {
 }
 
 .endpoint-section {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  background: var(--bg-card, #fff);
+  @include tokens.radius('lg');
+  @include tokens.shadow('xs');
   padding: 0.7rem 1rem 0.7rem 1rem;
   margin-bottom: 0.7rem;
-  border: 1px solid #e5e8ec;
+  border: 1px solid var(--fg-divider, #e5e8ec);
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
@@ -117,10 +118,10 @@ button[mat-stroked-button], button[mat-raised-button], button[mat-button] {
 button[mat-icon-button] {
   margin-left: 0.1rem;
   margin-right: 0.1rem;
-  transition: background 0.2s;
+  @include tokens.transition('colors');
 }
 button[mat-icon-button]:hover:not([disabled]) {
-  background: #e3eaf3;
+  background: var(--bg-hover, #e3eaf3);
 }
 
 @media (max-width: 1100px) {

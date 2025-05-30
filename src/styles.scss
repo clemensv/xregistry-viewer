@@ -4,6 +4,7 @@
 @use '@angular/material' as mat;
 @use './styles/theme' as theme;
 @use './styles/layout';
+@use './styles/field-group-layout';
 
 // Make sure we can access map and color functions
 @use 'sass:map';
@@ -469,25 +470,6 @@ body.theme-dark {
     }
   }
 
-  /* Success, warning, and error states */
-  .success-badge,
-  .status-success {
-    background-color: #2d5a3d !important;
-    color: #90ee90 !important;
-  }
-
-  .warning-badge,
-  .status-warning {
-    background-color: #5d4e2d !important;
-    color: #ffd700 !important;
-  }
-
-  .error-badge,
-  .status-error {
-    background-color: #5d2d2d !important;
-    color: #ff6b6b !important;
-  }
-
   /* Links and interactive text */
   a:not(.mat-mdc-button):not(.mat-mdc-tab-link) {
     color: #6d9eeb !important;
@@ -895,33 +877,25 @@ code {
 }
 
 /* Success state styling */
-.success,
-.status-success,
-.badge-success {
+.success {
   background-color: var(--success-color, #28a745) !important;
   color: white !important;
 }
 
 /* Warning state styling */
-.warning,
-.status-warning,
-.badge-warning {
+.warning {
   background-color: var(--warning-color, #ffc107) !important;
   color: #212529 !important;
 }
 
 /* Error state styling */
-.error,
-.status-error,
-.badge-error {
+.error {
   background-color: var(--error-color, #dc3545) !important;
   color: white !important;
 }
 
 /* Info state styling */
-.info,
-.status-info,
-.badge-info {
+.info {
   background-color: var(--info-color, #17a2b8) !important;
   color: white !important;
 }
@@ -1374,13 +1348,6 @@ h4 {  font-size: 1.02rem;
   text-align: right;
 }
 
-.clickable-row {
-  cursor: pointer;
-  &:hover {
-    background-color: map.get(theme.$background-color, hover);
-  }
-}
-
 /* Footer styles */
 .footer {
   padding: 1rem;
@@ -1480,49 +1447,12 @@ h4 {  font-size: 1.02rem;
   margin-top: 1rem;
 }
 
-.tile-secondary {
-  background-color: theme.$accent-color;
-  color: white;
-
-  &:hover {
-    background-color: color.adjust(theme.$accent-color, $lightness: -10%);
-  }
-}
-
-.tile-success {
-  background-color: var(--success-color, #4CAF50);  // Green 500
-  color: white;
-
-  &:hover {
-    background-color: var(--success-color, #388E3C);  // Green 700
-  }
-}
-
-.tile-link {
-  background-color: transparent;
-  color: theme.$primary-color;
-  text-decoration: underline;
-  padding: 4px 8px;
-  &:hover {
-    color: color.adjust(theme.$primary-color, $lightness: -10%);
-    background-color: transparent;
-  }
-}
-
 /* Typography utility classes */
 .text-xs { font-size: 0.75rem; }
 .text-s  { font-size: 0.875rem; }
 .text-m  { font-size: 1rem; }
 .text-l  { font-size: 1.125rem; }
 .text-xl { font-size: 1.25rem; }
-
-/* Color utility classes */
-.text-primary { color: theme.c(primary); }
-.text-info    { color: theme.c(info); }
-.text-success { color: theme.c(success); }
-.text-warning { color: theme.c(warning); }
-.text-danger  { color: theme.c(danger); }
-.text-dark    { color: theme.c(dark); }
 
 /* Badge styling */
 .badge {
@@ -1574,31 +1504,6 @@ app-footer {
   border-top: 1px solid #e0e0e0;
   box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
 }
-
-/* Utility classes for responsive spacing */
-.mb-xs { margin-bottom: var(--spacing-xs) !important; }
-.mb-sm { margin-bottom: var(--spacing-sm) !important; }
-.mb-md { margin-bottom: var(--spacing-md) !important; }
-.mb-lg { margin-bottom: var(--spacing-lg) !important; }
-.mb-xl { margin-bottom: var(--spacing-xl) !important; }
-
-.mt-xs { margin-top: var(--spacing-xs) !important; }
-.mt-sm { margin-top: var(--spacing-sm) !important; }
-.mt-md { margin-top: var(--spacing-md) !important; }
-.mt-lg { margin-top: var(--spacing-lg) !important; }
-.mt-xl { margin-top: var(--spacing-xl) !important; }
-
-.p-xs { padding: var(--spacing-xs) !important; }
-.p-sm { padding: var(--spacing-sm) !important; }
-.p-md { padding: var(--spacing-md) !important; }
-.p-lg { padding: var(--spacing-lg) !important; }
-.p-xl { padding: var(--spacing-xl) !important; }
-
-.gap-xs { gap: var(--spacing-xs) !important; }
-.gap-sm { gap: var(--spacing-sm) !important; }
-.gap-md { gap: var(--spacing-md) !important; }
-.gap-lg { gap: var(--spacing-lg) !important; }
-.gap-xl { gap: var(--spacing-xl) !important; }
 
 /* List and item spacing adjustments */
 body.font-size-small {

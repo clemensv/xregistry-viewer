@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field-Group Layout Test</title>
+    <style>
+        /* Include our field-group layout styles for testing */
+        
+        /* Base theme variables for testing */
+        :root {
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --bg-hover: #f8f9fa;
+            --bg-elevated: #f1f3f4;
+            --fg-text: #2c3e50;
+            --fg-secondary-text: #6c757d;
+            --fg-tertiary-text: #999;
+            --fg-border: #d1ecf1;
+            --fg-divider: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #fafafa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .demo-section {
+            margin-bottom: 3rem;
+        }
+
+        .demo-section h2 {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .font-size-controls {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .font-size-controls button {
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .font-size-controls button:hover {
+            background: #f8f9fa;
+            border-color: #3F51B5;
+        }
+
+        .font-size-controls button.active {
+            background: #3F51B5;
+            color: white;
+            border-color: #3F51B5;
+        }
+
+        /* Include the field-group layout styles */
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.75rem;
+            position: relative;
+            background: var(--bg-card, rgba(255, 255, 255, 0.8));
+            border: 1px solid var(--fg-border, #d1ecf1);
+            border-radius: 6px;
+            transition: all 0.2s ease-in-out;
+            margin-bottom: 1rem;
+        }
+
+        .field-group:hover {
+            background: var(--bg-hover, #f8f9fa);
+            border-color: var(--fg-border, #a8dadc);
+        }
+
+        .field-group .field-title {
+            font-weight: 600;
+            color: var(--fg-text, #2c3e50);
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            display: block;
+            line-height: 1.4;
+        }
+
+        .field-group .input-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .field-group .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .field-group .type-pill {
+            background-color: var(--bg-elevated, #F1FAEE);
+            border: 1px solid var(--fg-border, #A8DADC);
+            border-radius: 12px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--fg-secondary-text, #6c757d);
+            white-space: nowrap;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-group .numeric-input,
+        .field-group .text-input,
+        .field-group .readonly-value {
+            flex: 1;
+            min-width: 0;
+            background-color: var(--bg-elevated, rgba(240, 240, 240, 0.3));
+            border: 1px solid var(--fg-border, #ddd);
+            border-radius: 4px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            color: var(--fg-text, #333);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .field-group .numeric-input:focus,
+        .field-group .text-input:focus {
+            border-color: #3F51B5;
+            box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
+            background: var(--bg-card, #fff);
+        }
+
+        .field-group .readonly-value {
+            background-color: var(--bg-elevated, #f8f9fa);
+            border: 1px solid var(--fg-divider, #e0e0e0);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            word-break: break-all;
+        }
+
+        .field-group .url-link {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            background: var(--bg-card, rgba(255, 255, 255, 0.8));
+            border: 1px solid var(--fg-border, #d1ecf1);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--fg-text, #2c3e50);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .field-group .url-link:hover {
+            background: var(--bg-hover, #f8f9fa);
+            border-color: #3F51B5;
+            color: #3F51B5;
+        }
+
+        .field-group .action-buttons {
+            display: flex;
+            gap: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .field-group .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: transparent;
+            border: 1px solid var(--fg-border, #ddd);
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--fg-secondary-text, #666);
+            transition: all 0.2s ease;
+        }
+
+        .field-group .action-btn:hover {
+            background: var(--bg-hover, #f8f9fa);
+            border-color: #3F51B5;
+            color: #3F51B5;
+        }
+
+        /* Font size variations */
+        body.font-size-small .field-group {
+            padding: 0.5rem;
+            gap: 0.375rem;
+        }
+
+        body.font-size-small .field-group .field-title {
+            font-size: 0.85rem;
+            margin-bottom: 0.2rem;
+        }
+
+        body.font-size-small .field-group .input-row {
+            gap: 0.375rem;
+        }
+
+        body.font-size-small .field-group .input-wrapper {
+            gap: 0.25rem;
+        }
+
+        body.font-size-small .field-group .type-pill {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        body.font-size-small .field-group .numeric-input,
+        body.font-size-small .field-group .text-input,
+        body.font-size-small .field-group .readonly-value {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        body.font-size-small .field-group .action-btn {
+            width: 24px;
+            height: 24px;
+        }
+
+        body.font-size-large .field-group {
+            padding: 1rem;
+            gap: 0.75rem;
+            border-radius: 8px;
+        }
+
+        body.font-size-large .field-group .field-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.375rem;
+            line-height: 1.5;
+        }
+
+        body.font-size-large .field-group .input-row {
+            gap: 0.75rem;
+        }
+
+        body.font-size-large .field-group .input-wrapper {
+            gap: 0.5rem;
+        }
+
+        body.font-size-large .field-group .type-pill {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 14px;
+        }
+
+        body.font-size-large .field-group .numeric-input,
+        body.font-size-large .field-group .text-input,
+        body.font-size-large .field-group .readonly-value {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        body.font-size-large .field-group .action-btn {
+            width: 32px;
+            height: 32px;
+        }
+    </style>
+</head>
+<body class="font-size-medium">
+    <div class="container">
+        <h1>Field-Group Layout Specification Test</h1>
+        
+        <div class="font-size-controls">
+            <strong>Font Size:</strong>
+            <button class="font-size-btn" data-size="small">Small</button>
+            <button class="font-size-btn active" data-size="medium">Medium</button>
+            <button class="font-size-btn" data-size="large">Large</button>
+        </div>
+
+        <div class="demo-section">
+            <h2>Text Input Field</h2>
+            <div class="field-group">
+                <div class="field-title">Resource Name</div>
+                <div class="input-row">
+                    <div class="input-wrapper">
+                        <div class="type-pill">string</div>
+                        <input type="text" class="text-input" value="example-resource" placeholder="Enter resource name">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" title="Copy">📋</button>
+                        <button class="action-btn" title="Edit">✏️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Numeric Input Field</h2>
+            <div class="field-group">
+                <div class="field-title">Port Number</div>
+                <div class="input-row">
+                    <div class="input-wrapper">
+                        <div class="type-pill">integer</div>
+                        <input type="number" class="numeric-input" value="8080" placeholder="Enter port number">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" title="Copy">📋</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>URL Link Field</h2>
+            <div class="field-group">
+                <div class="field-title">Documentation URL</div>
+                <div class="input-row">
+                    <div class="input-wrapper">
+                        <div class="type-pill">url</div>
+                        <a href="https://example.com/docs" class="url-link">
+                            <span class="link-text">https://example.com/docs</span>
+                            <span class="external-link-icon">🔗</span>
+                        </a>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" title="Copy">📋</button>
+                        <button class="action-btn" title="Open">🔍</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Read-Only Value Field</h2>
+            <div class="field-group">
+                <div class="field-title">Generated ID</div>
+                <div class="input-row">
+                    <div class="input-wrapper">
+                        <div class="type-pill">uuid</div>
+                        <div class="readonly-value">550e8400-e29b-41d4-a716-446655440000</div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" title="Copy">📋</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Error State</h2>
+            <div class="field-group error">
+                <div class="field-title">Invalid Field</div>
+                <div class="input-row">
+                    <div class="input-wrapper">
+                        <div class="type-pill">string</div>
+                        <input type="text" class="text-input" value="" placeholder="This field is required">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" title="Validate">❌</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Disabled State</h2>
+            <div class="field-group disabled">
+                <div class="field-title">Read-Only System Field</div>
+                <div class="input-row">
+                    <div class="input-wrapper">
+                        <div class="type-pill">system</div>
+                        <input type="text" class="text-input" value="system-generated-value" disabled>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" title="Copy" disabled>📋</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Font size switcher
+        document.querySelectorAll('.font-size-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const size = btn.dataset.size;
+                
+                // Remove all font size classes
+                document.body.classList.remove('font-size-small', 'font-size-medium', 'font-size-large');
+                
+                // Add the selected font size class
+                document.body.classList.add('font-size-' + size);
+                
+                // Update active button
+                document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Simulate copy functionality
+        document.querySelectorAll('.action-btn[title="Copy"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alert('Value copied to clipboard!');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,8 @@
 @use '../shared-variables' as vars;
+@use '../shared-colors' as colors;
+@use '../shared-breakpoints' as breakpoints;
 @use '../_vertical-bars' as vbars;
+@use '../shared-design-tokens' as tokens;
 @use '../../../styles/theme' as *;
 
 /* Component-specific overrides for resources */
@@ -31,8 +34,8 @@
   border-collapse: collapse;
   border-spacing: 0;
   background-color: var(--bg-card, #fff);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  @include tokens.shadow('sm');
+  @include tokens.radius('sm');
   table-layout: auto;
 }
 
@@ -78,7 +81,7 @@
   color: var(--fg-secondary-text, #495057);
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: tokens.z-index('base');
 }
 
 .resources-table tr:last-child td {
@@ -116,11 +119,11 @@
   display: inline-block;
   margin-top: 10px;
   padding: 6px 12px;
-  background-color: var(--primary-color, #6c757d);
+  background-color: colors.primary();
   color: #fff !important; /* Force white text color */
   text-decoration: none;
-  border-radius: 3px;
-  transition: background-color 0.2s;
+  @include tokens.radius('xs');
+  @include tokens.transition('colors');
   align-self: flex-start;
   font-weight: 500;
   font-size: 0.85rem;
@@ -173,7 +176,7 @@
   white-space: pre-wrap;
   background-color: var(--code-bg, #f8f9fa);
   padding: 6px;
-  border-radius: 3px;
+  @include tokens.radius('xs');
   margin-top: 3px;
   font-size: 0.82rem;
 }
@@ -193,7 +196,7 @@
 
 .object-array {
   background: var(--bg-hover, #f7f7f7);
-  border-radius: 3px;
+  @include tokens.radius('xs');
   padding: 0.4em 0.6em;
   margin: 0.15em 0 0.4em 0;
   font-size: 0.82rem;
@@ -235,7 +238,7 @@ h4 {
   color: white;
   font-size: 0.7rem;
   padding: 0.2rem 0.5rem;
-  border-radius: 10px;
+  @include tokens.radius('full');
   margin-left: 0.5rem;
 }
 
@@ -249,7 +252,7 @@ h4 {
 .loading-progress {
   background-color: var(--bg-elevated, #f8f9fa);
   border: 1px solid var(--fg-border, #dee2e6);
-  border-radius: 4px;
+  @include tokens.radius('sm');
   padding: 0.75rem;
   margin-bottom: 1rem;
   text-align: center;
@@ -268,10 +271,7 @@ h4 {
   animation: spin 1.5s linear infinite;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+// Spin animation is now available globally from styles.scss
 
 /* Empty state styling */
 .empty-state {
@@ -312,7 +312,7 @@ h4 {
 }
 
 /* Responsive empty state */
-@media (max-width: 768px) {
+@include breakpoints.tablet-and-below {
   .empty-state {
     min-height: 300px;
     padding: 1.5rem;
@@ -461,23 +461,21 @@ h4 {
   .list-view {
     padding: 1.5rem;
   }
-
   .resources-table {
     th, td {
       padding: 1rem 1.25rem;
       font-size: 0.95rem;
     }
 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    @include tokens.shadow('md');
+    @include tokens.radius('lg');
   }
-
   /* Spacious tiles */
   .tile {
     padding: 8px 16px;
     font-size: 0.9rem;
     margin-top: 12px;
-    border-radius: 4px;
+    @include tokens.radius('sm');
   }
 
   .tile-footer {
@@ -499,22 +497,19 @@ h4 {
     span {
       font-size: 0.9rem;
       line-height: 1.5;
-    }
-
-    pre {
+    }    pre {
       padding: 10px;
       margin-top: 6px;
       font-size: 0.85rem;
       max-height: 250px;
-      border-radius: 4px;
+      @include tokens.radius('sm');
     }
   }
-
   .object-array {
     padding: 0.6rem 0.8rem;
     margin: 0.25rem 0 0.6rem 0;
     font-size: 0.85rem;
-    border-radius: 4px;
+    @include tokens.radius('sm');
   }
 
   .object-field {
@@ -535,23 +530,21 @@ h4 {
   .resource-header {
     margin-bottom: 0.6rem;
   }
-
   .version-badge {
     font-size: 0.75rem;
     padding: 0.3rem 0.6rem;
-    border-radius: 12px;
+    @include tokens.radius('full');
   }
 
   .resource-footer {
     padding-top: 0.75rem;
     margin-top: 1rem;
   }
-
   /* Spacious loading indicator */
   .loading-progress {
     padding: 1rem;
     margin-bottom: 1.5rem;
-    border-radius: 8px;
+    @include tokens.radius('lg');
   }
 
   .loading-indicator {
@@ -571,7 +564,7 @@ h4 {
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@include breakpoints.tablet-and-below {
   .grid-item {
     min-width: 100%;
     max-width: 100%;

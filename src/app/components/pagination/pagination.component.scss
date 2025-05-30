@@ -1,4 +1,5 @@
 @use '../../../styles/_theme' as *;
+@use '../shared-design-tokens' as tokens;
 
 .pagination {
   display: flex;
@@ -6,25 +7,30 @@
   align-items: center;
   gap: s(xs);
   margin: s(md) 0;
+}
 
-  .pagination-btn {
-    padding: s(xs) s(sm);
-    border: 1px solid c(neutral);
-    background-color: c(background);
-    color: c(text);
-    border-radius: $radius;
-    cursor: pointer;
-    transition: all 0.2s ease;
+// Pagination button styles
+.pagination-button {
+  @include tokens.radius('sm');
+  @include tokens.transition('interactive');
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--fg-divider, #dee2e6);
+  background: var(--bg-card, white);
+  color: var(--fg-secondary-text, #6c757d);
 
-    &:hover:not(:disabled) {
-      background-color: c(primary);
-      color: c(background);
-      border-color: c(primary);
-    }
+  &:hover:not(:disabled) {
+    background: var(--bg-hover, #f8f9fa);
+    color: var(--fg-text, #495057);
+  }
 
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    background: var(--fg-secondary-text, #6c757d);
+    color: var(--bg-card, white);
+    border-color: var(--fg-secondary-text, #6c757d);
   }
 }

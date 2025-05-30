@@ -1,13 +1,16 @@
 /* Styles for app-code-highlight */
+@use '../shared-design-tokens' as tokens;
+
 :host {
   width: 100%;
   display: block;
 }
 
 pre {
-  background-color: #f5f5f5; /* Light grey background */
+  background-color: var(--bg-card-alt, #f5f5f5); /* Light grey background */
   padding: 10px;
-  border-radius: 4px;
+  @include tokens.radius('sm');
+  @include tokens.shadow('xs');
   overflow-x: auto; /* Allow horizontal scrolling for long lines */
   font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
   font-size: 0.9em;

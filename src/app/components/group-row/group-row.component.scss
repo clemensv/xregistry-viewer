@@ -1,5 +1,6 @@
 @use '../shared-variables' as vars;
 @use '../../../styles/theme' as *;
+@use '../shared-design-tokens' as tokens;
 
 /* Group row styling */
 :host {
@@ -33,12 +34,13 @@
 
 /* Links styling */
 a {
-  color: #007bff;
+  color: var(--color-primary, #007bff);
   text-decoration: none;
+  @include tokens.transition('colors');
 
   &:hover {
     text-decoration: underline;
-    color: #0056b3;
+    color: var(--color-primary-dark, #0056b3);
   }
 }
 
@@ -51,21 +53,22 @@ a {
 }
 
 .resource-link-small {
-  color: #6c757d;
+  color: var(--fg-secondary-text, #6c757d);
   font-size: 0.85rem;
+  @include tokens.transition('colors');
 
   &:hover {
-    color: #495057;
+    color: var(--fg-text, #495057);
   }
 }
 
 .resource-count-small {
   font-weight: 500;
-  color: #495057;
+  color: var(--fg-text, #495057);
 }
 
 .resource-separator {
-  color: #adb5bd;
+  color: var(--fg-divider, #adb5bd);
 }
 
 /* Font size specific adjustments */

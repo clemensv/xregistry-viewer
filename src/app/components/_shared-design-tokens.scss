@@ -1,0 +1,149 @@
+/**
+ * SHARED DESIGN TOKENS FOR XREGISTRY-VIEWER
+ *
+ * This file establishes foundational design tokens including
+ * border-radius, box-shadows, transitions, spacing, and z-index scales.
+ */
+
+// Border Radius Scale
+// ===================
+$radius-none: 0;
+$radius-xs: 2px;    // Small elements, badges
+$radius-sm: 4px;    // Buttons, inputs, small cards
+$radius-md: 6px;    // Medium cards, containers
+$radius-lg: 8px;    // Large cards, panels
+$radius-xl: 12px;   // Hero sections, major containers
+$radius-2xl: 16px;  // Extra large containers
+$radius-full: 50%;  // Circular elements
+
+// Box Shadow Scale
+// ================
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);    // Subtle elements
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);     // Small cards
+$shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);     // Medium cards
+$shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);     // Large cards
+$shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.1);    // Elevated elements
+$shadow-2xl: 0 8px 32px rgba(0, 0, 0, 0.2);   // Modals, overlays
+$shadow-none: none;
+
+// Transition Scale
+// ================
+$transition-fast: 0.15s;      // Quick interactions
+$transition-normal: 0.2s;     // Standard interactions
+$transition-slow: 0.3s;       // Theme changes, major state
+
+// Common transition patterns
+$transition-all: all $transition-normal ease;
+$transition-colors: background-color $transition-normal ease, color $transition-normal ease;
+$transition-transform: transform $transition-normal ease;
+$transition-shadow: box-shadow $transition-normal ease;
+$transition-interactive: transform $transition-normal ease, box-shadow $transition-normal ease;
+
+// Z-Index Scale
+// =============
+$z-base: 1;           // Base layer elements
+$z-dropdown: 100;     // Dropdowns, tooltips
+$z-sticky: 200;       // Sticky headers
+$z-overlay: 500;      // Overlays, modals backdrop
+$z-modal: 1000;       // Modals, important overlays
+$z-popover: 1100;     // Popovers above modals
+$z-toast: 1200;       // Toast notifications
+
+// CSS Custom Properties for Runtime Theming
+// ==========================================
+
+:root {
+  // Border radius tokens
+  --radius-xs: #{$radius-xs};
+  --radius-sm: #{$radius-sm};
+  --radius-md: #{$radius-md};
+  --radius-lg: #{$radius-lg};
+  --radius-xl: #{$radius-xl};
+  --radius-2xl: #{$radius-2xl};
+  --radius-full: #{$radius-full};
+
+  // Shadow tokens
+  --shadow-xs: #{$shadow-xs};
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
+  --shadow-2xl: #{$shadow-2xl};
+
+  // Transition tokens
+  --transition-fast: #{$transition-fast};
+  --transition-normal: #{$transition-normal};
+  --transition-slow: #{$transition-slow};
+}
+
+// Design Token Mixins
+// ===================
+
+@mixin radius($size: 'sm') {
+  @if $size == 'xs' { border-radius: $radius-xs; }
+  @else if $size == 'sm' { border-radius: $radius-sm; }
+  @else if $size == 'md' { border-radius: $radius-md; }
+  @else if $size == 'lg' { border-radius: $radius-lg; }
+  @else if $size == 'xl' { border-radius: $radius-xl; }
+  @else if $size == '2xl' { border-radius: $radius-2xl; }
+  @else if $size == 'full' { border-radius: $radius-full; }
+  @else if $size == 'none' { border-radius: $radius-none; }
+  @else { border-radius: var(--radius-#{$size}, #{$radius-sm}); }
+}
+
+@mixin shadow($size: 'sm') {
+  @if $size == 'xs' { box-shadow: $shadow-xs; }
+  @else if $size == 'sm' { box-shadow: $shadow-sm; }
+  @else if $size == 'md' { box-shadow: $shadow-md; }
+  @else if $size == 'lg' { box-shadow: $shadow-lg; }
+  @else if $size == 'xl' { box-shadow: $shadow-xl; }
+  @else if $size == '2xl' { box-shadow: $shadow-2xl; }
+  @else if $size == 'none' { box-shadow: $shadow-none; }
+  @else { box-shadow: var(--shadow-#{$size}, #{$shadow-sm}); }
+}
+
+@mixin transition($type: 'all') {
+  @if $type == 'all' { transition: $transition-all; }
+  @else if $type == 'colors' { transition: $transition-colors; }
+  @else if $type == 'transform' { transition: $transition-transform; }
+  @else if $type == 'shadow' { transition: $transition-shadow; }
+  @else if $type == 'interactive' { transition: $transition-interactive; }
+  @else { transition: #{$type} $transition-normal ease; }
+}
+
+// Utility Functions
+// =================
+
+@function z-index($layer) {
+  @if $layer == 'base' { @return $z-base; }
+  @else if $layer == 'dropdown' { @return $z-dropdown; }
+  @else if $layer == 'sticky' { @return $z-sticky; }
+  @else if $layer == 'overlay' { @return $z-overlay; }
+  @else if $layer == 'modal' { @return $z-modal; }
+  @else if $layer == 'popover' { @return $z-popover; }
+  @else if $layer == 'toast' { @return $z-toast; }
+  @else { @return $z-base; }
+}
+
+@function radius($size: 'sm') {
+  @if $size == 'xs' { @return $radius-xs; }
+  @else if $size == 'sm' { @return $radius-sm; }
+  @else if $size == 'md' { @return $radius-md; }
+  @else if $size == 'lg' { @return $radius-lg; }
+  @else if $size == 'xl' { @return $radius-xl; }
+  @else if $size == '2xl' { @return $radius-2xl; }
+  @else if $size == 'full' { @return $radius-full; }
+  @else if $size == 'none' { @return $radius-none; }
+  @else { @return $radius-sm; }
+}
+
+@function shadow($size: 'sm') {
+  @if $size == 'xs' { @return $shadow-xs; }
+  @else if $size == 'sm' { @return $shadow-sm; }
+  @else if $size == 'md' { @return $shadow-md; }
+  @else if $size == 'lg' { @return $shadow-lg; }
+  @else if $size == 'xl' { @return $shadow-xl; }
+  @else if $size == '2xl' { @return $shadow-2xl; }
+  @else if $size == 'none' { @return $shadow-none; }
+  @else { @return $shadow-sm; }
+}

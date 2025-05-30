@@ -1,4 +1,5 @@
 /* Header styles have been moved to global styles.scss */
+@use '../shared-design-tokens' as tokens;
 
 /* Logo styles specific to the header component */
 .logo-container {
@@ -7,6 +8,7 @@
   cursor: pointer;
   text-decoration: none;
   padding: 4px 0;
+  @include tokens.transition('all');
 
   &:hover {
     opacity: 0.9;
@@ -84,10 +86,12 @@ app-api-info {
 /* Active menu item styling */
 ::ng-deep .mat-mdc-menu-item.active {
   background-color: rgba(255, 255, 255, 0.1);
-        color: #6c757d;
+  color: var(--fg-secondary-text, #6c757d);
+  @include tokens.transition('colors');
 
   .mat-icon {
-    color: #6c757d;
+    color: var(--fg-secondary-text, #6c757d);
+    @include tokens.transition('colors');
   }
 }
 

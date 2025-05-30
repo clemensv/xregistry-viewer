@@ -38,52 +38,68 @@
     </span>
   </div>
 
-  <!-- Simple attribute display -->
-  <div *ngIf="isSimpleValue(item.value)" class="simple-attribute-grid">
-    <div class="attribute-name">{{ item.key }}</div>
-    <div class="attribute-type">
-      {{ item.itemModel?.type ? getDisplayType() : typeof item.value | titlecase }}
-    </div>
-    <div *ngIf="item.description" class="attribute-description">{{ item.description }}</div>
-    <div class="attribute-value">
-      <span *ngIf="isAnyType() && item.value !== null && item.value !== undefined" class="any-value">
-        <app-code-highlight
-          [code]="getSafeJsonString(item.value)"
-          [language]="'json'">
-        </app-code-highlight>
-      </span>
-      <span *ngIf="!isAnyType()"
-            [class.null-value]="item.value === null"
-            [class.undefined-value]="item.value === undefined">
-        <!-- URL link -->
+  <!-- Simple attribute display with new field-group layout -->
+  <div *ngIf="isSimpleValue(item.value)" class="field-group" [class.full]="shouldUseFullWidth()">
+    <label class="field-title" [for]="getFieldId()">{{ item.key }}</label>
+    
+    <div class="input-row">
+      <div class="input-wrapper">
+        <!-- Numeric input for number types -->
+        <input *ngIf="isNumericType()" 
+               [id]="getFieldId()"
+               type="number" 
+               [value]="item.value"
+               class="numeric-input"
+               readonly />
+        
+        <!-- Text input for other types -->
+        <input *ngIf="!isNumericType()"
+               [id]="getFieldId()"
+               type="text"
+               [value]="getDisplayValue()"
+               class="text-input"
+               readonly />
+        
+        <!-- URL link display -->
         <a *ngIf="isUrl(item.value)"
            [href]="item.value"
            target="_blank"
            rel="noopener noreferrer"
-           class="url-link"
+           class="url-link text-input"
            title="Open URL in new tab">
           {{ item.value }}
           <span class="material-icons external-link-icon">open_in_new</span>
         </a>
-        <!-- XID link -->
+        
+        <!-- XID link display -->
         <a *ngIf="isXid(item)"
            [routerLink]="getXidRoute(item.value)"
-           class="xid-link"
+           class="xid-link text-input"
            title="Navigate to {{ item.value }} in this registry">
           {{ item.value }}
           <span class="material-icons internal-link-icon">link</span>
         </a>
-        <!-- Regular value -->
-        <span *ngIf="!isUrl(item.value) && !isXid(item)">
-          {{ item.value === null ? 'null' : (item.value === undefined ? 'undefined' : item.value) }}
-        </span>
-      </span>
-    </div>
-    <div class="attribute-actions">
-      <button class="copy-btn" title="Copy value" (click)="copyToClipboard(item.value); $event.stopPropagation();">
+        
+        <!-- JSON/Any type display -->
+        <div *ngIf="isAnyType() && item.value !== null && item.value !== undefined" class="any-value text-input">
+          <app-code-highlight
+            [code]="getSafeJsonString(item.value)"
+            [language]="'json'">
+          </app-code-highlight>
+        </div>
+        
+        <span class="type-pill">{{ getDisplayType() }}</span>
+      </div>
+      
+      <button class="copy-btn" 
+              [attr.aria-label]="'Copy ' + item.key + ' value'"
+              title="Copy value" 
+              (click)="copyToClipboard(item.value); $event.stopPropagation();">
         <i class="material-icons">content_copy</i>
       </button>
     </div>
+    
+    <p *ngIf="item.description" class="field-desc">{{ item.description }}</p>
   </div>  <!-- Expanded content for arrays and objects -->
   <div *ngIf="isExpandable() && isExpanded()"
        class="expanded-content"

@@ -1,0 +1,85 @@
+/**
+ * SHARED BREAKPOINTS FOR XREGISTRY-VIEWER
+ *
+ * This file contains centralized responsive design breakpoints
+ * to ensure consistency across all components.
+ */
+
+// Breakpoint Values
+// =================
+
+$breakpoint-xs: 480px;   // Extra small devices
+$breakpoint-sm: 768px;   // Small devices (tablets)
+$breakpoint-md: 1024px;  // Medium devices (small laptops)
+$breakpoint-lg: 1200px;  // Large devices (desktops)
+$breakpoint-xl: 1440px;  // Extra large devices
+
+// Breakpoint Mixins
+// ==================
+
+@mixin mobile-only {
+  @media (max-width: #{$breakpoint-xs}) {
+    @content;
+  }
+}
+
+@mixin tablet-and-below {
+  @media (max-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: #{$breakpoint-xs + 1px}) and (max-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+@mixin tablet-and-above {
+  @media (min-width: #{$breakpoint-xs + 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop-small {
+  @media (min-width: #{$breakpoint-sm + 1px}) and (max-width: #{$breakpoint-md}) {
+    @content;
+  }
+}
+
+@mixin desktop-medium {
+  @media (min-width: #{$breakpoint-md + 1px}) and (max-width: #{$breakpoint-lg}) {
+    @content;
+  }
+}
+
+@mixin desktop-and-above {
+  @media (min-width: #{$breakpoint-sm + 1px}) {
+    @content;
+  }
+}
+
+@mixin large-desktop {
+  @media (min-width: #{$breakpoint-lg + 1px}) {
+    @content;
+  }
+}
+
+// Custom Breakpoint Mixin
+// ========================
+
+@mixin custom-breakpoint($min: null, $max: null) {
+  @if $min and $max {
+    @media (min-width: #{$min}) and (max-width: #{$max}) {
+      @content;
+    }
+  } @else if $min {
+    @media (min-width: #{$min}) {
+      @content;
+    }
+  } @else if $max {
+    @media (max-width: #{$max}) {
+      @content;
+    }
+  }
+}

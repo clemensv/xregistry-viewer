@@ -1,3 +1,6 @@
+@use '../shared-breakpoints' as breakpoints;
+@use '../shared-design-tokens' as tokens;
+
 .search-container {
   display: flex;
   align-items: center;
@@ -36,6 +39,8 @@
   min-height: 40px;
   display: flex;
   align-items: center;
+  border-radius: tokens.radius('sm');
+  @include tokens.transition('all');
 }
 
 :host ::ng-deep .mat-mdc-input-element {
@@ -44,6 +49,7 @@
   cursor: text;
   line-height: 1.5;
   vertical-align: middle;
+  @include tokens.transition('colors');
 }
 
 :host ::ng-deep .mat-mdc-input-element::placeholder {
@@ -57,7 +63,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@include breakpoints.tablet-and-below {
   .search-container {
     margin: 0.25rem 0;
   }

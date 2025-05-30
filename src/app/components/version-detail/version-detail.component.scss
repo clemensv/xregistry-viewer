@@ -1,4 +1,7 @@
 /* Styles for VersionDetailComponent */
+@use '../shared-buttons' as buttons;
+@use '../shared-colors' as colors;
+@use '../shared-design-tokens' as tokens;
 
 :host {
   width: 100%;
@@ -38,8 +41,8 @@
 
 .grid-item {
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  @include tokens.radius('lg');
+  @include tokens.shadow('sm');
   border: 1px solid #e0e0e0;
   min-width: 340px;
   max-width: 420px;
@@ -48,12 +51,12 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 0.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  @include tokens.transition('interactive');
 }
 
 .grid-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  @include tokens.shadow('lg');
 }
 
 h3 {
@@ -106,7 +109,7 @@ h3 {
 /* Distinct formatting for arrays of objects */
 .attribute .object-array {
   background: var(--bg-hover, #f7f7f7);
-  border-radius: 5px;
+  @include tokens.radius('sm');
   padding: 0.7em 1em;
   margin: 0.3em 0 0.7em 0;
   font-size: 0.97rem;
@@ -124,7 +127,7 @@ section {
   margin-top: 1.5rem;
   padding: 1rem;
   background-color: var(--bg-elevated, #f8f9fa);
-  border-radius: 4px;
+  @include tokens.radius('sm');
 
   h3 {
     margin-bottom: 1rem;
@@ -136,7 +139,7 @@ section {
     padding: 1rem;
     background-color: var(--bg-card, #fff);
     border: 1px solid var(--fg-border, #e9ecef);
-    border-radius: 4px;
+    @include tokens.radius('sm');
     overflow-x: auto;
     max-height: 500px;
     font-family: 'Consolas', monospace;
@@ -147,46 +150,26 @@ section {
   .loading-document {
     padding: 1rem;
     background-color: var(--info-color, #e8f4fd);
-    border-radius: 4px;
+    @include tokens.radius('sm');
     text-align: center;
-    color: var(--primary-color, #0366d6);
+    color: colors.primary();
   }
 
   .document-error {
     padding: 1rem;
     background-color: var(--error-color, #ffebee);
-    border-radius: 4px;
+    @include tokens.radius('sm');
     color: var(--error-color, #d32f2f);
   }
 
-  .download-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: var(--primary-color, #0366d6);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: var(--primary-hover-color, #0256b0);
-    }
-
-    .material-icons {
-      font-size: 1.2rem;
-    }
-  }
+  // Download button styles now imported from shared-buttons.scss
 }
 
 section:has(h3:contains("Document")) {
   margin-top: 2rem;
   padding: 1.5rem;
   background-color: #f8f9fa;
-  border-radius: 8px;
+  @include tokens.radius('lg');
   border: 1px solid #dee2e6;
 
   h3 {
@@ -198,7 +181,7 @@ section:has(h3:contains("Document")) {
   pre {
     background-color: #fff;
     padding: 1rem;
-    border-radius: 4px;
+    @include tokens.radius('sm');
     border: 1px solid #e9ecef;
     overflow-x: auto;
     font-family: 'Courier New', monospace;
@@ -222,7 +205,7 @@ section:has(h3:contains("Document")) {
   .document-error {
     background-color: #fff3f3;
     padding: 1rem;
-    border-radius: 4px;
+    @include tokens.radius('sm');
     border-left: 4px solid #dc3545;
 
     p {
@@ -231,27 +214,7 @@ section:has(h3:contains("Document")) {
     }
   }
 
-  .download-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #0069d9;
-    }
-
-    .material-icons {
-      font-size: 1.1rem;
-    }
-  }
+  // Download button styles now imported from shared-buttons.scss
 }
 
 /* Icon styles */
@@ -278,10 +241,7 @@ section:has(h3:contains("Document")) {
   gap: 0.5rem;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+// Spin animation is now available globally from styles.scss
 
 /* Content type specific styles */
 pre.application-json {
@@ -307,7 +267,7 @@ pre.text-plain {
   padding: 2rem;
   text-align: center;
   background-color: #f9f9f9;
-  border-radius: 8px;
+  @include tokens.radius('lg');
   margin: 1rem 0;
   min-height: 200px;
 }
@@ -316,7 +276,7 @@ pre.text-plain {
   padding: 1.5rem;
   background-color: #fff0f0;
   border: 1px solid #ffcdd2;
-  border-radius: 8px;
+  @include tokens.radius('lg');
   margin: 1rem 0;
 
   h2 {
@@ -336,7 +296,7 @@ pre.text-plain {
   margin: 1rem 0;
   padding: 0.75rem;
   background-color: #e8f4fd;
-  border-radius: 4px;
+  @include tokens.radius('sm');
 
   .loading-icon {
     color: #2196f3;
@@ -355,7 +315,7 @@ pre.text-plain {
   margin: 1rem 0;
   padding: 0.75rem;
   background-color: #ffebee;
-  border-radius: 4px;
+  @include tokens.radius('sm');
 
   .error-icon {
     color: #f44336;
@@ -379,7 +339,7 @@ pre.text-plain {
 .attribute-tile {
   background-color: #f9f9f9;
   border: 1px solid #eee;
-  border-radius: 4px;
+  @include tokens.radius('sm');
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -438,7 +398,7 @@ section > h3 {
   align-items: center;
   gap: 8px;
   padding: 1rem;
-  border-radius: 4px;
+  @include tokens.radius('sm');
   margin-top: 1rem;
 }
 
@@ -452,37 +412,6 @@ section > h3 {
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
   color: #721c24;
-}
-
-.loading-icon,
-.error-icon {
-  font-size: 1.3rem;
-}
-
-.action-buttons {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-.download-btn {
-  background-color: #6c757d;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #5a6268;
-  }
-
-  .material-icons {
-    font-size: 1.1rem;
-  }
 }
 
 /* Ensure <pre> inside app-code-highlight takes full width and scrolls */

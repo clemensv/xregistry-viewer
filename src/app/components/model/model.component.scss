@@ -1,4 +1,6 @@
 @use '../shared-variables' as vars;
+@use '../shared-colors' as colors;
+@use '../shared-design-tokens' as tokens;
 @use '../../../styles/theme' as *;
 
 .model-page {
@@ -19,7 +21,7 @@
 .loading-spinner {
   .material-icons {
     font-size: 3rem !important;
-    color: var(--primary-color, #007bff);
+    color: colors.primary();
   }
 }
 
@@ -32,10 +34,7 @@
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+// Spin animation is now available globally from styles.scss
 
 .model-content {
   max-width: 1200px;
@@ -52,10 +51,9 @@
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
   border-bottom: 2px solid var(--fg-divider, #e9ecef);
-
   .section-icon {
     font-size: 2rem !important;
-    color: var(--primary-color, #007bff);
+    color: colors.primary();
   }
 
   h1, h2 {
@@ -71,12 +69,11 @@
   h2 {
     font-size: 2rem;
   }
-
   .count-badge {
-    background: var(--primary-color, #6c757d);
+    background: colors.primary();
     color: white;
     padding: 0.25rem 0.75rem;
-    border-radius: 12px;
+    @include tokens.radius('xl');
     font-weight: 600;
     font-size: 0.9rem;
     margin-left: auto;
@@ -85,9 +82,9 @@
 
 .registry-overview {
   background: var(--bg-card, white);
-  border-radius: 12px;
+  @include tokens.radius('xl');
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  @include tokens.shadow('lg');
   border: 1px solid var(--fg-divider, #e9ecef);
 }
 
@@ -112,7 +109,7 @@
     background: var(--bg-hover, #f8f9fa);
     color: var(--fg-secondary-text, #6c757d);
     padding: 0.25rem 0.75rem;
-    border-radius: 6px;
+    @include tokens.radius('md');
     font-family: 'Courier New', monospace;
     font-size: 0.9rem;
     border: 1px solid var(--fg-divider, #dee2e6);
@@ -134,9 +131,9 @@
 
 .group-types-section {
   background: var(--bg-card, white);
-  border-radius: 12px;
+  @include tokens.radius('xl');
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  @include tokens.shadow('lg');
   border: 1px solid var(--fg-divider, #e9ecef);
 }
 
@@ -182,8 +179,8 @@
   right: 2rem;
   background: var(--bg-card, white);
   padding: 1rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  @include tokens.radius('lg');
+  @include tokens.shadow('xl');
   border: 1px solid var(--fg-divider, #e9ecef);
   display: flex;
   align-items: center;
@@ -232,7 +229,7 @@
 
   .registry-overview, .group-types-section {
     padding: 1.5rem;
-    border-radius: 8px;
+    @include tokens.radius('lg');
   }
 
   .registry-title {
@@ -292,13 +289,13 @@
     .count-badge {
       padding: 0.35rem 1rem;
       font-size: 1rem;
-      border-radius: 16px;
+      @include tokens.radius('2xl');
     }
   }
 
   .registry-overview, .group-types-section {
     padding: 3rem;
-    border-radius: 16px;
+    @include tokens.radius('2xl');
   }
 
   .registry-info {
@@ -316,7 +313,7 @@
     .registry-id {
       padding: 0.35rem 1rem;
       font-size: 1rem;
-      border-radius: 8px;
+      @include tokens.radius('lg');
     }
   }
 
@@ -332,7 +329,7 @@
   .progress-indicator {
     padding: 1.25rem 2rem;
     font-size: 1rem;
-    border-radius: 12px;
+    @include tokens.radius('xl');
 
     .material-icons {
       font-size: 1.4rem !important;

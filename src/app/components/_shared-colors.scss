@@ -1,0 +1,76 @@
+/**
+ * SHARED COLOR SYSTEM FOR XREGISTRY-VIEWER
+ *
+ * This file contains centralized color definitions and CSS custom properties
+ * to ensure consistency across all components.
+ */
+
+// Base Color Palette
+// ==================
+
+// Primary theme colors
+$primary-blue: #007bff;
+$primary-gray: #6c757d;
+$primary-elegant: #5e5ce6;
+
+// Semantic colors
+$success-green: #28a745;
+$warning-yellow: #ffc107;
+$danger-red: #dc3545;
+$info-blue: #17a2b8;
+
+// Neutral grays
+$gray-50: #f8f9fa;
+$gray-100: #e9ecef;
+$gray-200: #dee2e6;
+$gray-300: #ced4da;
+$gray-400: #adb5bd;
+$gray-500: #6c757d;
+$gray-600: #495057;
+$gray-700: #343a40;
+$gray-800: #212529;
+
+// CSS Custom Properties
+// ====================
+
+:root {
+  // Core theme colors (consistent fallbacks)
+  --primary-color: #{$primary-gray};
+  --primary-hover-color: #{$gray-600};
+  --secondary-color: #{$gray-500};
+
+  // Semantic colors
+  --success-color: #{$success-green};
+  --warning-color: #{$warning-yellow};
+  --error-color: #{$danger-red};
+  --info-color: #{$info-blue};
+
+  // Neutral colors
+  --fg-text: #{$gray-800};
+  --fg-secondary-text: #{$gray-600};
+  --fg-tertiary-text: #{$gray-500};
+  --bg-card: white;
+  --bg-hover: #{$gray-50};
+  --bg-elevated: #{$gray-50};
+  --fg-border: #{$gray-200};
+  --fg-divider: #{$gray-200};
+}
+
+// Color Helper Functions
+// ======================
+
+@function primary($shade: 'default') {
+  @return var(--primary-color, #{$primary-gray});
+}
+
+@function semantic($type: 'info') {
+  @if $type == 'success' {
+    @return var(--success-color, #{$success-green});
+  } @else if $type == 'warning' {
+    @return var(--warning-color, #{$warning-yellow});
+  } @else if $type == 'error' {
+    @return var(--error-color, #{$danger-red});
+  } @else {
+    @return var(--info-color, #{$info-blue});
+  }
+}

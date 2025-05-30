@@ -1,4 +1,5 @@
 /* Breadcrumb styles have been moved to global styles.scss */
+@use '../shared-design-tokens' as tokens;
 
 /* Breadcrumb styles are defined globally in styles.scss.
   This component relies on those global styles and doesn't need
@@ -20,6 +21,7 @@
   display: block;
   width: 100%;
   background-color: var(--bg-card, white);
+  @include tokens.radius('md');
 }
 
 /* Use CSS variables for theme support */
@@ -29,6 +31,8 @@
 
   &-link {
     color: var(--primary-color, #5e5ce6);
+    @include tokens.radius('sm');
+    @include tokens.transition('colors');
 
     &:hover {
       color: var(--primary-color, #5e5ce6);
@@ -43,5 +47,6 @@
   &-current {
     color: var(--fg-text, #333);
     background-color: var(--bg-hover, #f5f5f5);
+    @include tokens.radius('sm');
   }
 }

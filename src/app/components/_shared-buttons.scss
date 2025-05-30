@@ -1,0 +1,87 @@
+/**
+ * SHARED BUTTON STYLES FOR XREGISTRY-VIEWER
+ *
+ * This file contains centralized button styles used across components
+ * to ensure consistency and reduce duplication.
+ */
+
+@use 'shared-variables' as vars;
+@use 'shared-colors' as colors;
+@use 'shared-design-tokens' as tokens;
+
+// Button Mixins
+// =============
+
+@mixin base-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  @include tokens.radius('sm');
+  cursor: pointer;
+  font-weight: 500;
+  @include tokens.transition('all');
+  text-decoration: none;
+
+  // Ensure proper spacing for icons
+  .material-icons {
+    font-size: 1.1rem;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-primary {
+  @include base-button;
+  background-color: colors.primary();
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: var(--primary-hover-color, #5a6268);
+  }
+}
+
+@mixin button-secondary {
+  @include base-button;
+  background-color: var(--bg-elevated, #f8f9fa);
+  color: var(--fg-text, #333);
+  border: 1px solid var(--fg-border, #dee2e6);
+
+  &:hover:not(:disabled) {
+    background-color: var(--bg-hover, #e9ecef);
+    border-color: var(--fg-border, #adb5bd);
+  }
+}
+
+// Standard Button Classes
+// =======================
+
+.download-btn {
+  @include button-primary;
+  padding: 0.5rem 1rem;
+  font-size: vars.$content-size;
+}
+
+.action-btn {
+  @include button-primary;
+  padding: 0.375rem 0.75rem;
+  font-size: vars.$small-size;
+}
+
+.pagination-btn {
+  @include button-secondary;
+  padding: 0.25rem 0.5rem;
+  font-size: vars.$small-size;
+  min-width: 2rem;
+    &.active {
+    background-color: colors.primary();
+    color: white;
+    border-color: colors.primary();
+  }
+}
+
+// End of shared button definitions

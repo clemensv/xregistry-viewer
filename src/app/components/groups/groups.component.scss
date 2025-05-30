@@ -1,5 +1,7 @@
 @use '../shared-variables' as vars;
+@use '../shared-breakpoints' as breakpoints;
 @use '../_vertical-bars' as vbars;
+@use '../shared-design-tokens' as tokens;
 @use '../../../styles/theme' as *;
 
 /* Component-specific overrides for groups */
@@ -97,14 +99,14 @@ app-pagination {
   flex-direction: column;
   position: relative;
   background: var(--bg-card, white);
-  border-radius: $radius;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  @include tokens.radius('md');
+  @include tokens.shadow('sm');
   border: 1px solid var(--fg-divider, c(neutral));
   @include chromeline(#9575cd); /* Purple for group objects */
   min-height: 210px; // Keep minimum height for consistency
   // Removed max-height and fixed height to allow vertical expansion
   margin-bottom: 0;
-  transition: transform 0.2s, box-shadow 0.2s;
+  @include tokens.transition('interactive');
   overflow: visible; // Changed from hidden to visible to show all content
   @include pad-x(m);
   @include pad-y(s);
@@ -112,7 +114,7 @@ app-pagination {
 
 .grid-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  @include tokens.shadow('lg');
   border-color: var(--fg-divider, c(neutral));
 }
 
@@ -207,8 +209,8 @@ app-pagination {
   background-color: var(--primary-color, #3498db); /* Match the download button from resource document */
   color: #fff !important; /* Force white text color */
   text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.2s ease;
+  @include tokens.radius('md');
+  @include tokens.transition('colors');
   align-self: flex-start;
   font-weight: 500;
   font-size: vars.$content-size; /* Use shared variable for consistency */
@@ -270,9 +272,8 @@ h3 {
     padding-left: s(xs);
     @include chromeline(c(info)); /* Blue vertical bar like arrays */
     margin-top: s(xs);
-    margin-bottom: s(xs);
-    background-color: rgba(91, 192, 222, 0.05);
-    border-radius: 0 $radius $radius 0;
+    margin-bottom: s(xs);    background-color: rgba(91, 192, 222, 0.05);
+    border-radius: 0 tokens.$radius-md tokens.$radius-md 0;
     // Removed max-height restriction to allow full content display
     overflow: visible;
     width: 100%; // Ensure resource types fill parent horizontally
@@ -286,9 +287,7 @@ h3 {
   margin-top: 0.25rem; // Reduced from 0.5rem for compactness
   padding-left: 0.25rem !important;
   margin-left: 0 !important;
-  border-left: 3px solid #5bc0de; /* Blue vertical bar like arrays */
-
-  &::before {
+  border-left: 3px solid #5bc0de; /* Blue vertical bar like arrays */  &::before {
     content: '';
     position: absolute;
     top: 0;
@@ -296,8 +295,8 @@ h3 {
     width: 3px; /* Match the border-left width */
     height: 100%;
     background-color: #5bc0de; /* Match the border color */
-    border-bottom-left-radius: 4px;
-    z-index: 1;
+    border-bottom-left-radius: tokens.$radius-sm;
+    z-index: tokens.z-index('base');
   }
 }
 
@@ -308,7 +307,7 @@ h3 {
   @include pad-x(xs);
   padding-top: 2px;
   padding-bottom: 2px;
-  border-radius: 0 $radius $radius 0;
+  border-radius: 0 tokens.$radius-md tokens.$radius-md 0;
   margin-bottom: s(xs);
   font-size: $body-size;
   font-weight: 500;
@@ -322,7 +321,7 @@ h3 {
   padding-left: 0.5rem !important;
   margin-left: 0 !important;
   background-color: rgba(91, 192, 222, 0.05);
-  border-radius: 0 $radius $radius 0;
+  border-radius: 0 tokens.$radius-md tokens.$radius-md 0;
   width: 100%; // Ensure resource types list fills parent horizontally
   box-sizing: border-box; // Include padding and border in width calculation
 }
@@ -331,12 +330,11 @@ h3 {
   list-style: none;
   padding: 0.5rem;
   margin: 0;
-
   li {
     margin-bottom: 0.35rem;
     padding: 0.15rem 0.25rem;
-    border-radius: 3px;
-    transition: background-color 0.2s ease;
+    @include tokens.radius('sm');
+    @include tokens.transition('colors');
 
     &:hover {
       background-color: rgba(0, 0, 0, 0.04);
@@ -455,7 +453,7 @@ h3 {
 .attribute-type {
   font-size: 0.85em;
   padding: 2px 6px;
-  border-radius: 3px;
+  @include tokens.radius('sm');
   background: var(--bg-hover, #e9ecef);
   color: var(--fg-secondary-text, #495057);
 }
@@ -474,7 +472,7 @@ h3 {
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@include breakpoints.tablet-and-below {
   .grid-item {
     min-width: 100%;
     max-width: 100%;
@@ -501,8 +499,8 @@ h3 {
   border-collapse: collapse;
   border-spacing: 0;
   background-color: var(--bg-card, #fff);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  @include tokens.shadow('sm');
+  @include tokens.radius('sm');
   table-layout: auto;
 }
 
@@ -551,7 +549,7 @@ h3 {
   color: var(--fg-secondary-text, #495057);
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: tokens.z-index('sticky');
 }
 
 .groups-table tr:last-child td {
@@ -651,18 +649,15 @@ a {
     th, td {
       padding: 1rem 1.25rem;
       font-size: 0.95rem;
-    }
-
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    }    @include tokens.shadow('sm');
+    @include tokens.radius('lg');
   }
-
   /* Spacious grid items */
   .grid-item {
     min-height: 250px;
     padding: 1.5rem;
     gap: 1rem;
-    border-radius: 8px;
+    @include tokens.radius('lg');
 
     h3 {
       font-size: 1.1rem;

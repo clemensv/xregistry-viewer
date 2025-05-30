@@ -1,3 +1,5 @@
+@use '../shared-breakpoints' as breakpoints;
+@use '../shared-design-tokens' as tokens;
 @use '../../../styles/theme' as *;
 
 /* Global Page Header Styles */
@@ -20,17 +22,17 @@
 .page-header-main {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start !important; /* Always align to top instead of center, with !important to override any other styles */
   width: 100%;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--fg-divider, #e0e0e0);
   margin-bottom: 0.5rem;
   background-color: var(--bg-card, white);
-  border-radius: 6px 6px 0 0;
+  border-radius: tokens.radius('md') tokens.radius('md') 0 0; /* Apply tokens for top radius only */
   flex-wrap: wrap;
   gap: 1rem;
   box-sizing: border-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  @include tokens.shadow('sm'); /* Use token for shadow instead of hardcoded value */
 }
 
 /* Page title styling */
@@ -71,12 +73,12 @@
 /* Unified button styling for both pagination and view toggle */
 .toggle-btn {
   background: none;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--fg-divider, #dee2e6);
   padding: 0.5rem 0.75rem;
-  border-radius: 4px;
+  border-radius: tokens.radius('sm');
   cursor: pointer;
-  color: #6c757d;
-  transition: all 0.2s ease;
+  color: var(--fg-secondary-text, #6c757d);
+  @include tokens.transition('interactive');
   font-size: 1rem;
   display: flex;
   align-items: center;
@@ -84,8 +86,8 @@
   min-width: 40px;
 
   &:hover:not(:disabled) {
-    background: #f8f9fa;
-    color: #495057;
+    background: var(--bg-hover, #f8f9fa);
+    color: var(--fg-text, #495057);
   }
 
   &:disabled {
@@ -100,9 +102,9 @@
 
 /* View toggle specific styling */
 .view-btn.active {
-  background: #6c757d;
-  border-color: #6c757d;
-  color: white;
+  background: var(--fg-secondary-text, #6c757d);
+  border-color: var(--fg-secondary-text, #6c757d);
+  color: var(--bg-card, white);
 }
 
 /* Pagination and view toggle containers */
@@ -114,12 +116,12 @@
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@include breakpoints.tablet-and-below {
   .page-header-main {
     padding: 0.5rem 0.75rem;
     gap: 0.5rem;
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start; /* Maintain top alignment in responsive views */
   }
 
   .page-title {
@@ -163,9 +165,10 @@
 }
 
 /* Medium screen adjustments */
-@media (max-width: 1024px) and (min-width: 769px) {
+@include breakpoints.desktop-small {
   .page-header-main {
     padding: 0.75rem;
+    align-items: flex-start; /* Ensure consistent top alignment */
   }
 
   .page-title {
@@ -179,9 +182,10 @@
 }
 
 /* Small mobile adjustments */
-@media (max-width: 480px) {
+@include breakpoints.mobile-only {
   .page-header-main {
     padding: 0.5rem;
+    align-items: flex-start; /* Ensure consistent top alignment on small screens */
   }
 
   .page-title {
