@@ -29,7 +29,7 @@ import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
       padding: 1rem;
       background-color: #f8f9fa;
     }
-    
+
     .error-content {
       text-align: center;
       max-width: 600px;
@@ -38,12 +38,12 @@ import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
       background-color: white;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     .error-content h2 {
       color: #dc3545;
       margin-bottom: 1rem;
     }
-    
+
     .error-content button {
       margin-top: 1rem;
       padding: 0.5rem 1rem;
@@ -53,11 +53,11 @@ import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
       border-radius: 4px;
       cursor: pointer;
     }
-    
+
     .error-content button:hover {
       background-color: #0069d9;
     }
-    
+
     .bootstrap-container {
       position: fixed;
       top: 0;
@@ -107,17 +107,17 @@ export class AppComponent implements OnInit {
   loadConfiguration(): void {
     // Check multiple possible locations for config.json
     const configLocations = ['/config.json', './config.json', 'config.json', '/assets/config.json'];
-    
+
     // Log the base href - this can affect where files are loaded from
     const baseElement = document.querySelector('base');
     const baseHref = baseElement ? baseElement.getAttribute('href') : '/';
     this.debug.log(`AppComponent: Current base href is: ${baseHref}`);
-    
+
     // First try to verify the config file exists at primary location
     const checkConfigUrl = '/config.json';
-    
+
     this.debug.log(`AppComponent: Checking for config at ${checkConfigUrl}`);
-    fetch(checkConfigUrl, { 
+    fetch(checkConfigUrl, {
       method: 'HEAD',
       // Add cache-busting to prevent cached responses
       headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
@@ -137,7 +137,7 @@ export class AppComponent implements OnInit {
         this.tryConfigLocations(configLocations, 0);
       });
   }
-  
+
   /**
    * Tries to load configuration from multiple possible locations
    * @param locations Array of configuration file locations to try
@@ -156,10 +156,10 @@ export class AppComponent implements OnInit {
         });
       return;
     }
-    
+
     const location = locations[index];
     this.debug.log(`AppComponent: Trying config location: ${location}`);
-    
+
     this.loadConfigFile(location)
       .then(() => {
         this.debug.log(`AppComponent: Successfully loaded config from ${location}`);
@@ -170,7 +170,7 @@ export class AppComponent implements OnInit {
         this.tryConfigLocations(locations, index + 1);
       });
   }
-  
+
   /**
    * Loads configuration from a specific file path
    * @param configPath Path to the configuration file
@@ -178,7 +178,7 @@ export class AppComponent implements OnInit {
    */
   private loadConfigFile(configPath: string = '/config.json'): Promise<any> {
     this.debug.log(`AppComponent: Loading configuration from ${configPath}`);
-    
+
     return this.configService.loadConfigFromJson(configPath)
       .then(config => {
         this.debug.log('AppComponent: Configuration loaded successfully:', config);
@@ -198,18 +198,18 @@ export class AppComponent implements OnInit {
             this.routePersistenceService.restoreRoute();
           }, 500);
         }
-        
+
         return config;
       })
       .catch(err => {
         this.configError = `Failed to load application configuration from ${configPath}`;
         this.debug.error('AppComponent: Error loading configuration:', err);
-        
+
         // Re-throw the error for the tryConfigLocations cascade
         throw err;
       });
   }
-  
+
   /**
    * Updates the base href with retry logic
    * @param maxRetries Maximum number of retries
@@ -217,7 +217,7 @@ export class AppComponent implements OnInit {
    */
   private updateBaseHrefWithRetry(maxRetries: number, attempt: number = 1): void {
     const success = this.baseUrlService.updateBaseHref();
-    
+
     if (!success && attempt < maxRetries) {
       this.debug.warn(`AppComponent: Base href update failed, retry ${attempt} of ${maxRetries}`);
       setTimeout(() => {

@@ -4,19 +4,19 @@
     <h2>Registry Endpoints Configuration</h2>
     <p>Manage multiple API and model endpoints</p>
   </div>
-  
+
   <!-- Loading State -->
   <div *ngIf="loading()" class="loading-container">
     <fluent-progress-ring></fluent-progress-ring>
     <p>Loading configuration...</p>
   </div>
-  
+
   <!-- Error State -->
   <div *ngIf="error() && !loading()" class="error-container">
     <fluent-icon name="warning"></fluent-icon>
     <p>{{ error() }}</p>
   </div>
-  
+
   <!-- Configuration Form -->
   <div *ngIf="!loading()" class="card-content">
     <form [formGroup]="configForm" (ngSubmit)="onSubmit()">      <div class="endpoint-section">

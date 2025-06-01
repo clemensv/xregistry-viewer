@@ -64,10 +64,10 @@ export class IconComponent implements OnInit {
   private _name: string = 'info';
   private _size: number = 20;
   private _filled: boolean = false;
-  private iconSubject = new BehaviorSubject<{ name: string, size: number, filled: boolean }>({ 
-    name: this._name, 
-    size: this._size, 
-    filled: this._filled 
+  private iconSubject = new BehaviorSubject<{ name: string, size: number, filled: boolean }>({
+    name: this._name,
+    size: this._size,
+    filled: this._filled
   });
 
   iconSvg$: Observable<SafeHtml>;
@@ -98,7 +98,7 @@ export class IconComponent implements OnInit {
     const iconName = this.mapLegacyIconName(name);
     const variant = filled ? 'filled' : 'regular';
     const cacheKey = `${iconName}_${size}_${variant}`;
-    
+
     // Check cache first
     if (IconComponent.iconCache.has(cacheKey)) {
       return IconComponent.iconCache.get(cacheKey)!;
@@ -108,7 +108,7 @@ export class IconComponent implements OnInit {
     const fileName = `ic_fluent_${iconName}_${size}_${variant}.svg`;
     // Use GitHub repository directly for icon source with correct folder structure
     const githubUrl = `https://raw.githubusercontent.com/microsoft/fluentui-system-icons/main/assets/${encodeURIComponent(titleCaseName)}/SVG/${fileName}`;
-    
+
     // Fetch the icon and sanitize the SVG
     const icon$ = this.http.get(githubUrl, { responseType: 'text' }).pipe(
       map(svg => this.processAndSanitizeSvg(svg, size)),      catchError(() => {
@@ -153,16 +153,16 @@ export class IconComponent implements OnInit {
     const iconMapping: Record<string, string> = {
       // Settings and configuration
       'settings': 'settings',
-      
+
       // Font and text controls
       'font_decrease': 'text_font_size',
       'font_size': 'text_font_size',
       'font_increase': 'text_font_size',
-      
+
       // Theme controls
       'weather_moon': 'weather_moon',
       'weather_sunny': 'weather_sunny',
-      
+
       // Navigation
       'chevron_left': 'chevron_left',
       'chevron_right': 'chevron_right',
@@ -172,11 +172,11 @@ export class IconComponent implements OnInit {
       'chevron_double_right': 'chevron_double_right',
       'arrow_left': 'arrow_left',
       'arrow_right': 'arrow_right',
-      'arrow_up': 'arrow_up', 
+      'arrow_up': 'arrow_up',
       'arrow_down': 'arrow_down',
       'arrow_download': 'arrow_download',
       'arrow_sync_circle': 'arrow_sync_circle',
-      
+
       // Actions
       'search': 'search',
       'dismiss': 'dismiss',
@@ -187,17 +187,17 @@ export class IconComponent implements OnInit {
       'delete': 'delete',
       'edit': 'edit',
       'refresh': 'arrow_clockwise',
-      
+
       // Content
       'document': 'document',
       'folder': 'folder',
       'folder_open': 'folder_open',
-      
+
       // Status
       'info': 'info',
       'warning': 'warning',
       'error': 'error_circle',
-      
+
       // UI
       'home': 'home',
       'list': 'list',

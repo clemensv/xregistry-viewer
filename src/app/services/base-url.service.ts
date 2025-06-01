@@ -26,7 +26,7 @@ export class BaseUrlService {
         console.error('BaseUrlService: Cannot update base href - base URL is empty or undefined');
         return false;
       }
-      
+
       console.log(`BaseUrlService: Updating base href with URL: ${baseUrl}`);
 
       // Normalize the base URL to ensure it ends with a slash
@@ -49,20 +49,20 @@ export class BaseUrlService {
         baseElement = this.document.createElement('base');
         this.document.head.appendChild(baseElement);
       }
-      
+
       // Get the current href for comparison
       const currentHref = baseElement.getAttribute('href');
-      
+
       // If the href is already set to the normalized URL, no need to update
       if (currentHref === normalizedBaseUrl) {
         console.log(`BaseUrlService: Base href already set to ${normalizedBaseUrl}`);
         return true;
       }
-      
+
       // Update the href attribute
       baseElement.setAttribute('href', normalizedBaseUrl);
       console.log(`BaseUrlService: Base URL updated from "${currentHref}" to: "${normalizedBaseUrl}"`);
-      
+
       // Verify the update was successful
       const newHref = baseElement.getAttribute('href');
       if (newHref !== normalizedBaseUrl) {
@@ -72,20 +72,20 @@ export class BaseUrlService {
 
       // Log the update for debugging
       console.info(`BaseUrlService: Base URL successfully set to: ${normalizedBaseUrl}`);
-      
+
       // Update window location if necessary and we're at the root path
       if (window.location.pathname === '/' && normalizedBaseUrl !== '/' && !window.location.pathname.startsWith(normalizedBaseUrl)) {
         console.log(`BaseUrlService: Current path ${window.location.pathname} doesn't match base URL ${normalizedBaseUrl}, considering redirect`);
         // Only log the consideration, don't perform the redirect automatically as it can cause issues
       }
-      
+
       return true;
     } catch (error) {
       console.error('BaseUrlService: Error updating base href:', error);
       return false;
     }
   }
-  
+
   /**
    * Validates if a string is a valid base URL
    * @param url The URL to validate
@@ -96,12 +96,12 @@ export class BaseUrlService {
     if (!url.startsWith('/') && !url.startsWith('http://') && !url.startsWith('https://')) {
       return false;
     }
-    
+
     // Base URL must end with /
     if (!url.endsWith('/')) {
       return false;
     }
-    
+
     return true;
   }
 

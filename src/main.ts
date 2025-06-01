@@ -19,7 +19,7 @@ provideFluentDesignSystem()
   .register(
     fluentTextField(),
     fluentButton(),
-    fluentMenu(), 
+    fluentMenu(),
     fluentMenuItem()
   );
 

@@ -96,14 +96,14 @@ export class BootstrapComponent implements OnInit {
   ngOnInit(): void {
     // Setup effect to monitor loading state from signal
     this.setupLoadingEffect();
-    
+
     // Setup effect to monitor error state from signal
     this.setupErrorEffect();
-    
+
     // Try multiple config locations in sequence
     this.tryLoadConfiguration(['/config.json', './config.json', '/assets/config.json']);
   }
-  
+
   /**
    * Sets up effect to monitor loading state changes
    */
@@ -111,7 +111,7 @@ export class BootstrapComponent implements OnInit {
     // We'll use a simple polling approach since signals don't have subscribe
     const checkLoadingState = () => {
       const isLoading = this.configService.loading();
-      
+
       // If not loading and config not yet marked as loaded, check if we have config
       if (!isLoading && !this.configLoaded) {
         const config = this.configService.getConfig();
@@ -119,17 +119,17 @@ export class BootstrapComponent implements OnInit {
           this.handleSuccessfulConfigLoad(config);
         }
       }
-      
+
       // Continue polling while not loaded
       if (!this.configLoaded) {
         setTimeout(checkLoadingState, 300);
       }
     };
-    
+
     // Start the polling
     setTimeout(checkLoadingState, 300);
   }
-  
+
   /**
    * Sets up effect to monitor error state changes
    */
@@ -137,22 +137,22 @@ export class BootstrapComponent implements OnInit {
     // We'll use a simple polling approach for error state too
     const checkErrorState = () => {
       const currentError = this.configService.error();
-      
+
       if (currentError && !this.error) {
         this.error = `Failed to load configuration: ${currentError.message}`;
         this.debug.error('Bootstrap: Configuration loading error:', currentError);
       }
-      
+
       // Continue polling while not loaded
       if (!this.configLoaded) {
         setTimeout(checkErrorState, 500);
       }
     };
-    
+
     // Start the polling
     setTimeout(checkErrorState, 500);
   }
-  
+
   /**
    * Tries to load configuration from multiple locations
    * @param configPaths Array of paths to try loading config from
@@ -162,7 +162,7 @@ export class BootstrapComponent implements OnInit {
     if (index >= configPaths.length) {
       this.error = 'Failed to load application configuration from all possible locations.';
       this.debug.error('Bootstrap: All config locations failed');
-      
+
       // Check if we have a fallback config
       const config = this.configService.getConfig();
       if (config) {
@@ -171,10 +171,10 @@ export class BootstrapComponent implements OnInit {
       }
       return;
     }
-    
+
     const configPath = configPaths[index];
     this.debug.log(`Bootstrap: Attempting to load configuration from ${configPath}`);
-    
+
     this.configService.loadConfigFromJson(configPath)
       .then(config => {
         if (config) {
@@ -190,7 +190,7 @@ export class BootstrapComponent implements OnInit {
         this.tryLoadConfiguration(configPaths, index + 1);
       });
   }
-  
+
   /**
    * Handles successful configuration loading
    * @param config The loaded configuration

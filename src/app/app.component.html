@@ -194,7 +194,7 @@
   <div *ngIf="!configLoaded" class="bootstrap-container">
     <app-bootstrap></app-bootstrap>
   </div>
-  
+
   <!-- Configuration error state -->
   <div *ngIf="configError && configLoaded" class="config-error-container">
     <div class="error-content">
@@ -203,7 +203,7 @@
       <button (click)="loadConfiguration()">Retry Loading Configuration</button>
     </div>
   </div>
-  
+
   <!-- Main application when configuration is loaded successfully -->
   <div *ngIf="configLoaded && !configError" class="app-content">
     <app-header></app-header>

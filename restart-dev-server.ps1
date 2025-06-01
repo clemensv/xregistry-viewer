@@ -2,8 +2,8 @@
 Write-Host "Stopping existing nx serve processes..."
 $nxServeProcesses = Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*nx serve*" }
 if ($nxServeProcesses) {
-    $nxServeProcesses | ForEach-Object { 
-        try { 
+    $nxServeProcesses | ForEach-Object {
+        try {
             Stop-Process -Id $_.Id -Force
             Write-Host "Stopped process with ID: $($_.Id)"
         } catch {

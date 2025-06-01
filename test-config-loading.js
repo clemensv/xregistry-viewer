@@ -8,11 +8,11 @@ fetch('http://localhost:4200/config.json', { method: 'HEAD' })
     console.log('HEAD request status:', response.status);
     console.log('HEAD request ok:', response.ok);
     console.log('Content type:', response.headers.get('content-type'));
-    
+
     if (!response.ok) {
       throw new Error(`Config file not accessible: ${response.status}`);
     }
-    
+
     runConfigTest();
   })
   .catch(error => {
@@ -29,11 +29,11 @@ function runConfigTest() {
       console.log('Response status:', response.status);
       console.log('Response ok:', response.ok);
       console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch config: ${response.status}`);
       }
-      
+
       return response.json();
     })
     .then(config => {

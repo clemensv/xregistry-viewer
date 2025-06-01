@@ -1,18 +1,18 @@
 import { Injectable, Inject, PLATFORM_ID, inject, signal } from '@angular/core';
-import { 
-  BehaviorSubject, 
-  Observable, 
-  Subject, 
-  catchError, 
-  firstValueFrom, 
-  from, 
-  map, 
-  mergeMap, 
-  of, 
-  retry, 
-  shareReplay, 
-  tap, 
-  throwError 
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  catchError,
+  firstValueFrom,
+  from,
+  map,
+  mergeMap,
+  of,
+  retry,
+  shareReplay,
+  tap,
+  throwError
 } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { isPlatformBrowser } from '@angular/common';
@@ -54,7 +54,7 @@ export class ConfigService {
   readonly loading = signal<boolean>(false);
   /** Signal for error state */
   readonly error = signal<Error | null>(null);
-  
+
   /** Subject for base URL updates */
   private baseUrlSubject = new BehaviorSubject<string>(environment.baseUrl || '/');
   /** Observable of current base URL */
@@ -135,7 +135,7 @@ export class ConfigService {
     this.configLoaded = false;
     this.baseUrlSubject.next(environment.baseUrl);
     this.configSubject.next(this.getDefaultConfig());
-    
+
     if (this.isBrowser) {
       localStorage.removeItem('baseUrl');
       localStorage.removeItem('appConfig');
@@ -152,7 +152,7 @@ export class ConfigService {
    */
   loadConfigFromJson(configPath: string): Promise<AppConfig | null> {
     console.log(`ConfigService: Loading configuration from ${configPath}`);
-    
+
     // If already loading, return the existing promise
     if (this.configLoading) {
       console.log('ConfigService: Configuration already loading, returning existing promise');
@@ -176,7 +176,7 @@ export class ConfigService {
     if (this.configLoaded) {
       console.log('ConfigService: Configuration already loaded, returning existing config');
       const existingConfig = this.configSubject.getValue();
-      
+
       // Verify the config is valid
       if (existingConfig && this.validateConfig(existingConfig)) {
         return Promise.resolve(existingConfig);
@@ -227,12 +227,12 @@ export class ConfigService {
         }),
         tap(config => {
           console.log('ConfigService: Configuration normalized successfully');
-          
+
           // Validate the configuration
           if (!this.validateConfig(config)) {
             throw new Error('Configuration validation failed');
           }
-          
+
           // Update state with new configuration
           this.configSubject.next(config);
           this.configLoaded = true;
@@ -259,7 +259,7 @@ export class ConfigService {
             headers: error.headers ? Object.fromEntries(error.headers.keys().map(key => [key, error.headers.get(key)])) : 'No headers',
             body: error.error
           });
-          
+
           // Try loading from localStorage if available before falling back to defaults
           if (this.isBrowser) {
             try {
@@ -282,7 +282,7 @@ export class ConfigService {
               console.warn('ConfigService: Error reading from localStorage:', storageError);
             }
           }
-          
+
           this.configLoading = false;
           this.loading.set(false);
           this.error.set(configError);
@@ -372,7 +372,7 @@ export class ConfigService {
     if (!config) {
       return null;
     }
-    
+
     return this.normalizeConfig(config);
   }
 
@@ -384,7 +384,7 @@ export class ConfigService {
    */
   private getDefaultConfig(): AppConfig {
     return {
-      apiEndpoints: [environment.apiBaseUrl], 
+      apiEndpoints: [environment.apiBaseUrl],
       modelUris: [],
       baseUrl: environment.baseUrl,
       defaultDocumentView: true,
@@ -410,32 +410,32 @@ export class ConfigService {
     // Validate required top-level fields
     const requiredFields: Array<keyof AppConfig> = ['baseUrl', 'features'];
     const missingFields = requiredFields.filter(field => !config[field]);
-    
+
     if (missingFields.length > 0) {
       console.error(`ConfigService: Configuration is missing required fields: ${missingFields.join(', ')}`);
       return false;
     }
-    
+
     // Validate features object
     if (!config.features) {
       console.error('ConfigService: features object is missing');
       return false;
     }
-    
+
     const requiredFeatures: Array<keyof AppConfig['features']> = ['enableFilters', 'enableSearch', 'enableDocDownload'];
     const missingFeatures = requiredFeatures.filter(feature => config.features[feature] === undefined);
-    
+
     if (missingFeatures.length > 0) {
       console.warn(`ConfigService: features object is missing fields: ${missingFeatures.join(', ')}`);
       // Not failing validation for missing feature flags, just warning
     }
-    
+
     // Validate arrays
     if (config.apiEndpoints && !Array.isArray(config.apiEndpoints)) {
       console.error('ConfigService: apiEndpoints is not an array');
       return false;
     }
-    
+
     if (config.modelUris && !Array.isArray(config.modelUris)) {
       console.error('ConfigService: modelUris is not an array');
       return false;

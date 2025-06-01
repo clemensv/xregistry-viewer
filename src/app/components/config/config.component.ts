@@ -24,16 +24,16 @@ export class ConfigComponent implements OnInit, OnDestroy {
   configForm!: FormGroup;
   /** Flag indicating if restart is required */
   restartRequired = signal(false);
-  
+
   /** Flag indicating if config is loading */
   loading = signal(true);
-  
+
   /** Error message if config load failed */
   error = signal<string | null>(null);
-  
+
   /** Original configuration for comparison */
   private originalConfig = signal<AppConfig | null>(null);
-  
+
   constructor(
     private fb: FormBuilder,
     private configService: ConfigService,
@@ -53,11 +53,11 @@ export class ConfigComponent implements OnInit, OnDestroy {
 
   // Injector for use with runInInjectionContext
   private injector = inject(Injector);
-  
+
   ngOnInit(): void {
     this.loading.set(true);
     this.error.set(null);
-    
+
     // Set up subscription to loading state using toSignal
     const loadingSignal = toSignal(
       toObservable(this.configService.loading).pipe(
@@ -65,7 +65,7 @@ export class ConfigComponent implements OnInit, OnDestroy {
       ),
       { initialValue: true }
     );
-    
+
     // Set up subscription to error state using toSignal
     const errorSignal = toSignal(
       toObservable(this.configService.error).pipe(
@@ -73,14 +73,14 @@ export class ConfigComponent implements OnInit, OnDestroy {
       ),
       { initialValue: null }
     );
-    
+
     // Create an effect to handle loading state updates
     effect(() => {
       const isLoading = loadingSignal();
       this.loading.set(isLoading);
       this.cdr.markForCheck();
     }, { injector: this.injector });
-    
+
     // Create an effect to handle error state updates
     effect(() => {
       const err = errorSignal();
@@ -91,7 +91,7 @@ export class ConfigComponent implements OnInit, OnDestroy {
       }
       this.cdr.markForCheck();
     }, { injector: this.injector });
-    
+
     // Initialize configuration - must be after effects are set up
     setTimeout(() => this.initializeConfig(), 0);
   }
@@ -105,7 +105,7 @@ export class ConfigComponent implements OnInit, OnDestroy {
       // First check if we already have a loaded configuration
       let config = this.configService.getConfig();
       console.log('ConfigComponent: Initial config state:', config ? 'Available' : 'Not available');
-      
+
       if (!config) {
         console.log('ConfigComponent: Loading config from /config.json');
         try {
@@ -114,14 +114,14 @@ export class ConfigComponent implements OnInit, OnDestroy {
           const configPromise = this.configService.loadConfigFromJson('/config.json');
           config = await Promise.race([
             configPromise,
-            new Promise<AppConfig | null>((_, reject) => 
+            new Promise<AppConfig | null>((_, reject) =>
               setTimeout(() => reject(new Error('Configuration loading timed out after 15 seconds')), 15000)
             )
           ]);
           console.log('ConfigComponent: Config loaded successfully:', config);
         } catch (loadError) {
           console.error('ConfigComponent: Error loading from /config.json:', loadError);
-          
+
           // Try loading from assets folder as fallback
           console.log('ConfigComponent: Attempting to load from /assets/config.json as fallback');
           try {
@@ -133,24 +133,24 @@ export class ConfigComponent implements OnInit, OnDestroy {
           }
         }
       }
-      
+
       if (!config) {
         throw new Error('Failed to load configuration - config object is null');
       }
-      
+
       // Validate required configuration fields
       this.validateConfig(config);
-      
+
       // Store the original configuration for comparison later
       this.originalConfig.set(structuredClone(config));
       console.log('ConfigComponent: Original config stored for comparison');
-      
+
       // Initialize form with loaded configuration
       this.initializeForm(config);
     } catch (error) {
       console.error('ConfigComponent: Failed to load configuration:', error);
       this.error.set(`Failed to load configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
+
       // Create form with default values
       this.initializeForm(null);
     } finally {
@@ -158,7 +158,7 @@ export class ConfigComponent implements OnInit, OnDestroy {
       this.cdr.markForCheck();
     }
   }
-  
+
   /**
    * Initializes the form with configuration values
    * @param config The configuration to use for initialization
@@ -166,20 +166,20 @@ export class ConfigComponent implements OnInit, OnDestroy {
   private initializeForm(config: AppConfig | null): void {
     this.configForm = this.fb.group({
       apiEndpoints: this.fb.array(
-        (config?.apiEndpoints || []).map(url => 
+        (config?.apiEndpoints || []).map(url =>
           this.fb.control(url, [Validators.required, Validators.pattern('https?://.*')])
-        ) || [this.fb.control('', [Validators.required, Validators.pattern('https?://.*')])], 
+        ) || [this.fb.control('', [Validators.required, Validators.pattern('https?://.*')])],
         Validators.required
       ),
       modelUris: this.fb.array(
-        (config?.modelUris || []).map(url => 
+        (config?.modelUris || []).map(url =>
           this.fb.control(url, [Validators.required])
-        ) || [this.fb.control('', [Validators.required])], 
+        ) || [this.fb.control('', [Validators.required])],
         Validators.required
       ),
       baseUrl: [config?.baseUrl || '/', [Validators.required]]
     });
-    
+
     this.cdr.markForCheck();
   }
 
@@ -324,21 +324,21 @@ export class ConfigComponent implements OnInit, OnDestroy {
   private validateConfig(config: AppConfig): void {
     const requiredFields: Array<keyof AppConfig> = ['baseUrl', 'features'];
     const missingFields = requiredFields.filter(field => !config[field]);
-    
+
     if (missingFields.length > 0) {
       throw new Error(`Configuration is missing required fields: ${missingFields.join(', ')}`);
     }
-    
+
     if (!config.apiEndpoints || !Array.isArray(config.apiEndpoints)) {
       console.warn('ConfigComponent: apiEndpoints is missing or not an array, initializing as empty array');
       config.apiEndpoints = [];
     }
-    
+
     if (!config.modelUris || !Array.isArray(config.modelUris)) {
       console.warn('ConfigComponent: modelUris is missing or not an array, initializing as empty array');
       config.modelUris = [];
     }
-    
+
     if (!config.features) {
       console.warn('ConfigComponent: features object is missing, initializing with defaults');
       config.features = {

@@ -104,26 +104,32 @@
       "options": {}
     },
     "test": {
-      "executor": "@angular-devkit/build-angular:karma",
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/xregistry-viewer"
+      ],
       "options": {
-        "main": "src/test.ts",
-        "polyfills": [
-          "zone.js",
-          "zone.js/testing"
-        ],
-        "tsConfig": "tsconfig.spec.json",
-        "inlineStyleLanguage": "scss",
-        "assets": [
-          {
-            "glob": "**/*",
-            "input": "public",
-            "output": "/"
-          }
-        ],
-        "styles": [
-          "src/styles.scss"
-        ],
-        "scripts": []
+        "jestConfig": "jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "lint": {
+      "executor": "@angular-eslint/builder:lint",
+      "options": {
+        "lintFilePatterns": [
+          "src/**/*.ts",
+          "src/**/*.html",
+          "src/**/*.scss",
+          "src/**/*.css",
+          "src/**/*.json",
+          "src/**/*.md"
+        ]
       }
     }
   }
