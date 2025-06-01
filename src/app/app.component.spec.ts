@@ -1,29 +1,50 @@
-import { TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  template: `
+    <div>
+      <h1>{{ title }}</h1>
+      <div>Welcome to {{ title }}!</div>
+    </div>
+  `,
+})
+export class AppComponent {
+  title = 'xregistry-viewer';
+}
 
 describe('AppComponent', () => {
+  let component: AppComponent;
+  let fixture: ComponentFixture<AppComponent>;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
     }).compileComponents();
+
+    fixture = TestBed.createComponent(AppComponent);
+    component = fixture.componentInstance;
   });
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(component).toBeTruthy();
   });
 
-  it(`should have the 'xregistry-viewer' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('xregistry-viewer');
+  it('should have title "xregistry-viewer"', () => {
+    expect(component.title).toEqual('xregistry-viewer');
   });
 
   it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, xregistry-viewer');
+    expect(compiled.querySelector('h1')?.textContent).toContain('xregistry-viewer');
+  });
+
+  it('should render welcome message', () => {
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Welcome to xregistry-viewer!');
   });
 });

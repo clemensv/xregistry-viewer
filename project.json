@@ -106,7 +106,7 @@
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": [
-        "{workspaceRoot}/coverage/xregistry-viewer"
+        "{workspaceRoot}/coverage"
       ],
       "options": {
         "jestConfig": "jest.config.ts",

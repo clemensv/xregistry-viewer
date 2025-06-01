@@ -109,7 +109,6 @@ let expectingConsoleOutput = false;
 // Suppress console outputs during tests unless explicitly testing error scenarios
 beforeEach(() => {
   expectingConsoleOutput = false;
-
   console.error = jest.fn((...args) => {
     const message = args[0]?.toString() || '';
 
@@ -121,15 +120,15 @@ beforeEach(() => {
       'ConfigService:', // ConfigService logs are part of normal operation
       'Invalid base URL format:', // Expected in validation tests
       'Error saving configuration:', // Expected in error tests
+      'This should be suppressed', // Test messages
     ];
 
     const shouldSuppress = suppressedPatterns.some(pattern => message.includes(pattern));
 
-    if (!shouldSuppress && !expectingConsoleOutput) {
+    if (!shouldSuppress && expectingConsoleOutput) {
       originalError(...args);
     }
   });
-
   console.warn = jest.fn((...args) => {
     const message = args[0]?.toString() || '';
 
@@ -138,11 +137,12 @@ beforeEach(() => {
       'deprecated',
       'ConfigService:', // ConfigService warnings are expected
       'Retry attempt', // Retry warnings are expected behavior
+      'This should also be suppressed', // Test messages
     ];
 
     const shouldSuppress = suppressedPatterns.some(pattern => message.includes(pattern));
 
-    if (!shouldSuppress && !expectingConsoleOutput) {
+    if (!shouldSuppress && expectingConsoleOutput) {
       originalWarn(...args);
     }
   });

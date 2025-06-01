@@ -1,8 +1,10 @@
-import { Config } from 'jest';
+import type { Config } from 'jest';
 
 const config: Config = {
+  displayName: 'xregistry-viewer',
   preset: 'jest-preset-angular',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  testEnvironment: 'jsdom',
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/dist/',
@@ -29,12 +31,14 @@ const config: Config = {
     '!src/main.ts',
     '!src/test-setup.ts',
     '!src/environments/*.ts',
-  ],
-  testMatch: [
+  ],  testMatch: [
     '<rootDir>/src/**/__tests__/**/*.[jt]s?(x)',
     '<rootDir>/src/**/*(*.)@(spec|test).[jt]s?(x)',
   ],
-  globals: {},
+  maxWorkers: 1,
+  clearMocks: true,
+  restoreMocks: true,
+  resetMocks: true
 };
 
 export default config;

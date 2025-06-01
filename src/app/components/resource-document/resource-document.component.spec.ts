@@ -1,6 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { ResourceDocumentComponent } from './resource-document.component';
+import { RegistryService } from '../../services/registry.service';
+import { ConfigService } from '../../services/config.service';
+import { ModelService } from '../../services/model.service';
+import { PLATFORM_ID } from '@angular/core';
 
 describe('ResourceDocumentComponent', () => {
   let component: ResourceDocumentComponent;
@@ -8,7 +13,16 @@ describe('ResourceDocumentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResourceDocumentComponent]
+      imports: [
+        ResourceDocumentComponent,
+        HttpClientTestingModule
+      ],
+      providers: [
+        RegistryService,
+        ConfigService,
+        ModelService,
+        { provide: PLATFORM_ID, useValue: 'browser' }
+      ]
     })
     .compileComponents();
 
