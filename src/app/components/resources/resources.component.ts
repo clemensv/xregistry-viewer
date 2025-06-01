@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Observable, Subject, interval } from 'rxjs';
 import { map, switchMap, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -22,6 +22,7 @@ import { truncateText, truncateDescription, formatDateShort, getFullText } from 
   imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, ResourceRowComponent, ResourceDocumentComponent, PageHeaderComponent],
   templateUrl: './resources.component.html',
   styleUrls: ['./resources.component.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
 export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {

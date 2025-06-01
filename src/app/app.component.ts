@@ -1,8 +1,7 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
-import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { FontService } from './services/font.service';
 import { ThemeService } from './services/theme.service';
@@ -17,9 +16,10 @@ import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
 @Component({
   standalone: true,
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, HeaderComponent, BreadcrumbComponent, FooterComponent, BootstrapComponent],
+  imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent, BootstrapComponent],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppComponent implements OnInit {
   title = 'xregistry-viewer';

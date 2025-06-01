@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Observable, Subject, interval } from 'rxjs';
 import { map, switchMap, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -15,20 +15,22 @@ import { SearchService } from '../../services/search.service';
 import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
 import { ConfigService } from '../../services/config.service';
 import { truncateText, truncateDescription, formatDateShort, getFullText } from '../../utils/text.utils';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   standalone: true,
   selector: 'app-groups',
-  imports: [CommonModule, RouterModule, FormsModule, GroupRowComponent, ResourceDocumentItemComponent, PageHeaderComponent],
+  imports: [CommonModule, RouterModule, FormsModule, GroupRowComponent, ResourceDocumentItemComponent, PageHeaderComponent, IconComponent],
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
 export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
   groupType!: string;
   resourceTypes$!: Observable<string[]>;
   groupAttributes: { [key: string]: any } = {};
-  private suppressGroupAttributes = ['groupid', 'self', 'xid', 'epoch', 'createdat', 'modifiedat'];
+  private suppressGroupAttributes = ['groupid', 'self', 'xid', 'epoch', 'createdat', 'modifiedat', 'name', 'id', 'origin'];
   registryModel: any = null;
   groupsList: Group[] = [];
   filteredGroupsList: Group[] = [];
@@ -37,6 +39,13 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
   currentOriginFilter = ''; // Add origin filter
   loading = true;
   loadingProgress = true; // Tracks if we're still expecting more data
+
+  // Error handling state
+  hasApiError = false;
+  apiErrorMessage = '';
+  apiErrorDetails: any = null;
+  partialFailure = false; // True when some but not all APIs failed
+  totalFailure = false; // True when ALL APIs failed
   private destroy$ = new Subject<void>();
   private initialLoad = true;
   private userHasChangedView = false; // Track if user manually changed view mode
@@ -217,10 +226,37 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    // Reset error states
+    this.hasApiError = false;
+    this.apiErrorMessage = '';
+    this.apiErrorDetails = null;
+    this.partialFailure = false;
+    this.totalFailure = false;
+
     const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.listGroups(this.groupType, pageRel, filter)
       .subscribe({
         next: (page) => {
+          // Check API failure statistics
+          if (page.totalApis && page.totalApis > 0) {
+            this.partialFailure = page.failedApis! > 0 && page.successfulApis! > 0;
+            this.totalFailure = page.successfulApis === 0;
+
+            if (this.totalFailure) {
+              // ALL APIs failed - show error state
+              this.hasApiError = true;
+              this.apiErrorMessage = this.generateErrorMessage(page.error, page.allApiErrors);
+              this.apiErrorDetails = page.allApiErrors;
+              this.loading = false;
+              this.loadingProgress = false;
+              this.cdr.markForCheck();
+              return;
+            } else if (this.partialFailure) {
+              // Some APIs failed but we have data - log warning but continue
+              this.debug.warn(`Partial API failure: ${page.failedApis} of ${page.totalApis} APIs failed for group type '${this.groupType}'`);
+            }
+          }
+
           // Check if server returned pagination links
           const hasServerPagination = Object.keys(page.links).length > 0;
 
@@ -253,6 +289,10 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         },
         error: (error) => {
           console.error('GroupsComponent: Error loading groups:', error);
+          this.hasApiError = true;
+          this.totalFailure = true;
+          this.apiErrorMessage = this.generateErrorMessage(error);
+          this.apiErrorDetails = error;
           this.loading = false;
           this.loadingProgress = false;
           this.cdr.markForCheck();
@@ -412,9 +452,29 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayGroupAttributes(): string[] {
-    return Object.keys(this.groupAttributes || {}).filter(
-      key => !this.suppressGroupAttributes.includes(key) && !key.endsWith('url')
+    const filteredAttributes = Object.keys(this.groupAttributes || {}).filter(
+      key => {
+        const lowerKey = key.toLowerCase();
+        // Filter out basic suppressed attributes
+        if (this.suppressGroupAttributes.includes(lowerKey)) {
+          return false;
+        }
+        // Filter out URL attributes
+        if (lowerKey.endsWith('url')) {
+          return false;
+        }
+        // Filter out resource count attributes (e.g., serverscount, endpointscount)
+        if (lowerKey.endsWith('count')) {
+          return false;
+        }
+        // Filter out description as it's shown separately
+        if (lowerKey === 'description') {
+          return false;
+        }
+        return true;
+      }
     );
+    return filteredAttributes;
   }
 
   /** reuse hasValue from ResourcesComponent or reimplement*/
@@ -536,5 +596,61 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   isSimpleAttribute(value: any): boolean {
     return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
+  }
+
+  /**
+   * Generate a user-friendly error message based on the type of failure
+   */
+  private generateErrorMessage(error: any, allApiErrors?: Array<{ api: string; error: any }>): string {
+    if (!error) {
+      return 'Unable to load groups - all registry endpoints are currently unavailable.';
+    }
+
+    // Check for common network error types
+    const errorMessage = error.message || error.toString();
+
+    if (errorMessage.includes('ERR_NAME_NOT_RESOLVED')) {
+      return 'Network connectivity issue - unable to resolve registry server addresses.';
+    }
+
+    if (errorMessage.includes('CORS')) {
+      return 'Cross-origin request blocked - registry servers may not be configured to accept requests from this application.';
+    }
+
+    if (errorMessage.includes('ERR_FAILED') || errorMessage.includes('NetworkError')) {
+      return 'Network connection failed - registry servers may be offline or unreachable.';
+    }
+
+    if (error.status === 404) {
+      return `Groups of type "${this.groupType}" not found on any available registry endpoints.`;
+    }
+
+    if (error.status === 403) {
+      return 'Access denied - you may not have permission to view these groups.';
+    }
+
+    if (error.status === 500) {
+      return 'Registry server error - the servers are experiencing internal issues.';
+    }
+
+    // If we have multiple API errors, show a summary
+    if (allApiErrors && allApiErrors.length > 1) {
+      const errorTypes = allApiErrors.map(apiError => {
+        const msg = apiError.error?.message || apiError.error?.toString() || 'Unknown error';
+        if (msg.includes('ERR_NAME_NOT_RESOLVED')) return 'DNS resolution failed';
+        if (msg.includes('CORS')) return 'CORS blocked';
+        if (msg.includes('ERR_FAILED')) return 'Connection failed';
+        if (apiError.error?.status === 404) return '404 Not Found';
+        if (apiError.error?.status === 403) return '403 Forbidden';
+        if (apiError.error?.status === 500) return '500 Server Error';
+        return 'Connection error';
+      });
+
+      const uniqueErrors = [...new Set(errorTypes)];
+      return `All ${allApiErrors.length} registry endpoints failed: ${uniqueErrors.join(', ')}.`;
+    }
+
+    // Fallback to generic message
+    return `Unable to load groups - registry endpoints are currently unavailable (${errorMessage}).`;
   }
 }

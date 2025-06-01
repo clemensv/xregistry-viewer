@@ -1,8 +1,7 @@
 <div class="model-page">
   <!-- Loading State -->
   <div *ngIf="loading" class="loading-container">
-    <div class="loading-spinner">
-      <span class="material-icons spinning">refresh</span>
+    <div class="loading-spinner">      <fluent-icon name="arrow_sync_circle" class="spinning"></fluent-icon>
     </div>
     <div class="loading-text">Loading registry model...</div>
   </div>
@@ -12,8 +11,7 @@
 
     <!-- Registry Overview -->
     <section class="registry-overview">
-      <div class="section-header">
-        <span class="material-icons section-icon">hub</span>
+      <div class="section-header">        <fluent-icon name="link" class="section-icon"></fluent-icon>
         <h1>Registry Model</h1>
       </div>
 
@@ -35,12 +33,9 @@
           [initialExpanded]="item.isExpanded || false">
         </app-resource-document-item>
       </div>
-    </section>
-
-    <!-- Group Types -->
+    </section>    <!-- Group Types -->
     <section class="group-types-section">
-      <div class="section-header">
-        <span class="material-icons section-icon">category</span>
+      <div class="section-header">        <fluent-icon name="folder" class="section-icon"></fluent-icon>
         <h2>Group Types</h2>
         <span class="count-badge">{{ groupTypes.length }}</span>
       </div>
@@ -63,15 +58,13 @@
   </div>
 
   <!-- Error State -->
-  <div *ngIf="!loading && !registryModel" class="error-state">
-    <span class="material-icons error-icon">error_outline</span>
+  <div *ngIf="!loading && !registryModel" class="error-state">    <fluent-icon name="warning" class="error-icon"></fluent-icon>
     <h2>Unable to Load Registry Model</h2>
     <p>There was an error loading the registry model. Please check your configuration and try again.</p>
   </div>
 
   <!-- Loading Progress -->
-  <div *ngIf="loadingProgress && !loading" class="progress-indicator">
-    <span class="material-icons spinning">sync</span>
+  <div *ngIf="loadingProgress && !loading" class="progress-indicator">    <fluent-icon name="arrow_sync_circle" class="spinning"></fluent-icon>
     <span>Loading additional endpoints...</span>
   </div>
 </div>

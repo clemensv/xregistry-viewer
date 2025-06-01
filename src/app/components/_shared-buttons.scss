@@ -17,17 +17,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: none;
-  @include tokens.radius('sm');
+  border: none;  @include tokens.radius('sm');
   cursor: pointer;
   font-weight: 500;
   @include tokens.transition('all');
   text-decoration: none;
-
-  // Ensure proper spacing for icons
-  .material-icons {
-    font-size: 1.1rem;
-  }
 
   &:disabled {
     opacity: 0.6;

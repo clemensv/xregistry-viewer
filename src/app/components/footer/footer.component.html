@@ -1,5 +1,5 @@
-<mat-divider></mat-divider>
-<mat-toolbar color="primary" class="footer">
+<fluent-divider role="separator"></fluent-divider>
+<div class="footer-toolbar">
   <span>
     <a href="https://xregistry.io" target="_blank" rel="noopener noreferrer">
       xRegistry, a project of the Cloud Native Foundation
@@ -15,4 +15,4 @@
       <a *ngIf="!isInternalRoute(api)" [href]="getExternalApiUrl(api)" target="_blank">{{ api }}</a>
     </ng-container>
   </ng-container>
-</mat-toolbar>
+</div>

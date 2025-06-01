@@ -37,16 +37,11 @@
       &:hover {
         background: rgba(108, 117, 125, 0.1);
         color: var(--primary-hover-color, #5a6268);
-      }
-
-      &:focus {
+      }      &:focus {
         outline: 2px solid colors.primary();
         outline-offset: 2px;
       }
 
-      .material-icons {
-        font-size: 1.2rem;
-      }
     }
   }
 

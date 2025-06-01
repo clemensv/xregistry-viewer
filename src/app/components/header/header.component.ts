@@ -1,28 +1,28 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { ThemeService, FontSize, Theme } from '../../services/theme.service';
 import { SearchComponent } from '../search/search.component';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   standalone: true,
   selector: 'app-header',
-  imports: [MatToolbarModule, MatButtonModule, MatMenuModule, RouterModule, MatIconModule, CommonModule, SearchComponent],
+  imports: [RouterModule, CommonModule, SearchComponent, IconComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   currentFontSize: FontSize = 'medium';
   currentTheme: Theme = 'light';
+  fontMenuOpen = false;
 
   private destroy$ = new Subject<void>();
 
-  constructor(private themeService: ThemeService) {}
+  constructor(private themeService: ThemeService, private router: Router) {}
 
   ngOnInit(): void {
     this.themeService.fontSize$
@@ -43,8 +43,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.themeService.setFontSize(fontSize);
   }
 
+  getFontSizeIcon(): string {
+    switch (this.currentFontSize) {
+      case 'small': return 'font_decrease';
+      case 'medium': return 'font_size';
+      case 'large': return 'font_increase';
+      default: return 'font_size';
+    }
+  }
+
   toggleTheme(): void {
     const newTheme: Theme = this.currentTheme === 'light' ? 'dark' : 'light';
     this.themeService.setTheme(newTheme);
+  }
+
+  navigateToConfig(): void {
+    this.router.navigate(['/config']);
   }
 }

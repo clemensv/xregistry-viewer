@@ -13,7 +13,7 @@
 
 @mixin item-border($color) {
   border-left: 3px solid $color;
-  position: relative;  
+  position: relative;
   &::before {
     content: '';
     position: absolute;
@@ -50,87 +50,249 @@
     border-color: colors.primary();
     color: colors.primary();
   }
-
-  i.material-icons {
+  fluent-icon, .icon-span {
     font-size: 14px;
     line-height: 1;
   }
 }
 
-@mixin attribute-container($color: #28a745) {
-  background: var(--bg-elevated, #fafafa);
-  border-left: 3px solid $color;
-  @include tokens.radius('md');
-  padding: 0.5rem;
-  @include tokens.shadow('sm');
-  height: fit-content;
+// Field Group Layout - Keep existing Fluent Design but add type pill
+.field-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .field-title {
+    display: block;
+    font-weight: 600;
+    color: var(--fg-text, #323130);
+    font-size: 0.875rem;
+    margin: 0;
+    flex-shrink: 0;
+    min-width: 120px; // Give label some minimum width
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center; // Center align all elements (label, input, copy button)
+    gap: 0.5rem;
+  }
+
+  .input-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  // Keep existing Fluent input styling
+  .numeric-input,
+  .text-input {
+    width: 100%;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--fg-border, #8a8886);
+    border-radius: 2px;
+    font-size: 14px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-card, #ffffff);
+    color: var(--fg-text, #323130);
+    outline: none;
+
+    &:focus {
+      border-color: var(--primary-color, #0078d4);
+      box-shadow: 0 0 0 1px var(--primary-color, #0078d4);
+    }
+
+    &:disabled,
+    &[readonly] {
+      background: var(--bg-disabled, #f3f2f1);
+      color: var(--fg-disabled, #a19f9d);
+      border-color: var(--fg-border-disabled, #c8c6c4);
+    }
+  }
+
+  // URL and XID links styling - keep Fluent design
+  .url-link,
+  .xid-link {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--fg-border, #8a8886);
+    border-radius: 2px;
+    font-size: 14px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-card, #ffffff);
+    color: var(--primary-color, #0078d4);
+    text-decoration: none;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover {
+      background: var(--bg-hover, #f3f2f1);
+      border-color: var(--primary-color, #0078d4);
+    }
+
+    fluent-icon {
+      margin-left: 0.5rem;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+  }
+
+  // Any type display - keep Fluent design
+  .any-value {
+    height: auto;
+    min-height: 32px;
+    padding: 8px;
+    border: 1px solid var(--fg-border, #8a8886);
+    border-radius: 2px;
+    background: var(--bg-card, #ffffff);
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+  }
+
+  // Type pill styling - positioned above input, hugging top line
+  .type-pill {
+    position: absolute;
+    top: -8px; // Adjusted for smaller height
+    right: 8px; // Align with right edge of input, accounting for padding
+    height: 15px; // 3/4 of original 20px
+    padding: 0 6px; // Reduced padding for smaller height
+    font-size: 10px; // Slightly smaller font for better proportion
+    font-weight: 500;
+    line-height: 15px;
+    color: #ffffff;
+    background: #0078d4; // Fluent 2 Communication Blue - primary brand color
+    border-radius: 8px; // Adjusted for smaller height
+    white-space: nowrap;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10;
+  }
+
+  // Copy button styling - keep Fluent design
+  .copy-btn {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid var(--fg-border, #8a8886);
+    border-radius: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--fg-text, #323130);
+
+    &:hover {
+      background: var(--bg-hover, #f3f2f1);
+      border-color: var(--primary-color, #0078d4);
+      color: var(--primary-color, #0078d4);
+    }
+
+    fluent-icon {
+      font-size: 16px;
+    }
+  }
+
+  // Field description - keep Fluent design
+  .field-desc {
+    margin: 0;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--fg-secondary-text, #605e5c);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .field-title {
+      min-width: 100px;
+    }
+
+    .type-pill {
+      font-size: 9px; // Slightly smaller for mobile
+      height: 13px; // 3/4 of mobile size
+      line-height: 13px;
+      padding: 0 5px;
+      top: -7px; // Adjusted for smaller height
+      right: 6px;
+      border-radius: 7px; // Adjusted for smaller height
+    }
+  }
+
+  @media (max-width: 480px) {
+    .input-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+
+    .field-title {
+      min-width: auto;
+    }
+
+    .type-pill {
+      top: -7px;
+      right: 8px;
+    }
+
+    .copy-btn {
+      align-self: center;
+    }
+  }
 }
 
-// Main component
+// Main component - minimal styles for complex items only
 .resource-document-item {
   margin: 0;
   display: block;
   position: relative;
-  font-size: $body-size;
 
   &.nested {
-    padding-left: s(xs);
+    padding-left: 0.5rem;
     margin-bottom: 0;
-  }  
+  }
 
-  // Unified row styling
+  // Unified row styling for complex items (arrays/objects)
   .unified-item-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     flex-wrap: wrap;
-    @include pad-x(xs);
-    @include pad-y(xs);
-    @include tokens.radius('md');
-    border: 1px solid c(neutral);
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--fg-border, #ddd);
     margin-bottom: 0.25rem;
+    cursor: pointer;
+    background-color: var(--bg-hover, #f8f9fa);
 
-    &.expanded, &.collapsed {
-      animation: flash 0.5s ease-out;
-    }
-
-    // Simple row styling
-    &.simple-row {
-      cursor: default;
-      background-color: var(--bg-elevated, #fafafa);
-      @include item-border(#28a745);
-    }
-
-    // Expandable rows
-    &.array-row, &.object-row {
-      cursor: pointer;
-      background-color: var(--bg-hover, #f8f9fa);
-      @include hover-transition;
-
-      &.expanded {
-        margin-bottom: 0;
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-      }
+    &.expanded {
+      margin-bottom: 0;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
     }
 
     // Array-specific styling
     &.array-row {
-      @include item-border(#5bc0de);
+      border-left: 3px solid #5bc0de;
       &.expanded {
         background-color: rgba(91, 192, 222, 0.1);
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
       }
     }
 
     // Object-specific styling
     &.object-row {
-      @include item-border(#9575cd);
+      border-left: 3px solid #9575cd;
       &.expanded {
         background-color: rgba(149, 117, 205, 0.1);
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
       }
     }
 
@@ -138,75 +300,55 @@
       font-weight: 600;
       color: var(--fg-text, #2c3e50);
       margin-right: 0.5rem;
-      font-size: vars.$content-size;
-    }    
+    }
 
     .toggle-icon {
-      margin-right: s(xs);
-      font-size: calc($body-size * 1.2);
-      color: c(dark);
-      @include tokens.transition('all');
+      margin-right: 0.5rem;
       background: transparent;
       border: none;
       cursor: pointer;
       padding: 2px;
-      @include tokens.radius('md');
-      z-index: tokens.z-index('dropdown');
+      border-radius: 0.375rem;
 
-      &:focus-visible {
-        outline: 2px solid c(primary);
-        outline-offset: 2px;
-      }      
-
-      i.material-icons {
-        font-size: calc($body-size * 1.2);
-        color: inherit;
-        @include tokens.transition('all');
+      fluent-icon {
+        font-size: 1.2rem;
+        color: var(--fg-text, #333);
       }
-
-      .expanded & i.material-icons { color: c(primary); }
-      .collapsed & i.material-icons { color: c(dark); }
     }
 
     .item-count {
       color: var(--fg-secondary-text, #6c757d);
-      font-size: vars.$small-size;
+      font-size: 0.875rem;
       margin-right: 0.5rem;
-      font-weight: normal;
-    }    
+    }
 
     .item-model-type {
       color: var(--info-color, #457B9D);
-      font-size: vars.$small-size;
+      font-size: 0.875rem;
       background-color: var(--bg-elevated, #F1FAEE);
       padding: 2px 6px;
-      @include tokens.radius('sm');
+      border-radius: 0.25rem;
       border: 1px solid var(--fg-border, #A8DADC);
       margin-right: 0.75rem;
     }
 
     .item-description {
       color: var(--fg-secondary-text, #6c757d);
-      font-size: vars.$small-size;
+      font-size: 0.875rem;
       font-style: italic;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       margin-right: auto;
     }
-
-    .copy-btn {
-      margin-left: auto;
-      @include button-style;
-    }
-  }  
+  }
 
   // Expanded content styling
   .expanded-content {
     background-color: var(--bg-elevated, rgba(240, 240, 240, 0.3));
     border: 1px solid var(--fg-border, #ddd);
     border-top: none;
-    border-radius: 0 0 tokens.$radius-md tokens.$radius-md;
+    border-radius: 0 0 0.375rem 0.375rem;
     padding: 0.5rem;
 
     .array-items, .object-items {
@@ -228,262 +370,58 @@
         }
       }
     }
-  }  
-  // Field-group layout inheriting from global specification
-  .field-group {
-    @include attribute-container();
-    // Inherit all base styles from global field-group specification
-    
-    // Component-specific modifications for backward compatibility
-    .input-wrapper {
-      // Ensure minimum height for layout consistency
-      min-height: 2.5rem;
-
-      // Numeric input specific styling (component-specific feature)
-      .numeric-input {
-        text-align: right;
-        font-family: 'Courier New', monospace;
-      }
-
-      // Type pill positioning override for this component
-      .type-pill {
-        position: absolute;
-        top: -0.5rem;
-        right: 0.5rem;
-        z-index: 2;
-        pointer-events: none;
-        // Use global styling but override position
-        background: #28a745;
-        color: white;
-      }
-
-      // Any-type JSON display (component-specific feature)
-      .any-value {
-        width: 100%;
-        font-family: 'Courier New', monospace;
-        background: var(--bg-hover, #f8f9fa);
-        border-radius: 4px;
-        display: block;
-        padding: 0.5rem;
-        border: 1px solid var(--fg-divider, #e0e0e0);
-        min-height: 2.5rem;
-        box-sizing: border-box;
-
-        app-code-highlight {
-          width: 100%;
-          display: block;
-        }
-      }
-
-      // Null/undefined value styling (component-specific feature)
-      .null-value,
-      .undefined-value {
-        color: var(--fg-tertiary-text, #999);
-        font-style: italic;
-      }
-    }
-
-    // Copy button styling (component-specific feature)
-    .input-row .copy-btn {
-      @include button-style;
-      display: inline-flex;
-      align-items: center;
-      flex-shrink: 0;
-      height: 2.5rem;
-      padding: 0.5rem;
-      margin-top: 0;
-
-      i.material-icons {
-        font-size: 16px;
-      }
-    }
-
-    // Field description styling (component-specific feature)
-    .field-desc {
-      font-size: 0.85rem;
-      color: var(--fg-secondary-text, #6c757d);
-      font-style: italic;
-      margin: 0;
-      line-height: 1.4;
-    }
-
-    // Full-width layout modifications (component-specific feature)
-    &.full {
-      .input-wrapper .type-pill {
-        top: 0.5rem;
-        right: 0.5rem;
-      }
-    }
-  }
-
-  // Grid layout optimizations
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 0.75rem; // Reduced from 1rem for compactness
-    padding: 0.25rem; // Reduced from 0.5rem for compactness
-
-    .unified-item-row.object-row,
-    .unified-item-row.array-row {
-      grid-column: 1 / -1;
-      width: 100%;
-    }
-
-    .expanded-content {
-      grid-column: 1 / -1;
-      width: 100%;
-    }
-  }
-
-  // Responsive design
-  @include breakpoints.tablet-and-below {
-    .array-items, .object-items, .grid-container {
-      grid-template-columns: 1fr !important;
-    }
 
     .simple-items-grid {
-      grid-template-columns: 1fr !important;
-    }
-  }
-
-  @include breakpoints.desktop-small {
-    .array-items, .object-items, .grid-container {
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.75rem;
+      padding: 0.25rem;
     }
 
-    .simple-items-grid {
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
-    }
-  }
-}
-
-/* Component-specific font size adjustments (complement global field-group) */
-:host-context(body.font-size-small) {
-  .field-group {
-    .input-row .copy-btn {
-      height: 2rem;
-      padding: 0.375rem;
-    }
-
-    .field-desc {
-      font-size: 0.75rem;
-    }
-
-    .input-wrapper {
-      .any-value {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-      }
-    }
-  }
-
-  .expanded-content {
-    .simple-items-section {
-      margin-bottom: 0.125rem;
-
-      .simple-items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 0.25rem;        
-        
-        app-resource-document-item {
-          ::ng-deep .field-group {
-            padding: 0.25rem;
-          }
-        }
-      }
-    }
-
-    .complex-items-section {
-      .complex-items-container {
-        gap: 0.25rem;
-      }
-    }
-
-    .items-separator {
-      margin: 0.125rem 0;
-
-      .separator-label {
-        font-size: 0.7rem;
-        padding: 0 0.5rem;
-      }
-    }
-  }
-}
-
-:host-context(body.font-size-medium) {
-  .expanded-content {
-    .simple-items-section {
-      margin-bottom: 0.25rem;
-
-      .simple-items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 0.5rem;        
-        
-        app-resource-document-item {
-          ::ng-deep .field-group {
-            padding: 0.5rem;
-          }
-        }
-      }
-    }
-
-    .items-separator {
-      margin: 0.25rem 0;
-    }
-  }
-}
-
-:host-context(body.font-size-large) {
-  .field-group {
-    .input-row .copy-btn {
-      height: 3rem;
-      padding: 0.75rem;
-    }
-
-    .field-desc {
-      font-size: 0.95rem;
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .input-wrapper {
-      .any-value {
-        padding: 0.35rem 0.75rem;
-        font-size: 0.95rem;
-        min-height: 2rem;
-      }
-    }
-  }
-
-  .expanded-content {
-    .simple-items-section {
-      margin-bottom: 0.5rem;
-
-      .simple-items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 0.75rem;        
-        
-        app-resource-document-item {
-          ::ng-deep .field-group {
-            padding: 0.75rem;
-          }
-        }
-      }
-    }
-
-    .complex-items-section {
-      .complex-items-container {
-        gap: 0.75rem;
-      }
+    .complex-items-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
     .items-separator {
       margin: 0.5rem 0;
 
-      .separator-label {
-        font-size: 0.9rem;
-        padding: 0 1rem;
+      hr {
+        border: none;
+        border-top: 1px solid var(--fg-border, #ddd);
+        margin: 0.5rem 0;
       }
+
+      .separator-label {
+        font-size: 0.875rem;
+        color: var(--fg-secondary-text, #666);
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Collapsed preview styling
+  .collapsed-preview {
+    background-color: var(--bg-elevated, rgba(240, 240, 240, 0.3));
+    border: 1px solid var(--fg-border, #ddd);
+    border-top: none;
+    border-radius: 0 0 0.375rem 0.375rem;
+    padding: 0.5rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--bg-hover, #f8f9fa);
+    }
+
+    .preview-content {
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: var(--fg-secondary-text, #666);
+    }
+
+    .preview-summary {
+      font-style: italic;
     }
   }
 }

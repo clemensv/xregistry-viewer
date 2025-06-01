@@ -14,7 +14,7 @@
   <!-- Progressive loading indicator -->
   <div class="loading-progress" *ngIf="loadingProgress && groupTypesList.length > 0">
     <div class="loading-indicator">
-      <span class="material-icons loading-spinner">sync</span>
+      <fluent-icon name="arrow_sync_circle" class="loading-spinner"></fluent-icon>
       <span>Loading more group types... ({{ groupTypesList.length }} loaded)</span>
     </div>
   </div>
@@ -22,13 +22,13 @@
     <div *ngFor="let gt of filteredGroupTypesList" class="grid-item">
       <a [routerLink]="getResourceCollectionRoute(gt)" class="card-link">
         <div class="card-header">
-          <span class="material-icons group-type-icon" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
+          <fluent-icon name="folder" class="group-type-icon"></fluent-icon>
           <h3>{{ gt.model.plural }}</h3>
           <button class="details-expander"
                   (click)="$event.preventDefault(); $event.stopPropagation(); toggleDetails(gt.groupType)"
                   [class.expanded]="isDetailsExpanded(gt.groupType)"
                   title="Show details">
-            <span class="material-icons">{{ isDetailsExpanded(gt.groupType) ? 'info' : 'info_outline' }}</span>
+            <fluent-icon name="info"></fluent-icon>
           </button>
         </div>
 
@@ -92,10 +92,10 @@
          (click)="$event.stopPropagation()"
          *ngFor="let groupType of getExpandedGroupTypes()">
       <div class="popup-header">
-        <span class="material-icons group-type-icon" [class]="getIconClass(groupType)">{{ getIconName(groupType) }}</span>
+        <fluent-icon name="folder" class="group-type-icon"></fluent-icon>
         <h3>{{ getGroupTypeModel(groupType)?.model?.plural }}</h3>
         <button class="close-button" (click)="closeAllDetails()" title="Close">
-          <span class="material-icons">close</span>
+          <fluent-icon name="dismiss"></fluent-icon>
         </button>
       </div>
 
@@ -137,41 +137,57 @@
     <table class="group-types-table">
       <thead>
         <tr>
-          <th>Group Type</th>
-          <th>Model</th>
-          <th>Description</th>
-          <th>Origins</th>
-          <th>Resource Types</th>
+          <th width="18%">Group Type</th>
+          <th width="32%">Description</th>
+          <th width="25%">Resource Types</th>
+          <th width="15%">Origins</th>
+          <th width="10%">Model</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let gt of filteredGroupTypesList">
-          <td>
+          <td class="group-type-cell">
             <div class="table-group-type">
-              <span class="material-icons group-type-icon-small" [class]="getIconClass(gt.groupType)">{{ getIconName(gt.groupType) }}</span>
-              <a [routerLink]="getResourceCollectionRoute(gt)" class="group-type-name">{{ gt.groupType }}</a>
+              <fluent-icon name="folder" class="group-type-icon-small"></fluent-icon>
+              <a [routerLink]="getResourceCollectionRoute(gt)"
+                 class="group-type-name"
+                 [title]="gt.groupType">{{ gt.groupType }}</a>
             </div>
           </td>
-          <td>
-            <a [routerLink]="getModelRoute(gt)" class="model-link">{{ gt.model.plural }}</a>
+          <td class="description-cell"
+              [title]="gt.model.description || 'No description available'">
+            <div class="cell-content">
+              {{ gt.model.description || '-' }}
+            </div>
           </td>
-          <td class="description-cell">{{ gt.model.description || '-' }}</td>
-          <td>
-            <div *ngIf="getOriginsForGroupType(gt.groupType).length > 0" class="origins-compact">
-              <button *ngFor="let origin of getOriginsForGroupType(gt.groupType); let last = last"
+          <td class="resource-types-cell">
+            <div *ngIf="getResourceTypesCount(gt.model) > 0"
+                 class="resource-types-compact"
+                 [title]="getResourceTypesTooltip(gt.model)">
+              <span *ngFor="let rt of getResourceTypesList(gt.model)"
+                    class="resource-type-pill">{{ rt }}</span>
+            </div>
+            <span *ngIf="getResourceTypesCount(gt.model) === 0"
+                  class="no-resources-indicator">-</span>
+          </td>
+          <td class="origins-cell">
+            <div *ngIf="getOriginsForGroupType(gt.groupType).length > 0"
+                 class="origins-compact"
+                 [title]="getOriginsTooltip(gt.groupType)">
+              <button *ngFor="let origin of getOriginsForGroupType(gt.groupType)"
                       class="origin-pill"
                       (click)="navigateToGroupsByOrigin(gt.groupType, origin)"
                       [title]="'Filter ' + gt.groupType + ' by origin: ' + origin">
                 {{ origin }}
               </button>
             </div>
-            <span *ngIf="getOriginsForGroupType(gt.groupType).length === 0" class="no-origins-indicator">-</span>
+            <span *ngIf="getOriginsForGroupType(gt.groupType).length === 0"
+                  class="no-origins-indicator">-</span>
           </td>
-          <td>
-            <div *ngIf="getResourceTypesCount(gt.model) > 0" class="resource-types-compact">
-              <span *ngFor="let rt of getResourceTypesList(gt.model)" class="resource-type-pill">{{ rt }}</span>
-            </div>
-            <span *ngIf="getResourceTypesCount(gt.model) === 0" class="no-resources-indicator">-</span>
+          <td class="model-cell">
+            <a [routerLink]="getModelRoute(gt)"
+               class="model-link"
+               [title]="gt.model.plural">{{ gt.model.plural }}</a>
           </td>
         </tr>
       </tbody>
@@ -181,7 +197,7 @@
   <!-- Loading state -->
   <div *ngIf="loading" class="empty-state">
     <div class="empty-state-content">
-      <span class="material-icons empty-state-icon loading-spinner">sync</span>
+      <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
       <h3 class="empty-state-title">Loading Group Types</h3>
       <p class="empty-state-message">
         Please wait while we load the available group types from the registry...
@@ -192,7 +208,7 @@
   <!-- Empty search results -->
   <div *ngIf="!loading && currentSearchTerm && filteredGroupTypesList.length === 0 && groupTypesList.length > 0" class="empty-state">
     <div class="empty-state-content">
-      <span class="material-icons empty-state-icon">search_off</span>
+      <fluent-icon name="search" class="empty-state-icon"></fluent-icon>
       <h3 class="empty-state-title">No Matching Group Types</h3>
       <p class="empty-state-message">
         No group types match your search criteria "{{ currentSearchTerm }}".
@@ -204,7 +220,7 @@
   <!-- No data state -->
   <div *ngIf="!loading && !currentSearchTerm && groupTypesList.length === 0" class="empty-state">
     <div class="empty-state-content">
-      <span class="material-icons empty-state-icon">inbox</span>
+      <fluent-icon name="inbox" class="empty-state-icon"></fluent-icon>
       <h3 class="empty-state-title">No Group Types Available</h3>
       <p class="empty-state-message">
         There are currently no group types configured in this registry.

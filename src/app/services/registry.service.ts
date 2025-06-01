@@ -33,6 +33,12 @@ export interface Page<T> {
   totalCount?: number;
   currentPage?: number;
   pageSize?: number;
+  // Error handling fields for multi-API scenarios
+  totalApis?: number;
+  successfulApis?: number;
+  failedApis?: number;
+  error?: any;
+  allApiErrors?: Array<{ api: string; error: any }>;
 }
 
 @Injectable({
@@ -1142,7 +1148,7 @@ export class RegistryService {
     const model = await lastValueFrom(this.modelService.getRegistryModel());
     const apis = this.modelService.getApiEndpointsForGroupType(groupType);
     if (apis.length === 0) {
-      return { items: [], links: {} };
+      return { items: [], links: {}, totalApis: 0, successfulApis: 0, failedApis: 0 };
     }
 
     // For absolute URLs (pagination), use the original single-API logic
@@ -1183,10 +1189,10 @@ export class RegistryService {
             ...entry
           } as Group;
         });
-        return { items: groups, links };
+        return { items: groups, links, totalApis: 1, successfulApis: 1, failedApis: 0 };
       } catch (err) {
         this.debug.error(`Failed to list groups from absolute URL ${pagePath}:`, err);
-        return { items: [], links: {} };
+        return { items: [], links: {}, totalApis: 1, successfulApis: 0, failedApis: 1, error: err };
       }
     }
 
@@ -1218,35 +1224,59 @@ export class RegistryService {
         });
 
         this.debug.log(`Successfully loaded ${groups.length} groups from ${api}`);
-        return { api, groups, success: true };
+        return { api, groups, success: true, error: null };
       } catch (err) {
         this.debug.error(`Failed to list groups from ${api}:`, err);
-        return { api, groups: [], success: false };
+        return { api, groups: [], success: false, error: err };
       }
     });
 
     // Wait for all API requests to complete
     const results = await Promise.all(apiRequests);
 
-    // Merge all successful results
+    // Merge all successful results and track failure statistics
     const allGroups: Group[] = [];
     const successfulApis: string[] = [];
+    const failedApis: string[] = [];
+    const errors: any[] = [];
 
     results.forEach(result => {
       if (result.success && result.groups.length > 0) {
         allGroups.push(...result.groups);
         successfulApis.push(result.api);
+      } else if (!result.success) {
+        failedApis.push(result.api);
+        if (result.error) {
+          errors.push({ api: result.api, error: result.error });
+        }
       }
     });
 
     this.debug.log(`Merged ${allGroups.length} total groups from ${successfulApis.length} successful APIs: ${successfulApis.join(', ')}`);
+    if (failedApis.length > 0) {
+      this.debug.log(`Failed APIs (${failedApis.length}): ${failedApis.join(', ')}`);
+    }
 
     // For pagination links, we'll use the first successful API's pattern
     // In a multi-API scenario, pagination becomes complex as each API has its own pagination
     // For now, we disable pagination when merging multiple APIs
     const links: any = {};
 
-    return { items: allGroups, links };
+    const result: Page<Group[]> = {
+      items: allGroups,
+      links,
+      totalApis: apis.length,
+      successfulApis: successfulApis.length,
+      failedApis: failedApis.length
+    };
+
+    // If ALL APIs failed, include error information
+    if (successfulApis.length === 0) {
+      result.error = errors.length > 0 ? errors[0].error : new Error('All API endpoints failed to respond');
+      result.allApiErrors = errors;
+    }
+
+    return result;
   }
 
 }

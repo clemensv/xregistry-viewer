@@ -1,66 +1,94 @@
 <div class="config-page-container">
-<mat-card class="config-card">
-  <mat-card-header>
-    <mat-card-title>Registry Endpoints Configuration</mat-card-title>
-    <mat-card-subtitle>Manage multiple API and model endpoints</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
+<fluent-card class="config-card">
+  <div class="card-header">
+    <h2>Registry Endpoints Configuration</h2>
+    <p>Manage multiple API and model endpoints</p>
+  </div>
+  <div class="card-content">
     <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
       <div class="endpoint-section">
-        <h3><mat-icon color="primary">cloud</mat-icon> API Endpoints</h3>
+        <h3><fluent-icon name="cloud"></fluent-icon> API Endpoints</h3>
         <div *ngFor="let ctrl of apiEndpointControls; let i = index" class="endpoint-row">
-          <mat-form-field appearance="outline" class="endpoint-field">
-            <mat-label>API Endpoint {{i + 1}}</mat-label>
-            <input matInput [formControl]="ctrl" placeholder="https://api.example.com/registry">
-            <mat-error *ngIf="ctrl.hasError('required')">API endpoint is required</mat-error>
-            <mat-error *ngIf="ctrl.hasError('pattern')">Must start with http:// or https://</mat-error>
-          </mat-form-field>
-          <button mat-icon-button color="primary" type="button" (click)="moveApiEndpointUp(i)" [disabled]="i === 0" title="Move up">
-            <mat-icon>arrow_upward</mat-icon>
-          </button>
-          <button mat-icon-button color="primary" type="button" (click)="moveApiEndpointDown(i)" [disabled]="i === apiEndpointControls.length - 1" title="Move down">
-            <mat-icon>arrow_downward</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" type="button" (click)="removeApiEndpoint(i)" title="Remove">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-        <button mat-stroked-button color="primary" type="button" (click)="addApiEndpoint()">
-          <mat-icon>add</mat-icon> Add API Endpoint
-        </button>
+          <div class="endpoint-field">
+            <label>API Endpoint {{i + 1}}</label>
+            <fluent-text-field
+              [formControl]="ctrl"
+              placeholder="https://api.example.com/registry"
+              type="url">
+            </fluent-text-field>
+            <div *ngIf="ctrl.hasError('required')" class="error-message">API endpoint is required</div>
+            <div *ngIf="ctrl.hasError('pattern')" class="error-message">Must start with http:// or https://</div>
+          </div>          <fluent-button
+            appearance="subtle"
+            type="button"
+            (click)="moveApiEndpointUp(i)"
+            [disabled]="i === 0"
+            title="Move up">
+            <fluent-icon name="arrow_up"></fluent-icon>
+          </fluent-button>          <fluent-button
+            appearance="subtle"
+            type="button"
+            (click)="moveApiEndpointDown(i)"
+            [disabled]="i === apiEndpointControls.length - 1"
+            title="Move down">
+            <fluent-icon name="arrow_down"></fluent-icon>
+          </fluent-button>          <fluent-button
+            appearance="subtle"
+            type="button"
+            (click)="removeApiEndpoint(i)"
+            title="Remove"
+            class="danger-button">
+            <fluent-icon name="delete"></fluent-icon>
+          </fluent-button>
+        </div>        <fluent-button appearance="outline" type="button" (click)="addApiEndpoint()">
+          <fluent-icon name="add"></fluent-icon> Add API Endpoint
+        </fluent-button>
       </div>
       <div class="endpoint-section">
-        <h3><mat-icon color="primary">description</mat-icon> Model Document URIs</h3>
+        <h3><fluent-icon name="document"></fluent-icon> Model Document URIs</h3>
         <div *ngFor="let ctrl of modelUriControls; let i = index" class="endpoint-row">
-          <mat-form-field appearance="outline" class="endpoint-field">
-            <mat-label>Model URI {{i + 1}}</mat-label>
-            <input matInput [formControl]="ctrl">
-            <mat-hint *ngIf="!ctrl.value">e.g. https://example.com/model.json</mat-hint>
-            <mat-error *ngIf="ctrl.hasError('required')">Model URI is required</mat-error>
-          </mat-form-field>
-          <button mat-icon-button color="primary" type="button" (click)="moveModelUriUp(i)" [disabled]="i === 0" title="Move up">
-            <mat-icon>arrow_upward</mat-icon>
-          </button>
-          <button mat-icon-button color="primary" type="button" (click)="moveModelUriDown(i)" [disabled]="i === modelUriControls.length - 1" title="Move down">
-            <mat-icon>arrow_downward</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" type="button" (click)="removeModelUri(i)" title="Remove">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-        <button mat-stroked-button color="primary" type="button" (click)="addModelUri()">
-          <mat-icon>add</mat-icon> Add Model URI
-        </button>
+          <div class="endpoint-field">
+            <label>Model URI {{i + 1}}</label>
+            <fluent-text-field
+              [formControl]="ctrl"
+              placeholder="e.g. https://example.com/model.json">
+            </fluent-text-field>
+            <div *ngIf="ctrl.hasError('required')" class="error-message">Model URI is required</div>
+          </div>          <fluent-button
+            appearance="subtle"
+            type="button"
+            (click)="moveModelUriUp(i)"
+            [disabled]="i === 0"
+            title="Move up">
+            <fluent-icon name="arrow_up"></fluent-icon>
+          </fluent-button>          <fluent-button
+            appearance="subtle"
+            type="button"
+            (click)="moveModelUriDown(i)"
+            [disabled]="i === modelUriControls.length - 1"
+            title="Move down">
+            <fluent-icon name="arrow_down"></fluent-icon>
+          </fluent-button>          <fluent-button
+            appearance="subtle"
+            type="button"
+            (click)="removeModelUri(i)"
+            title="Remove"
+            class="danger-button">
+            <fluent-icon name="delete"></fluent-icon>
+          </fluent-button>
+        </div>        <fluent-button appearance="outline" type="button" (click)="addModelUri()">
+          <fluent-icon name="add"></fluent-icon> Add Model URI
+        </fluent-button>
       </div>
       <div class="button-row">
-        <button mat-raised-button color="primary" type="submit" [disabled]="configForm.invalid">
-          <mat-icon>save</mat-icon> Save Changes
-        </button>
-        <button mat-button type="button" (click)="resetToDefault()">
-          <mat-icon>refresh</mat-icon> Reset to Default
-        </button>
+        <fluent-button appearance="accent" type="submit" [disabled]="configForm.invalid">
+          <fluent-icon name="save"></fluent-icon> Save Changes
+        </fluent-button>
+        <fluent-button appearance="neutral" type="button" (click)="resetToDefault()">
+          <fluent-icon name="arrow_sync"></fluent-icon> Reset to Default
+        </fluent-button>
       </div>
     </form>
-  </mat-card-content>
-</mat-card>
+  </div>
+</fluent-card>
 </div>

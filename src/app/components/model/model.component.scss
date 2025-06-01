@@ -19,10 +19,6 @@
 }
 
 .loading-spinner {
-  .material-icons {
-    font-size: 3rem !important;
-    color: colors.primary();
-  }
 }
 
 .loading-text {
@@ -32,6 +28,21 @@
 
 .spinning {
   animation: spin 1s linear infinite;
+}
+
+// Icon styling for fluent-icon
+fluent-icon.section-icon {
+  font-size: 1.5rem;
+  color: colors.primary();
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+fluent-icon.error-icon {
+  font-size: 2rem;
+  color: c(warning);
+  margin-bottom: 1rem;
 }
 
 // Spin animation is now available globally from styles.scss
@@ -181,17 +192,12 @@
   padding: 1rem 1.5rem;
   @include tokens.radius('lg');
   @include tokens.shadow('xl');
-  border: 1px solid var(--fg-divider, #e9ecef);
-  display: flex;
+  border: 1px solid var(--fg-divider, #e9ecef);  display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
   color: var(--fg-secondary-text, #6c757d);
 
-  .material-icons {
-    font-size: 1.2rem !important;
-    color: var(--primary-color, #6c757d);
-  }
 }
 
 /* Font size specific adjustments */
@@ -326,20 +332,11 @@
     gap: 3rem;
   }
 
-  .progress-indicator {
-    padding: 1.25rem 2rem;
+  .progress-indicator {    padding: 1.25rem 2rem;
     font-size: 1rem;
     @include tokens.radius('xl');
 
-    .material-icons {
-      font-size: 1.4rem !important;
-    }
   }
-
-  .loading-spinner .material-icons {
-    font-size: 4rem !important;
-  }
-
   .loading-text {
     font-size: 1.3rem;
   }

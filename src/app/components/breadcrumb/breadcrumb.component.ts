@@ -1,19 +1,19 @@
-import { Component, OnInit, ViewEncapsulation, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, AfterViewInit, Inject, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { Observable, of, forkJoin } from 'rxjs';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { ModelService } from '../../services/model.service';
 import { RegistryService } from '../../services/registry.service';
 import { RoutePersistenceService } from '../../services/route-persistence.service';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   standalone: true,
   selector: 'app-breadcrumb',
-  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, RouterModule, IconComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './breadcrumb.component.html',
   styleUrls: ['./breadcrumb.component.scss'],
   encapsulation: ViewEncapsulation.None // This is critical for global styles to be applied

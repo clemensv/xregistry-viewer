@@ -5,13 +5,16 @@ import { RegistryService } from '../../services/registry.service';
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
 import { CodeHighlightComponent } from '../code-highlight/code-highlight.component';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-resource-document',
   standalone: true,
-  imports: [CommonModule, ResourceDocumentItemComponent, CodeHighlightComponent],
+  imports: [CommonModule, ResourceDocumentItemComponent, CodeHighlightComponent, IconComponent],
   templateUrl: './resource-document.component.html',
-  styleUrl: './resource-document.component.scss'
+  styleUrl: './resource-document.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ResourceDocumentComponent implements OnInit {
   @Input() resourceDocument!: ResourceDocument;

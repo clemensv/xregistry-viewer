@@ -1,14 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { ConfigService, AppConfig } from '../../services/config.service';
 import { BaseUrlService } from '../../services/base-url.service';
-import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 
 @Component({
@@ -16,26 +10,19 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSnackBarModule,
-    MatIconModule
+    ReactiveFormsModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './config.component.html',
   styleUrl: './config.component.scss'
 })
 export class ConfigComponent implements OnInit {
   configForm!: FormGroup;
   restartRequired = false;
-
   constructor(
     private fb: FormBuilder,
     private configService: ConfigService,
     private baseUrlService: BaseUrlService,
-    private snackBar: MatSnackBar,
     private router: Router
   ) {}
 
@@ -128,18 +115,13 @@ export class ConfigComponent implements OnInit {
         if (oldBaseUrl !== baseUrl) {
           this.baseUrlService.updateBaseHref();
           this.restartRequired = true;
-        }
-        this.snackBar.open(
-          'Configuration updated. Changes will apply to new requests, but you may need to refresh the page for all changes to take effect.',
-          'Close',
-          { duration: 3000 }
+        }        this.showNotification(
+          'Configuration updated. Changes will apply to new requests, but you may need to refresh the page for all changes to take effect.'
         );
         setTimeout(() => this.router.navigate(['/']), 300); // Navigate to root after short delay
       } catch (error) {
         console.error('Error updating configuration:', error);
-        this.snackBar.open('Failed to update configuration', 'Close', {
-          duration: 3000
-        });
+        this.showNotification('Failed to update configuration');
       }
     }
   }
@@ -156,11 +138,26 @@ export class ConfigComponent implements OnInit {
     (config?.modelUris || []).forEach((url: string) => this.modelUris.push(this.fb.control(url, [Validators.required])));
     this.configForm.patchValue({
       baseUrl: config?.baseUrl || '/'
-    });
-    // Update base href
+    });    // Update base href
     this.baseUrlService.updateBaseHref();
-    this.snackBar.open('Configuration reset to server defaults', 'Close', {
-      duration: 3000
-    });
+    this.showNotification('Configuration reset to server defaults');
+  }
+
+  private showNotification(message: string): void {
+    // Simple notification using browser API or console
+    console.log(message);
+
+    // Alternative: Use browser notification API if available
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
+        new Notification('xRegistry Configuration', { body: message });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            new Notification('xRegistry Configuration', { body: message });
+          }
+        });
+      }
+    }
   }
 }

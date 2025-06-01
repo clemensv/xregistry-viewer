@@ -1,34 +1,31 @@
-// Custom Angular Material Theming
-@use '@angular/material' as mat;
+// Custom Fluent UI Theming
 @use 'sass:map';
 @use 'sass:color';
 
-// Include the core styles for Angular Material
-@include mat.core();
-
 // Define colors directly for our palette
-$primary-color: #3F51B5;  // Indigo 500
-$accent-color: #FF4081;   // Pink A200
-$warn-color: #F44336;     // Red 500
+$primary-color: #0078D4;  // Fluent UI primary blue
+$accent-color: #2B88D8;   // Secondary blue
+$warn-color: #A4262C;     // Error red
 
-// Create simplified theme
+// Create theme variables for custom components
 $light-theme: (
   color: (
     primary: (
       default: $primary-color,
-      lighter: #C5CAE9,
-      darker: #303F9F,
+      lighter: #C7E0F4,
+      darker: #005A9E,
       text: white
     ),
     accent: (
       default: $accent-color,
-      lighter: #FF80AB,
-      darker: #F50057,
+      lighter: #DEECF9,
+      darker: #106EBE,
       text: white
     ),
     warn: (
       default: $warn-color,
-      lighter: #FFCDD2,
+      lighter: #F3D6D8,
+      darker: #8E1B22,
       darker: #D32F2F,
       text: white
     ),

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef, ViewEncapsulation, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { GroupType } from '../../models/registry.model';
@@ -11,6 +11,7 @@ import { ResourceDocumentItem } from '../../models/resource-document-item.model'
   imports: [CommonModule, RouterModule, ResourceDocumentItemComponent],
   templateUrl: './group-type-model.component.html',
   styleUrls: ['./group-type-model.component.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   encapsulation: ViewEncapsulation.None
 })
 export class GroupTypeModelComponent implements OnInit {

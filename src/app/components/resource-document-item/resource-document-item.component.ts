@@ -1,16 +1,19 @@
-import { Component, Input, OnChanges, SimpleChanges, AfterViewInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, AfterViewInit, ChangeDetectorRef, ChangeDetectionStrategy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CodeHighlightComponent } from '../code-highlight/code-highlight.component';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
 import { DebugService } from '../../services/debug.service';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-resource-document-item',
   standalone: true,
-  imports: [CommonModule, RouterModule, CodeHighlightComponent],
+  imports: [CommonModule, FormsModule, RouterModule, CodeHighlightComponent, IconComponent],
   templateUrl: './resource-document-item.component.html',
   styleUrl: './resource-document-item.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
@@ -146,11 +149,11 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
     if (this.isUrl(this.item.value) || this.isXid(this.item) || this.isAnyType()) {
       return true;
     }
-    
+
     if (typeof this.item.value === 'string' && this.item.value.length > 30) {
       return true;
     }
-    
+
     return false;
   }
 

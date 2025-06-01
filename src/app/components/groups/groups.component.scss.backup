@@ -1,11 +1,9 @@
+// Import shared styles
 @use '../shared-variables' as vars;
 @use '../shared-breakpoints' as breakpoints;
 @use '../_vertical-bars' as vbars;
 @use '../shared-design-tokens' as tokens;
 @use '../../../styles/theme' as *;
-
-/* Component-specific overrides for groups */
-/* These will take precedence over global styles due to component encapsulation */
 
 /* Host element styling to control component behavior within parent container */
 :host {
@@ -13,9 +11,9 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  height: auto !important; /* Override parent's height: 100% */
-  min-height: 0 !important; /* Allow shrinking */
-  flex: 0 0 auto !important; /* Override parent's flex: 1 */
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
   align-self: flex-start !important;
 }
 
@@ -28,6 +26,14 @@
   flex-direction: column;
   align-items: flex-start;
   padding: 0;
+  
+  &-container, .list-container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0 24px 24px 24px;
+    box-sizing: border-box;
+  }
 }
 
 /* Full-width header wrapper */
@@ -38,7 +44,7 @@
   background: bg('card');
 }
 
-/* New Page Header Layout */
+/* Page Header Layout */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -49,18 +55,18 @@
   padding: 1rem 2.5vw;
   border-bottom: 1px solid fg('divider');
   margin-bottom: 1.5rem;
-}
 
-.page-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: c(dark);
-}
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: c(dark);
+  }
 
-.page-header .view-toggle {
-  display: flex;
-  gap: 0.5rem;
+  .view-toggle {
+    display: flex;
+    gap: 0.5rem;
+  }
 }
 
 /* Ensure pagination component is full width */
@@ -68,465 +74,100 @@ app-pagination {
   width: 100%;
 }
 
-// The global grid-container is now provided by _layout.scss
-// Add component-specific overrides for grid-container if needed
+/* Card/Grid Layout */
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); // Increased min width for group tiles
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 1.5rem 2rem;
-  grid-row-gap: 1.5rem;
-  grid-column-gap: 2rem;
   width: 100%;
   margin: 0 auto;
   justify-items: stretch;
-  align-items: start; // Ensure cards align to top, not center
-  grid-auto-rows: auto; // Allow cards to size naturally
+  align-items: start;
+  grid-auto-rows: auto;
   box-sizing: border-box;
   padding: 0.5rem;
-
-  // Ensure all grid items align to top
-  > * {
-    align-self: start;
-    justify-self: stretch;
-  }
 }
 
-.groups-container, .list-container {
+.grid {
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0 24px 24px 24px;
-  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 32px 24px;
+  align-items: start;
 }
 
-/* Fluent 2 Card customizations for group cards */
-.group-card {
-  background: var(--bg-card, #ffffff);
-  border: 1px solid var(--fg-border, #e1e1e1);
-  border-radius: 8px; // Fluent 2 standard corner radius
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); // Fluent 2 elevation
+/* Grid Item / Card Styling */
+.grid-item {
+  width: 100%;
+  height: auto;
+  align-self: start;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  height: auto; // Changed from 100% to auto to prevent stretching
-  align-items: stretch; // Ensure content doesn't center
-  justify-content: flex-start; // Align content to top
-
+  position: relative;
+  background: var(--bg-card, white);
+  @include tokens.radius('md');
+  @include tokens.shadow('sm');
+  border: 1px solid var(--fg-divider, c(neutral));
+  @include chromeline(#9575cd); /* Purple for group objects */
+  min-height: 210px;
+  margin-bottom: 0;
+  @include tokens.transition('interactive');
+  overflow: visible;
+  padding: vars.$small-spacing vars.$standard-spacing;
+  
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); // Enhanced elevation on hover
-    border-color: var(--primary-color, #0078d4);
-    transform: translateY(-1px);
+    transform: translateY(-4px);
+    @include tokens.shadow('lg');
+    border-color: var(--fg-divider, c(neutral));
   }
-
-  &:focus-within {
-    outline: 2px solid var(--primary-color, #0078d4);
-    outline-offset: 2px;
+  
+  h3 {
+    font-size: vars.$h3-size;
+    font-weight: 600;
+    color: var(--fg-text, c(dark));
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    word-break: break-all;
   }
+}
 
-  // Header styling
-  fluent-card-header {
-    padding: 12px 16px; // Reduced top/bottom padding
-    border-bottom: 1px solid var(--fg-divider, #f3f2f1);
-    background: var(--bg-card, #ffffff);
-    flex-shrink: 0; // Prevent header from shrinking
+/* Common Attribute Styling */
+.attribute {
+  margin-bottom: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 
-    fluent-card-title {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 22px;
-      color: var(--fg-text, #323130);
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      fluent-icon {
-        font-size: 16px;
-        color: var(--primary-color, #0078d4);
-      }
-    }
-
-    fluent-badge {
-      margin-top: 4px;
-      font-size: 11px; // Made smaller
-      background: var(--bg-elevated, #f3f2f1);
-      color: var(--fg-secondary-text, #605e5c);
-      border: 1px solid var(--fg-border, #e1e1e1);
-      border-radius: 12px;
-      padding: 2px 6px; // Reduced padding
-    }
-  }
-
-  // Content area styling - prevent centering
-  .origin-field,
-  .attribute {
-    padding: 0 16px;
-    margin-bottom: 8px; // Reduced margin
-    align-self: stretch; // Prevent centering
+  &.simple-attribute {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; // Align to start, not center
+    width: 100%;
 
-    &:first-of-type {
-      margin-top: 8px; // Reduced top margin
-    }
-  }
-
-  .origin-field {
-    font-size: 11px; // Made smaller
-    color: var(--fg-secondary-text, #605e5c);
-    background: var(--bg-elevated, #f9f9f9);
-    padding: 4px 8px; // Reduced padding
-    border-radius: 4px;
-    margin: 8px 16px 8px 16px; // Reduced margins
-    border: 1px solid var(--fg-border, #e1e1e1);
-  }
-
-  .description-attribute {
-    .attribute-value {
-      font-size: 13px; // Slightly smaller
-      line-height: 18px; // Tighter line height
-      color: var(--fg-text, #323130);
-      margin: 0;
-      padding: 0;
-      text-align: left; // Ensure left alignment
-    }
-  }
-
-  // Resource Types field-group styling - matches single attribute layout
-  .resource-types-field {
-    padding: 0 16px;
-    margin-bottom: 8px; // Reduced margin
-    align-self: stretch; // Prevent centering
-
-    .field-title {
-      font-size: 14px; // Slightly smaller
-      font-weight: 600;
-      color: var(--fg-text, #323130);
-      margin-bottom: 6px; // Reduced margin
-      display: block;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: left; // Ensure left alignment
-    }
-
-    .input-row {
+    .attribute-header {
       display: flex;
-      align-items: flex-start; // Changed from center to flex-start
-      gap: 8px;
-    }
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-bottom: 0.25rem;
+      align-items: center;
+      width: 100%;
 
-    .input-wrapper {
-      position: relative;
-      flex: 1;
-      min-height: 28px; // Reduced height
-      background: var(--bg-card, #ffffff);
-      border: 1px solid var(--fg-border, #8a8886);
-      border-radius: 2px;
-      padding: 6px 10px; // Reduced padding
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-      &.resource-types-container {
-        background: rgba(0, 120, 212, 0.05);
-        border-left: 3px solid var(--primary-color, #0078d4);
+      strong {
+        font-weight: 600;
+        color: var(--fg-text, #2c3e50);
+        font-size: vars.$content-size;
       }
-    }
-
-    .resource-types-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px; // Reduced gap
-
-      .resource-type-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1px 0; // Reduced padding
-
-        .resource-link {
-          color: var(--primary-color, #0078d4);
-          text-decoration: none;
-          font-size: 13px; // Slightly smaller
-          font-weight: 500;
-
-          &:hover {
-            text-decoration: underline;
-          }
-        }
-
-        .resource-count {
-          font-size: 11px; // Made smaller
-          color: var(--fg-secondary-text, #605e5c);
-          background: var(--bg-elevated, #f3f2f1);
-          padding: 1px 4px; // Reduced padding
-          border-radius: 6px; // Smaller radius
-          margin-left: 6px; // Reduced margin
-        }
-      }
-    }
-
-    // Type pill styling - positioned on the container
-    .type-pill {
-      position: absolute;
-      top: -8px;
-      right: 8px;
-      height: 15px;
-      padding: 0 6px;
-      font-size: 10px;
-      font-weight: 500;
-      line-height: 15px;
-      color: #ffffff;
-      background: #0078d4;
-      border-radius: 8px;
-      white-space: nowrap;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      z-index: 10;
-    }
-  }
-
-  // Footer styling - make timestamps much smaller
-  fluent-card-footer {
-    margin-top: auto; // Push to bottom
-    padding: 8px 16px; // Reduced padding
-    background: var(--bg-elevated, #f9f9f9);
-    border-top: 1px solid var(--fg-divider, #f3f2f1);
-    flex-shrink: 0; // Prevent footer from shrinking
-
-    small {
-      font-size: 10px; // Made much smaller
-      color: var(--fg-secondary-text, #605e5c);
-      line-height: 14px; // Tighter line height
-      display: block; // Ensure block display
-      text-align: left; // Left align timestamps
-
-      span {
-        &:not(:last-child)::after {
-          content: ' • ';
-          margin: 0 3px; // Reduced margin
-          color: var(--fg-divider, #c8c6c4);
-        }
-      }
-    }
-  }
-
-  // Divider styling
-  fluent-divider {
-    margin: 0;
-    border-color: var(--fg-divider, #f3f2f1);
-    flex-shrink: 0; // Prevent divider from shrinking
-  }
-
-  // Responsive adjustments for Fluent 2 cards
-  @media (max-width: 768px) {
-    fluent-card-header {
-      padding: 10px 12px; // Reduced padding
-
-      fluent-card-title {
-        font-size: 14px;
-        line-height: 20px;
-      }
-
-      fluent-badge {
-        font-size: 10px; // Made smaller
-        padding: 1px 5px; // Reduced padding
-      }
-    }
-
-    .origin-field,
-    .attribute {
-      padding: 0 12px;
-      margin-bottom: 6px; // Reduced margin
-      align-items: flex-start; // Prevent centering
-    }
-
-    .origin-field {
-      margin: 6px 12px; // Reduced margins
-      padding: 3px 6px; // Reduced padding
-      font-size: 10px; // Made smaller
-    }
-
-    .resource-types-field {
-      padding: 0 12px; // Match other attributes responsive padding
-      margin-bottom: 6px; // Reduced margin
-      align-self: stretch; // Prevent centering
-
-      .field-title {
-        font-size: 13px; // Slightly smaller
-        margin-bottom: 5px; // Reduced margin
-        text-align: left; // Ensure left alignment
-      }
-
-      .input-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px; // Reduced gap
-      }
-
-      .input-wrapper {
-        flex: 1;
-        min-height: 26px; // Reduced height
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--fg-border, #8a8886);
-        border-radius: 2px;
-        padding: 5px 8px; // Reduced padding
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      }
-
-      .resource-types-list {
-        gap: 1px; // Reduced gap
-
-        .resource-type-row {
-          padding: 0; // Minimal padding
-
-          .resource-link {
-            font-size: 12px;
-          }
-
-          .resource-count {
-            font-size: 10px;
-            padding: 1px 3px; // Reduced padding
-            border-radius: 5px; // Smaller radius
-            margin-left: 5px; // Reduced margin
-          }
-        }
-      }
-    }
-
-    fluent-card-footer {
-      padding: 6px 12px; // Reduced padding
-
-      small {
-        font-size: 9px; // Made even smaller
-        line-height: 12px; // Tighter line height
-        text-align: left; // Left align timestamps
-      }
-    }
-
-    // Type pill responsive styling for 768px
-    .type-pill {
-      font-size: 9px;
-      height: 13px;
-      line-height: 13px;
-      padding: 0 5px;
-      border-radius: 7px;
-      top: -7px;
-      right: 6px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    border-radius: 6px;
-
-    fluent-card-header {
-      padding: 8px 10px; // Further reduced padding
-
-      fluent-card-title {
-        font-size: 13px;
-        line-height: 18px;
-        gap: 6px;
-
-        fluent-icon {
-          font-size: 14px;
-        }
-      }
-
-      fluent-badge {
-        font-size: 9px; // Made even smaller
-        padding: 1px 4px; // Further reduced padding
-      }
-    }
-
-    .origin-field,
-    .attribute {
-      padding: 0 10px;
-      margin-bottom: 5px; // Further reduced margin
-      align-items: flex-start; // Prevent centering
-    }
-
-    .origin-field {
-      margin: 5px 10px; // Further reduced margins
-      padding: 2px 5px; // Further reduced padding
-      font-size: 9px; // Made even smaller
-    }
-
-    .resource-types-field {
-      padding: 0 10px; // Match smaller mobile padding
-      margin-bottom: 5px; // Further reduced margin
-      align-self: stretch; // Prevent centering
-
-      .field-title {
-        font-size: 12px; // Smaller
-        margin-bottom: 4px; // Further reduced margin
-        text-align: left; // Ensure left alignment
-      }
-
-      .input-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px; // Further reduced gap
-      }
-
-      .input-wrapper {
-        flex: 1;
-        min-height: 24px; // Further reduced height
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--fg-border, #8a8886);
-        border-radius: 2px;
-        padding: 4px 6px; // Further reduced padding
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      }
-
-      .resource-types-list {
-        gap: 1px; // Minimal gap
-
-        .resource-type-row {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 1px; // Minimal gap
-          padding: 0; // No padding
-
-          .resource-link {
-            font-size: 11px; // Smaller
-          }
-
-          .resource-count {
-            font-size: 9px; // Made even smaller
-            padding: 1px 2px; // Minimal padding
-            border-radius: 4px; // Smaller radius
-            margin-left: 0; // No margin when stacked
-            margin-top: 1px; // Small top margin when stacked
-          }
-        }
-      }
-    }
-
-    fluent-card-footer {
-      padding: 5px 10px; // Minimal padding
-
-      small {
-        font-size: 8px; // Made very small
-        line-height: 11px; // Very tight line height
-        text-align: left; // Left align timestamps
-      }
-    }
-
-    // Type pill responsive styling for 480px
-    .type-pill {
-      font-size: 8px;
-      height: 12px;
-      line-height: 12px;
-      padding: 0 4px;
-      border-radius: 6px;
-      top: -6px;
-      right: 6px;
     }
   }
 }
 
-// Remove legacy grid-item styles
-.grid-item {
-  display: none;
+.attribute-value {
+  font-size: vars.$content-size;
+  color: var(--fg-text, c(text));
+  word-break: break-word;
+  padding: 0.25rem 0;
+  overflow: visible;
+  text-overflow: unset;
+  width: 100%;
+  flex: 1;
 }
 
 .label-item {
@@ -627,9 +268,8 @@ h3 {
 }
 
 /* Resource Types section styles - styled like arrays in resource document */
-/* Legacy resource-types styling - commented out to prevent conflicts with Fluent 2 implementation
 .resource-types {
-  margin-bottom: s(s);
+  margin-bottom: s(s); // Reduced from s(m) for compactness
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -637,32 +277,31 @@ h3 {
   .attribute-value {
     position: relative;
     padding-left: s(xs);
-    @include chromeline(c(info));
+    @include chromeline(c(info)); /* Blue vertical bar like arrays */
     margin-top: s(xs);
-    margin-bottom: s(xs);
-    background-color: rgba(91, 192, 222, 0.05);
+    margin-bottom: s(xs);    background-color: rgba(91, 192, 222, 0.05);
     border-radius: 0 tokens.$radius-md tokens.$radius-md 0;
+    // Removed max-height restriction to allow full content display
     overflow: visible;
-    width: 100%;
-    box-sizing: border-box;
+    width: 100%; // Ensure resource types fill parent horizontally
+    box-sizing: border-box; // Include padding and border in width calculation
   }
 }
 
+// Remove extra left padding and margin from resource-types-list and resource-type-row
 .resource-types-list {
   position: relative;
-  margin-top: 0.25rem;
+  margin-top: 0.25rem; // Reduced from 0.5rem for compactness
   padding-left: 0.25rem !important;
   margin-left: 0 !important;
-  border-left: 3px solid #5bc0de;
-
-  &::before {
+  border-left: 3px solid #5bc0de; /* Blue vertical bar like arrays */  &::before {
     content: '';
     position: absolute;
     top: 0;
-    left: -3px;
-    width: 3px;
+    left: -3px; /* Match the border-left width */
+    width: 3px; /* Match the border-left width */
     height: 100%;
-    background-color: #5bc0de;
+    background-color: #5bc0de; /* Match the border color */
     border-bottom-left-radius: tokens.$radius-sm;
     z-index: tokens.z-index('base');
   }
@@ -683,16 +322,16 @@ h3 {
   margin-left: 0 !important;
 }
 
+// Ensure .attribute-value.resource-types-list has proper styling with vertical bar
 .attribute-value.resource-types-list {
   position: relative;
   padding-left: 0.5rem !important;
   margin-left: 0 !important;
   background-color: rgba(91, 192, 222, 0.05);
   border-radius: 0 tokens.$radius-md tokens.$radius-md 0;
-  width: 100%;
-  box-sizing: border-box;
+  width: 100%; // Ensure resource types list fills parent horizontally
+  box-sizing: border-box; // Include padding and border in width calculation
 }
-End of legacy resource-types styling */
 
 .resource-list {
   list-style: none;
@@ -1207,10 +846,14 @@ a {
       background: var(--primary-hover-color, #0056b3);
     }
 
-    &:focus {      outline: 2px solid var(--primary-color, #007bff);
+    &:focus {
+      outline: 2px solid var(--primary-color, #007bff);
       outline-offset: 2px;
     }
 
+    .material-icons {
+      font-size: 1rem;
+    }
   }
 }
 
@@ -1283,33 +926,4 @@ a {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
   }
-}
-
-router-outlet + app-groups {
-  height: auto !important;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
-}
-
-/* Legacy resource-types styling removed - now handled in .group-card Fluent 2 implementation */
-
-.input-wrapper {
-  flex: 1;
-  min-height: 32px;
-  background: var(--bg-card, #ffffff);
-  border: 1px solid var(--fg-border, #8a8886);
-  border-radius: 2px;
-  padding: 8px 12px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-// Type pill responsive styling for 768px
-.type-pill {
-  font-size: 9px;
-  height: 13px;
-  line-height: 13px;
-  padding: 0 5px;
-  border-radius: 7px;
-  top: -7px;
-  right: 6px;
 }

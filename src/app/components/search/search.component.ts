@@ -1,20 +1,18 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { SearchService } from '../../services/search.service';
 import { DebugService } from '../../services/debug.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   standalone: true,
   selector: 'app-search',
-  imports: [CommonModule, FormsModule, MatInputModule, MatFormFieldModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, FormsModule, IconComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']
 })
@@ -83,7 +81,11 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
     this.destroy$.complete();
   }
 
-  onSearchInput(): void {
+  onSearchInput(event?: Event): void {
+    if (event) {
+      const target = event.target as HTMLInputElement;
+      this.searchTerm = target.value;
+    }
     this.debug.log('Search input changed:', this.searchTerm);
     this.searchSubject.next(this.searchTerm);
   }

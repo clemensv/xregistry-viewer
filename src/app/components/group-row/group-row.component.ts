@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Group } from '../../models/registry.model';
 import { truncateText, truncateDescription, formatDateShort, getFullText } from '../../utils/text.utils';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @Component({
   // Use a property selector instead of an element selector
@@ -11,7 +12,8 @@ import { truncateText, truncateDescription, formatDateShort, getFullText } from 
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './group-row.component.html',
-  styleUrls: ['./group-row.component.scss']
+  styleUrls: ['./group-row.component.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class GroupRowComponent implements OnInit {
   @Input() group!: Group;

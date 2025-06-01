@@ -15,46 +15,62 @@
 <!-- Progressive loading indicator -->
 <div class="loading-progress" *ngIf="loadingProgress && groupsList.length > 0">
   <div class="loading-indicator">
-    <span class="material-icons loading-spinner">sync</span>
+    <fluent-progress-ring indeterminate diameter="16" class="loading-spinner"></fluent-progress-ring>
     <span>Loading more groups... ({{ groupsList.length }} loaded)</span>
   </div>
 </div>
 
 <!-- Cards View --><div class="groups">  <div *ngIf="viewMode === 'cards' && filteredGroupsList.length > 0" class="grid-container cards-view">
-    <div *ngFor="let group of filteredGroupsList" class="grid-item">
-      <h3>
-        <span class="material-icons group-icon">folder</span>
-        {{ group['name'] || group['id'] }}
-      </h3>
-      <div class="origin-field" *ngIf="group.origin">Origin: {{ group.origin }}</div>
-      <div class="attribute simple-attribute description-attribute" *ngIf="group['description']">
-        <div class="attribute-value">
-          {{ group['description'] }}
+    <fluent-card *ngFor="let group of filteredGroupsList" class="group-card">
+      <fluent-card-header>
+        <fluent-card-title>
+          <fluent-icon slot="prefix" name="folder"></fluent-icon>
+          {{ group['name'] || group['id'] }}
+        </fluent-card-title>
+        <fluent-badge slot="subtitle" *ngIf="group.origin">Origin: {{ group.origin }}</fluent-badge>
+      </fluent-card-header>
+      <fluent-divider></fluent-divider>
+       <div class="attribute simple-attribute description-attribute" *ngIf="group['description']">
+         <div class="attribute-value">
+           {{ group['description'] }}
+         </div>
+       </div>
+       <!-- Group Attributes Display -->
+       <ng-container *ngFor="let attrName of displayGroupAttributes">
+        <div class="attribute simple-attribute group-attributes" *ngIf="hasValue(group[attrName])">
+          <!-- Only show attribute header for complex attributes -->
+          <div class="attribute-header" *ngIf="!isSimpleAttribute(group[attrName])">
+            <strong>{{ attrName }}</strong>
+            <span class="attribute-type" *ngIf="groupAttributes[attrName]?.type">{{ groupAttributes[attrName].type }}</span>
+          </div>
+          <div class="attribute-value">
+            <app-resource-document-item               [item]="{                key: attrName,                value: group[attrName],                type: groupAttributes[attrName]?.type || typeof group[attrName],                description: groupAttributes[attrName]?.description,                itemModel: groupAttributes[attrName],                isExpanded: false              }"              [nestingLevel]="0"              [initialExpanded]="false">            </app-resource-document-item>
+          </div>
+        </div>
+      </ng-container>        <!-- Resource Types Section - styled like single attribute -->
+      <div class="field-group resource-types-field" *ngIf="getResourceTypesItem(group)?.value.length > 0">
+        <label class="field-title">Resource Types</label>
+        <div class="input-row">
+          <div class="input-wrapper resource-types-container">
+            <div class="resource-types-list">
+              <ng-container *ngFor="let rt of getResourceTypesItem(group)?.value">
+                <div class="resource-type-row">
+                  <a [routerLink]="['/', groupType, group['id'], rt.name]" class="resource-link">{{ rt.name }}</a>
+                  <span *ngIf="rt.count !== undefined" class="resource-count">({{ rt.count }})</span>
+                </div>
+              </ng-container>
+            </div>
+            <span class="type-pill">Array, {{ getResourceTypesItem(group)?.value.length }} {{ getResourceTypesItem(group)?.value.length === 1 ? 'item' : 'items' }}</span>
+          </div>
         </div>
       </div>
-            <div class="attribute simple-attribute" *ngIf="group['labels']">        <div class="attribute-value">          <div *ngFor="let label of objectKeys(group['labels'])" class="label-item">            <span class="label-key">{{ label }}</span>:            <span class="label-value">{{ group['labels'][label] }}</span>          </div>        </div>      </div>      <!-- Group Attributes Display -->      <ng-container *ngFor="let attrName of displayGroupAttributes">        <div class="attribute simple-attribute group-attributes" *ngIf="hasValue(group[attrName])">          <!-- Only show attribute header for complex attributes -->          <div class="attribute-header" *ngIf="!isSimpleAttribute(group[attrName])">            <strong>{{ attrName }}</strong>            <span class="attribute-type" *ngIf="groupAttributes[attrName]?.type">{{ groupAttributes[attrName].type }}</span>          </div>          <div class="attribute-value">            <app-resource-document-item               [item]="{                key: attrName,                value: group[attrName],                type: groupAttributes[attrName]?.type || typeof group[attrName],                description: groupAttributes[attrName]?.description,                itemModel: groupAttributes[attrName],                isExpanded: false              }"              [nestingLevel]="0"              [initialExpanded]="false">            </app-resource-document-item>          </div>        </div>      </ng-container>        <!-- Resource Types Section - optimized formatting -->
-      <div class="attribute simple-attribute resource-types">
-        <div class="attribute-header unified-item-row array-row">
-          <strong>Resource Types</strong>
-          <span class="item-count">{{ getResourceTypesItem(group)?.value.length }} {{ getResourceTypesItem(group)?.value.length === 1 ? 'item' : 'items' }}</span>
-        </div>
-        <div class="attribute-value resource-types-list">
-          <ng-container *ngFor="let rt of getResourceTypesItem(group)?.value">
-            <span class="resource-type-row">
-              <a [routerLink]="['/', groupType, group['id'], rt.name]" class="resource-link">{{ rt.name }}</a>
-              <span *ngIf="rt.count !== undefined" class="resource-count">({{ rt.count }})</span>
-            </span>
-          </ng-container>
-        </div>
-      </div>
-      <div class="tile-footer-container">
-        <footer class="tile-footer">
-          <small>
-            <span [title]="getFullText(formatDateShort(group['createdAt']))">Created: {{ formatDateShort(group['createdAt']) }}</span>&nbsp;|
-            <span [title]="getFullText(formatDateShort(group['modifiedAt']))">Modified: {{ formatDateShort(group['modifiedAt']) }}</span>
-          </small>
-        </footer>      </div>
-    </div>
+      <fluent-card-footer>
+        <small>
+          <span [title]="getFullText(formatDateShort(group['createdAt']))">Created: {{ formatDateShort(group['createdAt']) }}</span>&nbsp;|
+          <span [title]="getFullText(formatDateShort(group['modifiedAt']))">Modified: {{ formatDateShort(group['modifiedAt']) }}</span>
+        </small>
+      </fluent-card-footer>
+    </fluent-card>
   </div>
 
   <!-- List View -->
@@ -83,9 +99,9 @@
   </div>
 
   <!-- Loading state -->
-  <div *ngIf="loading" class="empty-state">
+  <div *ngIf="loading && !hasApiError" class="empty-state">
     <div class="empty-state-content">
-      <span class="material-icons empty-state-icon loading-spinner">sync</span>
+      <fluent-progress-ring indeterminate diameter="32" class="empty-state-icon"></fluent-progress-ring>
       <h3 class="empty-state-title">Loading Groups</h3>
       <p class="empty-state-message">
         Please wait while we load the available groups from the registry...
@@ -93,10 +109,48 @@
     </div>
   </div>
 
+  <!-- Error state when ALL APIs fail -->
+  <div *ngIf="hasApiError && totalFailure" class="empty-state error-state">
+    <div class="empty-state-content">
+      <fluent-icon class="error-icon" name="error"></fluent-icon>
+      <h3 class="empty-state-title">Unable to Load Groups</h3>
+      <p class="empty-state-message">
+        {{ apiErrorMessage }}
+      </p>
+      <div *ngIf="apiErrorDetails && apiErrorDetails.length > 1" class="error-details">
+        <details>
+          <summary>View detailed error information</summary>
+          <div class="error-endpoints">
+            <div *ngFor="let apiError of apiErrorDetails" class="error-endpoint">
+              <strong>{{ apiError.api }}:</strong>
+              <span class="error-message">{{ apiError.error?.message || apiError.error?.toString() || 'Unknown error' }}</span>
+            </div>
+          </div>
+        </details>
+      </div>
+      <div class="error-actions">
+        <fluent-button appearance="outline" (click)="loadGroups()">
+          <fluent-icon slot="start" name="refresh"></fluent-icon>
+          Retry Loading
+        </fluent-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Partial failure warning (when some APIs work) -->
+  <div *ngIf="partialFailure && !totalFailure && groupsList.length > 0" class="partial-failure-warning">
+    <div class="warning-content">
+      <fluent-icon name="warning" class="warning-icon"></fluent-icon>
+      <span class="warning-text">
+        Some registry endpoints are unavailable. Showing available groups from working endpoints.
+      </span>
+    </div>
+  </div>
+
   <!-- Empty search results -->
   <div *ngIf="!loading && currentSearchTerm && filteredGroupsList.length === 0 && groupsList.length > 0" class="empty-state">
     <div class="empty-state-content">
-      <span class="material-icons empty-state-icon">search_off</span>
+      <fluent-icon class="empty-state-icon" name="search_off"></fluent-icon>
       <h3 class="empty-state-title">No Matching Groups</h3>
       <p class="empty-state-message">
         No groups match your search criteria "{{ currentSearchTerm }}".
@@ -108,7 +162,7 @@
   <!-- No data state -->
   <div *ngIf="!loading && !currentSearchTerm && groupsList.length === 0" class="empty-state">
     <div class="empty-state-content">
-      <span class="material-icons empty-state-icon">folder_open</span>
+      <fluent-icon class="empty-state-icon" name="folder_open"></fluent-icon>
       <h3 class="empty-state-title">No Groups Available</h3>
       <p class="empty-state-message">
         There are currently no groups of type "{{ groupType }}" in this registry.

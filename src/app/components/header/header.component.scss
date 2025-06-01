@@ -1,5 +1,63 @@
-/* Header styles have been moved to global styles.scss */
+/* Header component styles - keeping only logo and search box */
 @use '../shared-design-tokens' as tokens;
+
+/* Unified header outer container */
+.header-outer {
+  background-color: var(--colorBrandBackground);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
+}
+
+/* Header toolbar styling */
+.header-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 16px;
+  background-color: var(--colorBrandBackground);
+  color: var(--colorNeutralForegroundOnBrand);
+  gap: 16px;
+}
+
+/* Left section with logo and search */
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 0 1 auto;
+}
+
+/* Right section with controls */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  height: 48px; /* Match header height */
+  z-index: 10;
+}
+
+/* Control group styling - organized button layout */
+.control-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 36px; /* Fixed height for consistency */
+  position: relative; /* For proper menu positioning */
+
+  /* Ensure proper stacking order */
+  &:has(fluent-menu-button[open]) {
+    z-index: 1001;
+  }
+}
+
+/* Breadcrumb container styling */
+.breadcrumb-container {
+  background-color: var(--bg-card, white);
+  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
+  padding: 0;
+}
 
 /* Logo styles specific to the header component */
 .logo-container {
@@ -8,6 +66,7 @@
   cursor: pointer;
   text-decoration: none;
   padding: 4px 0;
+  flex-shrink: 0;
   @include tokens.transition('all');
 
   &:hover {
@@ -19,6 +78,7 @@
   height: 26px;
   margin: 0;
   max-width: 180px;
+  min-width: 120px;
 }
 
 /* Title logo SVG height fix */
@@ -26,7 +86,7 @@
   height: 20px;
   vertical-align: middle;
   margin-right: 4px;
-  transform: translateY(-1px); /* Adjust the vertical alignment */
+  transform: translateY(-1px);
 }
 
 svg.title-logo {
@@ -34,132 +94,321 @@ svg.title-logo {
   width: auto;
   display: inline-block;
   vertical-align: middle;
-  transform: translateY(-2px); /* Adjust the vertical alignment */
-}
-
-/* Spacer to push content to the right */
-.spacer {
-  flex: 1 1 auto;
-}
-
-/* Style for API info component within the header */
-app-api-info {
-  margin-right: 12px;
+  transform: translateY(-2px);
 }
 
 /* Search container styling */
 .search-container {
   display: flex;
   align-items: center;
-  margin-right: 16px;
-
-  app-search {
-    ::ng-deep .search-field {
-      width: 300px;
-
-      .mat-mdc-form-field-wrapper {
-        padding-bottom: 0;
-      }
-
-      .mat-mdc-text-field-wrapper {
-        height: 36px;
-
-        .mat-mdc-form-field-input-control {
-          color: rgba(255, 255, 255, 0.9);
-        }
-
-        .mat-mdc-form-field-input-control::placeholder {
-          color: rgba(255, 255, 255, 0.6);
-        }
-      }
-    }
-  }
-}
-
-/* Control group styling */
-.control-group {
-  display: flex;
-  align-items: center;
-  margin-right: 4px;
+  flex: 0 0 auto;
+  min-width: 200px;
+  max-width: 300px;
 }
 
 /* Active menu item styling */
-::ng-deep .mat-mdc-menu-item.active {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--fg-secondary-text, #6c757d);
-  @include tokens.transition('colors');
+fluent-menu-item.active {
+  background-color: var(--colorNeutralBackground1Selected);
 
-  .mat-icon {
-    color: var(--fg-secondary-text, #6c757d);
-    @include tokens.transition('colors');
+  &::part(content) {
+    background-color: var(--colorNeutralBackground1Selected);
+    color: var(--colorNeutralForeground1);
   }
 }
 
-/* Font size specific adaptations */
-:host-context(body.font-size-small) {
-  .logo {
-    height: 20px;
-  }
+/* Fluent UI component styling overrides */
+fluent-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  position: relative;
 
-  .title-logo {
-    height: 16px;
-  }
+  &::part(button) {
+    color: var(--colorNeutralForegroundOnBrand);
+    border: none;
+    background: transparent;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    @include tokens.transition('background-color');
 
-  svg.title-logo {
-    height: 18px;
-  }
-
-  .search-container {
-    margin-right: 8px;
-
-    app-search ::ng-deep .search-field {
-      width: 250px;
-
-      .mat-mdc-text-field-wrapper {
-        height: 28px;
-      }
+    &:hover {
+      background-color: var(--colorNeutralBackground1Hover);
     }
   }
 
-  .control-group {
-    margin-right: 2px;
+  fluent-icon[slot="button"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
   }
 
-  app-api-info {
+  /* Only show menu when open */
+  fluent-menu[slot="menu"] {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 1000;
+    min-width: 160px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    @include tokens.transition('opacity, visibility, transform');
+
+    &::part(root) {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      background: var(--colorNeutralBackground1);
+      border: 1px solid var(--colorNeutralStroke1);
+    }
+  }
+
+  /* Show menu when open */
+  &[open] fluent-menu[slot="menu"] {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* Ensure dropdowns don't interfere with layout */
+  &:not([open]) fluent-menu[slot="menu"] {
+    display: none !important;
+  }
+
+  /* Menu items styling */
+  fluent-menu-item {
+    &::part(content) {
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+
+      &:hover {
+        background-color: var(--colorNeutralBackground1Hover);
+      }
+    }
+
+    &.active::part(content) {
+      background-color: var(--colorBrandBackground);
+      color: var(--colorNeutralForegroundOnBrand);
+    }
+
+    fluent-icon {
+      flex-shrink: 0;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    span {
+      flex: 1;
+    }
+  }
+}
+
+/* Fixed button styling */
+fluent-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+
+  &::part(control) {
+    color: var(--colorNeutralForegroundOnBrand);
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 4px;
+    @include tokens.transition('background-color');
+
+    &:hover {
+      background-color: var(--colorNeutralBackground1Hover);
+    }
+  }
+
+  fluent-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Prevent tooltip overlap issues */
+fluent-menu-button::part(button):hover::after,
+fluent-button::part(control):hover::after {
+  display: none !important;
+}
+
+/* Hide any default tooltips that might be interfering */
+.control-group [title] {
+  position: relative;
+}
+
+.control-group [title]:hover::after {
+  display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header-toolbar {
+    padding: 0 8px;
+    gap: 4px;
+  }
+
+  .logo-container {
     margin-right: 8px;
+  }
+
+  .logo {
+    max-width: 120px;
+    min-width: 80px;
+  }
+
+  .search-container {
+    min-width: 150px;
+    max-width: 200px;
+    margin-right: 8px;
+  }
+
+  .control-group {
+    margin: 0 1px;
+
+    &:not(:last-child) {
+      margin-right: 2px;
+    }
+  }
+
+  fluent-menu-button,
+  fluent-button {
+    &::part(button),
+    &::part(control) {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+    }
+
+    fluent-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .header-toolbar {
+    padding: 0 4px;
+    gap: 2px;
+  }
+
+  .logo {
+    max-width: 100px;
+    min-width: 60px;
+  }
+
+  .search-container {
+    min-width: 120px;
+    max-width: 150px;
+    margin-right: 4px;
+  }
+
+  .spacer {
+    min-width: 10px;
+  }
+
+  .control-group {
+    margin: 0;
+
+    &:not(:last-child) {
+      margin-right: 1px;
+    }
+  }
+
+  fluent-menu-button,
+  fluent-button {
+    &::part(button),
+    &::part(control) {
+      width: 28px !important;
+      height: 28px !important;
+      min-width: 28px !important;
+      min-height: 28px !important;
+    }
+
+    fluent-icon {
+      font-size: 12px !important;
+      width: 12px !important;
+      height: 12px !important;
+    }
+  }
+}
+
+/* Font size responsive variants */
+:host-context(body.font-size-small) {
+  .header-toolbar {
+    min-height: 40px;
+    padding: 0 12px;
+  }
+
+  fluent-menu-button,
+  fluent-button {
+    &::part(button),
+    &::part(control) {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+    }
+
+    fluent-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
   }
 }
 
 :host-context(body.font-size-large) {
-  .logo {
-    height: 32px;
+  .header-toolbar {
+    min-height: 56px;
+    padding: 0 20px;
   }
 
-  .title-logo {
-    height: 26px;
-  }
-
-  svg.title-logo {
-    height: 30px;
-  }
-
-  .search-container {
-    margin-right: 24px;
-
-    app-search ::ng-deep .search-field {
-      width: 350px;
-
-      .mat-mdc-text-field-wrapper {
-        height: 44px;
-      }
+  fluent-menu-button,
+  fluent-button {
+    &::part(button),
+    &::part(control) {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
     }
-  }
 
-  .control-group {
-    margin-right: 8px;
-  }
-
-  app-api-info {
-    margin-right: 16px;
+    fluent-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
   }
 }

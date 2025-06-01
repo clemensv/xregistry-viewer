@@ -1,56 +1,72 @@
-<mat-toolbar color="primary">
-  <a routerLink="/" class="logo-container">
-    <img *ngIf="currentTheme === 'light'" src="xregistry-logo.svg" alt="xRegistry Explorer" class="logo title-logo">
-    <img *ngIf="currentTheme === 'dark'" src="xregistry-logo-dark.svg" alt="xRegistry Explorer" class="logo title-logo">
-  </a>
-  <!-- Search Box -->
-  <div class="search-container">
-    <app-search></app-search>
+<div class="header-outer">
+  <div class="header-toolbar">
+    <!-- Left section -->
+    <div class="left-section">
+      <a routerLink="/" class="logo-container">
+        <img *ngIf="currentTheme === 'light'" src="xregistry-logo.svg" alt="xRegistry Explorer" class="logo title-logo">
+        <img *ngIf="currentTheme === 'dark'" src="xregistry-logo-dark.svg" alt="xRegistry Explorer" class="logo title-logo">
+      </a>
+      <div class="search-container">
+        <app-search></app-search>
+      </div>
+    </div>
+
+    <!-- Right section -->
+    <div class="right-section">
+      <!-- API Settings -->
+      <div class="control-group">
+        <fluent-button
+          appearance="subtle"
+          (click)="navigateToConfig()"
+          aria-label="API Settings">
+          <fluent-icon name="settings"></fluent-icon>
+        </fluent-button>
+      </div>
+
+      <!-- Font/Layout Size Selector -->
+      <div class="control-group">
+        <fluent-menu-button
+          [open]="fontMenuOpen"
+          (toggle)="fontMenuOpen = !fontMenuOpen"
+          aria-label="Font Size">
+          <fluent-icon slot="button" [name]="getFontSizeIcon()"></fluent-icon>
+          <fluent-menu slot="menu">
+            <fluent-menu-item
+              (click)="setFontSize('small'); fontMenuOpen = false"
+              [class.active]="currentFontSize === 'small'">
+              <fluent-icon name="font_decrease"></fluent-icon>
+              <span>Small</span>
+            </fluent-menu-item>
+            <fluent-menu-item
+              (click)="setFontSize('medium'); fontMenuOpen = false"
+              [class.active]="currentFontSize === 'medium'">
+              <fluent-icon name="font_size"></fluent-icon>
+              <span>Medium</span>
+            </fluent-menu-item>
+            <fluent-menu-item
+              (click)="setFontSize('large'); fontMenuOpen = false"
+              [class.active]="currentFontSize === 'large'">
+              <fluent-icon name="font_increase"></fluent-icon>
+              <span>Large</span>
+            </fluent-menu-item>
+          </fluent-menu>
+        </fluent-menu-button>
+      </div>
+
+      <!-- Dark/Light Mode Selector -->
+      <div class="control-group">
+        <fluent-button
+          appearance="subtle"
+          (click)="toggleTheme()"
+          aria-label="Toggle Theme">
+          <fluent-icon [name]="currentTheme === 'light' ? 'weather_moon' : 'weather_sunny'"></fluent-icon>
+        </fluent-button>
+      </div>
+    </div>
   </div>
 
-  <span class="spacer"></span>
-
-  <!-- Font Size Selector -->
-  <div class="control-group">
-    <button mat-icon-button [matMenuTriggerFor]="fontSizeMenu" aria-label="Font Size" title="Font Size">
-      <mat-icon>format_size</mat-icon>
-    </button>
-    <mat-menu #fontSizeMenu="matMenu">
-      <button mat-menu-item (click)="setFontSize('small')" [class.active]="currentFontSize === 'small'">
-        <mat-icon>text_fields</mat-icon>
-        <span>Small</span>
-      </button>
-      <button mat-menu-item (click)="setFontSize('medium')" [class.active]="currentFontSize === 'medium'">
-        <mat-icon>text_fields</mat-icon>
-        <span>Medium</span>
-      </button>
-      <button mat-menu-item (click)="setFontSize('large')" [class.active]="currentFontSize === 'large'">
-        <mat-icon>text_fields</mat-icon>
-        <span>Large</span>
-      </button>
-    </mat-menu>
+  <!-- Integrated Breadcrumb -->
+  <div class="breadcrumb-container">
+    <app-breadcrumb></app-breadcrumb>
   </div>
-
-  <!-- Theme Selector -->
-  <div class="control-group">
-    <button mat-icon-button (click)="toggleTheme()" [title]="currentTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
-      <mat-icon>{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
-    </button>
-  </div>
-
-  <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Settings">
-    <mat-icon>settings</mat-icon>
-  </button>
-  <mat-menu #settingsMenu="matMenu">
-    <button mat-menu-item routerLink="/config">
-      <mat-icon>tune</mat-icon>
-      <span>API Configuration</span>
-    </button>
-  </mat-menu>
-  <button mat-button [matMenuTriggerFor]="menu">User</button>
-  <mat-menu #menu="matMenu">
-    <button mat-menu-item routerLink="/">Home</button>
-    <button mat-menu-item>Profile</button>
-    <button mat-menu-item>Logout</button>
-  </mat-menu>
-</mat-toolbar>
+</div>

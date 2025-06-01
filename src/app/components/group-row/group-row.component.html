@@ -1,5 +1,5 @@
 <td class="no-wrap" [title]="getFullText(group?.name || group?.id)">
-  <span class="material-icons group-icon-small">folder</span> 
+  <fluent-icon name="folder" class="group-icon-small"></fluent-icon>
   <a [routerLink]="getGroupNavigationRoute()">{{ truncateText(group?.name || group?.id) }}</a>
 </td>
 <td class="description-cell" [title]="getFullText(group?.description)">

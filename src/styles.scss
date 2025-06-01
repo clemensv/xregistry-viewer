@@ -1,7 +1,6 @@
 // Remove the static font import
 // @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-@use '@angular/material' as mat;
 @use './styles/theme' as theme;
 @use './styles/layout';
 @use './styles/field-group-layout';
@@ -12,31 +11,63 @@
 
 @import '../node_modules/highlight.js/styles/default.css';
 
-/* Override Material toolbar height */
-.mat-toolbar {
-  min-height: 48px !important;
-  height: 48px !important;
+/* Remove conflicting header toolbar styles - let component handle its own styling */
+
+/* Standardized Icon styles - 16px consistently */
+.icon-span {
   font-size: 16px;
+  height: 16px;
+  width: 16px;
+  line-height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: top;
 }
 
-.mat-mdc-icon-button {
-  width: 36px !important;
-  height: 36px !important;
-  padding: 6px !important;
-  font-size: 18px;
+/* Fluent Icon styles - standardized to 16px */
+fluent-icon {
+  height: 16px;
+  width: 16px;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: top;
+  line-height: 1;
 }
 
-.mat-icon {
-  font-size: 18px;
-  height: 18px;
-  width: 18px;
-  line-height: 18px;
+/* Button context for icons */
+button fluent-icon,
+fluent-button fluent-icon {
+  vertical-align: middle;
 }
 
-.mat-mdc-menu-item {
-  min-height: 36px;
-  line-height: 36px;
-  font-size: 13px;
+/* Search context for icons */
+.search-buttons fluent-icon {
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+/* View toggle context for icons */
+.view-toggle fluent-icon,
+.pagination-toggle fluent-icon {
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+/* Specific icon types */
+fluent-icon.warning-icon {
+  color: #e76f51; /* theme warning color */
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+fluent-icon.loading-spinner {
+  animation: spin 1s linear infinite;
+  color: theme.$primary-color;
+  font-size: 20px;
+  margin-right: 8px;
 }
 
 /* Global styles */
@@ -58,72 +89,44 @@ body {
 /* Font size system for high information density */
 /* Small font size variant - Optimized for information density */
 body.font-size-small {
-  /* Typography */
-  h1 {font-size: 1.2rem; margin: 0.5rem 0;}
-  h2 {font-size: 1.0rem; margin: 0.4rem 0;}
-  h3 {font-size: 0.9rem; margin: 0.3rem 0;}
-  h4 {font-size: 0.8rem; margin: 0.25rem 0;}
-  h5 {font-size: 0.75rem; margin: 0.2rem 0;}
-  h6 {font-size: 0.7rem; margin: 0.15rem 0;}
-  p, div, span, a, input, button, select, textarea {font-size: 0.75rem;}
-  .auxiliary-text {font-size: 0.6rem;}
-  .table-text {font-size: 0.7rem;}
-  .card-text {font-size: 0.72rem;}
+  /* Typography - Using Fluent Design System typography scales */
+  h1 {font-size: var(--type-ramp-plus-5-font-size, 1.2rem); margin: 0.5rem 0;}
+  h2 {font-size: var(--type-ramp-plus-3-font-size, 1.0rem); margin: 0.4rem 0;}
+  h3 {font-size: var(--type-ramp-plus-1-font-size, 0.9rem); margin: 0.3rem 0;}
+  h4 {font-size: var(--type-ramp-base-font-size, 0.8rem); margin: 0.25rem 0;}
+  h5 {font-size: var(--type-ramp-minus-1-font-size, 0.75rem); margin: 0.2rem 0;}
+  h6 {font-size: var(--type-ramp-minus-2-font-size, 0.7rem); margin: 0.15rem 0;}
+  p, div, span, a, input, select, textarea {font-size: var(--type-ramp-minus-1-font-size, 0.75rem);}
+  .auxiliary-text {font-size: var(--type-ramp-minus-2-font-size, 0.6rem);}
+  .table-text {font-size: var(--type-ramp-minus-1-font-size, 0.7rem);}
+  .card-text {font-size: var(--type-ramp-minus-1-font-size, 0.72rem);}
 
-  /* Spacing and Layout Density */
-  --spacing-xs: 0.125rem;
-  --spacing-sm: 0.25rem;
-  --spacing-md: 0.375rem;
-  --spacing-lg: 0.5rem;
-  --spacing-xl: 0.75rem;
+  /* Spacing and Layout Density - Use Fluent Design System spacing variables */
+  --spacing-xs: var(--design-unit, 4px) * 0.5;
+  --spacing-sm: var(--design-unit, 4px);
+  --spacing-md: var(--design-unit, 4px) * 1.5;
+  --spacing-lg: var(--design-unit, 4px) * 2;
+  --spacing-xl: var(--design-unit, 4px) * 3;
 
-  /* Reduced padding and margins */
-  .mat-toolbar {
-    min-height: 48px !important;
-    padding: 0 0.5rem !important;
-  }
-
-  .mat-mdc-button, .mat-mdc-icon-button {
-    height: 32px !important;
-    line-height: 32px !important;
-    padding: 0 0.5rem !important;
-  }
-
-  .mat-mdc-menu-item {
-    min-height: 36px !important;
-    padding: 0 0.75rem !important;
-  }
-
-  /* Compact cards and containers */
-  .mat-mdc-card, .section-container, .grid-item {
-    padding: 0.5rem !important;
-    margin-bottom: 0.5rem !important;
+  /* Compact containers */
+  .section-container, .grid-item {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
   }
 
   /* Compact tables */
-  .mat-mdc-table {
-    .mat-mdc-row, .mat-mdc-header-row {
-      height: 36px !important;
+  table.data-table {
+    tr {
+      height: var(--spacing-lg);
     }
-    .mat-mdc-cell, .mat-mdc-header-cell {
-      padding: 0 0.5rem !important;
+    td, th {
+      padding: 0 var(--spacing-sm);
     }
   }
 
   /* Compact form fields */
-  .mat-mdc-form-field {
-    margin-bottom: 0.5rem !important;
-  }
-
-  /* Breadcrumb compact */
-  .breadcrumb {
-    padding: 0.25rem 0.5rem !important; /* Match small header padding */
-    &-link, &-current {
-      padding: 0.125rem 0.25rem !important;
-    }
-    &-separator {
-      margin: 0 0.25rem !important;
-    }
+  fluent-text-field {
+    margin-bottom: var(--spacing-sm);
   }
 
   /* Page sections */
@@ -167,389 +170,442 @@ body.font-size-medium {
   --spacing-lg: 1rem;
   --spacing-xl: 1.5rem;
 
-  /* Standard Material Design spacing */
-  .mat-toolbar {
-    min-height: 56px !important;
-    padding: 0 1rem !important;
+  /* Standard Fluent UI component spacing */
+  /* Remove conflicting header toolbar height - let component handle it */
+
+  fluent-button::part(control) {
+    height: 36px;
   }
 
-  .mat-mdc-button, .mat-mdc-icon-button {
-    height: 36px !important;
-    line-height: 36px !important;
-  }
-
-  .mat-mdc-menu-item {
-    min-height: 48px !important;
-    padding: 0 1rem !important;
+  fluent-menu-item::part(content) {
+    min-height: 48px;
+    padding: 0 var(--spacing-lg);
   }
 
   /* Standard cards and containers */
-  .mat-mdc-card, .section-container, .grid-item {
-    padding: 1rem !important;
-    margin-bottom: 1rem !important;
+  fluent-card, .section-container, .grid-item {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
   }
 
   /* Standard tables */
-  .mat-mdc-table {
-    .mat-mdc-row, .mat-mdc-header-row {
-      height: 48px !important;
+  table.data-table {
+    tr {
+      height: 48px;
     }
-    .mat-mdc-cell, .mat-mdc-header-cell {
-      padding: 0 0.75rem !important;
+    td, th {
+      padding: 0 var(--spacing-md);
     }
   }
 
   /* Standard form fields */
-  .mat-mdc-form-field {
-    margin-bottom: 1rem !important;
-  }
-
-  /* Breadcrumb standard */
-  .breadcrumb {
-    padding: 0.5rem 1rem !important; /* Match medium header padding */
-    &-link, &-current {
-      padding: 0.25rem 0.5rem !important;
-    }
-    &-separator {
-      margin: 0 0.5rem !important;
-    }
+  fluent-text-field {
+    margin-bottom: var(--spacing-lg);
   }
 
   /* Page sections */
   .page-container {
-    padding: 1rem !important;
+    padding: var(--spacing-lg);
   }
 
   /* Standard gaps in flex containers */
   .flex-container {
-    gap: 0.5rem !important;
+    gap: var(--spacing-sm);
   }
 
   /* Standard pagination */
   .pagination {
-    gap: 0.25rem !important;
+    gap: var(--spacing-xs);
     button {
-      padding: 0.5rem 0.75rem !important;
-      margin: 0 0.25rem !important;
+      padding: var(--spacing-sm) var(--spacing-md);
+      margin: 0 var(--spacing-xs);
     }
   }
 }
 
 /* Large font size variant - Accessibility focused with generous spacing */
 body.font-size-large {
-  /* Typography */
-  h1 {font-size: 1.6rem; margin: 1.5rem 0;}
-  h2 {font-size: 1.3rem; margin: 1.25rem 0;}
-  h3 {font-size: 1.1rem; margin: 1rem 0;}
-  h4 {font-size: 0.95rem; margin: 0.875rem 0;}
-  h5 {font-size: 0.85rem; margin: 0.75rem 0;}
-  h6 {font-size: 0.8rem; margin: 0.625rem 0;}
-  p, div, span, a, input, button, select, textarea {font-size: 0.9rem; line-height: 1.6;}
-  .auxiliary-text {font-size: 0.75rem;}
-  .table-text {font-size: 0.85rem;}
-  .card-text {font-size: 0.87rem;}
+  /* Typography - Using Fluent type ramp with larger scale */
+  h1 {font-size: var(--type-ramp-plus-6-font-size, 1.6rem); margin: 1.5rem 0;}
+  h2 {font-size: var(--type-ramp-plus-5-font-size, 1.3rem); margin: 1.25rem 0;}
+  h3 {font-size: var(--type-ramp-plus-3-font-size, 1.1rem); margin: 1rem 0;}
+  h4 {font-size: var(--type-ramp-plus-2-font-size, 0.95rem); margin: 0.875rem 0;}
+  h5 {font-size: var(--type-ramp-plus-1-font-size, 0.85rem); margin: 0.75rem 0;}
+  h6 {font-size: var(--type-ramp-base-font-size, 0.8rem); margin: 0.625rem 0;}
+  p, div, span, a, input, select, textarea {font-size: var(--type-ramp-plus-1-font-size, 0.9rem); line-height: 1.6;}
+  .auxiliary-text {font-size: var(--type-ramp-minus-1-font-size, 0.75rem);}
+  .table-text {font-size: var(--type-ramp-base-font-size, 0.85rem);}
+  .card-text {font-size: var(--type-ramp-plus-1-font-size, 0.87rem);}
 
-  /* Spacing and Layout - Generous whitespace */
-  --spacing-xs: 0.5rem;
-  --spacing-sm: 0.75rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
+  /* Spacing and Layout - Using Fluent UI design tokens with increased scale */
+  --spacing-xs: calc(var(--design-unit, 4px) * 2);
+  --spacing-sm: calc(var(--design-unit, 4px) * 3);
+  --spacing-md: calc(var(--design-unit, 4px) * 4);
+  --spacing-lg: calc(var(--design-unit, 4px) * 6);
+  --spacing-xl: calc(var(--design-unit, 4px) * 8);
 
   /* Larger toolbar and controls */
-  .mat-toolbar {
-    min-height: 64px !important;
-    padding: 0 1.5rem !important;
+  /* Remove conflicting header toolbar height - let component handle it */
+
+  fluent-button::part(control) {
+    height: 44px;
+    padding: 0 var(--spacing-lg);
+    min-width: 44px;
   }
 
-  .mat-mdc-button, .mat-mdc-icon-button {
-    height: 44px !important;
-    line-height: 44px !important;
-    padding: 0 1rem !important;
-    min-width: 44px !important;
-  }
-
-  .mat-mdc-menu-item {
-    min-height: 56px !important;
-    padding: 0 1.5rem !important;
+  fluent-menu-item::part(content) {
+    min-height: 56px;
+    padding: 0 var(--spacing-xl);
   }
 
   /* Spacious cards and containers */
-  .mat-mdc-card, .section-container, .grid-item {
-    padding: 1.5rem !important;
-    margin-bottom: 1.5rem !important;
-    border-radius: 8px !important;
+  fluent-card, .section-container, .grid-item {
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    border-radius: var(--radius-lg, 8px);
   }
 
   /* Spacious tables */
-  .mat-mdc-table {
-    .mat-mdc-row, .mat-mdc-header-row {
-      height: 56px !important;
+  table.data-table {
+    tr {
+      height: 56px;
     }
-    .mat-mdc-cell, .mat-mdc-header-cell {
-      padding: 0 1rem !important;
+    td, th {
+      padding: 0 var(--spacing-lg);
     }
   }
 
   /* Spacious form fields */
-  .mat-mdc-form-field {
-    margin-bottom: 1.5rem !important;
-  }
-
-  /* Breadcrumb spacious */
-  .breadcrumb {
-    padding: 0.75rem 1.5rem !important; /* Match large header padding */
-    &-link, &-current {
-      padding: 0.375rem 0.75rem !important;
-    }
-    &-separator {
-      margin: 0 0.75rem !important;
-    }
+  fluent-text-field {
+    margin-bottom: var(--spacing-xl);
   }
 
   /* Page sections with extra padding */
   .page-container {
-    padding: 1.5rem !important;
+    padding: var(--spacing-xl);
   }
 
   /* Larger gaps in flex containers */
   .flex-container {
-    gap: 1rem !important;
+    gap: var(--spacing-lg);
   }
 
   /* Spacious pagination */
   .pagination {
-    gap: 0.5rem !important;
+    gap: var(--spacing-sm);
     button {
-      padding: 0.75rem 1rem !important;
-      margin: 0 0.375rem !important;
-      min-width: 44px !important;
-      min-height: 44px !important;
+      padding: var(--spacing-md) var(--spacing-lg);
+      margin: 0 var(--spacing-sm);
+      min-width: 44px;
+      min-height: 44px;
     }
   }
 
-  /* Increase touch targets */
+  /* Increase touch targets for accessibility */
   button, a, .clickable {
-    min-height: 44px !important;
-    min-width: 44px !important;
+    min-height: 44px;
+    min-width: 44px;
   }
 
   /* Extra spacing between sections */
   section + section {
-    margin-top: 2rem !important;
+    margin-top: var(--spacing-xl);
   }
 }
 
-/* Dark theme */
+/* Dark theme - Using Fluent UI design tokens */
 body.theme-dark {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+  background-color: var(--neutral-layer-1, #11100f);
+  color: var(--neutral-foreground-rest, #f5f5f5);
 
-  /* Update theme colors for dark mode */
-  --bg-card: #2d2d2d;
-  --bg-hover: #3d3d3d;
-  --bg-app: #1a1a1a;
-  --bg-surface: #2d2d2d;
-  --bg-elevated: #3d3d3d;
-  --fg-text: #e0e0e0;
-  --fg-secondary-text: #b0b0b0;
-  --fg-tertiary-text: #888888;
-  --fg-divider: #404040;
-  --fg-border: #404040;
-  --primary-color: #6c757d; /* Elegant gray instead of blue */
-  --primary-hover-color: #5a6268; /* Darker gray for hover */
-  --primary-light-color: #868e96; /* Lighter gray */
-  --secondary-color: #495057;
-  --success-color: #90ee90;
-  --warning-color: #ffd700;
-  --error-color: #ff6b6b;
-  --info-color: #87ceeb;
-  --link-color: #6c757d; /* Elegant gray for links */
-  --link-hover-color: #5a6268;
-  --code-bg: #1d1d1d;
+  /* Fluent UI Design Tokens for Dark Mode */
+  --colorNeutralForeground1: #f5f5f5;
+  --colorNeutralForeground2: #e1dfdd;
+  --colorNeutralForeground3: #c8c6c4;
+  --colorNeutralForegroundHint: #a19f9d;
+  --colorNeutralForegroundOnBrand: #ffffff;
+  --colorNeutralForegroundInverted: #11100f;
 
-  /* Dark theme Material components */
-  .mat-toolbar.mat-primary {
-    background-color: var(--bg-elevated, #3d3d3d) !important;
-    color: #e0e0e0 !important;
+  --colorNeutralBackground1: #292827;
+  --colorNeutralBackground1Hover: #323130;
+  --colorNeutralBackground1Pressed: #3b3a39;
+  --colorNeutralBackground2: #201f1e;
+  --colorNeutralBackground3: #323130;
+  --colorNeutralBackground4: #484644;
+  --colorNeutralBackground5: #605e5c;
+  --colorNeutralBackground6: #797775;
+
+  --colorNeutralBackgroundInverted: #f5f5f5;
+  --colorNeutralBackgroundStatic: #323130;
+
+  --colorNeutralStroke1: #605e5c;
+  --colorNeutralStroke1Hover: #797775;
+  --colorNeutralStroke1Pressed: #8a8886;
+  --colorNeutralStroke2: #484644;
+  --colorNeutralStroke3: #3b3a39;
+  --colorNeutralStrokeAccessible: #8a8886;
+  --colorNeutralStrokeOnBrand: #ffffff;
+  --colorNeutralStrokeDisabled: #484644;
+
+  --colorBrandBackground: #0078d4;
+  --colorBrandBackgroundHover: #106ebe;
+  --colorBrandBackgroundPressed: #005a9e;
+  --colorBrandBackgroundSelected: #005a9e;
+  --colorBrandForeground1: #479ef5;
+  --colorBrandForeground2: #0078d4;
+  --colorBrandStroke1: #479ef5;
+  --colorBrandStroke2: #0078d4;
+
+  --colorSubtleBackground: transparent;
+  --colorSubtleBackgroundHover: #323130;
+  --colorSubtleBackgroundPressed: #3b3a39;
+  --colorSubtleBackgroundSelected: #3b3a39;
+
+  --colorTransparentBackground: transparent;
+  --colorTransparentBackgroundHover: #323130;
+  --colorTransparentBackgroundPressed: #3b3a39;
+  --colorTransparentBackgroundSelected: #3b3a39;
+
+  --borderRadiusNone: 0;
+  --borderRadiusSmall: 2px;
+  --borderRadiusMedium: 4px;
+  --borderRadiusLarge: 6px;
+  --borderRadiusXLarge: 8px;
+  --borderRadiusCircular: 10000px;
+
+  /* Update theme colors for dark mode using Fluent UI design tokens */
+  --bg-card: var(--colorNeutralBackground1, #292827);
+  --bg-hover: var(--colorNeutralBackground1Hover, #323130);
+  --bg-app: var(--neutral-layer-1, #11100f);
+  --bg-surface: var(--neutral-layer-floating, #292827);
+  --bg-elevated: var(--colorNeutralBackground4, #484644);
+  --fg-text: var(--colorNeutralForeground1, #f5f5f5);
+  --fg-secondary-text: var(--colorNeutralForeground3, #c8c6c4);
+  --fg-tertiary-text: var(--colorNeutralForegroundHint, #a19f9d);
+  --fg-divider: var(--colorNeutralStroke2, #484644);
+  --fg-border: var(--colorNeutralStroke1, #605e5c);
+  --primary-color: var(--colorBrandBackground, #0078d4);
+  --primary-hover-color: var(--colorBrandBackgroundHover, #106ebe);
+  --primary-light-color: var(--colorNeutralStroke1, #605e5c);
+  --secondary-color: var(--colorNeutralForeground3, #c8c6c4);
+  --success-color: var(--success-foreground-rest, #107c10);
+  --warning-color: var(--warning-foreground-rest, #ffb900);
+  --error-color: var(--error-foreground-rest, #d13438);
+  --info-color: var(--colorBrandBackground, #0078d4);
+  --link-color: var(--colorBrandForeground1, #479ef5);
+  --link-hover-color: var(--colorBrandBackgroundHover, #106ebe);
+  --code-bg: var(--colorNeutralBackground2, #201f1e);
+
+  /* Dark theme Fluent UI components */
+  .header-toolbar {
+    background-color: var(--bg-elevated);
+    color: var(--fg-text);
+    border-bottom: 1px solid var(--fg-divider);
   }
 
-  .mat-mdc-menu-panel {
-    background-color: #2d2d2d !important;
-    color: #e0e0e0 !important;
-  }
-
-  .mat-mdc-menu-item {
-    color: #e0e0e0 !important;
+  /* Fluent UI Button overrides for dark mode */
+  fluent-button::part(control) {
+    color: var(--colorNeutralForeground1);
+    background-color: var(--colorSubtleBackground);
+    border: 1px solid var(--colorNeutralStroke1);
 
     &:hover {
-      background-color: #3d3d3d !important;
+      background-color: var(--colorSubtleBackgroundHover);
+      border-color: var(--colorNeutralStroke1Hover);
+    }
+
+    &:active {
+      background-color: var(--colorSubtleBackgroundPressed);
+    }
+  }
+
+  /* Fluent UI Text Field overrides for dark mode */
+  fluent-text-field::part(control) {
+    background-color: var(--colorNeutralBackground1) !important;
+    color: var(--colorNeutralForeground1) !important;
+    border-color: var(--colorNeutralStroke1) !important;
+
+    &:hover {
+      border-color: var(--colorNeutralStroke1Hover) !important;
+    }
+
+    &:focus {
+      border-color: var(--colorBrandStroke1) !important;
+      box-shadow: 0 0 0 1px var(--colorBrandStroke1) !important;
+    }
+
+    &::placeholder {
+      color: var(--colorNeutralForeground3) !important;
+    }
+  }
+
+  fluent-menu::part(root) {
+    background-color: var(--colorNeutralBackground1);
+    color: var(--colorNeutralForeground1);
+    border: 1px solid var(--colorNeutralStroke1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  fluent-menu-item::part(content) {
+    color: var(--colorNeutralForeground1);
+
+    &:hover {
+      background-color: var(--colorNeutralBackground1Hover);
     }
 
     &.active {
-      background-color: rgba(109, 158, 235, 0.2) !important;
-      color: #6d9eeb !important;
-
-      .mat-icon {
-        color: #6d9eeb !important;
-      }
+      background-color: var(--colorBrandBackground);
+      color: var(--colorNeutralForegroundOnBrand);
     }
   }
 
-  .mat-icon {
-    color: #e0e0e0 !important;
+  fluent-icon {
+    color: var(--colorNeutralForeground1);
   }
 
   /* Button and interactive elements in dark mode */
-  .mat-mdc-button,
-  .mat-mdc-raised-button,
-  .mat-mdc-outlined-button {
-    &.mat-primary {
-      background-color: #6d9eeb !important;
-      color: #1a1a1a !important;
+  fluent-button::part(control) {
+    &.accent {
+      background-color: var(--colorBrandBackground);
+      color: var(--colorNeutralForegroundOnBrand);
+      border-color: var(--colorBrandBackground);
+
+      &:hover {
+        background-color: var(--colorBrandBackgroundHover);
+        border-color: var(--colorBrandBackgroundHover);
+      }
     }
   }
 
   /* Cards and containers */
   .section-container {
-    background-color: #2d2d2d !important;
-    border: 1px solid #404040 !important;
+    background-color: var(--bg-card);
+    border: 1px solid var(--fg-border);
   }
 
   /* Tables and data display */
-  .mat-mdc-table {
-    background-color: #2d2d2d !important;
-    color: #e0e0e0 !important;
-  }
-
-  /* Form elements */
-  .mat-mdc-form-field {
-    .mat-mdc-text-field-wrapper {
-      background-color: #3d3d3d !important;
-    }
-
-    .mat-mdc-input-element {
-      color: #e0e0e0 !important;
-    }
+  table.data-table {
+    background-color: var(--bg-card);
+    color: var(--fg-text);
   }
 
   /* Chips and badges */
-  .mat-mdc-chip {
-    background-color: #3d3d3d !important;
-    color: #e0e0e0 !important;
+  fluent-badge {
+    background-color: var(--bg-hover);
+    color: var(--fg-text);
   }
 
   /* Cards */
-  .mat-mdc-card {
-    background-color: #2d2d2d !important;
-    color: #e0e0e0 !important;
+  fluent-card {
+    background-color: var(--bg-card);
+    color: var(--fg-text);
   }
 
-  /* Override hardcoded colors in components */
+  /* Override hardcoded colors in components with Fluent UI design tokens */
   .grid-item,
   .registry-card,
   .page-container {
-    background-color: var(--bg-card, #2d2d2d) !important;
-    color: var(--fg-text, #e0e0e0) !important;
-    border-color: var(--fg-border, #404040) !important;
+    background-color: var(--bg-card);
+    color: var(--fg-text);
+    border-color: var(--fg-border);
   }
 
   /* Pagination and navigation */
   .pagination button {
-    background-color: #3d3d3d !important;
-    color: #e0e0e0 !important;
-    border-color: #404040 !important;
+    background-color: var(--bg-hover);
+    color: var(--fg-text);
+    border-color: var(--fg-border);
 
     &:hover {
-      background-color: #4d4d4d !important;
+      background-color: var(--bg-elevated);
     }
 
     &.active {
-      background-color: #6d9eeb !important;
-      color: #1a1a1a !important;
+      background-color: var(--primary-color);
+      color: var(--colorNeutralForegroundOnBrand, #ffffff);
     }
   }
 
   /* Links and interactive text */
   a:not(.mat-mdc-button):not(.mat-mdc-tab-link) {
-    color: #6d9eeb !important;
+    color: var(--link-color) !important;
 
     &:hover {
-      color: #8fb4f0 !important;
+      color: var(--link-hover-color) !important;
     }
   }
 
   /* Code blocks and pre elements */
   pre,
   code {
-    background-color: #1d1d1d !important;
-    color: #e0e0e0 !important;
-    border-color: #404040 !important;
+    background-color: var(--code-bg) !important;
+    color: var(--fg-text) !important;
+    border-color: var(--fg-border) !important;
   }
 
   /* Dividers and borders */
   hr,
   .divider {
-    border-color: #404040 !important;
+    border-color: var(--fg-border) !important;
   }
 
   /* Resource and group table overrides */
   .resources-table,
   .group-types-table {
-    background-color: var(--bg-card, #2d2d2d) !important;
-    color: var(--fg-text, #e0e0e0) !important;
+    background-color: var(--bg-card) !important;
+    color: var(--fg-text) !important;
 
     th, td {
-      border-color: var(--fg-divider, #404040) !important;
-      color: var(--fg-text, #e0e0e0) !important;
+      border-color: var(--fg-divider) !important;
+      color: var(--fg-text) !important;
     }
 
     th {
-      background-color: var(--bg-elevated, #3d3d3d) !important;
-      color: var(--fg-secondary-text, #b0b0b0) !important;
+      background-color: var(--bg-elevated) !important;
+      color: var(--fg-secondary-text) !important;
     }
 
     tr:hover td {
-      background-color: var(--bg-hover, #3d3d3d) !important;
+      background-color: var(--bg-hover) !important;
     }
 
     a {
-      color: var(--link-color, #6d9eeb) !important;
+      color: var(--link-color) !important;
     }
   }
 
   /* Attribute and object styling */
   .attribute {
-    color: var(--fg-text, #e0e0e0) !important;
+    color: var(--fg-text) !important;
 
     strong {
-      color: var(--fg-text, #e0e0e0) !important;
+      color: var(--fg-text) !important;
     }
 
     span {
-      color: var(--fg-text, #e0e0e0) !important;
+      color: var(--fg-text) !important;
     }
 
     pre {
-      background-color: var(--code-bg, #1d1d1d) !important;
-      color: var(--fg-text, #e0e0e0) !important;
-      border-color: var(--fg-border, #404040) !important;
+      background-color: var(--code-bg) !important;
+      color: var(--fg-text) !important;
+      border-color: var(--fg-border) !important;
     }
 
     .object-array {
-      background-color: var(--bg-hover, #3d3d3d) !important;
-      border-color: var(--fg-border, #404040) !important;
-      color: var(--fg-text, #e0e0e0) !important;
+      background-color: var(--bg-hover) !important;
+      border-color: var(--fg-border) !important;
+      color: var(--fg-text) !important;
 
       .object-item {
-        border-color: var(--fg-divider, #404040) !important;
+        border-color: var(--fg-divider) !important;
       }
 
       .detail-label {
-        color: var(--fg-secondary-text, #b0b0b0) !important;
+        color: var(--fg-secondary-text) !important;
 
         .detail-value {
-          color: var(--fg-text, #e0e0e0) !important;
+          color: var(--fg-text) !important;
         }
       }
     }
@@ -558,66 +614,66 @@ body.theme-dark {
   /* Document item styling */
   .resource-document-item {
     .unified-item-row {
-      background-color: var(--bg-elevated, #3d3d3d) !important;
-      border-color: var(--fg-border, #404040) !important;
-      color: var(--fg-text, #e0e0e0) !important;
+      background-color: var(--bg-elevated) !important;
+      border-color: var(--fg-border) !important;
+      color: var(--fg-text) !important;
 
       strong {
-        color: var(--fg-text, #e0e0e0) !important;
+        color: var(--fg-text) !important;
       }
 
       .item-count,
       .item-description {
-        color: var(--fg-secondary-text, #b0b0b0) !important;
+        color: var(--fg-secondary-text) !important;
       }
 
       .item-model-type {
-        background-color: var(--bg-hover, #3d3d3d) !important;
-        border-color: var(--fg-border, #404040) !important;
-        color: var(--info-color, #87ceeb) !important;
+        background-color: var(--bg-hover) !important;
+        border-color: var(--fg-border) !important;
+        color: var(--info-color) !important;
       }
     }
 
     .expanded-content {
-      background-color: var(--bg-elevated, #3d3d3d) !important;
-      border-color: var(--fg-border, #404040) !important;
+      background-color: var(--bg-elevated) !important;
+      border-color: var(--fg-border) !important;
 
       .empty-notice {
-        color: var(--fg-secondary-text, #b0b0b0) !important;
+        color: var(--fg-secondary-text) !important;
       }
     }
 
     .simple-attribute-container {
-      background-color: var(--bg-elevated, #3d3d3d) !important;
+      background-color: var(--bg-elevated) !important;
 
       .attribute-header {
         strong {
-          color: var(--fg-secondary-text, #b0b0b0) !important;
+          color: var(--fg-secondary-text) !important;
         }
 
         .attribute-type {
-          background-color: var(--bg-card, #2d2d2d) !important;
-          border-color: var(--fg-border, #404040) !important;
-          color: var(--fg-text, #e0e0e0) !important;
+          background-color: var(--bg-card) !important;
+          border-color: var(--fg-border) !important;
+          color: var(--fg-text) !important;
         }
 
         .attribute-description {
-          color: var(--fg-secondary-text, #b0b0b0) !important;
+          color: var(--fg-secondary-text) !important;
         }
       }
 
       .attribute-value {
         span:not(.copy-btn) {
-          background-color: var(--bg-card, #2d2d2d) !important;
-          border-color: var(--fg-border, #404040) !important;
-          color: var(--fg-text, #e0e0e0) !important;
+          background-color: var(--bg-card) !important;
+          border-color: var(--fg-border) !important;
+          color: var(--fg-text) !important;
 
           &.null-value {
-            color: var(--fg-tertiary-text, #888888) !important;
+            color: var(--fg-tertiary-text) !important;
           }
 
           &.undefined-value {
-            color: var(--primary-color, #6d9eeb) !important;
+            color: var(--primary-color) !important;
           }
         }
       }
@@ -626,56 +682,56 @@ body.theme-dark {
 
   /* Tile styling */
   .tile {
-    background-color: var(--primary-color, #6d9eeb) !important;
+    background-color: var(--primary-color) !important;
     color: #1a1a1a !important;
 
     &:hover {
-      background-color: var(--primary-hover-color, #5a6268) !important;
+      background-color: var(--primary-hover-color) !important;
     }
   }
 
   .tile-footer {
-    border-color: var(--fg-divider, #404040) !important;
-    color: var(--fg-secondary-text, #b0b0b0) !important;
+    border-color: var(--fg-divider) !important;
+    color: var(--fg-secondary-text) !important;
   }
 
   /* Resource type pills */
   .resource-type-pill {
-    background-color: var(--bg-hover, #3d3d3d) !important;
-    color: var(--fg-secondary-text, #b0b0b0) !important;
+    background-color: var(--bg-hover) !important;
+    color: var(--fg-secondary-text) !important;
   }
 
   /* Section styling */
   section {
-    background-color: var(--bg-elevated, #3d3d3d) !important;
-    color: var(--fg-text, #e0e0e0) !important;
+    background-color: var(--bg-elevated) !important;
+    color: var(--fg-text) !important;
 
     h3 {
-      color: var(--fg-text, #e0e0e0) !important;
+      color: var(--fg-text) !important;
     }
 
     pre {
-      background-color: var(--code-bg, #1d1d1d) !important;
-      color: var(--fg-text, #e0e0e0) !important;
-      border-color: var(--fg-border, #404040) !important;
+      background-color: var(--code-bg) !important;
+      color: var(--fg-text) !important;
+      border-color: var(--fg-border) !important;
     }
 
     .loading-document {
-      background-color: var(--bg-hover, #3d3d3d) !important;
-      color: var(--info-color, #87ceeb) !important;
+      background-color: var(--bg-hover) !important;
+      color: var(--info-color) !important;
     }
 
     .document-error {
-      background-color: var(--bg-hover, #3d3d3d) !important;
-      color: var(--error-color, #ff6b6b) !important;
+      background-color: var(--bg-hover) !important;
+      color: var(--error-color) !important;
     }
 
     .download-btn {
-      background-color: var(--primary-color, #6d9eeb) !important;
+      background-color: var(--primary-color) !important;
       color: #1a1a1a !important;
 
       &:hover {
-        background-color: var(--primary-hover-color, #5a6268) !important;
+        background-color: var(--primary-hover-color) !important;
       }
     }
   }
@@ -710,90 +766,6 @@ body.theme-light {
   flex: 1 1 auto;
 }
 
-/* Breadcrumb styles - unified with header */
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 0.5rem 1rem; /* Match header padding */
-  background-color: var(--bg-elevated, #f8f9fa);
-  border-bottom: none;
-  margin-bottom: 0;
-
-  &-item {
-    display: flex;
-    align-items: center;
-
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-
-  &-link {
-    text-decoration: none;
-    color: theme.$primary-color;
-    transition: color 0.2s ease, background-color 0.2s ease; // Smooth transition
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-
-    .mat-icon {
-      font-size: 1rem;
-      height: 1rem;
-      width: 1rem;
-      margin-right: 0.25rem;
-    }
-
-    &:hover {
-      color: color.adjust(theme.$primary-color, $lightness: -10%);
-      background-color: theme.bg('hover');
-    }
-
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px theme.$primary-color;
-    }
-  }
-  &-separator {
-    margin: 0 0.5rem;
-    color: theme.fg('secondary-text');
-    user-select: none; // Prevent selection
-  }
-  &-current {
-    font-weight: 600;
-    color: theme.fg('text');
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    background-color: theme.bg('hover');
-    display: flex;
-    align-items: center;
-
-    .mat-icon {
-      font-size: 1rem;
-      height: 1rem;
-      width: 1rem;
-      margin-right: 0.25rem;
-    }
-  }
-}
-
-// Responsive breadcrumb adjustments
-@media (max-width: 768px) {
-  .breadcrumb {
-    padding: 0.5rem 0.75rem; /* Reduced but still aligned */
-
-    &-separator {
-      margin: 0 0.25rem;
-    }
-
-    &-link, &-current {
-      padding: 0.15rem 0.3rem;
-      font-size: 0.9rem;
-    }
-  }
-}
-
 /* Layout styles - no centering, consistent alignment */
 .app-container {
   display: flex;
@@ -811,48 +783,17 @@ body.theme-light {
   flex: 1;
 }
 
-/* Remove gap between header and breadcrumb */
-app-header + .layout-container {
-  margin-top: 0;
-  padding-top: 0;
-}
-
-/* Remove space between header-outer and breadcrumb */
-.header-outer + .layout-container,
-.layout-container .breadcrumb {
-  margin-top: 0;
-}
-
-/* Header toolbar and breadcrumb integration */
-.mat-toolbar {
-  box-shadow: none !important;
-  border-bottom: none !important;
-  margin-bottom: 0 !important;
-}
-
-/* Unified header background */
-.mat-toolbar.mat-primary,
-.breadcrumb {
-  background-color: var(--bg-elevated, #f8f9fa) !important;
-}
-
-/* Single bottom border for the entire header section */
-.layout-container {
-  border-bottom: 1px solid var(--fg-divider, #e0e0e0);
-  margin-bottom: 0;
-}
-
 /* Global theme-aware element overrides */
 * {
   /* Override any hardcoded colors with theme variables */
-  &:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-button) {
-    border-color: var(--fg-border, #dee2e6) !important;
+  &:not(fluent-button):not(fluent-button[appearance="accent"]):not(fluent-button[appearance="outline"]) {
+    border-color: var(--fg-border, #dee2e6);
   }
 }
 
 /* Theme-aware link styling */
-a:not(.mat-mdc-button):not(.mat-mdc-tab-link) {
-  color: var(--link-color, #6c757d) !important;
+a:not(fluent-anchor) {
+  color: var(--link-color, #6c757d);
 
   &:hover {
     opacity: 0.8;
@@ -917,19 +858,19 @@ code {
   border-color: var(--fg-border, #dee2e6) !important;
 }
 
-/* Override buttons that aren't Material buttons */
-button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-button):not(.mat-mdc-icon-button) {
-  background-color: var(--bg-elevated, #f8f9fa) !important;
-  color: var(--fg-text, #333) !important;
-  border-color: var(--fg-border, #dee2e6) !important;
+/* Basic button styling for non-Fluent buttons */
+button:not(fluent-button) {
+  background-color: var(--bg-elevated, #f8f9fa);
+  color: var(--fg-text, #333);
+  border-color: var(--fg-border, #dee2e6);
 
   &:hover {
-    background-color: var(--bg-hover, #f5f5f5) !important;
+    background-color: var(--bg-hover, #f5f5f5);
   }
 
   &.primary {
-    background-color: var(--primary-color, #6c757d) !important;
-    color: white !important;
+    background-color: var(--primary-color, #0078d4);
+    color: white;
   }
 }
 
@@ -952,19 +893,21 @@ button:not(.mat-mdc-button):not(.mat-mdc-raised-button):not(.mat-mdc-outlined-bu
   overflow: visible; /* Allow popups to overflow */
 }
 
-/* Content area wrapper with aspect ratio enforcement */
+/* Content area wrapper with natural height */
 .main-container > * {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  flex: 1; /* Allow components to fill available height */
+  flex: 0 0 auto; /* Don't allow components to expand to fill height */
 }
 
-/* Router outlet content should fill available height */
+/* Router outlet content should align to top */
 router-outlet + * {
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 /* Consistent inner content width */
@@ -1332,7 +1275,7 @@ h4 {  font-size: 1.02rem;
   padding: 16px;
 }
 
-.mat-mdc-table {
+table.data-table {
   width: 100%;
 }
 
@@ -1343,7 +1286,7 @@ h4 {  font-size: 1.02rem;
   margin-bottom: 16px;
 }
 
-.mat-column-actions {
+.column-actions {
   width: 120px;
   text-align: right;
 }
@@ -1428,7 +1371,7 @@ h4 {  font-size: 1.02rem;
     align-items: flex-start;
   }
 
-  .mat-column-actions {
+  .column-actions {
     width: 80px;
   }
 
@@ -1474,12 +1417,6 @@ h4 {  font-size: 1.02rem;
   align-items: center;
   transition: background 0.15s, color 0.15s;
   float: right; // Float the button to the right of its container
-
-  .material-icons {
-    font-size: 1.1em;
-    line-height: 1;
-    vertical-align: middle;
-  }
 
   &:hover, &:focus {
     background: var(--bg-hover, #f0f0f0);
@@ -1556,66 +1493,111 @@ body.font-size-large {
 
 /* Dialog and modal adjustments */
 body.font-size-small {
-  .mat-mdc-dialog-container {
-    padding: 0.75rem !important;
+  fluent-dialog::part(control) {
+    padding: 0.75rem;
   }
 
-  .mat-mdc-dialog-title {
-    margin: 0 0 0.5rem 0 !important;
+  fluent-dialog::part(heading) {
+    margin: 0 0 0.5rem 0;
   }
 
-  .mat-mdc-dialog-content {
-    padding: 0.5rem !important;
+  fluent-dialog::part(content) {
+    padding: 0.5rem;
   }
 
-  .mat-mdc-dialog-actions {
-    padding: 0.5rem !important;
-    gap: 0.25rem !important;
+  fluent-dialog::part(footer) {
+    padding: 0.5rem;
+    gap: 0.25rem;
   }
 }
 
 body.font-size-large {
-  .mat-mdc-dialog-container {
-    padding: 2rem !important;
+  fluent-dialog::part(control) {
+    padding: 2rem;
   }
 
-  .mat-mdc-dialog-title {
-    margin: 0 0 1.5rem 0 !important;
+  fluent-dialog::part(heading) {
+    margin: 0 0 1.5rem 0;
   }
 
-  .mat-mdc-dialog-content {
-    padding: 1.5rem !important;
+  fluent-dialog::part(content) {
+    padding: 1.5rem;
   }
 
-  .mat-mdc-dialog-actions {
-    padding: 1.5rem !important;
-    gap: 1rem !important;
+  fluent-dialog::part(footer) {
+    padding: 1.5rem;
+    gap: 1rem;
   }
 }
 
 /* Chip and badge density adjustments */
 body.font-size-small {
-  .mat-mdc-chip {
-    height: 24px !important;
-    padding: 0 0.5rem !important;
-    font-size: 0.7rem !important;
+  fluent-badge::part(control) {
+    height: 24px;
+    padding: 0 0.5rem;
+    font-size: 0.7rem;
   }
 
   .badge, .chip, .status-badge {
-    padding: 0.125rem 0.375rem !important;
-    font-size: 0.65rem !important;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.65rem;
   }
 }
 
 body.font-size-large {
-  .mat-mdc-chip {
-    height: 36px !important;
-    padding: 0 1rem !important;
-    font-size: 0.85rem !important;
+  fluent-badge::part(control) {
+    height: 36px;
+    padding: 0 1rem;
+    font-size: 0.85rem;
   }
 
   .badge, .chip, .status-badge {
-    padding: 0.375rem 0.75rem !important;
-    font-size: 0.8rem !important;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
   }
+}
+
+/* Fix for app-groups alignment issue */
+router-outlet + app-groups {
+  height: auto !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+/* Fluent menu button icon alignment */
+fluent-menu-button fluent-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+/* Fluent button icon alignment */
+fluent-button fluent-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+/* Fluent UI menu positioning in header */
+.header-toolbar fluent-menu-button fluent-menu {
+  position: absolute !important;
+  top: 100% !important;
+  left: auto !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  transform: none !important;
+  margin-top: 4px !important;
+}
+
+/* Ensure header menus don't affect layout */
+.header-toolbar fluent-menu-button {
+  position: relative !important;
+}
+
+/* Menu backdrop to prevent layout shifts */
+.header-toolbar fluent-menu::part(root) {
+  position: fixed !important;
+  z-index: 1000 !important;
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation, ElementRef, AfterViewInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subject, interval } from 'rxjs';
@@ -10,13 +10,15 @@ import { RegistryModel, GroupType } from '../../models/registry.model';
 import { GroupTypeModelComponent } from '../group-type-model/group-type-model.component';
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   standalone: true,
   selector: 'app-model',
-  imports: [CommonModule, RouterModule, GroupTypeModelComponent, ResourceDocumentItemComponent],
+  imports: [CommonModule, RouterModule, GroupTypeModelComponent, ResourceDocumentItemComponent, IconComponent],
   templateUrl: './model.component.html',
   styleUrls: ['./model.component.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   encapsulation: ViewEncapsulation.None
 })
 export class ModelComponent implements OnInit, OnDestroy, AfterViewInit {

@@ -13,7 +13,7 @@
 
 @mixin item-border($color) {
   border-left: 3px solid $color;
-  position: relative;  
+  position: relative;
   &::before {
     content: '';
     position: absolute;
@@ -47,14 +47,9 @@
 
   &:hover {
     background: var(--bg-hover, #f8f9fa);
-    border-color: colors.primary();
-    color: colors.primary();
+    border-color: colors.primary();    color: colors.primary();
   }
 
-  i.material-icons {
-    font-size: 14px;
-    line-height: 1;
-  }
 }
 
 @mixin attribute-container($color: #28a745) {
@@ -76,7 +71,7 @@
   &.nested {
     padding-left: s(xs);
     margin-bottom: 0;
-  }  
+  }
 
   // Unified row styling
   .unified-item-row {
@@ -139,7 +134,7 @@
       color: var(--fg-text, #2c3e50);
       margin-right: 0.5rem;
       font-size: vars.$content-size;
-    }    
+    }
 
     .toggle-icon {
       margin-right: s(xs);
@@ -156,24 +151,14 @@
       &:focus-visible {
         outline: 2px solid c(primary);
         outline-offset: 2px;
-      }      
-
-      i.material-icons {
-        font-size: calc($body-size * 1.2);
-        color: inherit;
-        @include tokens.transition('all');
-      }
-
-      .expanded & i.material-icons { color: c(primary); }
-      .collapsed & i.material-icons { color: c(dark); }
-    }
+      }    }
 
     .item-count {
       color: var(--fg-secondary-text, #6c757d);
       font-size: vars.$small-size;
       margin-right: 0.5rem;
       font-weight: normal;
-    }    
+    }
 
     .item-model-type {
       color: var(--info-color, #457B9D);
@@ -199,7 +184,7 @@
       margin-left: auto;
       @include button-style;
     }
-  }  
+  }
 
   // Expanded content styling
   .expanded-content {
@@ -230,7 +215,7 @@
     }
   }
 
-  // Simple attribute display  
+  // Simple attribute display
   .simple-attribute-grid {
     @include attribute-container();
     display: grid;
@@ -259,7 +244,7 @@
       color: var(--info-color, #457B9D);
       justify-self: end;
       align-self: start;
-    }    
+    }
 
     .attribute-description {
       grid-column: 1 / 3;
@@ -270,7 +255,7 @@
       margin-top: 0.5rem; /* Added vertical space above description */
       margin-bottom: 0.5rem; /* Added vertical space below description */
     }
-    
+
     .attribute-value {
       grid-column: 1 / 2;
       grid-row: 2 / 3;
@@ -307,7 +292,7 @@
     .null-value, .undefined-value {
       color: var(--fg-tertiary-text, #999);
       font-style: italic;
-    }      
+    }
 
     /* URL link styling */
     .url-link {
@@ -327,8 +312,8 @@
         font-size: 0.8rem !important;
         opacity: 0.7;
       }
-    }      
-    
+    }
+
     /* XID link styling */
     .xid-link {
       color: var(--secondary-color, #6c757d);
@@ -356,7 +341,7 @@
       justify-self: end;
       align-self: end;
     }
-    
+
     /* When description exists, actions need to be in row 3 */
     .attribute-description ~ .attribute-actions {
       grid-row: 3 / 4;

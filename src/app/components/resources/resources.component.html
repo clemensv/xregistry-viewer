@@ -16,7 +16,7 @@
   <!-- Progressive loading indicator -->
   <div class="loading-progress" *ngIf="loadingProgress && resourcesList.length > 0">
     <div class="loading-indicator">
-      <span class="material-icons loading-spinner">sync</span>
+      <fluent-icon name="arrow_sync_circle" class="loading-spinner"></fluent-icon>
       <span>Loading more resources... ({{ resourcesList.length }} loaded)</span>
     </div>
   </div>
@@ -78,7 +78,7 @@
     <!-- Loading state -->
     <div *ngIf="loading" class="empty-state">
       <div class="empty-state-content">
-        <span class="material-icons empty-state-icon loading-spinner">sync</span>
+        <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
         <h3 class="empty-state-title">Loading Resources</h3>
         <p class="empty-state-message">
           Please wait while we load the available resources from the registry...
@@ -89,7 +89,7 @@
     <!-- Empty search results -->
     <div *ngIf="!loading && currentSearchTerm && filteredResourcesList.length === 0 && resourcesList.length > 0" class="empty-state">
       <div class="empty-state-content">
-        <span class="material-icons empty-state-icon">search_off</span>
+        <fluent-icon name="search" class="empty-state-icon"></fluent-icon>
         <h3 class="empty-state-title">No Matching Resources</h3>
         <p class="empty-state-message">
           No resources match your search criteria "{{ currentSearchTerm }}".
@@ -101,7 +101,7 @@
     <!-- No data state -->
     <div *ngIf="!loading && !currentSearchTerm && resourcesList.length === 0" class="empty-state">
       <div class="empty-state-content">
-        <span class="material-icons empty-state-icon">description</span>
+        <fluent-icon name="document" class="empty-state-icon"></fluent-icon>
         <h3 class="empty-state-title">No Resources Available</h3>
         <p class="empty-state-message">
           There are currently no {{ resourceType }} resources in {{ groupType }}/{{ groupId }}.

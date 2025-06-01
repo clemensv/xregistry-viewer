@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DebugService } from '../../services/debug.service';
+import { IconComponent } from '../icon/icon.component';
 
 export interface LinkSet {
   first?: string;
@@ -12,7 +13,8 @@ export interface LinkSet {
 @Component({
   standalone: true,
   selector: 'app-pagination',
-  imports: [CommonModule], // enable ngIf, ngFor directives
+  imports: [CommonModule, IconComponent], // enable ngIf, ngFor directives
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './pagination.component.html',
   styleUrls: ['./pagination.component.scss']
 })

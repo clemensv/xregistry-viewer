@@ -47,14 +47,9 @@
 
   &:hover {
     background: var(--bg-hover, #f8f9fa);
-    border-color: colors.primary();
-    color: colors.primary();
+    border-color: colors.primary();    color: colors.primary();
   }
 
-  i.material-icons {
-    font-size: 14px;
-    line-height: 1;
-  }
 }
 
 @mixin attribute-container($color: #28a745) {
@@ -156,17 +151,7 @@
       &:focus-visible {
         outline: 2px solid c(primary);
         outline-offset: 2px;
-      }
-
-      i.material-icons {
-        font-size: calc($body-size * 1.2);
-        color: inherit;
-        @include tokens.transition('all');
-      }
-
-      .expanded & i.material-icons { color: c(primary); }
-      .collapsed & i.material-icons { color: c(dark); }
-    }
+      }    }
 
     .item-count {
       color: var(--fg-secondary-text, #6c757d);

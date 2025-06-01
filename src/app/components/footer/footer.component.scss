@@ -1,1 +1,28 @@
-/* Footer styles have been moved to global styles.scss */
+/* Footer styles */
+.footer-toolbar {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 16px;
+  background-color: var(--colorBrandBackground);
+  color: var(--colorNeutralForegroundOnBrand);
+  font-size: 14px;
+
+  a {
+    color: var(--colorNeutralForegroundOnBrand);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      opacity: 0.9;
+    }
+  }
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+fluent-divider {
+  --divider-color: var(--colorNeutralStroke1);
+}

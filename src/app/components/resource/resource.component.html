@@ -13,7 +13,7 @@
   <!-- Progressive loading indicator -->
   <div class="loading-progress" *ngIf="loadingProgress && (versionsList.length > 0 || (defaultVersion$ | async))">
     <div class="loading-indicator">
-      <span class="material-icons loading-spinner">sync</span>
+      <fluent-icon name="arrow_sync_circle" class="loading-spinner"></fluent-icon>
       <span>Loading resource data from additional endpoints...</span>
     </div>
   </div>

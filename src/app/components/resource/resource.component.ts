@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of, switchMap, tap, catchError, map, Subject, takeUntil, interval } from 'rxjs';
 import { RegistryService } from '../../services/registry.service';
@@ -18,6 +18,7 @@ import { ConfigService } from '../../services/config.service';
   imports: [CommonModule, RouterModule, ResourceDocumentComponent, DocumentationViewerComponent, PaginationComponent, PageHeaderComponent],
   templateUrl: './resource.component.html',
   styleUrl: './resource.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ResourceComponent implements OnInit, OnDestroy {
   groupType!: string;

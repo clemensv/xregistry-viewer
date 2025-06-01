@@ -6,6 +6,22 @@ import { BaseUrlService } from './app/services/base-url.service';
 import { APP_INITIALIZER, importProvidersFrom } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import {
+  provideFluentDesignSystem,
+  fluentTextField,
+  fluentButton,
+  fluentMenu,
+  fluentMenuItem
+} from '@fluentui/web-components';
+
+// Register Fluent Design System components
+provideFluentDesignSystem()
+  .register(
+    fluentTextField(),
+    fluentButton(),
+    fluentMenu(), 
+    fluentMenuItem()
+  );
 
 /**
  * Factory function to load configuration before app bootstrap

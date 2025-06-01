@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit, HostListener } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, OnDestroy, ElementRef, AfterViewInit, HostListener, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, interval } from 'rxjs';
@@ -10,11 +10,13 @@ import { RoutePersistenceService } from '../../services/route-persistence.servic
 import { GroupType } from '../../models/registry.model';
 import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   standalone: true,
   selector: 'app-group-types',
-  imports: [CommonModule, RouterModule, PageHeaderComponent, ResourceDocumentItemComponent],
+  imports: [CommonModule, RouterModule, PageHeaderComponent, ResourceDocumentItemComponent, IconComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './group-types.component.html',
   styleUrls: ['./group-types.component.scss'],
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
@@ -294,6 +296,28 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   getOriginsForGroupType(groupType: string): string[] {
     return this.modelService.getApiEndpointsForGroupType(groupType);
+  }
+
+  /**
+   * Get tooltip text for origins column
+   */
+  getOriginsTooltip(groupType: string): string {
+    const origins = this.getOriginsForGroupType(groupType);
+    if (origins.length === 0) {
+      return 'No origins available';
+    }
+    return `Origins (${origins.length}): ${origins.join(', ')}`;
+  }
+
+  /**
+   * Get tooltip text for resource types column
+   */
+  getResourceTypesTooltip(groupType: GroupType): string {
+    const resourceTypes = this.getResourceTypesList(groupType);
+    if (resourceTypes.length === 0) {
+      return 'No resource types available';
+    }
+    return `Resource Types (${resourceTypes.length}): ${resourceTypes.join(', ')}`;
   }
 
   /**

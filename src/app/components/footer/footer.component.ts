@@ -1,7 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatDividerModule } from '@angular/material/divider';
 import { RouterModule } from '@angular/router';
 import { CapabilitiesService } from '../../services/capabilities.service';
 import { ConfigService } from '../../services/config.service';
@@ -11,7 +9,8 @@ import { Capabilities } from '../../models/registry.model';
 @Component({
   standalone: true,
   selector: 'app-footer',
-  imports: [CommonModule, MatToolbarModule, MatDividerModule, RouterModule],
+  imports: [CommonModule, RouterModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.scss']
 })

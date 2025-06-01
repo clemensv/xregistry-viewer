@@ -1,8 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { truncateText, truncateDescription, formatDateShort, getFullText } from '../../utils/text.utils';
 import { DebugService } from '../../services/debug.service';
 
@@ -11,7 +9,8 @@ import { DebugService } from '../../services/debug.service';
   // This allows the component to be used as an attribute on a tr element
   selector: '[app-resource-row]',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, RouterModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './resource-row.component.html',
   styleUrls: ['./resource-row.component.scss']
 })

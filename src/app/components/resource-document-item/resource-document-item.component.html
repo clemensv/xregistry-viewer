@@ -18,8 +18,8 @@
             class="toggle-icon"
             [attr.aria-expanded]="isExpanded()"
             (click)="$event.stopPropagation(); toggleExpansion($event)">
-            <i class="material-icons">{{ isExpanded() ? 'expand_more' : 'chevron_right' }}</i>
-       </button>
+        <fluent-icon [name]="isExpanded() ? 'chevron_down' : 'chevron_right'"></fluent-icon>
+      </button>
 
     <!-- Key name for array/object items -->
     <strong [title]="item.description">{{ item.key }}</strong>
@@ -40,65 +40,65 @@
 
   <!-- Simple attribute display with new field-group layout -->
   <div *ngIf="isSimpleValue(item.value)" class="field-group" [class.full]="shouldUseFullWidth()">
-    <label class="field-title" [for]="getFieldId()">{{ item.key }}</label>
-    
     <div class="input-row">
+      <label class="field-title" [for]="getFieldId()">{{ item.key }}</label>
+
       <div class="input-wrapper">
-        <!-- Numeric input for number types -->
-        <input *ngIf="isNumericType()" 
-               [id]="getFieldId()"
-               type="number" 
-               [value]="item.value"
-               class="numeric-input"
-               readonly />
-        
-        <!-- Text input for other types -->
-        <input *ngIf="!isNumericType()"
-               [id]="getFieldId()"
-               type="text"
-               [value]="getDisplayValue()"
-               class="text-input"
-               readonly />
-        
+        <span class="type-pill">{{ getDisplayType() }}</span>
+
         <!-- URL link display -->
         <a *ngIf="isUrl(item.value)"
            [href]="item.value"
            target="_blank"
            rel="noopener noreferrer"
-           class="url-link text-input"
+           class="url-link"
            title="Open URL in new tab">
           {{ item.value }}
-          <span class="material-icons external-link-icon">open_in_new</span>
+          <fluent-icon name="open" class="external-link-icon"></fluent-icon>
         </a>
-        
+
         <!-- XID link display -->
         <a *ngIf="isXid(item)"
            [routerLink]="getXidRoute(item.value)"
-           class="xid-link text-input"
+           class="xid-link"
            title="Navigate to {{ item.value }} in this registry">
           {{ item.value }}
-          <span class="material-icons internal-link-icon">link</span>
+          <fluent-icon name="arrow_right" class="internal-link-icon"></fluent-icon>
         </a>
-        
+
         <!-- JSON/Any type display -->
-        <div *ngIf="isAnyType() && item.value !== null && item.value !== undefined" class="any-value text-input">
+        <div *ngIf="isAnyType() && item.value !== null && item.value !== undefined && !isUrl(item.value) && !isXid(item)" class="any-value">
           <app-code-highlight
             [code]="getSafeJsonString(item.value)"
             [language]="'json'">
           </app-code-highlight>
         </div>
-        
-        <span class="type-pill">{{ getDisplayType() }}</span>
+
+        <!-- Numeric input for number types (not URL/XID/Any) -->
+        <input *ngIf="isNumericType() && !isUrl(item.value) && !isXid(item) && !isAnyType()"
+               [id]="getFieldId()"
+               type="number"
+               [value]="item.value"
+               class="numeric-input"
+               readonly>
+
+        <!-- Text input for other types (not URL/XID/Any/Numeric) -->
+        <input *ngIf="!isNumericType() && !isUrl(item.value) && !isXid(item) && !isAnyType()"
+               [id]="getFieldId()"
+               type="text"
+               [value]="getDisplayValue()"
+               class="text-input"
+               readonly>
       </div>
-      
-      <button class="copy-btn" 
+
+      <button class="copy-btn"
               [attr.aria-label]="'Copy ' + item.key + ' value'"
-              title="Copy value" 
+              title="Copy value"
               (click)="copyToClipboard(item.value); $event.stopPropagation();">
-        <i class="material-icons">content_copy</i>
+        <fluent-icon name="copy"></fluent-icon>
       </button>
     </div>
-    
+
     <p *ngIf="item.description" class="field-desc">{{ item.description }}</p>
   </div>  <!-- Expanded content for arrays and objects -->
   <div *ngIf="isExpandable() && isExpanded()"

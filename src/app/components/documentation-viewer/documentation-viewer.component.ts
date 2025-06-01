@@ -1,21 +1,21 @@
 import { Component, Input, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-documentation-viewer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <div class="documentation-viewer" *ngIf="documentationUrl">
       <div class="documentation-header">
-        <h3>Documentation</h3>
-        <button
+        <h3>Documentation</h3>        <button
           class="pop-out-btn"
           (click)="openInNewWindow()"
           title="Open documentation in new window"
           [attr.aria-label]="'Open documentation in new window'">
-          <span class="material-icons">open_in_new</span>
+          <fluent-icon name="open_in_new"></fluent-icon>
         </button>
       </div>
       <div class="documentation-content">

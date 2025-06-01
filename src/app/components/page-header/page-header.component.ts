@@ -1,13 +1,15 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaginationComponent, LinkSet } from '../pagination/pagination.component';
+import { IconComponent } from '../icon/icon.component';
 
 export type ViewMode = 'cards' | 'list';
 
 @Component({
   selector: 'app-page-header',
   standalone: true,
-  imports: [CommonModule, PaginationComponent],
+  imports: [CommonModule, PaginationComponent, IconComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './page-header.component.html',
   styleUrl: './page-header.component.scss'
 })

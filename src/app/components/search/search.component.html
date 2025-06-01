@@ -1,29 +1,32 @@
 <div class="search-container">
-  <mat-form-field appearance="outline" class="search-field">
-    <input
-      matInput
+  <div class="search-field">
+    <fluent-text-field
       type="text"
       placeholder="Search..."
-      [(ngModel)]="searchTerm"
-      (input)="onSearchInput()"
+      [value]="searchTerm"
+      (input)="onSearchInput($event)"
       (keyup.enter)="onSearchSubmit()"
-      aria-label="Search resources">
-    <button
+      aria-label="Search resources"
+      class="search-input">
+    </fluent-text-field>
+    <fluent-button
       *ngIf="searchTerm"
-      matSuffix
-      mat-icon-button
+      appearance="subtle"
+      size="small"
       aria-label="Clear"
-      (click)="clearSearch()">
-      <mat-icon>close</mat-icon>
-    </button>
-    <button
-      matSuffix
-      mat-icon-button
+      (click)="clearSearch()"
+      class="search-clear-button">
+      <fluent-icon name="dismiss"></fluent-icon>
+    </fluent-button>
+    <fluent-button
+      appearance="subtle"
+      size="small"
       aria-label="Search"
-      (click)="onSearchSubmit()">
-      <mat-icon>search</mat-icon>
-    </button>
-  </mat-form-field>
+      (click)="onSearchSubmit()"
+      class="search-submit-button">
+      <fluent-icon name="search"></fluent-icon>
+    </fluent-button>
+  </div>
 </div>
 
 <!-- Debug element - remove this after testing -->

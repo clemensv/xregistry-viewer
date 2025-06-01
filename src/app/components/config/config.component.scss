@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #fafbfc;
+  background: var(--colorNeutralBackground2);
   padding-top: 2rem;
   box-sizing: border-box;
 }
@@ -21,86 +21,198 @@
   max-width: 900px;
   min-width: 340px;
   margin: 0 auto;
-  @include tokens.shadow('xl');
-  @include tokens.radius('2xl');
-  background: var(--bg-card, #fafbfc);
-  padding: 1.2rem 1.5rem 1rem 1.5rem;
+
+  fluent-card {
+    display: block;
+    padding: 24px;
+    background: var(--colorNeutralBackground1);
+    border-radius: 8px;
+    box-shadow: var(--shadow16);
+  }
+}
+
+.card-header {
+  border-bottom: 1px solid var(--colorNeutralStroke1);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--colorNeutralForeground1);
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    color: var(--colorNeutralForeground2);
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.card-content {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
-}
-
-mat-card-header {
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 0.7rem;
-}
-
-mat-card-title {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #2a3a4a;
-}
-
-mat-card-subtitle {
-  color: #6c7a89;
-  font-size: 1rem;
+  gap: 24px;
 }
 
 .endpoint-section {
-  background: var(--bg-card, #fff);
-  @include tokens.radius('lg');
-  @include tokens.shadow('xs');
-  padding: 0.7rem 1rem 0.7rem 1rem;
-  margin-bottom: 0.7rem;
-  border: 1px solid var(--fg-divider, #e5e8ec);
+  background: var(--colorNeutralBackground1);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--colorNeutralStroke1);
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
-}
+  gap: 16px;
 
-.endpoint-section h3 {
-  margin-top: 0;
-  margin-bottom: 0.3rem;
-  font-size: 1.08rem;
-  color: #3a4a5a;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.08rem;
+    color: var(--colorNeutralForeground1);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 }
 
 .endpoint-row {
   display: flex;
   align-items: flex-end;
-  gap: 0.5rem;
-  margin-bottom: 0.1rem;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .endpoint-field {
   flex: 1 1 0%;
   min-width: 0;
   max-width: 100%;
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--colorNeutralForeground1);
+  }
+
+  fluent-text-field {
+    width: 100%;
+
+    &::part(control) {
+      background: var(--colorNeutralBackground1);
+      border: 1px solid var(--colorNeutralStroke1);
+      border-radius: 4px;
+      padding: 8px 12px;
+      color: var(--colorNeutralForeground1);
+
+      &:focus {
+        border-color: var(--colorBrandBackground);
+        outline: 1px solid var(--colorBrandBackground);
+      }
+
+      &::placeholder {
+        color: var(--colorNeutralForeground3);
+      }
+    }
+  }
 }
 
-mat-form-field.endpoint-field {
-  width: 100%;
+.error-message {
+  color: var(--colorPaletteRedForeground1);
+  font-size: 12px;
+  margin-top: 4px;
 }
 
-mat-form-field .mat-mdc-text-field-wrapper {
-  padding-left: 0.3rem;
-  padding-right: 0.3rem;
-  padding-top: 0.1rem;
-  padding-bottom: 0.1rem;
+.icon-span {
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
 }
 
-mat-form-field input {
+.button-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+
+  fluent-button {
+    &::part(control) {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+  }
+}
+
+.danger-button {
+  &::part(control) {
+    color: var(--colorPaletteRedForeground1);
+
+    &:hover {
+      background-color: var(--colorPaletteRedBackground1);
+    }
+  }
+}
+
+/* Fluent UI component styling */
+fluent-button {
+  margin: 0 4px;
+
+  &[appearance="accent"]::part(control) {
+    background-color: var(--colorBrandBackground);
+    color: var(--colorNeutralForegroundOnBrand);
+    border: 1px solid var(--colorBrandBackground);
+
+    &:hover {
+      background-color: var(--colorBrandBackgroundHover);
+    }
+  }
+
+  &[appearance="outline"]::part(control) {
+    background-color: transparent;
+    color: var(--colorBrandBackground);
+    border: 1px solid var(--colorBrandBackground);
+
+    &:hover {
+      background-color: var(--colorBrandBackground);
+      color: var(--colorNeutralForegroundOnBrand);
+    }
+  }
+
+  &[appearance="subtle"]::part(control) {
+    background-color: transparent;
+    color: var(--colorNeutralForeground1);
+    border: none;
+    padding: 6px 8px;
+
+    &:hover {
+      background-color: var(--colorNeutralBackground1Hover);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Fluent UI text field styling
+fluent-text-field::part(root) {
+  margin: 0.5rem 0;
+}
+
+fluent-text-field::part(control) {
   font-size: 1.02rem;
   padding: 0.3rem 0.2rem;
 }
 
-::ng-deep input::placeholder {
-  color: #bfc5cc !important;
-  opacity: 1 !important;
+fluent-text-field::part(control)::placeholder {
+  color: var(--colorNeutralForeground3);
+  opacity: 1;
 }
 
 .button-row {
