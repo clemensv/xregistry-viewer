@@ -94,23 +94,120 @@ export class BootstrapComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Load configuration
-    this.configService.loadConfigFromJson('/config.json')
+    // Setup effect to monitor loading state from signal
+    this.setupLoadingEffect();
+    
+    // Setup effect to monitor error state from signal
+    this.setupErrorEffect();
+    
+    // Try multiple config locations in sequence
+    this.tryLoadConfiguration(['/config.json', './config.json', '/assets/config.json']);
+  }
+  
+  /**
+   * Sets up effect to monitor loading state changes
+   */
+  private setupLoadingEffect(): void {
+    // We'll use a simple polling approach since signals don't have subscribe
+    const checkLoadingState = () => {
+      const isLoading = this.configService.loading();
+      
+      // If not loading and config not yet marked as loaded, check if we have config
+      if (!isLoading && !this.configLoaded) {
+        const config = this.configService.getConfig();
+        if (config) {
+          this.handleSuccessfulConfigLoad(config);
+        }
+      }
+      
+      // Continue polling while not loaded
+      if (!this.configLoaded) {
+        setTimeout(checkLoadingState, 300);
+      }
+    };
+    
+    // Start the polling
+    setTimeout(checkLoadingState, 300);
+  }
+  
+  /**
+   * Sets up effect to monitor error state changes
+   */
+  private setupErrorEffect(): void {
+    // We'll use a simple polling approach for error state too
+    const checkErrorState = () => {
+      const currentError = this.configService.error();
+      
+      if (currentError && !this.error) {
+        this.error = `Failed to load configuration: ${currentError.message}`;
+        this.debug.error('Bootstrap: Configuration loading error:', currentError);
+      }
+      
+      // Continue polling while not loaded
+      if (!this.configLoaded) {
+        setTimeout(checkErrorState, 500);
+      }
+    };
+    
+    // Start the polling
+    setTimeout(checkErrorState, 500);
+  }
+  
+  /**
+   * Tries to load configuration from multiple locations
+   * @param configPaths Array of paths to try loading config from
+   * @param index Current index in the array
+   */
+  private tryLoadConfiguration(configPaths: string[], index: number = 0): void {
+    if (index >= configPaths.length) {
+      this.error = 'Failed to load application configuration from all possible locations.';
+      this.debug.error('Bootstrap: All config locations failed');
+      
+      // Check if we have a fallback config
+      const config = this.configService.getConfig();
+      if (config) {
+        this.debug.log('Bootstrap: Using fallback configuration');
+        this.handleSuccessfulConfigLoad(config);
+      }
+      return;
+    }
+    
+    const configPath = configPaths[index];
+    this.debug.log(`Bootstrap: Attempting to load configuration from ${configPath}`);
+    
+    this.configService.loadConfigFromJson(configPath)
       .then(config => {
-        this.configLoaded = true;
-        this.debug.log('Configuration loaded successfully:', config);
-
-        // Update base URL
-        this.baseUrlService.updateBaseHref();
-
-        // Navigate to home page after a brief delay
-        setTimeout(() => {
-          this.router.navigate(['/']);
-        }, 1000);
+        if (config) {
+          this.debug.log(`Bootstrap: Successfully loaded config from ${configPath}`, config);
+          this.handleSuccessfulConfigLoad(config);
+        } else {
+          throw new Error('Config loaded but returned null');
+        }
       })
       .catch(err => {
-        this.error = 'Failed to load application configuration. Please try again.';
-        this.debug.error('Error loading configuration:', err);
+        this.debug.warn(`Bootstrap: Failed to load config from ${configPath}:`, err);
+        // Try next location
+        this.tryLoadConfiguration(configPaths, index + 1);
       });
+  }
+  
+  /**
+   * Handles successful configuration loading
+   * @param config The loaded configuration
+   */
+  private handleSuccessfulConfigLoad(config: any): void {
+    this.configLoaded = true;
+    this.debug.log('Bootstrap: Configuration loaded successfully');
+
+    // Update base URL
+    const baseUrlUpdateSuccess = this.baseUrlService.updateBaseHref();
+    if (!baseUrlUpdateSuccess) {
+      this.debug.warn('Bootstrap: Failed to update base URL, but continuing');
+    }
+
+    // Navigate to home page after a brief delay
+    setTimeout(() => {
+      this.router.navigate(['/']);
+    }, 1000);
   }
 }

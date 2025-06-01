@@ -459,8 +459,43 @@ body.theme-dark {
     }
   }
 
+  /* Enhanced fluent-icon styling for dark mode */
   fluent-icon {
     color: var(--colorNeutralForeground1);
+    
+    /* Ensure proper color inheritance in different contexts */
+    &.warning-icon {
+      color: var(--warning-foreground-rest, #ffb900);
+    }
+    
+    &.loading-spinner {
+      color: var(--colorBrandBackground, #0078d4);
+    }
+  }
+  
+  /* Button context icons */
+  fluent-button fluent-icon,
+  button fluent-icon {
+    color: inherit; /* Inherit from button color */
+  }
+  
+  /* Accent button icons should be white */
+  fluent-button[appearance="accent"] fluent-icon,
+  button.accent fluent-icon {
+    color: var(--colorNeutralForegroundOnBrand, #ffffff);
+  }
+  
+  /* Navigation and interactive element icons */
+  .header-toolbar fluent-icon,
+  .nav-item fluent-icon,
+  .menu-item fluent-icon {
+    color: var(--colorNeutralForeground2, #e1dfdd);
+  }
+  
+  /* Form and input related icons */
+  .search-container fluent-icon,
+  .input-group fluent-icon {
+    color: var(--colorNeutralForeground3, #c8c6c4);
   }
 
   /* Button and interactive elements in dark mode */

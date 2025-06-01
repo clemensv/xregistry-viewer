@@ -1,44 +1,186 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, HostListener, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal, computed, effect, inject, Injector } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ConfigService, AppConfig } from '../../services/config.service';
 import { BaseUrlService } from '../../services/base-url.service';
 import { Router } from '@angular/router';
-import { IconComponent } from '../icon/icon.component';
+import { takeUntilDestroyed, toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { Observable, BehaviorSubject, firstValueFrom, filter } from 'rxjs';
 
 @Component({
   selector: 'app-config',
-  standalone: true,  imports: [
+  standalone: true,
+  imports: [
     CommonModule,
-    ReactiveFormsModule,
-    IconComponent
+    ReactiveFormsModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './config.component.html',
-  styleUrl: './config.component.scss'
+  styleUrl: './config.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ConfigComponent implements OnInit {
+export class ConfigComponent implements OnInit, OnDestroy {
+  /** Form for configuration settings */
   configForm!: FormGroup;
-  restartRequired = false;
+  /** Flag indicating if restart is required */
+  restartRequired = signal(false);
+  
+  /** Flag indicating if config is loading */
+  loading = signal(true);
+  
+  /** Error message if config load failed */
+  error = signal<string | null>(null);
+  
+  /** Original configuration for comparison */
+  private originalConfig = signal<AppConfig | null>(null);
+  
   constructor(
     private fb: FormBuilder,
     private configService: ConfigService,
     private baseUrlService: BaseUrlService,
-    private router: Router
+    private router: Router,
+    private location: Location,
+    private cdr: ChangeDetectorRef
   ) {}
-  async ngOnInit(): Promise<void> {
-    // Load configuration asynchronously first
-    let config = this.configService.getConfig();
-    if (!config) {
-      // Try to load from default config.json if not already loaded
-      config = await this.configService.loadConfigFromJson('/config.json');
-    }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapeKey(event: KeyboardEvent): void {
+    event.preventDefault();
+    this.onCancel();
+  }  /**
+   * Computed property for form validity
+   */  formValid = computed(() => this.configForm?.valid ?? false);
+
+  // Injector for use with runInInjectionContext
+  private injector = inject(Injector);
+  
+  ngOnInit(): void {
+    this.loading.set(true);
+    this.error.set(null);
     
+    // Set up subscription to loading state using toSignal
+    const loadingSignal = toSignal(
+      toObservable(this.configService.loading).pipe(
+        takeUntilDestroyed()
+      ),
+      { initialValue: true }
+    );
+    
+    // Set up subscription to error state using toSignal
+    const errorSignal = toSignal(
+      toObservable(this.configService.error).pipe(
+        takeUntilDestroyed()
+      ),
+      { initialValue: null }
+    );
+    
+    // Create an effect to handle loading state updates
+    effect(() => {
+      const isLoading = loadingSignal();
+      this.loading.set(isLoading);
+      this.cdr.markForCheck();
+    }, { injector: this.injector });
+    
+    // Create an effect to handle error state updates
+    effect(() => {
+      const err = errorSignal();
+      if (err) {
+        this.error.set(err.message);
+      } else {
+        this.error.set(null);
+      }
+      this.cdr.markForCheck();
+    }, { injector: this.injector });
+    
+    // Initialize configuration - must be after effects are set up
+    setTimeout(() => this.initializeConfig(), 0);
+  }
+    /**
+   * Initializes configuration and form
+   * Implements enhanced error handling and diagnostics
+   */
+  private async initializeConfig(): Promise<void> {
+    console.log('ConfigComponent: Starting configuration initialization');
+    try {
+      // First check if we already have a loaded configuration
+      let config = this.configService.getConfig();
+      console.log('ConfigComponent: Initial config state:', config ? 'Available' : 'Not available');
+      
+      if (!config) {
+        console.log('ConfigComponent: Loading config from /config.json');
+        try {
+          // Try to load from default config.json if not already loaded
+          // Set explicit timeout to ensure we don't hang indefinitely
+          const configPromise = this.configService.loadConfigFromJson('/config.json');
+          config = await Promise.race([
+            configPromise,
+            new Promise<AppConfig | null>((_, reject) => 
+              setTimeout(() => reject(new Error('Configuration loading timed out after 15 seconds')), 15000)
+            )
+          ]);
+          console.log('ConfigComponent: Config loaded successfully:', config);
+        } catch (loadError) {
+          console.error('ConfigComponent: Error loading from /config.json:', loadError);
+          
+          // Try loading from assets folder as fallback
+          console.log('ConfigComponent: Attempting to load from /assets/config.json as fallback');
+          try {
+            config = await this.configService.loadConfigFromJson('/assets/config.json');
+            console.log('ConfigComponent: Fallback config loaded successfully');
+          } catch (fallbackError) {
+            console.error('ConfigComponent: Fallback loading failed:', fallbackError);
+            throw new Error('Could not load configuration from primary or fallback location');
+          }
+        }
+      }
+      
+      if (!config) {
+        throw new Error('Failed to load configuration - config object is null');
+      }
+      
+      // Validate required configuration fields
+      this.validateConfig(config);
+      
+      // Store the original configuration for comparison later
+      this.originalConfig.set(structuredClone(config));
+      console.log('ConfigComponent: Original config stored for comparison');
+      
+      // Initialize form with loaded configuration
+      this.initializeForm(config);
+    } catch (error) {
+      console.error('ConfigComponent: Failed to load configuration:', error);
+      this.error.set(`Failed to load configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Create form with default values
+      this.initializeForm(null);
+    } finally {
+      this.loading.set(false);
+      this.cdr.markForCheck();
+    }
+  }
+  
+  /**
+   * Initializes the form with configuration values
+   * @param config The configuration to use for initialization
+   */
+  private initializeForm(config: AppConfig | null): void {
     this.configForm = this.fb.group({
-      apiEndpoints: this.fb.array((config?.apiEndpoints || []).map(url => this.fb.control(url, [Validators.required, Validators.pattern('https?://.*')])), Validators.required),
-      modelUris: this.fb.array((config?.modelUris || []).map(url => this.fb.control(url, [Validators.required])), Validators.required),
+      apiEndpoints: this.fb.array(
+        (config?.apiEndpoints || []).map(url => 
+          this.fb.control(url, [Validators.required, Validators.pattern('https?://.*')])
+        ) || [this.fb.control('', [Validators.required, Validators.pattern('https?://.*')])], 
+        Validators.required
+      ),
+      modelUris: this.fb.array(
+        (config?.modelUris || []).map(url => 
+          this.fb.control(url, [Validators.required])
+        ) || [this.fb.control('', [Validators.required])], 
+        Validators.required
+      ),
       baseUrl: [config?.baseUrl || '/', [Validators.required]]
     });
+    
+    this.cdr.markForCheck();
   }
 
   get apiEndpoints() {
@@ -116,12 +258,11 @@ export class ConfigComponent implements OnInit {
           baseUrl,
           defaultDocumentView: prevConfig.defaultDocumentView ?? true,
           features: prevConfig.features ?? { enableFilters: true, enableSearch: true, enableDocDownload: true }
-        };
-        this.configService.saveConfig(config);
+        };        this.configService.saveConfig(config);
         if (oldBaseUrl !== baseUrl) {
           this.baseUrlService.updateBaseHref();
-          this.restartRequired = true;
-        }        this.showNotification(
+          this.restartRequired.set(true);
+        }this.showNotification(
           'Configuration updated. Changes will apply to new requests, but you may need to refresh the page for all changes to take effect.'
         );
         setTimeout(() => this.router.navigate(['/']), 300); // Navigate to root after short delay
@@ -148,6 +289,14 @@ export class ConfigComponent implements OnInit {
     this.baseUrlService.updateBaseHref();
     this.showNotification('Configuration reset to server defaults');
   }
+  onCancel(): void {
+    // Navigate back to the previous location
+    this.location.back();
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup if needed - currently no subscriptions to clean up
+  }
 
   private showNotification(message: string): void {
     // Simple notification using browser API or console
@@ -164,6 +313,39 @@ export class ConfigComponent implements OnInit {
           }
         });
       }
+    }
+  }
+
+  /**
+   * Validates that the configuration has all required fields
+   * @param config The configuration to validate
+   * @throws Error if validation fails
+   */
+  private validateConfig(config: AppConfig): void {
+    const requiredFields: Array<keyof AppConfig> = ['baseUrl', 'features'];
+    const missingFields = requiredFields.filter(field => !config[field]);
+    
+    if (missingFields.length > 0) {
+      throw new Error(`Configuration is missing required fields: ${missingFields.join(', ')}`);
+    }
+    
+    if (!config.apiEndpoints || !Array.isArray(config.apiEndpoints)) {
+      console.warn('ConfigComponent: apiEndpoints is missing or not an array, initializing as empty array');
+      config.apiEndpoints = [];
+    }
+    
+    if (!config.modelUris || !Array.isArray(config.modelUris)) {
+      console.warn('ConfigComponent: modelUris is missing or not an array, initializing as empty array');
+      config.modelUris = [];
+    }
+    
+    if (!config.features) {
+      console.warn('ConfigComponent: features object is missing, initializing with defaults');
+      config.features = {
+        enableFilters: true,
+        enableSearch: true,
+        enableDocDownload: true
+      };
     }
   }
 }

@@ -382,3 +382,42 @@ button[mat-icon-button]:hover:not([disabled]) {
     height: 44px;
   }
 }
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+
+  fluent-progress-ring {
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--colorNeutralForeground2);
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.error-container {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: var(--colorStatusDangerBackground1);
+  border: 1px solid var(--colorStatusDangerBorder1);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+
+  fluent-icon {
+    color: var(--colorStatusDangerForeground1);
+    margin-right: 0.5rem;
+  }
+
+  p {
+    color: var(--colorStatusDangerForeground1);
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}

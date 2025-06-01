@@ -6,11 +6,12 @@ import { Subject, takeUntil } from 'rxjs';
 import { ThemeService, FontSize, Theme } from '../../services/theme.service';
 import { SearchComponent } from '../search/search.component';
 import { IconComponent } from '../icon/icon.component';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 @Component({
   standalone: true,
   selector: 'app-header',
-  imports: [RouterModule, CommonModule, SearchComponent, IconComponent],
+  imports: [RouterModule, CommonModule, SearchComponent, IconComponent, BreadcrumbComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
