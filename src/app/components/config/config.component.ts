@@ -4,13 +4,14 @@ import { CommonModule } from '@angular/common';
 import { ConfigService, AppConfig } from '../../services/config.service';
 import { BaseUrlService } from '../../services/base-url.service';
 import { Router } from '@angular/router';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-config',
-  standalone: true,
-  imports: [
+  standalone: true,  imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    IconComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './config.component.html',
@@ -25,9 +26,14 @@ export class ConfigComponent implements OnInit {
     private baseUrlService: BaseUrlService,
     private router: Router
   ) {}
-
-  ngOnInit(): void {
-    const config = this.configService.getConfig();
+  async ngOnInit(): Promise<void> {
+    // Load configuration asynchronously first
+    let config = this.configService.getConfig();
+    if (!config) {
+      // Try to load from default config.json if not already loaded
+      config = await this.configService.loadConfigFromJson('/config.json');
+    }
+    
     this.configForm = this.fb.group({
       apiEndpoints: this.fb.array((config?.apiEndpoints || []).map(url => this.fb.control(url, [Validators.required, Validators.pattern('https?://.*')])), Validators.required),
       modelUris: this.fb.array((config?.modelUris || []).map(url => this.fb.control(url, [Validators.required])), Validators.required),

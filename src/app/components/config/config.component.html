@@ -5,9 +5,8 @@
     <p>Manage multiple API and model endpoints</p>
   </div>
   <div class="card-content">
-    <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
-      <div class="endpoint-section">
-        <h3><fluent-icon name="cloud"></fluent-icon> API Endpoints</h3>
+    <form [formGroup]="configForm" (ngSubmit)="onSubmit()">      <div class="endpoint-section">
+        <h3><app-icon name="cloud"></app-icon> API Endpoints</h3>
         <div *ngFor="let ctrl of apiEndpointControls; let i = index" class="endpoint-row">
           <div class="endpoint-field">
             <label>API Endpoint {{i + 1}}</label>
@@ -18,34 +17,42 @@
             </fluent-text-field>
             <div *ngIf="ctrl.hasError('required')" class="error-message">API endpoint is required</div>
             <div *ngIf="ctrl.hasError('pattern')" class="error-message">Must start with http:// or https://</div>
-          </div>          <fluent-button
+          </div>
+
+          <fluent-button
             appearance="subtle"
             type="button"
             (click)="moveApiEndpointUp(i)"
             [disabled]="i === 0"
             title="Move up">
-            <fluent-icon name="arrow_up"></fluent-icon>
-          </fluent-button>          <fluent-button
+            <app-icon name="arrow_up"></app-icon>
+          </fluent-button>
+
+          <fluent-button
             appearance="subtle"
             type="button"
             (click)="moveApiEndpointDown(i)"
             [disabled]="i === apiEndpointControls.length - 1"
             title="Move down">
-            <fluent-icon name="arrow_down"></fluent-icon>
-          </fluent-button>          <fluent-button
+            <app-icon name="arrow_down"></app-icon>
+          </fluent-button>
+
+          <fluent-button
             appearance="subtle"
             type="button"
             (click)="removeApiEndpoint(i)"
             title="Remove"
             class="danger-button">
-            <fluent-icon name="delete"></fluent-icon>
+            <app-icon name="delete"></app-icon>
           </fluent-button>
-        </div>        <fluent-button appearance="outline" type="button" (click)="addApiEndpoint()">
-          <fluent-icon name="add"></fluent-icon> Add API Endpoint
+        </div>
+
+        <fluent-button appearance="outline" type="button" (click)="addApiEndpoint()">
+          <app-icon name="add"></app-icon> Add API Endpoint
         </fluent-button>
       </div>
       <div class="endpoint-section">
-        <h3><fluent-icon name="document"></fluent-icon> Model Document URIs</h3>
+        <h3><app-icon name="document"></app-icon> Model Document URIs</h3>
         <div *ngFor="let ctrl of modelUriControls; let i = index" class="endpoint-row">
           <div class="endpoint-field">
             <label>Model URI {{i + 1}}</label>
@@ -60,32 +67,46 @@
             (click)="moveModelUriUp(i)"
             [disabled]="i === 0"
             title="Move up">
-            <fluent-icon name="arrow_up"></fluent-icon>
+            <app-icon name="arrow_up"></app-icon>
           </fluent-button>          <fluent-button
             appearance="subtle"
             type="button"
             (click)="moveModelUriDown(i)"
             [disabled]="i === modelUriControls.length - 1"
             title="Move down">
-            <fluent-icon name="arrow_down"></fluent-icon>
+            <app-icon name="arrow_down"></app-icon>
           </fluent-button>          <fluent-button
             appearance="subtle"
             type="button"
             (click)="removeModelUri(i)"
             title="Remove"
             class="danger-button">
-            <fluent-icon name="delete"></fluent-icon>
+            <app-icon name="delete"></app-icon>
           </fluent-button>
         </div>        <fluent-button appearance="outline" type="button" (click)="addModelUri()">
-          <fluent-icon name="add"></fluent-icon> Add Model URI
-        </fluent-button>
+          <app-icon name="add"></app-icon> Add Model URI        </fluent-button>
       </div>
+
+      <div class="endpoint-section">
+        <h3><app-icon name="globe"></app-icon> Base URL</h3>
+        <div class="endpoint-field">
+          <label>Application Base URL</label>
+          <fluent-text-field
+            formControlName="baseUrl"
+            placeholder="/"
+            type="text">
+          </fluent-text-field>
+          <div *ngIf="configForm.get('baseUrl')?.hasError('required')" class="error-message">Base URL is required</div>
+          <div class="help-text">The base path where this application is served (e.g., "/" for root, "/registry/" for subdirectory)</div>
+        </div>
+      </div>
+
       <div class="button-row">
         <fluent-button appearance="accent" type="submit" [disabled]="configForm.invalid">
-          <fluent-icon name="save"></fluent-icon> Save Changes
+          <app-icon name="save"></app-icon> Save Changes
         </fluent-button>
         <fluent-button appearance="neutral" type="button" (click)="resetToDefault()">
-          <fluent-icon name="arrow_sync"></fluent-icon> Reset to Default
+          <app-icon name="arrow_sync"></app-icon> Reset to Default
         </fluent-button>
       </div>
     </form>
