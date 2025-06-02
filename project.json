@@ -11,8 +11,11 @@
   "prefix": "app",
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:browser",
+      "executor": "@angular-builders/custom-webpack:browser",
       "options": {
+        "customWebpackConfig": {
+          "path": "./webpack.config.js"
+        },
         "outputPath": "dist/xregistry-viewer",
         "index": "src/index.html",
         "main": "src/main.ts",
@@ -84,7 +87,7 @@
       ]
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular-builders/custom-webpack:dev-server",
       "options": {
         "buildTarget": "xregistry-viewer:build:development",
         "proxyConfig": "proxy.conf.json"

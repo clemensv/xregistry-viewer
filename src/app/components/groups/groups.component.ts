@@ -118,6 +118,14 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }
       });
+
+    // Listen for configuration changes and reload data
+    this.configService.configChanges$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(newConfig => {
+        console.log('GroupsComponent: Configuration changed, reloading data...', newConfig);
+        this.reloadData();
+      });
   }
 
   private waitForConfigAndLoadData(): void {
@@ -652,5 +660,30 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Fallback to generic message
     return `Unable to load groups - registry endpoints are currently unavailable (${errorMessage}).`;
+  }
+
+  /**
+   * Reloads the data by clearing cache and reinitializing
+   */
+  private reloadData(): void {
+    // Reset loading states
+    this.loading = true;
+    this.loadingProgress = true;
+    this.groupsList = [];
+    this.filteredGroupsList = [];
+    this.allGroupsCache = [];
+    this.hasApiError = false;
+    this.apiErrorMessage = '';
+    this.apiErrorDetails = null;
+    this.partialFailure = false;
+    this.totalFailure = false;
+    this.cdr.markForCheck();
+
+    // Clear all caches to force reload from new endpoints
+    this.modelService.clearAllCaches();
+
+    // Force the model service to reload by clearing any cached data
+    // This ensures we get fresh data from the new endpoints
+    this.loadModelAndGroups();
   }
 }

@@ -30,6 +30,14 @@
           <fluent-icon name="list"></fluent-icon>
         </button>
       </div>
+
+      <!-- Reset button -->
+      <div *ngIf="showResetButton" class="reset-toggle">
+        <button type="button" class="toggle-btn reset-btn" (click)="onResetClick()" title="Reset to defaults">
+          <fluent-icon name="refresh"></fluent-icon>
+          Reset
+        </button>
+      </div>
     </div>
   </div>
 </div>

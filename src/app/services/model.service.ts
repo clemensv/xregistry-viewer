@@ -643,6 +643,7 @@ export class ModelService {
     ModelService.endpointCache = {};
     ModelService.progressiveCache = null;
     this.ongoingModelRequest = null;
+    this.ongoingProgressiveRequest = null;
   }
 
   /**

@@ -23,9 +23,11 @@ export class PageHeaderComponent {
   @Input() totalCount: number = 0; // Total number of items in collection (when available)
   @Input() resultsText: string = 'items';
   @Input() searchResultsText: string = '';
+  @Input() showResetButton: boolean = false;
 
   @Output() viewModeChange = new EventEmitter<ViewMode>();
   @Output() pageChange = new EventEmitter<string>();
+  @Output() resetClick = new EventEmitter<void>();
 
   setViewMode(mode: ViewMode): void {
     this.viewModeChange.emit(mode);
@@ -33,6 +35,10 @@ export class PageHeaderComponent {
 
   onPageChange(pageRel: string): void {
     this.pageChange.emit(pageRel);
+  }
+
+  onResetClick(): void {
+    this.resetClick.emit();
   }
 
   // Helper method to get the results display text

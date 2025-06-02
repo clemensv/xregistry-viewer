@@ -1,123 +1,131 @@
-<div class="config-page-container">
-<fluent-card class="config-card">
-  <div class="card-header">
-    <h2>Registry Endpoints Configuration</h2>
-    <p>Manage multiple API and model endpoints</p>
-  </div>
+<div class="config-container">
+  <!-- Page header for consistency with other pages -->
+  <app-page-header
+    title="API Endpoints"
+    [showViewToggle]="false"
+    [showPagination]="false"
+    [showResetButton]="true"
+    [resultsCount]="apiEndpoints.length"
+    [totalCount]="apiEndpoints.length"
+    [resultsText]="'endpoints'"
+    (resetClick)="resetToDefaults()">
+  </app-page-header>
 
   <!-- Loading State -->
-  <div *ngIf="loading()" class="loading-container">
-    <fluent-progress-ring></fluent-progress-ring>
-    <p>Loading configuration...</p>
+  <div *ngIf="loading()" class="loading-state">
+    <fluent-progress-ring size="small"></fluent-progress-ring>
+    Loading...
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error() && !loading()" class="error-container">
+  <div *ngIf="error() && !loading()" class="error-state">
     <fluent-icon name="warning"></fluent-icon>
-    <p>{{ error() }}</p>
+    {{ error() }}
   </div>
 
-  <!-- Configuration Form -->
-  <div *ngIf="!loading()" class="card-content">
-    <form [formGroup]="configForm" (ngSubmit)="onSubmit()">      <div class="endpoint-section">
-        <h3><fluent-icon name="cloud"></fluent-icon> API Endpoints</h3>
-        <div *ngFor="let ctrl of apiEndpointControls; let i = index" class="endpoint-row">
-          <div class="endpoint-field">
-            <label>API Endpoint {{i + 1}}</label>
-            <fluent-text-field
-              [formControl]="ctrl"
-              placeholder="https://api.example.com/registry"
-              type="url">
-            </fluent-text-field>
-            <div *ngIf="ctrl.hasError('required')" class="error-message">API endpoint is required</div>
-            <div *ngIf="ctrl.hasError('pattern')" class="error-message">Must start with http:// or https://</div>
-          </div>          <fluent-button
-            appearance="subtle"
-            type="button"
-            (click)="moveApiEndpointUp(i)"
-            [disabled]="i === 0"
-            title="Move up">
-            <fluent-icon name="arrow_up"></fluent-icon>
-          </fluent-button>
+  <!-- Endpoints Content -->
+  <div *ngIf="!loading()" class="endpoints-content">
+    <!-- Add new endpoint section -->
+    <div class="add-endpoint-section">
+      <div class="add-endpoint-container">
+        <div class="add-endpoint-input-group">
+          <input
+            type="url"
+            class="endpoint-input-field"
+            [(ngModel)]="newEndpointUrl"
+            placeholder="Add new endpoint URL..."
+            (keyup.enter)="addEndpoint()"
+            (blur)="validateNewEndpoint()"
+            [class.error]="newEndpointError">
 
           <fluent-button
-            appearance="subtle"
-            type="button"
-            (click)="moveApiEndpointDown(i)"
-            [disabled]="i === apiEndpointControls.length - 1"
-            title="Move down">
-            <fluent-icon name="arrow_down"></fluent-icon>
+            appearance="accent"
+            (click)="addEndpoint()"
+            [disabled]="!newEndpointUrl || newEndpointError || validatingEndpoint"
+            title="Add endpoint"
+            class="add-btn">
+            <fluent-icon name="add"></fluent-icon>
           </fluent-button>
-
-          <fluent-button
-            appearance="subtle"
-            type="button"
-            (click)="removeApiEndpoint(i)"
-            title="Remove"
-            class="danger-button">
-            <fluent-icon name="delete"></fluent-icon>
-          </fluent-button>
-        </div>        <fluent-button appearance="outline" type="button" (click)="addApiEndpoint()">
-          <fluent-icon name="add"></fluent-icon> Add API Endpoint
-        </fluent-button>
-      </div>
-      <div class="endpoint-section">
-        <h3><fluent-icon name="document"></fluent-icon> Model Document URIs</h3>
-        <div *ngFor="let ctrl of modelUriControls; let i = index" class="endpoint-row">
-          <div class="endpoint-field">
-            <label>Model URI {{i + 1}}</label>
-            <fluent-text-field
-              [formControl]="ctrl"
-              placeholder="e.g. https://example.com/model.json">
-            </fluent-text-field>
-            <div *ngIf="ctrl.hasError('required')" class="error-message">Model URI is required</div>
-          </div>          <fluent-button
-            appearance="subtle"
-            type="button"
-            (click)="moveModelUriUp(i)"
-            [disabled]="i === 0"
-            title="Move up">
-            <fluent-icon name="arrow_up"></fluent-icon>
-          </fluent-button>          <fluent-button
-            appearance="subtle"
-            type="button"
-            (click)="moveModelUriDown(i)"
-            [disabled]="i === modelUriControls.length - 1"
-            title="Move down">
-            <fluent-icon name="arrow_down"></fluent-icon>
-          </fluent-button>          <fluent-button
-            appearance="subtle"
-            type="button"
-            (click)="removeModelUri(i)"
-            title="Remove"
-            class="danger-button">
-            <fluent-icon name="delete"></fluent-icon>
-          </fluent-button>
-        </div>        <fluent-button appearance="outline" type="button" (click)="addModelUri()">
-          <fluent-icon name="add"></fluent-icon> Add Model URI        </fluent-button>
-      </div>
-
-      <div class="endpoint-section">
-        <h3><fluent-icon name="globe"></fluent-icon> Base URL</h3>
-        <div class="endpoint-field">
-          <label>Application Base URL</label>
-          <fluent-text-field
-            formControlName="baseUrl"
-            placeholder="/"
-            type="text">
-          </fluent-text-field>
-          <div *ngIf="configForm.get('baseUrl')?.hasError('required')" class="error-message">Base URL is required</div>
-          <div class="help-text">The base path where this application is served (e.g., "/" for root, "/registry/" for subdirectory)</div>
         </div>
-      </div>      <div class="button-row">        <fluent-button appearance="accent" type="submit" [disabled]="configForm.invalid">
-          <fluent-icon name="save"></fluent-icon> Save Changes
-        </fluent-button>        <fluent-button appearance="neutral" type="button" (click)="onCancel()">
-          Cancel
-        </fluent-button>        <fluent-button appearance="neutral" type="button" (click)="resetToDefault()">
-          <fluent-icon name="arrow_sync"></fluent-icon> Reset to Default
-        </fluent-button>
+
+        <div *ngIf="newEndpointError" class="error-text">{{ newEndpointError }}</div>
+        <div *ngIf="validatingEndpoint" class="validating-text">
+          <fluent-progress-ring size="small"></fluent-progress-ring>
+          Validating...
+        </div>
       </div>
-    </form>
+    </div>
+
+    <!-- Endpoints list -->
+    <div class="endpoints-list">
+      <div *ngFor="let endpoint of apiEndpoints.controls; let i = index" class="endpoint-item">
+        <!-- Edit mode -->
+        <div *ngIf="editingIndex === i" class="endpoint-edit-mode">
+          <input
+            type="url"
+            class="endpoint-edit-field"
+            [value]="endpoint.value"
+            (keyup.enter)="saveEdit(i)"
+            (keyup.escape)="cancelEdit()"
+            (blur)="saveEdit(i)"
+            (input)="updateEndpointValue(i, $event)"
+            #editInput>
+        </div>
+
+        <!-- Display mode -->
+        <div *ngIf="editingIndex !== i" class="endpoint-display-mode" (click)="editEndpoint(i)">
+          <div class="endpoint-info">
+            <span class="endpoint-url">{{ endpoint.value }}</span>
+            <span class="endpoint-status" [class]="endpointStatus[i]">
+              <fluent-icon [name]="getStatusIcon(i)"></fluent-icon>
+              {{ getStatusText(i) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="endpoint-actions">
+          <fluent-button
+            appearance="subtle"
+            (click)="moveUp(i)"
+            [disabled]="i === 0"
+            title="Move up"
+            class="action-btn square-btn">
+            <fluent-icon name="chevron_up"></fluent-icon>
+          </fluent-button>
+
+          <fluent-button
+            appearance="subtle"
+            (click)="moveDown(i)"
+            [disabled]="i === apiEndpoints.length - 1"
+            title="Move down"
+            class="action-btn square-btn">
+            <fluent-icon name="chevron_down"></fluent-icon>
+          </fluent-button>
+
+          <fluent-button
+            appearance="subtle"
+            (click)="editEndpoint(i)"
+            title="Edit"
+            class="action-btn square-btn">
+            <fluent-icon name="edit"></fluent-icon>
+          </fluent-button>
+
+          <fluent-button
+            appearance="subtle"
+            (click)="removeEndpoint(i)"
+            title="Remove"
+            class="action-btn square-btn remove-btn">
+            <fluent-icon name="delete"></fluent-icon>
+          </fluent-button>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="apiEndpoints.length === 0" class="empty-state">
+        <fluent-icon name="inbox"></fluent-icon>
+        <p>No endpoints configured. Add one above to get started.</p>
+      </div>
+    </div>
   </div>
-</fluent-card>
 </div>

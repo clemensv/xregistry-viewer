@@ -108,10 +108,20 @@
 
 /* Pagination and view toggle containers */
 .pagination-toggle,
-.view-toggle {
+.view-toggle,
+.reset-toggle {
   display: flex;
   gap: 0.25rem;
   flex-shrink: 0;
+}
+
+.reset-toggle .reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 /* Responsive design */

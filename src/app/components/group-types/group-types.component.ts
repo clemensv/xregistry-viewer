@@ -52,6 +52,16 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
     // Wait for configuration to be loaded before subscribing to ModelService
     this.waitForConfigAndLoadData();
 
+    // Listen for configuration changes and reload data
+    this.configService.configChanges$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(newConfig => {
+        console.log('GroupTypesComponent: Configuration changed, reloading data...');
+        console.log('GroupTypesComponent: New config API endpoints:', newConfig.apiEndpoints);
+        console.log('GroupTypesComponent: Previous group types count:', this.groupTypesList.length);
+        this.reloadData();
+      });
+
     // Subscribe to search state changes
     this.searchService.searchState$
       .pipe(takeUntil(this.destroy$))
@@ -139,6 +149,29 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
           this.cdr.markForCheck();
         }
       });
+  }
+
+  /**
+   * Reloads the data by clearing cache and reinitializing
+   */
+  private reloadData(): void {
+    console.log('GroupTypesComponent: Starting reload process...');
+
+    // Reset loading states
+    this.loading = true;
+    this.loadingProgress = true;
+    this.groupTypesList = [];
+    this.filteredGroupTypesList = [];
+    this.cdr.markForCheck();
+
+    // Clear all caches to force reload from new endpoints
+    console.log('GroupTypesComponent: Clearing all ModelService caches...');
+    this.modelService.clearAllCaches();
+
+    // Force the model service to reload by clearing any cached data
+    // This ensures we get fresh data from the new endpoints
+    console.log('GroupTypesComponent: Starting data load...');
+    this.loadData();
   }
 
   ngOnDestroy(): void {

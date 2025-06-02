@@ -69,6 +69,13 @@ export class ConfigService {
     shareReplay(1)
   );
 
+  /** Subject for configuration changes (emits when config is saved) */
+  private configChangesSubject = new Subject<AppConfig>();
+  /** Observable of configuration changes */
+  readonly configChanges$: Observable<AppConfig> = this.configChangesSubject.asObservable().pipe(
+    shareReplay(1)
+  );
+
   /** Flag indicating if configuration has been loaded */
   private configLoaded = false;
   /** Flag indicating if configuration is currently loading */
@@ -345,6 +352,10 @@ export class ConfigService {
   saveConfig(config: AppConfig): Promise<void> {
     try {
       const normalizedConfig = this.normalizeConfig(config);
+
+      console.log('ConfigService: Saving configuration:', normalizedConfig);
+      console.log('ConfigService: API endpoints:', normalizedConfig.apiEndpoints);
+
       this.configSubject.next(normalizedConfig);
 
       if (normalizedConfig.baseUrl) {
@@ -352,6 +363,11 @@ export class ConfigService {
       }
 
       this.persistConfig(normalizedConfig);
+
+      // Emit config change notification
+      console.log('ConfigService: Emitting configuration change event');
+      this.configChangesSubject.next(normalizedConfig);
+
       return Promise.resolve();
     } catch (error) {
       console.error('Error saving configuration:', error);

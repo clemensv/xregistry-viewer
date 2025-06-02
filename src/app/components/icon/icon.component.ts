@@ -1,227 +1,181 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit, OnChanges } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, catchError, map, of, shareReplay, switchMap } from 'rxjs';
+
+// Import all the icons we need statically (using regular style)
+import addIcon from '@fluentui/svg-icons/icons/add_20_regular.svg';
+import editIcon from '@fluentui/svg-icons/icons/edit_20_regular.svg';
+import deleteIcon from '@fluentui/svg-icons/icons/delete_20_regular.svg';
+import copyIcon from '@fluentui/svg-icons/icons/copy_20_regular.svg';
+import refreshIcon from '@fluentui/svg-icons/icons/arrow_sync_20_regular.svg';
+import chevronUpIcon from '@fluentui/svg-icons/icons/chevron_up_20_regular.svg';
+import chevronDownIcon from '@fluentui/svg-icons/icons/chevron_down_20_regular.svg';
+import chevronLeftIcon from '@fluentui/svg-icons/icons/chevron_left_20_regular.svg';
+import chevronRightIcon from '@fluentui/svg-icons/icons/chevron_right_20_regular.svg';
+import chevronDoubleLeftIcon from '@fluentui/svg-icons/icons/chevron_double_left_20_regular.svg';
+import chevronDoubleRightIcon from '@fluentui/svg-icons/icons/chevron_double_right_20_regular.svg';
+import arrowRightIcon from '@fluentui/svg-icons/icons/arrow_right_20_regular.svg';
+import homeIcon from '@fluentui/svg-icons/icons/home_20_regular.svg';
+import warningIcon from '@fluentui/svg-icons/icons/warning_20_regular.svg';
+import checkmarkCircleIcon from '@fluentui/svg-icons/icons/checkmark_circle_20_regular.svg';
+import errorCircleIcon from '@fluentui/svg-icons/icons/error_circle_20_regular.svg';
+import errorIcon from '@fluentui/svg-icons/icons/error_circle_20_regular.svg';
+import clockIcon from '@fluentui/svg-icons/icons/clock_20_regular.svg';
+import infoIcon from '@fluentui/svg-icons/icons/info_20_regular.svg';
+import arrowSyncCircleIcon from '@fluentui/svg-icons/icons/arrow_sync_20_regular.svg';
+import folderIcon from '@fluentui/svg-icons/icons/folder_20_regular.svg';
+import folderOpenIcon from '@fluentui/svg-icons/icons/folder_open_20_regular.svg';
+import documentIcon from '@fluentui/svg-icons/icons/document_20_regular.svg';
+import listIcon from '@fluentui/svg-icons/icons/list_20_regular.svg';
+import tableSimpleIcon from '@fluentui/svg-icons/icons/table_20_regular.svg';
+import inboxIcon from '@fluentui/svg-icons/icons/mail_inbox_20_regular.svg';
+import linkIcon from '@fluentui/svg-icons/icons/link_20_regular.svg';
+import openIcon from '@fluentui/svg-icons/icons/open_20_regular.svg';
+import arrowDownloadIcon from '@fluentui/svg-icons/icons/arrow_download_20_regular.svg';
+import searchIcon from '@fluentui/svg-icons/icons/search_20_regular.svg';
+import searchOffIcon from '@fluentui/svg-icons/icons/dismiss_20_regular.svg';
+import dismissIcon from '@fluentui/svg-icons/icons/dismiss_20_regular.svg';
+import settingsIcon from '@fluentui/svg-icons/icons/settings_20_regular.svg';
+import fontDecreaseIcon from '@fluentui/svg-icons/icons/font_decrease_20_regular.svg';
+import fontIncreaseIcon from '@fluentui/svg-icons/icons/font_increase_20_regular.svg';
+import fontSizeIcon from '@fluentui/svg-icons/icons/text_font_size_20_regular.svg';
+
+// Theme toggle icons
+import sunIcon from '@fluentui/svg-icons/icons/weather_sunny_20_regular.svg';
+import moonIcon from '@fluentui/svg-icons/icons/weather_moon_20_regular.svg';
+
+// Status icons for config page
+import onlineIcon from '@fluentui/svg-icons/icons/checkmark_circle_20_regular.svg';
+import offlineIcon from '@fluentui/svg-icons/icons/error_circle_20_regular.svg';
+import checkingIcon from '@fluentui/svg-icons/icons/clock_20_regular.svg';
 
 /**
  * Icon component that uses official Fluent UI System Icons from @fluentui/svg-icons
- * Icons are loaded from GitHub repository directly to ensure consistency
  */
 @Component({
   selector: 'fluent-icon',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
-    <ng-container *ngIf="iconSvg$ | async as svg; else loading">
-      <span [innerHTML]="svg" [attr.aria-hidden]="true" class="fluent-icon"></span>
-    </ng-container>
-    <ng-template #loading>
-      <span class="fluent-icon-loading" [style.width.px]="size" [style.height.px]="size"></span>
-    </ng-template>
-  `,
+  template: `<span class="fluent-icon" [innerHTML]="iconSvg" aria-hidden="true"></span>`,
   styles: [`
-    :host {
-      display: inline-block;
-      line-height: 0;
-    }
     .fluent-icon {
-      display: inline-block;
-      vertical-align: middle;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      color: inherit;
     }
-    .fluent-icon-loading {
-      display: inline-block;
-      vertical-align: middle;
+    .fluent-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor !important;
     }
-
-    /* Dark mode SVG icon inversion */
-    :host-context(body.theme-dark) .fluent-icon svg {
-      filter: invert(1);
+    .fluent-icon svg path {
+      fill: inherit !important;
     }
-
-    /* Ensure proper contrast for colored icons in dark mode */
-    :host-context(body.theme-dark) .fluent-icon svg[fill*="currentColor"] {
-      filter: none;
-    }
-  `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  `]
 })
-export class IconComponent implements OnInit {
-  @Input() set name(value: string) {
-    this._name = value;
-    this.updateIcon();
-  }
-  get name(): string {
-    return this._name;
-  }
+export class IconComponent implements OnInit, OnChanges {
+  @Input() name: string = '';
+  @Input() filled: boolean = false; // Default to regular style
+  @Input() size: number = 20;
 
-  @Input() set size(value: number) {
-    this._size = value;
-    this.updateIcon();
-  }
-  get size(): number {
-    return this._size;
-  }
+  iconSvg: SafeHtml = '';
 
-  @Input() set filled(value: boolean) {
-    this._filled = value;
-    this.updateIcon();
-  }
-  get filled(): boolean {
-    return this._filled;
-  }
+  private readonly icons: { [key: string]: string } = {
+    // Action icons
+    'add': addIcon,
+    'edit': editIcon,
+    'delete': deleteIcon,
+    'copy': copyIcon,
+    'refresh': refreshIcon,
 
-  private _name: string = 'info';
-  private _size: number = 20;
-  private _filled: boolean = false;
-  private iconSubject = new BehaviorSubject<{ name: string, size: number, filled: boolean }>({
-    name: this._name,
-    size: this._size,
-    filled: this._filled
-  });
+    // Navigation icons
+    'chevron_up': chevronUpIcon,
+    'chevron_down': chevronDownIcon,
+    'chevron_left': chevronLeftIcon,
+    'chevron_right': chevronRightIcon,
+    'chevron_double_left': chevronDoubleLeftIcon,
+    'chevron_double_right': chevronDoubleRightIcon,
+    'arrow_right': arrowRightIcon,
+    'home': homeIcon,
 
-  iconSvg$: Observable<SafeHtml>;
+    // Status icons
+    'warning': warningIcon,
+    'checkmark_circle': checkmarkCircleIcon,
+    'error_circle': errorCircleIcon,
+    'error': errorIcon,
+    'clock': clockIcon,
+    'info': infoIcon,
+    'arrow_sync_circle': arrowSyncCircleIcon,
 
-  // Cache for loaded icons to prevent repeated HTTP requests
-  private static iconCache = new Map<string, Observable<SafeHtml>>();
+    // Content icons
+    'folder': folderIcon,
+    'folder_open': folderOpenIcon,
+    'document': documentIcon,
+    'list': listIcon,
+    'table_simple': tableSimpleIcon,
+    'inbox': inboxIcon,
+    'link': linkIcon,
+    'open': openIcon,
+    'arrow_download': arrowDownloadIcon,
 
-  constructor(private http: HttpClient, private sanitizer: DomSanitizer) {
-    this.iconSvg$ = this.iconSubject.pipe(
-      switchMap(({name, size, filled}) => this.getIconSvg(name, size, filled)),
-      shareReplay(1)
-    );
-  }
+    // UI icons
+    'search': searchIcon,
+    'search_off': searchOffIcon,
+    'dismiss': dismissIcon,
+    'settings': settingsIcon,
 
-  ngOnInit(): void {
-    this.updateIcon();
-  }
+    // Font size icons
+    'font_decrease': fontDecreaseIcon,
+    'font_increase': fontIncreaseIcon,
+    'font_size': fontSizeIcon,
 
-  private updateIcon(): void {
-    this.iconSubject.next({
-      name: this._name,
-      size: this._size,
-      filled: this._filled
-    });
-  }
-  private getIconSvg(name: string, size: number, filled: boolean): Observable<SafeHtml> {
-    // Convert legacy icon names to the new format
-    const iconName = this.mapLegacyIconName(name);
-    const variant = filled ? 'filled' : 'regular';
-    const cacheKey = `${iconName}_${size}_${variant}`;
+    // Theme toggle icons
+    'sun': sunIcon,
+    'moon': moonIcon,
+    'light_mode': sunIcon,
+    'dark_mode': moonIcon,
+    'weather_sunny': sunIcon,
+    'weather_moon': moonIcon,
 
-    // Check cache first
-    if (IconComponent.iconCache.has(cacheKey)) {
-      return IconComponent.iconCache.get(cacheKey)!;
-    }    // Convert to title case for folder name (e.g., 'settings' -> 'Settings')
-    const titleCaseName = this.toTitleCase(iconName);
-    // Format the file name (e.g., 'ic_fluent_settings_20_regular.svg')
-    const fileName = `ic_fluent_${iconName}_${size}_${variant}.svg`;
-    // Use GitHub repository directly for icon source with correct folder structure
-    const githubUrl = `https://raw.githubusercontent.com/microsoft/fluentui-system-icons/main/assets/${encodeURIComponent(titleCaseName)}/SVG/${fileName}`;
+    // Config page status icons
+    'online': onlineIcon,
+    'offline': offlineIcon,
+    'checking': checkingIcon
+  };
 
-    // Fetch the icon and sanitize the SVG
-    const icon$ = this.http.get(githubUrl, { responseType: 'text' }).pipe(
-      map(svg => this.processAndSanitizeSvg(svg, size)),      catchError(() => {
-        console.warn(`Icon not found at: ${githubUrl}`);
-        // Return a placeholder icon
-        return of(this.sanitizer.bypassSecurityTrustHtml(this.getPlaceholderIcon(size)));
-      }),
-      shareReplay(1)
-    );
+  constructor(private sanitizer: DomSanitizer) {}
 
-    // Store in cache
-    IconComponent.iconCache.set(cacheKey, icon$);
-    return icon$;
+  ngOnInit() {
+    this.loadIcon();
   }
 
-  private processAndSanitizeSvg(svg: string, size: number): SafeHtml {
-    // Ensure proper size attributes
-    svg = svg.replace(/width="[^"]*"/, `width="${size}"`);
-    svg = svg.replace(/height="[^"]*"/, `height="${size}"`);
+  ngOnChanges() {
+    this.loadIcon();
+  }
 
-    // Fix current color if not present
-    if (!svg.includes('fill="currentColor"') && !svg.includes('fill="none"')) {
-      svg = svg.replace(/<svg/, '<svg fill="currentColor"');
+  private loadIcon() {
+    if (!this.name) {
+      this.iconSvg = '';
+      return;
     }
 
-    return this.sanitizer.bypassSecurityTrustHtml(svg);
-  }
+    const svgContent = this.icons[this.name];
+    if (svgContent) {
+      // Process the SVG to ensure it adapts to theme colors
+      let processedSvg = svgContent;
 
-  private getPlaceholderIcon(size: number): string {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <path d="M7.5 9H12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M7.5 12H12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>`;
-  }
+      // Add fill="currentColor" to the SVG element if it doesn't have a fill attribute
+      if (!processedSvg.includes('fill=')) {
+        processedSvg = processedSvg.replace('<svg', '<svg fill="currentColor"');
+      }
 
-  /**
-   * Maps old icon names to the official Fluent UI icon naming convention
-   */
-  private mapLegacyIconName(name: string): string {
-    // Mapping of legacy icon names to official Fluent UI icon names
-    const iconMapping: Record<string, string> = {
-      // Settings and configuration
-      'settings': 'settings',
+      // Also ensure any path elements without fill attribute inherit currentColor
+      processedSvg = processedSvg.replace(/<path(?![^>]*fill=)/g, '<path fill="currentColor"');
 
-      // Font and text controls
-      'font_decrease': 'text_font_size',
-      'font_size': 'text_font_size',
-      'font_increase': 'text_font_size',
-
-      // Theme controls
-      'weather_moon': 'weather_moon',
-      'weather_sunny': 'weather_sunny',
-
-      // Navigation
-      'chevron_left': 'chevron_left',
-      'chevron_right': 'chevron_right',
-      'chevron_up': 'chevron_up',
-      'chevron_down': 'chevron_down',
-      'chevron_double_left': 'chevron_double_left',
-      'chevron_double_right': 'chevron_double_right',
-      'arrow_left': 'arrow_left',
-      'arrow_right': 'arrow_right',
-      'arrow_up': 'arrow_up',
-      'arrow_down': 'arrow_down',
-      'arrow_download': 'arrow_download',
-      'arrow_sync_circle': 'arrow_sync_circle',
-
-      // Actions
-      'search': 'search',
-      'dismiss': 'dismiss',
-      'copy': 'copy',
-      'open': 'open',
-      'open_in_new': 'open',
-      'add': 'add',
-      'delete': 'delete',
-      'edit': 'edit',
-      'refresh': 'arrow_clockwise',
-
-      // Content
-      'document': 'document',
-      'folder': 'folder',
-      'folder_open': 'folder_open',
-
-      // Status
-      'info': 'info',
-      'warning': 'warning',
-      'error': 'error_circle',
-
-      // UI
-      'home': 'home',
-      'list': 'list',
-      'menu': 'line_horizontal_3'
-    };
-      return iconMapping[name] || name;
-  }
-  /**
-   * Converts a string to title case for folder names (e.g., 'settings' -> 'Settings', 'arrow_sync_circle' -> 'Arrow Sync Circle')
-   */
-  private toTitleCase(str: string): string {
-    return str
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+      this.iconSvg = this.sanitizer.bypassSecurityTrustHtml(processedSvg);
+    } else {
+      console.warn(`Icon not found: ${this.name}`, 'Available icons:', Object.keys(this.icons));
+      this.iconSvg = '';
+    }
   }
 }
