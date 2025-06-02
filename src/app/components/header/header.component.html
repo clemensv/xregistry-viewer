@@ -25,32 +25,37 @@
 
       <!-- Font/Layout Size Selector -->
       <div class="control-group">
-        <fluent-menu-button
-          [open]="fontMenuOpen"
-          (toggle)="fontMenuOpen = !fontMenuOpen"
-          aria-label="Font Size">
-          <fluent-icon slot="button" [name]="getFontSizeIcon()"></fluent-icon>
-          <fluent-menu slot="menu">
-            <fluent-menu-item
-              (click)="setFontSize('small'); fontMenuOpen = false"
-              [class.active]="currentFontSize === 'small'">
+        <div class="font-size-dropdown">
+          <fluent-button
+            appearance="subtle"
+            (click)="fontMenuOpen = !fontMenuOpen"
+            aria-label="Font Size">
+            <fluent-icon [name]="getFontSizeIcon()"></fluent-icon>
+          </fluent-button>
+          <div *ngIf="fontMenuOpen" class="font-size-menu">
+            <div
+              class="font-menu-item"
+              [class.active]="currentFontSize === 'small'"
+              (click)="setFontSize('small'); fontMenuOpen = false">
               <fluent-icon name="font_decrease"></fluent-icon>
               <span>Small</span>
-            </fluent-menu-item>
-            <fluent-menu-item
-              (click)="setFontSize('medium'); fontMenuOpen = false"
-              [class.active]="currentFontSize === 'medium'">
+            </div>
+            <div
+              class="font-menu-item"
+              [class.active]="currentFontSize === 'medium'"
+              (click)="setFontSize('medium'); fontMenuOpen = false">
               <fluent-icon name="font_size"></fluent-icon>
               <span>Medium</span>
-            </fluent-menu-item>
-            <fluent-menu-item
-              (click)="setFontSize('large'); fontMenuOpen = false"
-              [class.active]="currentFontSize === 'large'">
+            </div>
+            <div
+              class="font-menu-item"
+              [class.active]="currentFontSize === 'large'"
+              (click)="setFontSize('large'); fontMenuOpen = false">
               <fluent-icon name="font_increase"></fluent-icon>
               <span>Large</span>
-            </fluent-menu-item>
-          </fluent-menu>
-        </fluent-menu-button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Dark/Light Mode Selector -->

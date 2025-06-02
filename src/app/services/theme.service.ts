@@ -46,15 +46,25 @@ export class ThemeService {
 
     // Apply font size class
     this.fontSize$.subscribe(fontSize => {
-      document.body.className = document.body.className.replace(/font-size-\w+/g, '');
-      document.body.classList.add(`font-size-${fontSize}`);
+      this._applyFontSizeToBody(fontSize);
     });
 
     // Apply theme class
     this.theme$.subscribe(theme => {
-      document.body.className = document.body.className.replace(/theme-\w+/g, '');
-      document.body.classList.add(`theme-${theme}`);
+      this._applyThemeToBody(theme);
     });
+  }
+
+  private _applyFontSizeToBody(fontSize: FontSize): void {
+    if (!this.isBrowser) return;
+    document.body.className = document.body.className.replace(/font-size-\w+/g, '');
+    document.body.classList.add(`font-size-${fontSize}`);
+  }
+
+  private _applyThemeToBody(theme: Theme): void {
+    if (!this.isBrowser) return;
+    document.body.className = document.body.className.replace(/theme-\w+/g, '');
+    document.body.classList.add(`theme-${theme}`);
   }
 
   setFontSize(fontSize: FontSize): void {
@@ -62,6 +72,7 @@ export class ThemeService {
 
     this.fontSizeSubject.next(fontSize);
     localStorage.setItem(this.FONT_SIZE_KEY, fontSize);
+    this._applyFontSizeToBody(fontSize);
   }
 
   setTheme(theme: Theme): void {
@@ -69,6 +80,7 @@ export class ThemeService {
 
     this.themeSubject.next(theme);
     localStorage.setItem(this.THEME_KEY, theme);
+    this._applyThemeToBody(theme);
   }
 
   getCurrentFontSize(): FontSize {
