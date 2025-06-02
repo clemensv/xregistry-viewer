@@ -22,7 +22,7 @@ import { IconComponent } from '../icon/icon.component';
   encapsulation: ViewEncapsulation.None // This ensures styles can affect child components
 })
 export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
-  viewMode: ViewMode = 'cards'; // Default view mode
+  viewMode: ViewMode = 'cards'; // Always default to cards (tile) mode
   groupTypesList: { groupType: string; model: GroupType }[] = [];
   filteredGroupTypesList: { groupType: string; model: GroupType }[] = [];
   currentSearchTerm = '';
@@ -107,9 +107,9 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
             this.groupTypesList = groupTypes;
             this.applyClientSideFilter();
 
-            // Set default view mode based on smart logic (only on first significant load and if user hasn't manually changed view)
+            // Always keep cards mode as default - removed smart view mode logic
             if (this.initialLoad && this.groupTypesList.length > 0 && !this.userHasChangedView) {
-              this.setSmartViewMode();
+              this.viewMode = 'cards'; // Always default to cards mode
               this.initialLoad = false;
             }
 
@@ -147,9 +147,10 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Trigger smart view mode after view is initialized if we already have data
+    // Always ensure cards mode is set after view initialization
     if (!this.loading && this.groupTypesList.length > 0 && !this.userHasChangedView) {
-      setTimeout(() => this.setSmartViewMode(), 0);
+      this.viewMode = 'cards';
+      this.cdr.markForCheck();
     }
   }
 
@@ -158,8 +159,6 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
       this.filteredGroupTypesList = [];
       return;
     }
-
-    const previousCount = this.filteredGroupTypesList.length;
 
     if (!this.currentSearchTerm || this.currentSearchTerm.trim().length === 0) {
       this.filteredGroupTypesList = [...this.groupTypesList];
@@ -176,61 +175,12 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
 
-    // If user hasn't manually changed view and the filtered count changed, update view mode
-    if (!this.userHasChangedView && previousCount !== this.filteredGroupTypesList.length && this.filteredGroupTypesList.length > 0) {
-      setTimeout(() => this.setSmartViewMode(), 0);
-    }
+    // Removed smart view mode logic - always keep user's choice or default to cards
   }
 
   setViewMode(mode: ViewMode): void {
     this.viewMode = mode;
     this.userHasChangedView = true;
-  }
-
-  /**
-   * Set smart view mode based on item count and viewport constraints
-   */
-  private setSmartViewMode(): void {
-    const itemCount = this.filteredGroupTypesList.length;
-
-    // If more than 8 items, use list view
-    if (itemCount > 8) {
-      this.viewMode = 'list';
-      return;
-    }
-
-    // If 8 or fewer items, check if they fit in viewport
-    this.viewMode = 'cards';
-
-    // Use setTimeout to ensure DOM is rendered before checking viewport
-    setTimeout(() => {
-      if (this.checkViewportOverflow()) {
-        this.viewMode = 'list';
-        this.cdr.markForCheck();
-      }
-    }, 100);
-  }
-
-  /**
-   * Check if the grid view would overflow the viewport
-   */
-  private checkViewportOverflow(): boolean {
-    try {
-      const gridContainer = this.elementRef.nativeElement.querySelector('.grid-container.cards-view');
-      if (!gridContainer) {
-        return false;
-      }
-
-      const containerRect = gridContainer.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const pageHeaderHeight = 120; // Approximate height for page header
-      const availableHeight = viewportHeight - pageHeaderHeight;
-
-      return containerRect.height > availableHeight;
-    } catch (error) {
-      this.debug.log('Error checking viewport overflow:', error);
-      return false;
-    }
   }
 
   /**
