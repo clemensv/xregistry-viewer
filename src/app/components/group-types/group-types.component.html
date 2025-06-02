@@ -23,7 +23,7 @@
       <a [routerLink]="getResourceCollectionRoute(gt)" class="card-link">
         <div class="card-header">
           <fluent-icon name="folder" class="group-type-icon"></fluent-icon>
-          <h3>{{ gt.model.plural }}</h3>
+          <h3>{{ gt.model.plural || gt.groupType }}</h3>
           <button class="details-expander"
                   (click)="$event.preventDefault(); $event.stopPropagation(); toggleDetails(gt.groupType)"
                   [class.expanded]="isDetailsExpanded(gt.groupType)"
@@ -93,7 +93,7 @@
          *ngFor="let groupType of getExpandedGroupTypes()">
       <div class="popup-header">
         <fluent-icon name="folder" class="group-type-icon"></fluent-icon>
-        <h3>{{ getGroupTypeModel(groupType)?.model?.plural }}</h3>
+        <h3>{{ getGroupTypeModel(groupType)?.model?.plural || groupType }}</h3>
         <button class="close-button" (click)="closeAllDetails()" title="Close">
           <fluent-icon name="dismiss"></fluent-icon>
         </button>
@@ -187,7 +187,7 @@
           <td class="model-cell">
             <a [routerLink]="getModelRoute(gt)"
                class="model-link"
-               [title]="gt.model.plural">{{ gt.model.plural }}</a>
+               [title]="gt.model.plural || gt.groupType">{{ gt.model.plural || gt.groupType }}</a>
           </td>
         </tr>
       </tbody>

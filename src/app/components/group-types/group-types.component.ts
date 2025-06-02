@@ -208,6 +208,9 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
 
+    // Always sort group types by name alphabetically
+    this.filteredGroupTypesList.sort((a, b) => a.groupType.localeCompare(b.groupType));
+
     // Removed smart view mode logic - always keep user's choice or default to cards
   }
 
