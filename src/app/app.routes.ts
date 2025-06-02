@@ -15,12 +15,12 @@ export const routes: Routes = [
   { path: 'model', component: ModelComponent },
   { path: 'model/:groupType', component: ModelComponent },
   { path: ':groupType', component: GroupsComponent },
-  // Redirect group detail route to grid view with highlight param
-  { path: ':groupType/:groupId', redirectTo: ':groupType?highlight=:groupId', pathMatch: 'full' },
   { path: ':groupType/:groupId/:resourceType', component: ResourcesComponent },
   // Resource detail page that handles both single and multi-version cases
   { path: ':groupType/:groupId/:resourceType/:resourceId', component: ResourceComponent },
   // Direct path to a specific version
   { path: ':groupType/:groupId/:resourceType/:resourceId/versions/:versionId', component: VersionDetailComponent },
+  // Redirect group detail route to grid view with highlight param - moved to end to avoid conflicts
+  { path: ':groupType/:groupId', redirectTo: ':groupType?highlight=:groupId', pathMatch: 'full' },
   { path: '**', redirectTo: '' }
 ];

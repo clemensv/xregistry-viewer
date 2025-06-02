@@ -72,7 +72,7 @@ export class RoutePersistenceService {
     }
   }
 
-    /**
+  /**
    * Restore the last route if application was reloaded
    * Should be called during app initialization
    */

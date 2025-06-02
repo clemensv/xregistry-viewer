@@ -550,13 +550,38 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   }
 
   /**
-   * Check if a value looks like a URL
+   * Check if an attribute name indicates it should be treated as a URI/URL
+   */
+  isUriOrUrlAttribute(): boolean {
+    if (typeof this.item.value !== 'string') {
+      return false;
+    }
+
+    const key = this.item.key?.toLowerCase() || '';
+    return key.endsWith('uri') || key.endsWith('url');
+  }
+
+  /**
+   * Check if a value looks like a URL or if the attribute name suggests it's a URI/URL
    */
   isUrl(value: any): boolean {
     if (typeof value !== 'string') {
       return false;
     }
 
+    // Check if this is a URI/URL attribute
+    if (this.isUriOrUrlAttribute()) {
+      // For URI/URL attributes, check if it's an absolute URL
+      try {
+        const url = new URL(value);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch {
+        // If it's not a valid absolute URL, it might be a relative URL that should be treated as XID
+        return false;
+      }
+    }
+
+    // Original URL detection logic for non-URI/URL attributes
     try {
       const url = new URL(value);
       return url.protocol === 'http:' || url.protocol === 'https:';
@@ -566,11 +591,33 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
   }
 
   /**
-   * Check if an item is an XID (based on type)
+   * Check if an item is an XID (based on type or URI/URL attribute with relative path)
    */
   isXid(item: ResourceDocumentItem): boolean {
+    if (typeof item.value !== 'string') {
+      return false;
+    }
+
+    // Check if it's explicitly typed as XID
     const itemType = item.itemModel?.type || item.type;
-    return itemType === 'xid' && typeof item.value === 'string';
+    if (itemType === 'xid') {
+      return true;
+    }
+
+    // Check if this is a URI/URL attribute with a relative path
+    if (this.isUriOrUrlAttribute()) {
+      // If it's not an absolute URL, treat it as an XID for navigation
+      try {
+        new URL(item.value);
+        // If URL construction succeeds, it's an absolute URL, not an XID
+        return false;
+      } catch {
+        // If URL construction fails, it's likely a relative path/XID
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -578,9 +625,15 @@ export class ResourceDocumentItemComponent implements OnChanges, AfterViewInit {
    */
   getXidRoute(xidValue: string): string[] {
     // Parse XID format: typically "groupType/groupId/resourceType/resourceId"
-    // For now, we'll navigate to the groups page and let it handle the XID
+    // Return the full path for deep linking
     const parts = xidValue.split('/');
-    if (parts.length >= 2) {
+    if (parts.length >= 4) {
+      // Full path: /groupType/groupId/resourceType/resourceId
+      return ['/' + parts[0], parts[1], parts[2], parts[3]];
+    } else if (parts.length === 3) {
+      // Partial path: /groupType/groupId/resourceType
+      return ['/' + parts[0], parts[1], parts[2]];
+    } else if (parts.length >= 2) {
       // Navigate to the group type with the group ID
       return ['/' + parts[0], parts[1]];
     } else {

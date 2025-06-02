@@ -205,9 +205,24 @@ export class BootstrapComponent implements OnInit {
       this.debug.warn('Bootstrap: Failed to update base URL, but continuing');
     }
 
-    // Navigate to home page after a brief delay
-    setTimeout(() => {
-      this.router.navigate(['/']);
-    }, 1000);
+    // Check both router URL and browser location for deep link detection
+    const currentUrl = this.router.url;
+    const browserPath = window.location.pathname;
+    this.debug.log('Bootstrap: URL check:', { currentUrl, browserPath });
+
+    // Don't redirect if the user has navigated to a specific route (deep link)
+    // Check browser path first as it's more reliable during initialization
+    const isAtRoot = (browserPath === '/' || browserPath === '' || browserPath.startsWith('/?')) &&
+                     (currentUrl === '/' || currentUrl === '' || currentUrl.startsWith('/?'));
+
+    if (isAtRoot) {
+      this.debug.log('Bootstrap: User is at root, navigating to home page');
+      setTimeout(() => {
+        this.router.navigate(['/']);
+      }, 1000);
+    } else {
+      this.debug.log('Bootstrap: User is on a specific route, not redirecting');
+      // Just mark as loaded without redirecting
+    }
   }
 }
