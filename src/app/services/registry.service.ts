@@ -172,10 +172,15 @@ export class RegistryService {
     for (const api of apis) {
       try {
         this.debug.log(`Processing API: ${api}, pagePath: "${pagePath}", starts with http: ${pagePath.startsWith('http')}`);
-                let url = pagePath.startsWith('http') ? pagePath : this.getApiUrl(api, pagePath);
 
-        // Always add filter to the URL, whether it's absolute or relative
-        url = this.addFilterToUrl(url, filter);
+        let url: string;
+        if (pagePath.startsWith('http')) {
+          // For absolute URLs (pagination links), add filter directly
+          url = this.addFilterToUrl(pagePath, filter);
+        } else {
+          // For relative URLs, use getApiUrl which handles filter internally
+          url = this.getApiUrl(api, pagePath, filter);
+        }
 
         this.debug.log(`Filter applied: "${filter}", Final URL: ${url}`);
 
@@ -1156,8 +1161,11 @@ export class RegistryService {
       // Extract the API base from the absolute URL to determine which API to use
       const targetApi = apis.find(api => pagePath.startsWith(api)) || apis[0];
       try {
+        // For absolute URLs (pagination links), add filter directly
+        const url = this.addFilterToUrl(pagePath, filter);
+
         const response = await lastValueFrom(
-          this.http.get<{ [id: string]: any }>(pagePath, { observe: 'response' as const })
+          this.http.get<{ [id: string]: any }>(url, { observe: 'response' as const })
         );
         const data = response.body || {};
 
@@ -1201,6 +1209,7 @@ export class RegistryService {
 
     const apiRequests = apis.map(async (api) => {
       try {
+        // For relative URLs, use getApiUrl which handles filter internally
         const url = this.getApiUrl(api, pagePath, filter);
         this.debug.log(`Requesting groups from: ${url}`);
 
