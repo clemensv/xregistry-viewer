@@ -7,6 +7,7 @@
   min-width: 200px;
   flex: 1 1 auto;
   margin: 0;
+  height: 100%;
 }
 
 .search-field {
@@ -16,19 +17,25 @@
   flex: 1;
   max-width: 100%;
   gap: 4px;
+  height: 32px;
 }
 
 // Fluent UI text field styling
 fluent-text-field {
   flex: 1;
   max-width: 100%;
-  align-self: center;
+  display: flex;
+  align-items: center;
+  margin: 0 !important;
+  padding: 0;
 }
 
 fluent-text-field::part(root) {
   width: 100%;
   display: flex;
   align-items: center;
+  margin: 0 !important;
+  padding: 0;
 }
 
 fluent-text-field::part(control) {
@@ -43,6 +50,9 @@ fluent-text-field::part(control) {
   box-sizing: border-box;
   display: flex;
   align-items: center;
+  margin: 0 !important;
+  line-height: 1;
+  vertical-align: middle;
 
   &:hover {
     border-color: var(--colorNeutralStroke1Hover);
