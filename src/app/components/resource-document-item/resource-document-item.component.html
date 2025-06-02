@@ -2,53 +2,57 @@
      [class.nested]="nestingLevel > 0"
      [attr.data-item-type]="isSimpleValue(item.value) ? 'simple' : (isArray(item.value) ? 'array' : 'object')"
      [attr.data-complex]="!isSimpleValue(item.value)">
-  <div *ngIf="!isSimpleValue(item.value)" class="unified-item-row"
-       [class.array-row]="isArray(item.value)"
-       [class.object-row]="isObject(item.value) && !isArray(item.value)"
-       [class.expanded]="isExpanded()"
-       [class.collapsed]="!isExpanded()"
-       [attr.data-expanded]="isExpanded()"
-       (click)="toggleExpansion($event)">      <!-- Debug status indicator -->
-      <span class="debug-status" *ngIf="debugMode">
-        [{{item.key}}: {{isExpanded() ? 'expanded' : 'collapsed'}}]
-      </span>
-
-      <!-- Toggle icon for arrays and objects -->      <!-- Simple toggle button without complex bindings -->
-      <button type="button"
-            class="toggle-icon"
-            [attr.aria-expanded]="isExpanded()"
-            (click)="$event.stopPropagation(); toggleExpansion($event)">
-        <fluent-icon [name]="isExpanded() ? 'chevron_down' : 'chevron_right'"></fluent-icon>
-      </button>
-
-    <!-- Key name for array/object items -->
-    <strong [title]="item.description">{{ item.key }}</strong>
-
-    <!-- Count for arrays and objects -->
-    <span class="item-count">
-      {{ isArray(item.value) ? item.value.length + ' items' : (isObject(item.value) ? Object.keys(item.value).length : 0) + ' properties' }}
-    </span>    <!-- Type info if available from model or inferred -->
-    <span class="item-model-type">
-      {{ item.itemModel?.type ? getDisplayType() : (isArray(item.value) ? 'Array' : 'Object') | titlecase }}
-    </span>
-
-    <!-- Description for arrays/objects -->
-    <span *ngIf="item.description" class="item-description" title="{{ item.description }}">
-      {{ item.description }}
-    </span>
-  </div>
-
-  <!-- Simple attribute display with new field-group layout -->
-  <div *ngIf="isSimpleValue(item.value)" class="field-group" [class.full]="shouldUseFullWidth()">
-    <div class="value-box">
-      <!-- Label remains outside but overlaid via absolute positioning -->
+  <!-- Complex attribute display with field-group layout matching simple attributes -->
+  <div *ngIf="!isSimpleValue(item.value)" class="field-group expandable-field" [class.expanded]="isExpanded()">
+    <div class="value-box expandable-value-box" (click)="toggleExpansion($event)">
+      <!-- Field label positioned like simple attributes -->
       <span class="field-label">{{ item.key }}</span>
 
-      <!-- Remove type pill from here -->
+      <!-- Value content area -->
+      <div class="value-content expandable-content">
+        <!-- Toggle button -->
+        <button type="button"
+                class="toggle-icon"
+                [attr.aria-expanded]="isExpanded()"
+                (click)="$event.stopPropagation(); toggleExpansion($event)">
+          <fluent-icon [name]="isExpanded() ? 'chevron_down' : 'chevron_right'"></fluent-icon>
+        </button>
 
-      <!-- Value content now becomes the positioned container -->
+        <!-- Count display -->
+        <span class="item-count">
+          {{ isArray(item.value) ? item.value.length + ' items' : (isObject(item.value) ? Object.keys(item.value).length : 0) + ' properties' }}
+        </span>
+
+        <!-- Description if available -->
+        <span *ngIf="item.description" class="info-icon" title="{{ item.description }}">
+          <fluent-icon name="info"></fluent-icon>
+        </span>
+      </div>
+
+      <!-- Type pill positioned like simple attributes -->
+      <span class="type-pill">
+        {{ isArray(item.value) ? 'Array, ' + item.value.length + ' item' + (item.value.length !== 1 ? 's' : '') : 'Object, ' + Object.keys(item.value).length + ' propert' + (Object.keys(item.value).length !== 1 ? 'ies' : 'y') }}
+      </span>
+
+      <!-- Copy button (for consistency, though less useful for complex types) -->
+      <button class="copy-btn"
+              [attr.aria-label]="'Copy ' + item.key + ' value'"
+              title="Copy value"
+              (click)="copyToClipboard(item.value); $event.stopPropagation();">
+        <fluent-icon name="copy"></fluent-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Simple attribute display with field-group layout -->
+  <div *ngIf="isSimpleValue(item.value)" class="field-group" [class.full]="shouldUseFullWidth()">
+    <div class="value-box">
+      <!-- Label positioned at top left -->
+      <span class="field-label">{{ item.key }}</span>
+
+      <!-- Value content area -->
       <div class="value-content">
-        <!-- Existing value display elements -->
+        <!-- URL link display -->
         <a *ngIf="isUrl(item.value)"
            [href]="item.value"
            target="_blank"
@@ -92,18 +96,16 @@
                class="text-input"
                readonly>
 
-
-        <!-- Info icon moved inside value-content -->
+        <!-- Info icon -->
         <span *ngIf="item.description" class="info-icon" title="{{ item.description }}">
           <fluent-icon name="info"></fluent-icon>
         </span>
       </div>
 
-       <!-- Type pill repositioned inside value-content -->
-        <span *ngIf="getDisplayType()" class="type-pill">{{ getDisplayType() }}</span>
+      <!-- Type pill -->
+      <span *ngIf="getDisplayType()" class="type-pill">{{ getDisplayType() }}</span>
 
-
-      <!-- Copy button remains as is -->
+      <!-- Copy button -->
       <button class="copy-btn"
               [attr.aria-label]="'Copy ' + item.key + ' value'"
               title="Copy value"
@@ -111,8 +113,9 @@
         <fluent-icon name="copy"></fluent-icon>
       </button>
     </div>
+  </div>
 
-  </div>  <!-- Expanded content for arrays and objects -->
+  <!-- Expanded content for arrays and objects -->
   <div *ngIf="isExpandable() && isExpanded()"
        class="expanded-content"
        [class.array-content]="isArray(item.value)"
@@ -167,8 +170,8 @@
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
+      </div>
     </div>
-  </div>
 
     <!-- For objects -->
     <div *ngIf="isObject(item.value)" class="object-items">
@@ -206,7 +209,7 @@
 
       <!-- Display JSON for 'any' type object content -->
       <div *ngIf="isAnyType()" class="any-value-container">
-          <app-code-highlight
+        <app-code-highlight
           [code]="getSafeJsonString(item.value)"
           [language]="'json'">
         </app-code-highlight>
@@ -214,7 +217,7 @@
     </div>
   </div>
 
-    <!-- Improved collapsed preview with better click handling and visual cues -->
+  <!-- Improved collapsed preview with better click handling and visual cues -->
   <div *ngIf="isExpandable() && isCollapsed()"
        class="collapsed-preview"
        (click)="toggleExpansion($event)">
@@ -224,7 +227,9 @@
       <!-- For "any" type values, use JSON preview -->
       <div *ngIf="isAnyType()" class="preview-code">
         <pre><code [innerHTML]="getCollapsedPreviewText(item.value)"></code></pre>
-        </div>        <!-- For arrays, show a simplified preview instead of nested components -->
+      </div>
+
+      <!-- For arrays, show a simplified preview instead of nested components -->
       <div *ngIf="isArray(item.value) && !isAnyType()" class="preview-array-items">
         <div class="simplified-preview">
           <span *ngIf="item.value.length > 0" class="preview-summary">
@@ -232,7 +237,9 @@
           </span>
           <span *ngIf="item.value.length === 0" class="preview-summary">{{ '[' }} {{ ']' }}</span>
         </div>
-      </div><!-- For objects, show a simplified preview -->
+      </div>
+
+      <!-- For objects, show a simplified preview -->
       <div *ngIf="isObject(item.value) && !isArray(item.value) && !isAnyType()" class="preview-object-items">
         <div class="simplified-preview">
           <span *ngIf="Object.keys(item.value).length > 0" class="preview-summary">

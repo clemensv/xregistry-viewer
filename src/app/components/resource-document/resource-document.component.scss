@@ -7,7 +7,10 @@
 
 :host {
   width: 100%;
+  max-width: 100%;
   display: block;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .resource-document {
@@ -16,6 +19,9 @@
   margin-bottom: s(l);
   font-size: $body-size;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 
   // Add a dark gray left border to the resource-document
   border-left: 3px solid #444;
@@ -32,9 +38,12 @@
   // Container to allow flex layout for responsive design
   .resource-document-container {
     width: 100%;
+    max-width: 100%;
     display: flex;
     flex-direction: column; // Default stacked layout for mobile
     gap: 1rem;
+    overflow-x: hidden;
+    box-sizing: border-box;
       // Responsive layout for desktop (width > 541px)
     @include breakpoints.custom-breakpoint(800px) {
       &.has-document {
@@ -75,12 +84,14 @@
 
   section {
     margin-top: 0; // Remove top margin as we're using gap in the container
-    padding: 1rem;
+    padding: 0.75rem;
     background-color: #f8f9fa;
     @include tokens.radius('lg');
     border: 1px solid #dee2e6;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   /* Document section styles */
@@ -159,28 +170,44 @@
       margin-bottom: 0.5rem;
     }
 
-    .simple-attributes-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+    .simple-attributes-grid,
+    ::ng-deep .simple-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, calc(100% - 2rem)), 1fr));
+      gap: 0.75rem;
       width: 100%;
-      align-items: flex-start;
+      max-width: 100%;
+      overflow-x: hidden;
+      box-sizing: border-box;
+      justify-content: start;
+      align-items: start;
 
-      // Target the resource-document-item components to make them tile-like
+      // Consistent styling for all simple attributes, whether top-level or nested
       app-resource-document-item {
-        flex: 0 0 auto;
-        width: fit-content;
-        min-width: 180px;
-        max-width: 400px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0; // Allow shrinking
+        overflow: hidden;
+        box-sizing: border-box;
 
-        // Style the simple attribute containers within
         ::ng-deep .field-group {
           background: var(--bg-card, white);
           @include tokens.radius('md');
           border: 1px solid var(--fg-divider, #e0e0e0);
-          padding: 1rem;
+          padding: 0.75rem;
           @include tokens.shadow('xs');
           height: 100%;
+          width: 100%;
+          max-width: 100%;
+          min-width: 0; // Allow shrinking
+          box-sizing: border-box;
+          overflow: hidden;
+
+          // Ensure expandable field groups always fill horizontal space
+          &.expandable-field {
+            grid-column: 1 / -1; // Span all columns
+            width: 100%;
+          }
         }
       }
     }
@@ -232,58 +259,27 @@
       padding: 1rem;
       @include tokens.shadow('xs');
 
-      // Make complex attributes span full width
       app-resource-document-item {
         display: block;
         width: 100%;
 
-        // Ensure object and array types fill their parent horizontally
         ::ng-deep .resource-document-item {
           width: 100%;
 
-          &[data-item-type="object"],
-          &[data-item-type="array"] {
+          // Ensure expandable field groups always fill horizontal space
+          .field-group.expandable-field {
             width: 100%;
+            margin-bottom: 0.5rem;
+          }
 
-            .unified-item-row {
-              width: 100%;
-            }
+          &[data-item-type="array"],
+          &[data-item-type="object"] {
+            width: 100%;
 
             .expanded-content {
               width: 100%;
-
-              .simple-items-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 0.75rem;
-                width: 100%;
-              }
-
-              .complex-items-container {
-                width: 100%;
-
-                .resource-document-item {
-                  width: 100%;
-                }
-              }
             }
           }
-        }
-
-        // Allow simple attributes within complex attributes to flow horizontally
-        ::ng-deep .field-group {
-          display: flex;
-          flex-direction: column;
-          width: auto;
-          min-width: 180px;
-          max-width: 250px;
-          margin-right: 1rem;
-          margin-bottom: 0.75rem;
-          padding: 0.75rem;
-          background: var(--bg-hover, #f8f9fa);
-          @include tokens.radius('md');
-          border: 1px solid var(--fg-divider, #e9ecef);
-          vertical-align: top;
         }
       }
     }
@@ -364,28 +360,27 @@ app-code-highlight {
   .attributes-section {
     .simple-attributes-grid {
       gap: 0.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, calc(100% - 1rem)), 1fr));
 
       app-resource-document-item {
-        min-width: 150px;
-        max-width: 300px;
+        ::ng-deep .field-group {
+          padding: 0.5rem;
+          min-width: 0;
+        }
       }
     }
 
     .complex-attribute-tile {
-      padding: 1rem;
+      padding: 0.5rem;
 
       app-resource-document-item {
         ::ng-deep .simple-items-grid {
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+          grid-template-columns: repeat(auto-fit, minmax(min(200px, calc(100% - 1rem)), 1fr)) !important;
           gap: 0.5rem;
         }
 
         ::ng-deep .field-group {
-          min-width: 140px;
-          max-width: 200px;
           padding: 0.5rem;
-          margin-right: 0.75rem;
-          margin-bottom: 0.5rem;
         }
       }
     }
@@ -395,11 +390,13 @@ app-code-highlight {
 :host-context(body.font-size-medium) {
   .attributes-section {
     .simple-attributes-grid {
-      gap: 0.75rem;
+      gap: 0.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(min(250px, calc(100% - 1.5rem)), 1fr));
 
       app-resource-document-item {
-        min-width: 180px;
-        max-width: 400px;
+        ::ng-deep .field-group {
+          padding: 0.75rem;
+        }
       }
     }
   }
@@ -408,29 +405,27 @@ app-code-highlight {
 :host-context(body.font-size-large) {
   .attributes-section {
     .simple-attributes-grid {
-      gap: 1rem;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(min(300px, calc(100% - 2rem)), 1fr));
 
       app-resource-document-item {
-        min-width: 220px;
-        max-width: 500px;
+        ::ng-deep .field-group {
+          padding: 1rem;
+        }
       }
     }
 
     .complex-attribute-tile {
-      padding: 2rem;
+      padding: 1rem;
 
       app-resource-document-item {
         ::ng-deep .simple-items-grid {
-          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
-          gap: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(min(280px, calc(100% - 2rem)), 1fr)) !important;
+          gap: 0.75rem;
         }
 
         ::ng-deep .field-group {
-          min-width: 220px;
-          max-width: 300px;
           padding: 1rem;
-          margin-right: 1.5rem;
-          margin-bottom: 1rem;
         }
       }
     }

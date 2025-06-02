@@ -180,7 +180,7 @@ app-pagination {
     background: var(--bg-elevated, #f9f9f9);
     padding: 4px 8px; // Reduced padding
     border-radius: 4px;
-    margin: 8px 16px 8px 16px; // Reduced margins
+    margin: 20px 16px 8px 16px; // Increased top margin from 16px to 20px for more spacing above origin
     border: 1px solid var(--fg-border, #e1e1e1);
   }
 
@@ -189,65 +189,86 @@ app-pagination {
       font-size: 13px; // Slightly smaller
       line-height: 18px; // Tighter line height
       color: var(--fg-text, #323130);
-      margin: 0;
+      margin: 0 0 12px 0; // Added 12px bottom margin for more space under description
       padding: 0;
       text-align: left; // Ensure left alignment
     }
   }
 
-  // Resource Types field-group styling - matches single attribute layout
+  // Resource Types field-group styling - matches resource-document-item layout
   .resource-types-field {
-    padding: 0 16px;
-    margin-bottom: 8px; // Reduced margin
-    align-self: stretch; // Prevent centering
+    padding: 0; // No padding needed since parent handles it
+    margin-bottom: 8px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 
-    .field-title {
-      font-size: 14px; // Slightly smaller
-      font-weight: 600;
-      color: var(--fg-text, #323130);
-      margin-bottom: 6px; // Reduced margin
-      display: block;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: left; // Ensure left alignment
-    }
-
-    .input-row {
-      display: flex;
-      align-items: flex-start; // Changed from center to flex-start
-      gap: 8px;
-    }
-
-    .input-wrapper {
+    .value-box {
       position: relative;
-      flex: 1;
-      min-height: 28px; // Reduced height
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    // Field label positioned at top left like resource-document-item
+    .field-label {
+      position: absolute;
+      top: -9px;
+      left: 12px;
+      padding: 0 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--fg-secondary-text, #605e5c);
       background: var(--bg-card, #ffffff);
+      z-index: 10;
+      white-space: nowrap;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    // Value content takes all available space
+    .value-content {
+      flex: 1;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .resource-types-container {
+      height: auto;
+      min-height: 32px;
+      padding: 8px;
       border: 1px solid var(--fg-border, #8a8886);
       border-radius: 2px;
-      padding: 6px 10px; // Reduced padding
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-      &.resource-types-container {
-        background: rgba(0, 120, 212, 0.05);
-        border-left: 3px solid var(--primary-color, #0078d4);
-      }
+      background: var(--bg-card, #ffffff);
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+      border-left: 3px solid var(--primary-color, #0078d4);
+      background: rgba(0, 120, 212, 0.05);
     }
 
     .resource-types-list {
       display: flex;
       flex-direction: column;
-      gap: 2px; // Reduced gap
+      gap: 2px;
 
       .resource-type-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1px 0; // Reduced padding
+        padding: 1px 0;
 
         .resource-link {
           color: var(--primary-color, #0078d4);
           text-decoration: none;
-          font-size: 13px; // Slightly smaller
+          font-size: 13px;
           font-weight: 500;
 
           &:hover {
@@ -256,21 +277,46 @@ app-pagination {
         }
 
         .resource-count {
-          font-size: 11px; // Made smaller
+          font-size: 11px;
           color: var(--fg-secondary-text, #605e5c);
           background: var(--bg-elevated, #f3f2f1);
-          padding: 1px 4px; // Reduced padding
-          border-radius: 6px; // Smaller radius
-          margin-left: 6px; // Reduced margin
+          padding: 1px 4px;
+          border-radius: 6px;
+          margin-left: 6px;
         }
       }
     }
 
-    // Type pill styling - positioned on the container
+    // Copy button styling - matches resource-document-item
+    .copy-btn {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--fg-border, #8a8886);
+      border-radius: 2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--fg-text, #323130);
+
+      &:hover {
+        background: var(--bg-hover, #f3f2f1);
+        border-color: var(--primary-color, #0078d4);
+        color: var(--primary-color, #0078d4);
+      }
+
+      fluent-icon {
+        font-size: 16px;
+      }
+    }
+
+    // Type pill styling - matches resource-document-item positioning
     .type-pill {
       position: absolute;
       top: -8px;
-      right: 8px;
+      right: calc(0.5rem + 32px + 0.25rem);
       height: 15px;
       padding: 0 6px;
       font-size: 10px;
@@ -282,10 +328,13 @@ app-pagination {
       white-space: nowrap;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       z-index: 10;
+      max-width: calc(100% - 32px - 1rem - 0.5rem);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
-  // Footer styling - make timestamps much smaller
+  // Footer styling - right-align timestamps and make them tiny (8px)
   fluent-card-footer {
     margin-top: auto; // Push to bottom
     padding: 8px 16px; // Reduced padding
@@ -294,17 +343,19 @@ app-pagination {
     flex-shrink: 0; // Prevent footer from shrinking
 
     small {
-      font-size: 10px; // Made much smaller
+      font-size: 6px !important; // Made even tinier as requested (reduced from 8px to 6px)
       color: var(--fg-secondary-text, #605e5c);
-      line-height: 14px; // Tighter line height
-      display: block; // Ensure block display
-      text-align: left; // Left align timestamps
+      line-height: 1.2 !important; // Tighter line height for tiny text
+      display: block !important; // Ensure block display
+      text-align: right !important; // Right-align timestamps as requested
+      width: 100% !important;
 
       span {
-        &:not(:last-child)::after {
-          content: ' • ';
-          margin: 0 3px; // Reduced margin
-          color: var(--fg-divider, #c8c6c4);
+        display: block !important; // Stack timestamps vertically for better readability at tiny size
+        margin-bottom: 1px !important;
+
+        &:last-child {
+          margin-bottom: 0 !important;
         }
       }
     }
@@ -336,48 +387,35 @@ app-pagination {
     .origin-field,
     .attribute {
       padding: 0 12px;
-      margin-bottom: 6px; // Reduced margin
-      align-items: flex-start; // Prevent centering
+      margin-bottom: 6px;
+      align-items: flex-start;
     }
 
     .origin-field {
-      margin: 6px 12px; // Reduced margins
-      padding: 3px 6px; // Reduced padding
-      font-size: 10px; // Made smaller
+      margin: 6px 12px;
+      padding: 3px 6px;
+      font-size: 10px;
     }
 
     .resource-types-field {
-      padding: 0 12px; // Match other attributes responsive padding
-      margin-bottom: 6px; // Reduced margin
-      align-self: stretch; // Prevent centering
+      margin-bottom: 6px;
 
-      .field-title {
-        font-size: 13px; // Slightly smaller
-        margin-bottom: 5px; // Reduced margin
-        text-align: left; // Ensure left alignment
+      .field-label {
+        font-size: 10px;
+        top: -8px;
+        left: 10px;
       }
 
-      .input-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px; // Reduced gap
-      }
-
-      .input-wrapper {
-        flex: 1;
-        min-height: 26px; // Reduced height
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--fg-border, #8a8886);
-        border-radius: 2px;
-        padding: 5px 8px; // Reduced padding
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      .resource-types-container {
+        min-height: 26px;
+        padding: 5px 8px;
       }
 
       .resource-types-list {
-        gap: 1px; // Reduced gap
+        gap: 1px;
 
         .resource-type-row {
-          padding: 0; // Minimal padding
+          padding: 0;
 
           .resource-link {
             font-size: 12px;
@@ -385,33 +423,43 @@ app-pagination {
 
           .resource-count {
             font-size: 10px;
-            padding: 1px 3px; // Reduced padding
-            border-radius: 5px; // Smaller radius
-            margin-left: 5px; // Reduced margin
+            padding: 1px 3px;
+            border-radius: 5px;
+            margin-left: 5px;
           }
         }
+      }
+
+      .type-pill {
+        font-size: 9px;
+        height: 13px;
+        line-height: 13px;
+        padding: 0 5px;
+        border-radius: 7px;
+        top: -7px;
+        right: calc(32px + 0.5rem + 0.25rem);
+        max-width: calc(100% - 32px - 1rem - 0.5rem);
       }
     }
 
     fluent-card-footer {
-      padding: 6px 12px; // Reduced padding
+      padding: 6px 12px;
 
       small {
-        font-size: 9px; // Made even smaller
-        line-height: 12px; // Tighter line height
-        text-align: left; // Left align timestamps
-      }
-    }
+        font-size: 5px !important; // Even smaller for mobile but still readable (reduced from 7px to 5px)
+        line-height: 1.1 !important;
+        text-align: right !important; // Maintain right alignment
+        width: 100% !important;
 
-    // Type pill responsive styling for 768px
-    .type-pill {
-      font-size: 9px;
-      height: 13px;
-      line-height: 13px;
-      padding: 0 5px;
-      border-radius: 7px;
-      top: -7px;
-      right: 6px;
+        span {
+          display: block !important;
+          margin-bottom: 1px !important;
+
+          &:last-child {
+            margin-bottom: 0 !important;
+          }
+        }
+      }
     }
   }
 
@@ -419,7 +467,7 @@ app-pagination {
     border-radius: 6px;
 
     fluent-card-header {
-      padding: 8px 10px; // Further reduced padding
+      padding: 8px 10px;
 
       fluent-card-title {
         font-size: 13px;
@@ -432,94 +480,91 @@ app-pagination {
       }
 
       fluent-badge {
-        font-size: 9px; // Made even smaller
-        padding: 1px 4px; // Further reduced padding
+        font-size: 9px;
+        padding: 1px 4px;
       }
     }
 
     .origin-field,
     .attribute {
       padding: 0 10px;
-      margin-bottom: 5px; // Further reduced margin
-      align-items: flex-start; // Prevent centering
+      margin-bottom: 5px;
+      align-items: flex-start;
     }
 
     .origin-field {
-      margin: 5px 10px; // Further reduced margins
-      padding: 2px 5px; // Further reduced padding
-      font-size: 9px; // Made even smaller
+      margin: 5px 10px;
+      padding: 2px 5px;
+      font-size: 9px;
     }
 
     .resource-types-field {
-      padding: 0 10px; // Match smaller mobile padding
-      margin-bottom: 5px; // Further reduced margin
-      align-self: stretch; // Prevent centering
+      margin-bottom: 5px;
 
-      .field-title {
-        font-size: 12px; // Smaller
-        margin-bottom: 4px; // Further reduced margin
-        text-align: left; // Ensure left alignment
+      .field-label {
+        font-size: 9px;
+        top: -7px;
+        left: 8px;
       }
 
-      .input-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px; // Further reduced gap
-      }
-
-      .input-wrapper {
-        flex: 1;
-        min-height: 24px; // Further reduced height
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--fg-border, #8a8886);
-        border-radius: 2px;
-        padding: 4px 6px; // Further reduced padding
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      .resource-types-container {
+        min-height: 24px;
+        padding: 4px 6px;
       }
 
       .resource-types-list {
-        gap: 1px; // Minimal gap
+        gap: 1px;
 
         .resource-type-row {
           flex-direction: column;
           align-items: flex-start;
-          gap: 1px; // Minimal gap
-          padding: 0; // No padding
+          gap: 1px;
+          padding: 0;
 
           .resource-link {
-            font-size: 11px; // Smaller
+            font-size: 11px;
           }
 
           .resource-count {
-            font-size: 9px; // Made even smaller
-            padding: 1px 2px; // Minimal padding
-            border-radius: 4px; // Smaller radius
-            margin-left: 0; // No margin when stacked
-            margin-top: 1px; // Small top margin when stacked
+            font-size: 9px;
+            padding: 1px 2px;
+            border-radius: 4px;
+            margin-left: 0;
+            margin-top: 1px;
           }
         }
+      }
+
+      .type-pill {
+        font-size: 8px;
+        height: 12px;
+        line-height: 12px;
+        padding: 0 4px;
+        border-radius: 6px;
+        top: -6px;
+        right: calc(32px + 0.5rem + 0.25rem);
+        max-width: calc(100% - 32px - 1rem - 0.5rem);
       }
     }
 
     fluent-card-footer {
-      padding: 5px 10px; // Minimal padding
+      padding: 5px 10px;
 
       small {
-        font-size: 8px; // Made very small
-        line-height: 11px; // Very tight line height
-        text-align: left; // Left align timestamps
-      }
-    }
+        font-size: 5px !important; // Even smaller for mobile but still readable (reduced from 7px to 5px)
+        line-height: 1.1 !important;
+        text-align: right !important; // Maintain right alignment
+        width: 100% !important;
 
-    // Type pill responsive styling for 480px
-    .type-pill {
-      font-size: 8px;
-      height: 12px;
-      line-height: 12px;
-      padding: 0 4px;
-      border-radius: 6px;
-      top: -6px;
-      right: 6px;
+        span {
+          display: block !important;
+          margin-bottom: 1px !important;
+
+          &:last-child {
+            margin-bottom: 0 !important;
+          }
+        }
+      }
     }
   }
 }
@@ -1301,15 +1346,4 @@ router-outlet + app-groups {
   border-radius: 2px;
   padding: 8px 12px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-// Type pill responsive styling for 768px
-.type-pill {
-  font-size: 9px;
-  height: 13px;
-  line-height: 13px;
-  padding: 0 5px;
-  border-radius: 7px;
-  top: -7px;
-  right: 6px;
 }

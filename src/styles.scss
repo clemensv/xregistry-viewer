@@ -76,6 +76,10 @@ html, body {
   margin: 0;
   font-size: 14px;
   color: theme.c(text);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 body {
@@ -84,6 +88,19 @@ body {
   color: #333;
   background-color: #fafafa;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ensure all elements use border-box sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Prevent horizontal overflow globally */
+.container, .main-content, .page-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Font size system for high information density */

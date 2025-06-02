@@ -35,6 +35,7 @@
            {{ group['description'] }}
          </div>
        </div>
+
        <!-- Group Attributes Display -->
        <ng-container *ngFor="let attrName of displayGroupAttributes">
         <div class="attribute simple-attribute group-attributes" *ngIf="hasValue(group[attrName])">
@@ -47,28 +48,45 @@
             <app-resource-document-item               [item]="{                key: attrName,                value: group[attrName],                type: groupAttributes[attrName]?.type || typeof group[attrName],                description: groupAttributes[attrName]?.description,                itemModel: groupAttributes[attrName],                isExpanded: false              }"              [nestingLevel]="0"              [initialExpanded]="false">            </app-resource-document-item>
           </div>
         </div>
-      </ng-container>        <!-- Resource Types Section - styled like single attribute -->
-      <div class="field-group resource-types-field" *ngIf="getResourceTypesItem(group)?.value.length > 0">
-        <label class="field-title">Resource Types</label>
-        <div class="input-row">
-          <div class="input-wrapper resource-types-container">
-            <div class="resource-types-list">
-              <ng-container *ngFor="let rt of getResourceTypesItem(group)?.value">
-                <div class="resource-type-row">
-                  <a [routerLink]="['/', groupType, group['id'], rt.name]" class="resource-link">{{ rt.name }}</a>
-                  <span *ngIf="rt.count !== undefined" class="resource-count">({{ rt.count }})</span>
+      </ng-container>        <!-- Resource Types Section - styled like other attributes -->
+      <div class="attribute simple-attribute group-attributes" *ngIf="getResourceTypesItem(group)?.value.length > 0">
+        <div class="attribute-value">
+          <div class="field-group resource-types-field">
+            <div class="value-box">
+              <!-- Field label positioned at top left like other attributes -->
+              <span class="field-label">Resource Types</span>
+
+              <!-- Value content area -->
+              <div class="value-content resource-types-container">
+                <div class="resource-types-list">
+                  <ng-container *ngFor="let rt of getResourceTypesItem(group)?.value">
+                    <div class="resource-type-row">
+                      <a [routerLink]="['/', groupType, group['id'], rt.name]" class="resource-link">{{ rt.name }}</a>
+                      <span *ngIf="rt.count !== undefined" class="resource-count">({{ rt.count }})</span>
+                    </div>
+                  </ng-container>
                 </div>
-              </ng-container>
+              </div>
+
+              <!-- Type pill positioned like other attributes -->
+              <span class="type-pill">Array, {{ getResourceTypesItem(group)?.value.length }} {{ getResourceTypesItem(group)?.value.length === 1 ? 'item' : 'items' }}</span>
+
+              <!-- Copy button for consistency -->
+              <button class="copy-btn"
+                      [attr.aria-label]="'Copy Resource Types value'"
+                      title="Copy value"
+                      (click)="$event.stopPropagation();">
+                <fluent-icon name="copy"></fluent-icon>
+              </button>
             </div>
-            <span class="type-pill">Array, {{ getResourceTypesItem(group)?.value.length }} {{ getResourceTypesItem(group)?.value.length === 1 ? 'item' : 'items' }}</span>
           </div>
         </div>
       </div>
       <fluent-card-footer>
-        <xx-small>
-          <span [title]="getFullText(formatDateShort(group['createdAt']))">Created: {{ formatDateShort(group['createdAt']) }}</span><br>
+        <small>
+          <span [title]="getFullText(formatDateShort(group['createdAt']))">Created: {{ formatDateShort(group['createdAt']) }}</span>
           <span [title]="getFullText(formatDateShort(group['modifiedAt']))">Modified: {{ formatDateShort(group['modifiedAt']) }}</span>
-        </xx-small>
+        </small>
       </fluent-card-footer>
     </fluent-card>
   </div>
