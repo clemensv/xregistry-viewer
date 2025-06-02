@@ -90,5 +90,21 @@
         <p>Error loading document: {{ documentError }}</p>
       </div>
     </section>
+
+    <!-- Document Items Section -->
+    <section *ngIf="documentItems && documentItems.length > 0" class="document-items-section">
+      <h3>
+        <fluent-icon name="list" class="items-icon"></fluent-icon>
+        Document Items
+      </h3>
+
+      <div class="doc-items-container">
+        <div class="doc-item" *ngFor="let item of documentItems">
+          <label>{{ item.label }}</label>
+          <span class="value" [title]="item.value">{{ item.value }}</span>
+          <span class="description" [title]="item.description">{{ item.description }}</span>
+        </div>
+      </div>
+    </section>
   </div>
 </div>

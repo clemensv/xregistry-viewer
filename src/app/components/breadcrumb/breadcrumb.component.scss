@@ -24,10 +24,14 @@
   @include tokens.radius('md');
 }
 
-/* Use CSS variables for theme support */
 .breadcrumb {
+  display: flex;         // force items on one line
+  align-items: center;    // vertically center items
   font-size: 0.82rem;
   color: var(--fg-text, #333);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; // optional ellipsis if content is too long
 
   &-link {
     color: var(--primary-color, #5e5ce6);

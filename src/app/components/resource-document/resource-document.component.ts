@@ -23,6 +23,7 @@ export class ResourceDocumentComponent implements OnInit {
   @Input() showAttributes: boolean = true;
   @Input() showDocument: boolean = true;
   @Input() initialExpanded: boolean = false;
+  @Input() documentItems: { label: string; value: string; description: string }[] = [];
 
   // Document handling properties
   isLoadingDocument = false;

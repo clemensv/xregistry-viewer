@@ -32,7 +32,7 @@ describe('ConfigComponent', () => {
 
     fixture = TestBed.createComponent(ConfigComponent);
     component = fixture.componentInstance;
-    
+
     // Initialize form immediately to prevent template errors
     component.ngOnInit();
   });
