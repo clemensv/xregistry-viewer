@@ -18,8 +18,8 @@ describe('GroupsComponent', () => {
       queryParamMap: of({
         get: jest.fn(() => '')
       }),
-      snapshot: { 
-        params: {}, 
+      snapshot: {
+        params: {},
         queryParams: {},
         paramMap: {
           get: jest.fn((key: string) => {

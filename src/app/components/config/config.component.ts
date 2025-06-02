@@ -96,10 +96,10 @@ export class ConfigComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loading.set(true);
     this.error.set(null);
-    
+
     // Initialize form immediately to prevent template errors
     this.initializeForm(null);
-    
+
     // Initialize configuration asynchronously
     setTimeout(() => this.initializeConfig(), 0);
   }
@@ -205,22 +205,22 @@ export class ConfigComponent implements OnInit, OnDestroy {
         const baseUrl = this.configForm.get('baseUrl')?.value;
         const oldBaseUrl = this.configService.getBaseUrl();
         const prevConfig = this.configService.getConfig() as Partial<AppConfig> || {};
-        
+
         const config: AppConfig = {
           ...prevConfig,
           apiEndpoints,
           modelUris,
           baseUrl,
           defaultDocumentView: prevConfig.defaultDocumentView ?? true,
-          features: prevConfig.features ?? { 
-            enableFilters: true, 
-            enableSearch: true, 
-            enableDocDownload: true 
+          features: prevConfig.features ?? {
+            enableFilters: true,
+            enableSearch: true,
+            enableDocDownload: true
           }
         };
 
         this.configService.saveConfig(config);
-        
+
         if (oldBaseUrl !== baseUrl) {
           this.baseUrlService.updateBaseHref();
           this.restartRequired.set(true);
@@ -238,17 +238,17 @@ export class ConfigComponent implements OnInit, OnDestroy {
   async resetToDefault(): Promise<void> {
     this.configService.resetToDefault();
     const config = await this.configService.loadConfigFromJson('/config.json');
-    
+
     while (this.apiEndpoints.length > 0) this.apiEndpoints.removeAt(0);
-    (config?.apiEndpoints || []).forEach((url: string) => 
+    (config?.apiEndpoints || []).forEach((url: string) =>
       this.apiEndpoints.push(this.fb.control(url, [Validators.required, Validators.pattern('https?://.*')]))
     );
-    
+
     while (this.modelUris.length > 0) this.modelUris.removeAt(0);
-    (config?.modelUris || []).forEach((url: string) => 
+    (config?.modelUris || []).forEach((url: string) =>
       this.modelUris.push(this.fb.control(url, [Validators.required]))
     );
-    
+
     this.configForm.patchValue({ baseUrl: config?.baseUrl || '/' });
     this.baseUrlService.updateBaseHref();
     this.showNotification('Configuration reset to defaults');

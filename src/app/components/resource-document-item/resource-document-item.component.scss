@@ -63,26 +63,55 @@
   flex-direction: column;
   gap: 0.5rem;
 
-  .field-title {
-    display: block;
-    font-weight: 600;
-    color: var(--fg-text, #323130);
-    font-size: 0.875rem;
-    margin: 0;
-    flex-shrink: 0;
-    min-width: 120px; // Give label some minimum width
-  }
-
-  .input-row {
+  // Value box contains everything and extends full width
+  .value-box {
+    position: relative; // ensure positioning context
     display: flex;
-    align-items: center; // Center align all elements (label, input, copy button)
+    align-items: center;
     gap: 0.5rem;
+    width: 100%;
+
+    .info-icon {
+      position: absolute;
+      bottom: 6px;  // adjust as needed to be flush
+      right: -0.6rem;   // adjust as needed to be flush
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 10px;
+      height: 10px;
+      color: var(--fg-secondary-text, #605e5c);
+      cursor: default;
+
+      fluent-icon {
+        font-size: 6px;
+        line-height: 1;
+      }
+    }
   }
 
-  .input-wrapper {
-    position: relative;
+  // Label positioned at top left, no box, just text
+  .field-label {
+    position: absolute;
+    top: -9px;
+    left: 12px;
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg-secondary-text, #605e5c);
+    background: var(--bg-card, #ffffff);
+    z-index: 10;
+    white-space: nowrap;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  // Value content takes all available space
+  .value-content {
     flex: 1;
-    min-width: 0;
+    min-width: 20ch;
+    /* Add relative positioning so its children can be positioned relative to it,
+       if you opt to move the info icon into it in the future. */
+    position: relative;
   }
 
   // Keep existing Fluent input styling
@@ -112,7 +141,7 @@
     }
   }
 
-  // URL and XID links styling - keep Fluent design
+  // URL and XID links - full width
   .url-link,
   .xid-link {
     display: inline-flex;
@@ -137,13 +166,13 @@
     }
 
     fluent-icon {
-      margin-left: 0.5rem;
+      margin-left: auto;
       flex-shrink: 0;
       font-size: 12px;
     }
   }
 
-  // Any type display - keep Fluent design
+  // Any value display - full width
   .any-value {
     height: auto;
     min-height: 32px;
@@ -153,31 +182,14 @@
     background: var(--bg-card, #ffffff);
     width: 100%;
     overflow: hidden;
-    display: flex;
-    align-items: flex-start;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 14px;
   }
 
-  // Type pill styling - positioned above input, hugging top line
-  .type-pill {
-    position: absolute;
-    top: -8px; // Adjusted for smaller height
-    right: 8px; // Align with right edge of input, accounting for padding
-    height: 15px; // 3/4 of original 20px
-    padding: 0 6px; // Reduced padding for smaller height
-    font-size: 10px; // Slightly smaller font for better proportion
-    font-weight: 500;
-    line-height: 15px;
-    color: #ffffff;
-    background: #0078d4; // Fluent 2 Communication Blue - primary brand color
-    border-radius: 8px; // Adjusted for smaller height
-    white-space: nowrap;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    z-index: 10;
+  // Field description - with ellipsis and tooltip
+  .field-desc {
+    display: none;
   }
 
-  // Copy button styling - keep Fluent design
+  // Copy button remains compact
   .copy-btn {
     width: 32px;
     height: 32px;
@@ -202,29 +214,43 @@
     }
   }
 
-  // Field description - keep Fluent design
-  .field-desc {
-    margin: 0;
-    font-size: 12px;
-    font-style: italic;
-    color: var(--fg-secondary-text, #605e5c);
+  // Type pill styling - keep existing positioning
+  .type-pill {
+    position: absolute;
+    top: -8px;
+    /* Copy-button width (32) + gap (0.5 rem).  No extra 8 px inset. */
+    right: calc(0.5rem + 32px);
+    height: 15px;
+    padding: 0 6px;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 15px;
+    color: #ffffff;
+    background: #0078d4;
+    border-radius: 8px;
+    white-space: nowrap;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10;
   }
 
   // Responsive adjustments
   @media (max-width: 768px) {
-    .field-title {
-      min-width: 100px;
+    .field-label {
+      font-size: 10px;
+      top: -8px;
+      left: 10px;
     }
 
     .type-pill {
-      font-size: 9px; // Slightly smaller for mobile
-      height: 13px; // 3/4 of mobile size
+      /* keep proportional offset on small screens */
+      right: calc(32px + 0.5rem);
+      font-size: 9px;
+      height: 13px;
       line-height: 13px;
       padding: 0 5px;
-      top: -7px; // Adjusted for smaller height
+      top: -7px;
       right: 6px;
-      border-radius: 7px; // Adjusted for smaller height
+      border-radius: 7px;
     }
   }
 

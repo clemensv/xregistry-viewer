@@ -43,12 +43,20 @@
     gap: 0.5rem;
     width: 100%;
 
+    /* Ensure input-row children expand horizontally */
     .input-wrapper {
       display: flex;
       align-items: center;
       gap: 0.375rem;
-      flex: 1;
+      flex: 1 1 100%;  // Modified: allow the input wrapper to grow and shrink to 100% width
       min-width: 0;
+
+      // For resource-type-related content, force full width
+      &.resource-types-container {
+        width: 100%;
+        flex: 1 1 100%;
+        min-width: 0;
+      }
 
       // Type pill
       .type-pill {
@@ -63,6 +71,8 @@
         flex-shrink: 0;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        margin-left: auto;    // Pushes the pill to the right edge
+        margin-right: 0.5rem; // Adds the desired right gap
       }
 
       // Input fields

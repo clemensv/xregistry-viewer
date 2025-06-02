@@ -40,13 +40,15 @@
 
   <!-- Simple attribute display with new field-group layout -->
   <div *ngIf="isSimpleValue(item.value)" class="field-group" [class.full]="shouldUseFullWidth()">
-    <div class="input-row">
-      <label class="field-title" [for]="getFieldId()">{{ item.key }}</label>
+    <div class="value-box">
+      <!-- Label remains outside but overlaid via absolute positioning -->
+      <span class="field-label">{{ item.key }}</span>
 
-      <div class="input-wrapper">
-        <span class="type-pill">{{ getDisplayType() }}</span>
+      <!-- Remove type pill from here -->
 
-        <!-- URL link display -->
+      <!-- Value content now becomes the positioned container -->
+      <div class="value-content">
+        <!-- Existing value display elements -->
         <a *ngIf="isUrl(item.value)"
            [href]="item.value"
            target="_blank"
@@ -89,8 +91,19 @@
                [value]="getDisplayValue()"
                class="text-input"
                readonly>
+
+
+        <!-- Info icon moved inside value-content -->
+        <span *ngIf="item.description" class="info-icon" title="{{ item.description }}">
+          <fluent-icon name="info"></fluent-icon>
+        </span>
       </div>
 
+       <!-- Type pill repositioned inside value-content -->
+        <span *ngIf="getDisplayType()" class="type-pill">{{ getDisplayType() }}</span>
+
+
+      <!-- Copy button remains as is -->
       <button class="copy-btn"
               [attr.aria-label]="'Copy ' + item.key + ' value'"
               title="Copy value"
@@ -99,7 +112,6 @@
       </button>
     </div>
 
-    <p *ngIf="item.description" class="field-desc">{{ item.description }}</p>
   </div>  <!-- Expanded content for arrays and objects -->
   <div *ngIf="isExpandable() && isExpanded()"
        class="expanded-content"
