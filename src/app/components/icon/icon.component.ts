@@ -33,6 +33,16 @@ import { BehaviorSubject, Observable, catchError, map, of, shareReplay, switchMa
       display: inline-block;
       vertical-align: middle;
     }
+
+    /* Dark mode SVG icon inversion */
+    :host-context(body.theme-dark) .fluent-icon svg {
+      filter: invert(1);
+    }
+
+    /* Ensure proper contrast for colored icons in dark mode */
+    :host-context(body.theme-dark) .fluent-icon svg[fill*="currentColor"] {
+      filter: none;
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

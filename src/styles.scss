@@ -496,6 +496,16 @@ body.theme-dark {
   fluent-icon {
     color: var(--colorNeutralForeground1);
 
+    /* SVG icon inversion for dark mode */
+    svg {
+      filter: invert(1);
+    }
+
+    /* Preserve currentColor icons without inversion */
+    svg[fill*="currentColor"] {
+      filter: none;
+    }
+
     /* Ensure proper color inheritance in different contexts */
     &.warning-icon {
       color: var(--warning-foreground-rest, #ffb900);
@@ -504,6 +514,23 @@ body.theme-dark {
     &.loading-spinner {
       color: var(--colorBrandBackground, #0078d4);
     }
+  }
+
+  /* Global SVG inversion for dark mode (excluding logos and specific elements) */
+  svg:not(.logo):not([data-no-invert]) {
+    filter: invert(1);
+  }
+
+  /* Preserve currentColor SVGs without inversion */
+  svg[fill*="currentColor"]:not(.logo):not([data-no-invert]) {
+    filter: none;
+  }
+
+  /* Exclude logo images from inversion */
+  .logo,
+  .title-logo,
+  img[src*="logo"] {
+    filter: none !important;
   }
 
   /* Button context icons */
