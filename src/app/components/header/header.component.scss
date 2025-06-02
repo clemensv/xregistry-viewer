@@ -56,7 +56,12 @@
 .breadcrumb-container {
   background-color: var(--bg-card, white);
   border-bottom: 1px solid var(--fg-divider, #e0e0e0);
-  padding: 0;
+  padding: 0 0 0 1rem;
+
+  app-breadcrumb {
+    display: block;
+    width: 100%;
+  }
 }
 
 /* Logo styles specific to the header component */

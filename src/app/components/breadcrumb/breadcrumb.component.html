@@ -1,21 +1,26 @@
 <nav class="breadcrumb" aria-label="breadcrumb">
-  <a (click)="onHomeClick()" class="breadcrumb-home" title="Home" style="display: inline-flex; align-items: center; height: 1.5em; vertical-align: middle; margin-right: 0.5em; cursor: pointer;">
-    <fluent-icon name="home" style="font-size: 1.5em; color: #333; line-height: 1;"></fluent-icon>
+  <a (click)="onHomeClick()"
+     class="breadcrumb-home"
+     title="Home"
+     role="button"
+     tabindex="0"
+     (keydown)="onHomeKeydown($event)">
+    <fluent-icon name="home"></fluent-icon>
   </a>
+
   <ng-container *ngIf="breadcrumbs$ | async as breadcrumbs">
-    <div *ngFor="let crumb of breadcrumbs; let i = index; let isLast = last" class="breadcrumb-item">
-      <ng-container *ngIf="!isLast">
-        <a *ngIf="i === 1" [routerLink]="crumb.url" class="breadcrumb-link">
-          {{ crumb.label }}
-        </a>
-        <a *ngIf="i !== 1" [routerLink]="crumb.url" class="breadcrumb-link">
-          {{ crumb.label }}
-        </a>
+    <ng-container *ngFor="let crumb of breadcrumbs; let i = index; let isLast = last">
+      <div class="breadcrumb-item">
         <span class="breadcrumb-separator">/</span>
-      </ng-container>
-      <span *ngIf="isLast" class="breadcrumb-current">
-        {{ crumb.label }}
-      </span>
-    </div>
+        <ng-container *ngIf="!isLast">
+          <a [routerLink]="crumb.url" class="breadcrumb-link">
+            {{ crumb.label }}
+          </a>
+        </ng-container>
+        <span *ngIf="isLast" class="breadcrumb-current">
+          {{ crumb.label }}
+        </span>
+      </div>
+    </ng-container>
   </ng-container>
 </nav>

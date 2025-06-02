@@ -93,4 +93,14 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
     this.routePersistenceService.clearStoredRoute();
     this.router.navigate(['/']);
   }
+
+  /**
+   * Handle keyboard events for home button accessibility
+   */
+  onHomeKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.onHomeClick();
+    }
+  }
 }

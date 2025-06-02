@@ -11,6 +11,22 @@
 
 @import '../node_modules/highlight.js/styles/default.css';
 
+/* CSS Custom Properties for consistent theming */
+:root {
+  /* Primary colors */
+  --primary-color: #{theme.$primary-color};
+  --primary-color-hover: #{color.adjust(theme.$primary-color, $lightness: -5%)};
+
+  /* Background colors */
+  --bg-card: #{theme.bg(card)};
+  --bg-hover: #{theme.bg(hover)};
+
+  /* Foreground colors */
+  --fg-text: #{theme.fg(text)};
+  --fg-secondary-text: #{theme.fg(secondary-text)};
+  --fg-divider: #{theme.fg(divider)};
+}
+
 /* Remove conflicting header toolbar styles - let component handle its own styling */
 
 /* Standardized Icon styles - 16px consistently */
