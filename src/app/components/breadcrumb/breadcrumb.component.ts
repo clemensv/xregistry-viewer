@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, AfterViewInit, Inject, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap, catchError } from 'rxjs/operators';
 import { Observable, of, forkJoin } from 'rxjs';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -37,44 +37,104 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
       filter(event => event instanceof NavigationEnd),
       switchMap(() => {
         const segments = this.router.url.split('/').filter((seg: string) => seg);
+
+        // If no segments, return empty breadcrumbs
+        if (segments.length === 0) {
+          return of([]);
+        }
+
         return this.modelService.getRegistryModel().pipe(
           switchMap(model => {
             const observables = segments.map((seg: string, idx: number) => {
               const url = '/' + segments.slice(0, idx + 1).join('/');
-              if (idx === 0) {
-                // group type
-                const grp = model.groups[seg];
-                return of({ label: grp?.plural || seg, url });
+
+              try {
+                if (idx === 0) {
+                  // group type - use model data with fallback to segment
+                  const grp = model.groups?.[seg];
+                  const label = grp?.plural || seg;
+                  console.log(`Breadcrumb: Group type ${seg} -> ${label}`);
+                  return of({ label, url });
+                }
+                if (idx === 1) {
+                  // group id - try API call with fallback to segment
+                  console.log(`Breadcrumb: Loading group ${segments[0]}/${seg}`);
+                  return this.registryService.getGroup(segments[0], seg).pipe(
+                    map(g => {
+                      const label = g.name || seg;
+                      console.log(`Breadcrumb: Group ${segments[0]}/${seg} -> ${label}`);
+                      return { label, url };
+                    }),
+                    catchError((error) => {
+                      console.warn(`Breadcrumb: Failed to load group ${segments[0]}/${seg}:`, error.status || error.message);
+                      return of({ label: seg, url });
+                    })
+                  );
+                }
+                if (idx === 2) {
+                  // resource type - use model data with fallback to segment
+                  const resType = model.groups?.[segments[0]]?.resources?.[seg];
+                  const label = resType?.plural || seg;
+                  console.log(`Breadcrumb: Resource type ${seg} -> ${label}`);
+                  return of({ label, url });
+                }
+                if (idx === 3) {
+                  // resource id - try API call with fallback to segment
+                  console.log(`Breadcrumb: Loading resource ${segments[0]}/${segments[1]}/${segments[2]}/${seg}`);
+                  return this.registryService.getResource(
+                    segments[0],
+                    segments[1],
+                    segments[2],
+                    seg
+                  ).pipe(
+                    map(r => {
+                      const label = r.name || seg;
+                      console.log(`Breadcrumb: Resource ${segments[0]}/${segments[1]}/${segments[2]}/${seg} -> ${label}`);
+                      return { label, url };
+                    }),
+                    catchError((error) => {
+                      console.warn(`Breadcrumb: Failed to load resource ${segments[0]}/${segments[1]}/${segments[2]}/${seg}:`, error.status || error.message);
+                      return of({ label: seg, url });
+                    })
+                  );
+                }
+                if (seg === 'versions') {
+                  console.log(`Breadcrumb: Versions segment`);
+                  return of({ label: 'Versions', url });
+                }
+                // version id or other fallback - always use segment as label
+                console.log(`Breadcrumb: Generic segment ${seg}`);
+                return of({ label: seg, url });
+              } catch (error) {
+                console.warn(`Breadcrumb: Error processing segment ${idx} (${seg}):`, error);
+                return of({ label: seg, url });
               }
-              if (idx === 1) {
-                // group id
-                return this.registryService.getGroup(segments[0], seg).pipe(
-                  map(g => ({ label: g.name || seg, url }))
-                );
-              }
-              if (idx === 2) {
-                // resource type
-                const resType = model.groups[segments[0]]?.resources[seg];
-                return of({ label: resType?.plural || seg, url });
-              }
-              if (idx === 3) {
-                // resource id
-                return this.registryService.getResource(
-                  segments[0],
-                  segments[1],
-                  segments[2],
-                  seg
-                ).pipe(map(r => ({ label: r.name || seg, url })));
-              }
-              if (seg === 'versions') {
-                return of({ label: 'Versions', url });
-              }
-              // version id or fallback
-              return of({ label: seg, url });
             });
+
             return forkJoin(observables);
+          }),
+          catchError((error) => {
+            // If model loading fails, create breadcrumbs from URL segments only
+            console.warn('Breadcrumb: Model loading failed, using URL segments as labels:', error);
+            const segments = this.router.url.split('/').filter((seg: string) => seg);
+            const fallbackBreadcrumbs = segments.map((seg: string, idx: number) => {
+              const url = '/' + segments.slice(0, idx + 1).join('/');
+              return { label: seg, url };
+            });
+            console.log('Breadcrumb: Fallback breadcrumbs:', fallbackBreadcrumbs);
+            return of(fallbackBreadcrumbs);
           })
         );
+      }),
+      catchError((error) => {
+        // Final fallback - if everything fails, at least show the current page
+        console.error('Breadcrumb: Complete failure, using current URL:', error);
+        const segments = this.router.url.split('/').filter((seg: string) => seg);
+        if (segments.length > 0) {
+          const lastSegment = segments[segments.length - 1];
+          return of([{ label: lastSegment, url: this.router.url }]);
+        }
+        return of([]);
       })
     );
   }

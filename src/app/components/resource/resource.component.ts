@@ -46,6 +46,13 @@ export class ResourceComponent implements OnInit, OnDestroy {
   private initialLoad = true;
   loadingProgress = true; // Tracks if we're still expecting more data
 
+  // Error handling properties
+  hasError = false;
+  errorMessage: string | null = null;
+  errorDetails: any = null;
+  versionsError = false;
+  versionsErrorMessage: string | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private registry: RegistryService,
@@ -161,18 +168,23 @@ export class ResourceComponent implements OnInit, OnDestroy {
    * Loads the default version of the resource
    */
   loadDefaultVersion(): void {
+    this.hasError = false;
+    this.errorMessage = null;
+    this.errorDetails = null;
+
     this.defaultVersion$ = this.registry
       .getResourceDetail(
         this.groupType,
         this.groupId,
         this.resourceType,
         this.resourceId,
-this.resourceTypeData?.hasdocument !== false
+        this.resourceTypeData?.hasdocument !== false
       )
       .pipe(
         tap((version) => {
           // Set loading to false when the default version is loaded
           this.loading = false;
+          this.hasError = false;
           this.defaultVersionOrigin = version?.origin;
           this.documentationUrl = version?.['documentation'];
 
@@ -194,7 +206,21 @@ this.resourceTypeData?.hasdocument !== false
         catchError((err) => {
           console.error('Error loading default version:', err);
           this.loading = false;
-          return of({} as ResourceDocument);
+          this.hasError = true;
+          this.errorDetails = err;
+
+          // Set appropriate error message based on error type
+          if (err.status === 404) {
+            this.errorMessage = `Resource "${this.resourceId}" not found in ${this.groupType}/${this.groupId}/${this.resourceType}.`;
+          } else if (err.status === 0) {
+            this.errorMessage = `Unable to connect to the registry. Please check your network connection.`;
+          } else if (err.status >= 500) {
+            this.errorMessage = `Server error occurred while loading the resource. Please try again later.`;
+          } else {
+            this.errorMessage = `Failed to load resource: ${err.message || 'Unknown error'}`;
+          }
+
+          return of(null as any);
         })
       );
   }
@@ -203,6 +229,9 @@ this.resourceTypeData?.hasdocument !== false
    * Loads paginated version history using relation-based links
    */
   loadVersions(pageRel: string = ''): void {
+    this.versionsError = false;
+    this.versionsErrorMessage = null;
+
     const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.getResourceVersions(
       this.groupType,
@@ -213,6 +242,7 @@ this.resourceTypeData?.hasdocument !== false
       filter
     ).subscribe({
       next: (page) => {
+        this.versionsError = false;
         const items = page.items.sort((a, b) => new Date(b.modifiedAt || b['modifiedat']).getTime() - new Date(a.modifiedAt || a['modifiedat']).getTime());
         // mark default version
         const dv = items.find(v => v.isDefault);
@@ -229,6 +259,18 @@ this.resourceTypeData?.hasdocument !== false
         console.error('ResourceComponent: Error loading versions:', error);
         this.loading = false;
         this.loadingProgress = false;
+        this.versionsError = true;
+
+        // Set appropriate error message for versions
+        if (error.status === 404) {
+          this.versionsErrorMessage = `Version history not found for resource "${this.resourceId}".`;
+        } else if (error.status === 0) {
+          this.versionsErrorMessage = `Unable to connect to the registry to load version history.`;
+        } else if (error.status >= 500) {
+          this.versionsErrorMessage = `Server error occurred while loading version history.`;
+        } else {
+          this.versionsErrorMessage = `Failed to load version history: ${error.message || 'Unknown error'}`;
+        }
       }
     });
   }

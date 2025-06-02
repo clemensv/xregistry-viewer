@@ -32,6 +32,133 @@
 
 // Spin animation is now available globally from styles.scss
 
+/* Empty state and error state styling */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty-state-content {
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.empty-state-icon {
+  font-size: 4rem !important;
+  color: var(--fg-secondary-text, #6c757d);
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--fg-text, #2c3e50);
+  margin: 0;
+}
+
+.empty-state-message {
+  font-size: 1rem;
+  color: var(--fg-secondary-text, #6c757d);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.error-state {
+  .empty-state-icon.error-icon {
+    color: var(--error-color, #dc3545);
+    opacity: 0.8;
+  }
+
+  .empty-state-title {
+    color: var(--error-color, #dc3545);
+  }
+}
+
+.error-details {
+  margin-top: 1rem;
+  text-align: left;
+  max-width: 600px;
+
+  details {
+    cursor: pointer;
+
+    summary {
+      color: var(--fg-link, #007bff);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      outline: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .error-technical {
+    background: var(--bg-surface, #f8f9fa);
+    border: 1px solid var(--fg-divider, #dee2e6);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+
+    p {
+      margin: 0.5rem 0;
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    strong {
+      color: var(--fg-text, #2c3e50);
+    }
+  }
+}
+
+.error-actions {
+  margin-top: 1.5rem;
+}
+
+/* Versions error styling */
+.versions-error {
+  padding: 1rem;
+  text-align: center;
+  background: var(--bg-surface, #f8f9fa);
+  border: 1px solid var(--fg-divider, #dee2e6);
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+
+    .error-icon {
+      color: var(--warning-color, #ffc107);
+      font-size: 1.5rem;
+    }
+
+    .error-message {
+      color: var(--fg-secondary-text, #6c757d);
+      margin: 0;
+      font-size: 0.9rem;
+    }
+  }
+}
+
 .resource-container {
   padding: 1rem;
   width: 100%;

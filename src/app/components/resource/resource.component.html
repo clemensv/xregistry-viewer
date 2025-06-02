@@ -10,113 +10,163 @@
     [searchResultsText]="hasMultipleVersions && currentSearchTerm ? 'Showing ' + (filteredVersionsList?.length || 0) + ' versions (filtered from ' + (versionsList?.length || 0) + ')' : ''">
   </app-page-header>
 
+  <!-- Loading state -->
+  <div *ngIf="loading && !hasError" class="empty-state">
+    <div class="empty-state-content">
+      <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
+      <h3 class="empty-state-title">Loading Resource</h3>
+      <p class="empty-state-message">
+        Please wait while we load the resource details from the registry...
+      </p>
+    </div>
+  </div>
+
+  <!-- Error state for resource loading -->
+  <div *ngIf="hasError && !loading" class="empty-state error-state">
+    <div class="empty-state-content">
+      <fluent-icon name="error" class="empty-state-icon error-icon"></fluent-icon>
+      <h3 class="empty-state-title">Unable to Load Resource</h3>
+      <p class="empty-state-message">
+        {{ errorMessage }}
+      </p>
+      <div *ngIf="errorDetails" class="error-details">
+        <details>
+          <summary>View technical details</summary>
+          <div class="error-technical">
+            <p><strong>Error Code:</strong> {{ errorDetails.status || 'Unknown' }}</p>
+            <p><strong>Error Message:</strong> {{ errorDetails.message || errorDetails.statusText || 'No additional details' }}</p>
+            <p><strong>Resource Path:</strong> {{ groupType }}/{{ groupId }}/{{ resourceType }}/{{ resourceId }}</p>
+          </div>
+        </details>
+      </div>
+      <div class="error-actions">
+        <fluent-button appearance="outline" (click)="loadDefaultVersion()">
+          <fluent-icon slot="start" name="refresh"></fluent-icon>
+          Retry Loading
+        </fluent-button>
+      </div>
+    </div>
+  </div>
+
   <!-- Progressive loading indicator -->
-  <div class="loading-progress" *ngIf="loadingProgress && (versionsList.length > 0 || (defaultVersion$ | async))">
+  <div class="loading-progress" *ngIf="loadingProgress && (versionsList.length > 0 || (defaultVersion$ | async)) && !hasError">
     <div class="loading-indicator">
       <fluent-icon name="arrow_sync_circle" class="loading-spinner"></fluent-icon>
       <span>Loading resource data from additional endpoints...</span>
     </div>
   </div>
 
-  <!-- Multiple versions mode with sidebar layout -->
-  <ng-container *ngIf="hasMultipleVersions">
-    <div class="resource-layout">
-      <!-- Main content area -->
-      <div class="main-content">
-        <div *ngIf="defaultVersion$ | async as defaultVersion" class="default-version-section">
-          <h3>Default Version: {{ defaultVersion.id }}</h3>
-          <div class="origin-field" *ngIf="defaultVersion.origin">Origin: {{ defaultVersion.origin }}</div>
-          <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
-          <app-resource-document
-            [resourceDocument]="defaultVersion"
-            [resourceType]="resourceType"
-            [resourceAttributes]="resourceAttributes"
-            [hasDocumentSupport]="resourceTypeData?.hasdocument"
-            [showAttributes]="true"
-            [showDocument]="true"
-            [initialExpanded]="true">
-          </app-resource-document>
-        </div>
-      </div>
-
-      <!-- Right sidebar with documentation and version history -->
-      <div class="right-sidebar">
-        <!-- Documentation Viewer (if available) -->
-        <app-documentation-viewer
-          *ngIf="documentationUrl"
-          [documentationUrl]="documentationUrl"
-          [resourceId]="resourceId">
-        </app-documentation-viewer>
-
-        <!-- Version History Sidebar -->
-        <div class="versions-sidebar">
-          <div class="sidebar-header">
-            <h3>Version History</h3>
-            <div class="search-results-info" *ngIf="currentSearchTerm">
-              <span class="results-count">
-                Showing {{ filteredVersionsList.length }} versions (filtered from {{ versionsList.length }})
-              </span>
-            </div>
-            <app-pagination
-              *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)"
-              [links]="pageLinks"
-              (pageChange)="onVersionPageChange($event)">
-            </app-pagination>
-          </div>
-
-          <div class="versions-list-compact">
-            <div *ngFor="let v of filteredVersionsList"
-                 class="version-item"
-                 [class.default-version]="v.isDefault">
-              <div class="version-header">
-                <span class="version-id">{{ v.id || v.versionid }}</span>
-                <span *ngIf="v.isDefault" class="default-badge">Default</span>
-              </div>
-              <div class="version-meta">
-                <small>Modified: {{ (v.modifiedAt || v.modifiedat) | date:'short' }}</small>
-              </div>
-              <a [routerLink]="['versions', v.id || v.versionid]" class="btn-view-compact">View</a>
-            </div>
-
-            <div *ngIf="filteredVersionsList.length === 0 && versionsList.length > 0" class="no-versions">
-              <p>No versions match the search criteria.</p>
-            </div>
-
-            <div *ngIf="versionsList.length === 0" class="no-versions">
-              <p>No version history available.</p>
-            </div>
+  <!-- Main content when resource is loaded successfully -->
+  <ng-container *ngIf="!hasError && !loading">
+    <!-- Multiple versions mode with sidebar layout -->
+    <ng-container *ngIf="hasMultipleVersions">
+      <div class="resource-layout">
+        <!-- Main content area -->
+        <div class="main-content">
+          <div *ngIf="defaultVersion$ | async as defaultVersion" class="default-version-section">
+            <h3>Default Version: {{ defaultVersion.id }}</h3>
+            <div class="origin-field" *ngIf="defaultVersion.origin">Origin: {{ defaultVersion.origin }}</div>
+            <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
+            <app-resource-document
+              [resourceDocument]="defaultVersion"
+              [resourceType]="resourceType"
+              [resourceAttributes]="resourceAttributes"
+              [hasDocumentSupport]="resourceTypeData?.hasdocument"
+              [showAttributes]="true"
+              [showDocument]="true"
+              [initialExpanded]="true">
+            </app-resource-document>
           </div>
         </div>
+
+        <!-- Right sidebar with documentation and version history -->
+        <div class="right-sidebar">
+          <!-- Documentation Viewer (if available) -->
+          <app-documentation-viewer
+            *ngIf="documentationUrl"
+            [documentationUrl]="documentationUrl"
+            [resourceId]="resourceId">
+          </app-documentation-viewer>
+
+          <!-- Version History Sidebar -->
+          <div class="versions-sidebar">
+            <div class="sidebar-header">
+              <h3>Version History</h3>
+              <div class="search-results-info" *ngIf="currentSearchTerm">
+                <span class="results-count">
+                  Showing {{ filteredVersionsList.length }} versions (filtered from {{ versionsList.length }})
+                </span>
+              </div>
+              <app-pagination
+                *ngIf="pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)"
+                [links]="pageLinks"
+                (pageChange)="onVersionPageChange($event)">
+              </app-pagination>
+            </div>
+
+            <!-- Versions Error State -->
+            <div *ngIf="versionsError" class="versions-error">
+              <div class="error-content">
+                <fluent-icon name="warning" class="error-icon"></fluent-icon>
+                <p class="error-message">{{ versionsErrorMessage }}</p>
+                <fluent-button appearance="subtle" (click)="loadVersions()">
+                  <fluent-icon slot="start" name="refresh"></fluent-icon>
+                  Retry
+                </fluent-button>
+              </div>
+            </div>
+
+            <!-- Versions List -->
+            <div *ngIf="!versionsError" class="versions-list-compact">
+              <div *ngFor="let v of filteredVersionsList"
+                   class="version-item"
+                   [class.default-version]="v.isDefault">
+                <div class="version-header">
+                  <span class="version-id">{{ v.id || v.versionid }}</span>
+                  <span *ngIf="v.isDefault" class="default-badge">Default</span>
+                </div>
+                <div class="version-meta">
+                  <small>Modified: {{ (v.modifiedAt || v.modifiedat) | date:'short' }}</small>
+                </div>
+                <a [routerLink]="['versions', v.id || v.versionid]" class="btn-view-compact">View</a>
+              </div>
+
+              <div *ngIf="filteredVersionsList.length === 0 && versionsList.length > 0" class="no-versions">
+                <p>No versions match the search criteria.</p>
+              </div>
+
+              <div *ngIf="versionsList.length === 0" class="no-versions">
+                <p>No version history available.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </ng-container>
+
+    <!-- Single version mode -->
+    <ng-container *ngIf="!hasMultipleVersions && (defaultVersion$ | async) as version">
+      <!-- Documentation Viewer (if available) -->
+      <app-documentation-viewer
+        *ngIf="documentationUrl"
+        [documentationUrl]="documentationUrl"
+        [resourceId]="resourceId">
+      </app-documentation-viewer>
+
+      <div class="version-detail">
+        <h3>Version: {{ version.id }}</h3>
+
+        <!-- Use our new shared component -->
+        <app-resource-document
+          [resourceDocument]="version"
+          [resourceType]="resourceType"
+          [resourceAttributes]="resourceAttributes"
+          [hasDocumentSupport]="resourceTypeData?.hasdocument"
+          [showAttributes]="true"
+          [showDocument]="true"
+          [initialExpanded]="true">
+        </app-resource-document>
+      </div>
+    </ng-container>
   </ng-container>
-
-  <!-- Single version mode -->
-  <ng-container *ngIf="!hasMultipleVersions && (defaultVersion$ | async) as version">
-    <!-- Documentation Viewer (if available) -->
-    <app-documentation-viewer
-      *ngIf="documentationUrl"
-      [documentationUrl]="documentationUrl"
-      [resourceId]="resourceId">
-    </app-documentation-viewer>
-
-    <div class="version-detail">
-      <h3>Version: {{ version.id }}</h3>
-
-      <!-- Use our new shared component -->
-      <app-resource-document
-        [resourceDocument]="version"
-        [resourceType]="resourceType"
-        [resourceAttributes]="resourceAttributes"
-        [hasDocumentSupport]="resourceTypeData?.hasdocument"
-        [showAttributes]="true"
-        [showDocument]="true"
-        [initialExpanded]="true">
-      </app-resource-document>
-    </div>
-  </ng-container>
-
-  <div *ngIf="loading" class="loading-container">
-    <h2>Loading resource...</h2>
-  </div>
 </div>

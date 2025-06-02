@@ -14,7 +14,7 @@
   </app-page-header>
 
   <!-- Progressive loading indicator -->
-  <div class="loading-progress" *ngIf="loadingProgress && resourcesList.length > 0">
+  <div class="loading-progress" *ngIf="loadingProgress && resourcesList.length > 0 && !hasError">
     <div class="loading-indicator">
       <fluent-icon name="arrow_sync_circle" class="loading-spinner"></fluent-icon>
       <span>Loading more resources... ({{ resourcesList.length }} loaded)</span>
@@ -22,8 +22,35 @@
   </div>
 
   <div class="page-content">
+    <!-- Error state for resource loading -->
+    <div *ngIf="hasError && !loading" class="empty-state error-state">
+      <div class="empty-state-content">
+        <fluent-icon name="error" class="empty-state-icon error-icon"></fluent-icon>
+        <h3 class="empty-state-title">Unable to Load Resources</h3>
+        <p class="empty-state-message">
+          {{ errorMessage }}
+        </p>
+        <div *ngIf="errorDetails" class="error-details">
+          <details>
+            <summary>View technical details</summary>
+            <div class="error-technical">
+              <p><strong>Error Code:</strong> {{ errorDetails.status || 'Unknown' }}</p>
+              <p><strong>Error Message:</strong> {{ errorDetails.message || errorDetails.statusText || 'No additional details' }}</p>
+              <p><strong>Resource Path:</strong> {{ groupType }}/{{ groupId }}/{{ resourceType }}</p>
+            </div>
+          </details>
+        </div>
+        <div class="error-actions">
+          <fluent-button appearance="outline" (click)="retryLoadResources()">
+            <fluent-icon slot="start" name="refresh"></fluent-icon>
+            Retry Loading
+          </fluent-button>
+        </div>
+      </div>
+    </div>
+
     <!-- Cards View -->
-    <div *ngIf="!loading && viewMode === 'cards' && filteredResourcesList.length > 0" [ngClass]="{'single-resource': filteredResourcesList.length === 1}">
+    <div *ngIf="!loading && !hasError && viewMode === 'cards' && filteredResourcesList.length > 0" [ngClass]="{'single-resource': filteredResourcesList.length === 1}">
       <div class="grid-container">
         <div *ngFor="let res of filteredResourcesList" class="grid-item" [ngClass]="{'single-item': filteredResourcesList.length === 1}">
           <div class="resource-header">
@@ -52,7 +79,7 @@
     </div>
 
     <!-- List View -->
-    <div *ngIf="!loading && viewMode === 'list' && filteredResourcesList.length > 0" class="list-view">
+    <div *ngIf="!loading && !hasError && viewMode === 'list' && filteredResourcesList.length > 0" class="list-view">
       <table class="resources-table">
         <thead>
           <tr>
@@ -76,7 +103,7 @@
     </div>
 
     <!-- Loading state -->
-    <div *ngIf="loading" class="empty-state">
+    <div *ngIf="loading && !hasError" class="empty-state">
       <div class="empty-state-content">
         <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
         <h3 class="empty-state-title">Loading Resources</h3>
@@ -87,7 +114,7 @@
     </div>
 
     <!-- Empty search results -->
-    <div *ngIf="!loading && currentSearchTerm && filteredResourcesList.length === 0 && resourcesList.length > 0" class="empty-state">
+    <div *ngIf="!loading && !hasError && currentSearchTerm && filteredResourcesList.length === 0 && resourcesList.length > 0" class="empty-state">
       <div class="empty-state-content">
         <fluent-icon name="search" class="empty-state-icon"></fluent-icon>
         <h3 class="empty-state-title">No Matching Resources</h3>
@@ -99,7 +126,7 @@
     </div>
 
     <!-- No data state -->
-    <div *ngIf="!loading && !currentSearchTerm && resourcesList.length === 0" class="empty-state">
+    <div *ngIf="!loading && !hasError && !currentSearchTerm && resourcesList.length === 0" class="empty-state">
       <div class="empty-state-content">
         <fluent-icon name="document" class="empty-state-icon"></fluent-icon>
         <h3 class="empty-state-title">No Resources Available</h3>

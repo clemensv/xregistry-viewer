@@ -1,4 +1,43 @@
-<div class="version-detail" *ngIf="version$ | async as version; else loading">
+<!-- Loading state -->
+<div *ngIf="loading && !hasError" class="empty-state">
+  <div class="empty-state-content">
+    <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
+    <h3 class="empty-state-title">Loading Version Details</h3>
+    <p class="empty-state-message">
+      Please wait while we load the version details from the registry...
+    </p>
+  </div>
+</div>
+
+<!-- Error state -->
+<div *ngIf="hasError && !loading" class="empty-state error-state">
+  <div class="empty-state-content">
+    <fluent-icon name="error" class="empty-state-icon error-icon"></fluent-icon>
+    <h3 class="empty-state-title">Unable to Load Version</h3>
+    <p class="empty-state-message">
+      {{ errorMessage }}
+    </p>
+    <div *ngIf="errorDetails" class="error-details">
+      <details>
+        <summary>View technical details</summary>
+        <div class="error-technical">
+          <p><strong>Error Code:</strong> {{ errorDetails.status || 'Unknown' }}</p>
+          <p><strong>Error Message:</strong> {{ errorDetails.message || errorDetails.statusText || 'No additional details' }}</p>
+          <p><strong>Version Path:</strong> {{ groupType }}/{{ groupId }}/{{ resourceType }}/{{ resourceId }}/versions/{{ versionId }}</p>
+        </div>
+      </details>
+    </div>
+    <div class="error-actions">
+      <fluent-button appearance="outline" (click)="retryLoadVersion()">
+        <fluent-icon slot="start" name="refresh"></fluent-icon>
+        Retry Loading
+      </fluent-button>
+    </div>
+  </div>
+</div>
+
+<!-- Main content when version is loaded successfully -->
+<div class="version-detail" *ngIf="!hasError && !loading && (version$ | async) as version">
   <div *ngIf="version; else noData" class="version-content">
     <!-- Documentation Viewer (if available) -->
     <app-documentation-viewer
@@ -21,15 +60,14 @@
   </div>
 
   <ng-template #noData>
-    <div class="error-message">
-      <h2>Version data could not be loaded</h2>
-      <p>No data was returned from the API. Please check your connection and try again.</p>
+    <div class="empty-state">
+      <div class="empty-state-content">
+        <fluent-icon name="document" class="empty-state-icon"></fluent-icon>
+        <h3 class="empty-state-title">No Version Data</h3>
+        <p class="empty-state-message">
+          No data was returned from the API for this version. The version may exist but have no content.
+        </p>
+      </div>
     </div>
   </ng-template>
 </div>
-
-<ng-template #loading>
-  <div class="loading-container">
-    <h2>Loading version details...</h2>
-  </div>
-</ng-template>

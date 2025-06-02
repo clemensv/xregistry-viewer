@@ -44,6 +44,11 @@ export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
   private initialLoad = true;
   private userHasChangedView = false; // Track if user manually changed view mode
 
+  // Error handling properties
+  hasError = false;
+  errorMessage: string | null = null;
+  errorDetails: any = null;
+
   // Utility functions for template
   truncateText = truncateText;
   truncateDescription = truncateDescription;
@@ -170,10 +175,15 @@ export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   loadResources(pageRel: string = ''): void {
+    this.hasError = false;
+    this.errorMessage = null;
+    this.errorDetails = null;
+
     const filter = this.searchService.generateNameFilter(this.currentSearchTerm);
     this.registry.listResources(this.groupType, this.groupId, this.resourceType, pageRel, filter)
       .subscribe({
         next: (page) => {
+          this.hasError = false;
           this.debug.log('loadResources links:', page.links);
           this.resourcesList = page.items;
           // Process resources to ensure all required fields are present
@@ -199,17 +209,18 @@ export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
           }
 
           this.pageLinks = page.links;
-          this.totalCount = page.totalCount || 0;
-          this.debug.log(`Pagination info: totalCount=${this.totalCount}, pageSize=${page.pageSize}, currentPage=${page.currentPage}`);
+          this.totalCount = page.totalCount || this.resourcesList.length;
+
+          // Client-side filter
           this.applyClientSideFilter();
 
-          // Set default view mode based on smart logic (only on initial load and if user hasn't manually changed view)
-          if (!pageRel && this.initialLoad && !this.userHasChangedView) {
+          // Check if automatic view mode should be set
+          if (!this.userHasChangedView) {
             this.setSmartViewMode();
           }
 
           // Update loading state
-          if (this.loading && this.resourcesList.length > 0) {
+          if (this.loading && this.resourcesList.length >= 0) { // >= 0 to handle empty results
             this.loading = false;
           }
 
@@ -222,6 +233,20 @@ export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
           console.error('ResourcesComponent: Error loading resources:', error);
           this.loading = false;
           this.loadingProgress = false;
+          this.hasError = true;
+          this.errorDetails = error;
+
+          // Set appropriate error message based on error type
+          if (error.status === 404) {
+            this.errorMessage = `No ${this.resourceType} resources found in ${this.groupType}/${this.groupId}.`;
+          } else if (error.status === 0) {
+            this.errorMessage = `Unable to connect to the registry. Please check your network connection.`;
+          } else if (error.status >= 500) {
+            this.errorMessage = `Server error occurred while loading resources. Please try again later.`;
+          } else {
+            this.errorMessage = `Failed to load resources: ${error.message || 'Unknown error'}`;
+          }
+
           this.cdr.markForCheck();
         }
       });
@@ -355,5 +380,14 @@ export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
     // Force the model service to reload by clearing any cached data
     // This ensures we get fresh data from the new endpoints
     this.loadModelAndResources();
+  }
+
+  // Add retry method
+  retryLoadResources(): void {
+    this.hasError = false;
+    this.errorMessage = null;
+    this.errorDetails = null;
+    this.loading = true;
+    this.loadResources();
   }
 }

@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { switchMap, map, tap } from 'rxjs/operators';
+import { switchMap, map, tap, catchError } from 'rxjs/operators';
 import { RegistryService } from '../../services/registry.service';
 import { ResourceDocument } from '../../models/registry.model';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 import { ModelService } from '../../services/model.service';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 import { DocumentationViewerComponent } from '../documentation-viewer/documentation-viewer.component';
@@ -16,7 +16,8 @@ import { DebugService } from '../../services/debug.service';
   selector: 'app-version-detail',
   imports: [CommonModule, ResourceDocumentComponent, DocumentationViewerComponent],
   templateUrl: './version-detail.component.html',
-  styleUrls: ['./version-detail.component.scss']
+  styleUrls: ['./version-detail.component.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class VersionDetailComponent implements OnInit {
   version$!: Observable<ResourceDocument>;
@@ -33,6 +34,12 @@ export class VersionDetailComponent implements OnInit {
   cachedDocumentContent: string | null = null;
   versionOrigin?: string;
   documentationUrl?: string;
+
+  // Error handling properties
+  hasError = false;
+  errorMessage: string | null = null;
+  errorDetails: any = null;
+  loading = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -56,6 +63,12 @@ export class VersionDetailComponent implements OnInit {
         resourceId: this.resourceId,
         versionId: this.versionId
       });
+
+      // Reset error state
+      this.hasError = false;
+      this.errorMessage = null;
+      this.errorDetails = null;
+      this.loading = true;
 
       // First load metadata, then load the version details
       this.version$ = this.modelService.getRegistryModel().pipe(
@@ -85,8 +98,29 @@ export class VersionDetailComponent implements OnInit {
         }),
         tap((versionDetail: ResourceDocument) => {
           this.debug.log('Version detail loaded:', versionDetail);
+          this.loading = false;
+          this.hasError = false;
           this.versionOrigin = versionDetail?.origin;
           this.documentationUrl = versionDetail?.['documentation'];
+        }),
+        catchError((err) => {
+          this.debug.error('Error loading version detail:', err);
+          this.loading = false;
+          this.hasError = true;
+          this.errorDetails = err;
+
+          // Set appropriate error message based on error type
+          if (err.status === 404) {
+            this.errorMessage = `Version "${this.versionId}" not found for resource "${this.resourceId}" in ${this.groupType}/${this.groupId}/${this.resourceType}.`;
+          } else if (err.status === 0) {
+            this.errorMessage = `Unable to connect to the registry. Please check your network connection.`;
+          } else if (err.status >= 500) {
+            this.errorMessage = `Server error occurred while loading the version details. Please try again later.`;
+          } else {
+            this.errorMessage = `Failed to load version details: ${err.message || 'Unknown error'}`;
+          }
+
+          return of(null as any);
         })
       );
     });
@@ -341,5 +375,16 @@ export class VersionDetailComponent implements OnInit {
         description: this.resourceAttributes[key]?.description || '',
         type: this.resourceAttributes[key]?.type
       }));
+  }
+
+  // Add retry method
+  retryLoadVersion(): void {
+    this.hasError = false;
+    this.errorMessage = null;
+    this.errorDetails = null;
+    this.loading = true;
+
+    // Trigger a reload by re-subscribing to the route params
+    this.ngOnInit();
   }
 }
