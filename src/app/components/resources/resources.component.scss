@@ -243,7 +243,7 @@ h4 {
 }
 
 .resource-footer {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--fg-divider, #f0f0f0);
   padding-top: 0.5rem;
   margin-top: 0.6rem;
 }

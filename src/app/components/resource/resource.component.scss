@@ -61,7 +61,7 @@
   .attribute {
     margin-bottom: 0.5rem;
     padding: 0.5rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--fg-divider, #eee);
 
     strong {
       font-weight: 600;
@@ -77,7 +77,7 @@
   .object-item {
     margin-bottom: 0.5rem;
     padding: 0.5rem;
-    background-color: #f8f8f8;
+    background-color: var(--bg-elevated, #f8f8f8);
     @include tokens.radius('sm');
   }
 
@@ -89,21 +89,21 @@
     margin-bottom: 2rem;
   }
   pre {
-    background-color: #f5f5f5;
+    background-color: var(--bg-card-alt, #f5f5f5);
     padding: 0.5rem;
     @include tokens.radius('sm');
     overflow-x: auto;
   }
 
   .json-content {
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: var(--bg-card-alt, #f5f5f5);
+    color: var(--fg-text, #333);
     font-family: monospace;
     white-space: pre-wrap;
   }
 
   .text-content {
-    background-color: #f5f5f5;
+    background-color: var(--bg-card-alt, #f5f5f5);
     white-space: pre-wrap;
     font-family: monospace;
   }
@@ -111,7 +111,7 @@
   .loading-document {
     display: flex;
     align-items: center;
-    color: #0066cc;
+    color: var(--info-color, #0066cc);
     margin: 1rem 0;
 
     .loading-icon {
@@ -123,7 +123,7 @@
   .document-error {
     display: flex;
     align-items: center;
-    color: #cc0000;
+    color: var(--error-color, #cc0000);
     margin: 1rem 0;
 
     .error-icon {
@@ -143,7 +143,7 @@
   }
 
   .latest-version {
-    background-color: #f0f7ff;
+    background-color: var(--bg-elevated, #f0f7ff);
     padding: 1rem;
     @include tokens.radius('sm');
     margin-bottom: 1.5rem;
@@ -154,7 +154,7 @@
       display: inline-block;
       margin-top: 0.5rem;
       margin-bottom: 1rem;
-      color: #0066cc;
+      color: var(--link-color, #0066cc);
       text-decoration: none;
       font-weight: 500;
 
@@ -165,7 +165,7 @@
   }
 
   .versions-list {
-    background-color: #f5f5f5;
+    background-color: var(--bg-elevated, #f5f5f5);
     padding: 1rem;
     @include tokens.radius('sm');
     margin-bottom: 1.5rem;
@@ -184,22 +184,22 @@
         th, td {
           text-align: left;
           padding: 0.75rem;
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid var(--fg-border, #ddd);
         }
 
         th {
-          background-color: #f0f0f0;
+          background-color: var(--bg-hover, #f0f0f0);
           font-weight: 600;
         }        tr:hover {
-          background-color: #f8f8f8;
+          background-color: var(--bg-hover, #f8f8f8);
         }
 
         tr.default-version {
-          background-color: rgba(144, 238, 144, 0.2);
+          background-color: var(--success-color, rgba(144, 238, 144, 0.2));
         }
 
         .default-badge {
-          color: #008000;
+          color: var(--success-color, #008000);
           font-weight: bold;
           font-size: 16px;
         }
@@ -207,14 +207,14 @@
         .btn-view {
           display: inline-block;
           padding: 0.25rem 0.75rem;
-          background-color: #6c757d;
+          background-color: var(--fg-secondary-text, #6c757d);
           color: white;
           text-decoration: none;
           @include tokens.radius('sm');
           font-size: 0.875rem;
 
           &:hover {
-            background-color: #5a6268;
+            background-color: var(--fg-text, #5a6268);
           }
         }      }
     }
@@ -241,9 +241,9 @@
 .versions-sidebar {
   width: 350px;
   flex-shrink: 0;
-  background-color: #f8f9fa;
+  background-color: var(--bg-elevated, #f8f9fa);
   @include tokens.radius('lg');
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--fg-border, #e9ecef);
   max-height: 80vh;
   overflow-y: auto;
   position: sticky;
@@ -274,14 +274,14 @@ app-documentation-viewer {
 
 .sidebar-header {
   padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-  background-color: #fff;
+  border-bottom: 1px solid var(--fg-border, #e9ecef);
+  background-color: var(--bg-card, #fff);
   border-radius: tokens.radius('lg') tokens.radius('lg') 0 0;
 
   h3 {
     margin: 0 0 0.5rem 0;
     font-size: 1.1rem;
-    color: #333;
+    color: var(--fg-text, #333);
   }
 }
 
@@ -290,21 +290,21 @@ app-documentation-viewer {
 }
 
 .version-item {
-  background: white;
-  border: 1px solid #e9ecef;
+  background: var(--bg-card, white);
+  border: 1px solid var(--fg-border, #e9ecef);
   @include tokens.radius('md');
   padding: 0.75rem;
   margin-bottom: 0.5rem;
   @include tokens.transition('all');
 
   &:hover {
-    border-color: #6c757d;
+    border-color: var(--fg-secondary-text, #6c757d);
     @include tokens.shadow('sm');
   }
 
   &.default-version {
-    border-left: 4px solid #28a745;
-    background-color: #f8fff9;
+    border-left: 4px solid var(--success-color, #28a745);
+    background-color: var(--bg-elevated, #f8fff9);
   }
 }
 
@@ -317,12 +317,12 @@ app-documentation-viewer {
 
 .version-id {
   font-weight: 600;
-  color: #333;
+  color: var(--fg-text, #333);
   font-size: 0.9rem;
 }
 
 .default-badge {
-  background-color: #28a745;
+  background-color: var(--success-color, #28a745);
   color: white;
   padding: 0.1rem 0.4rem;
   @include tokens.radius('xl');
@@ -334,7 +334,7 @@ app-documentation-viewer {
   margin-bottom: 0.5rem;
 
   small {
-    color: #6c757d;
+    color: var(--fg-secondary-text, #6c757d);
     font-size: 0.8rem;
   }
 }
@@ -342,7 +342,7 @@ app-documentation-viewer {
 .btn-view-compact {
   display: inline-block;
   padding: 0.3rem 0.6rem;
-  background-color: #6c757d;
+  background-color: var(--fg-secondary-text, #6c757d);
   color: white;
   text-decoration: none;
   @include tokens.radius('sm');
@@ -351,13 +351,13 @@ app-documentation-viewer {
   @include tokens.transition('colors');
 
   &:hover {
-    background-color: #5a6268;
+    background-color: var(--fg-text, #5a6268);
   }
 }
 
 .no-versions {
   text-align: center;
-  color: #6c757d;
+  color: var(--fg-secondary-text, #6c757d);
   padding: 2rem;
 
   p {
@@ -367,21 +367,21 @@ app-documentation-viewer {
 }
 
 .default-version-section {
-  background-color: #f0f7ff;
+  background-color: var(--bg-elevated, #f0f7ff);
   padding: 1.5rem;
   @include tokens.radius('lg');
   margin-bottom: 1.5rem;
 
   h3 {
     margin-top: 0;
-    color: #333;
+    color: var(--fg-text, #333);
   }
 
   a {
     display: inline-block;
     margin-top: 0.5rem;
     margin-bottom: 1rem;
-    color: #0066cc;
+    color: var(--link-color, #0066cc);
     text-decoration: none;
     font-weight: 500;
 

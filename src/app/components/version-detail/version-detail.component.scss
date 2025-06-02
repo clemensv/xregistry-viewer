@@ -40,10 +40,10 @@
 }
 
 .grid-item {
-  background: #fff;
+  background: var(--bg-card, #fff);
   @include tokens.radius('lg');
   @include tokens.shadow('sm');
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--fg-border, #e0e0e0);
   min-width: 340px;
   max-width: 420px;
   flex: 1 1 340px;
@@ -168,21 +168,21 @@ section {
 section:has(h3:contains("Document")) {
   margin-top: 2rem;
   padding: 1.5rem;
-  background-color: #f8f9fa;
+  background-color: var(--bg-elevated, #f8f9fa);
   @include tokens.radius('lg');
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--fg-border, #dee2e6);
 
   h3 {
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--fg-divider, #e9ecef);
   }
 
   pre {
-    background-color: #fff;
+    background-color: var(--bg-card, #fff);
     padding: 1rem;
     @include tokens.radius('sm');
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--fg-border, #e9ecef);
     overflow-x: auto;
     font-family: 'Courier New', monospace;
     font-size: 0.9rem;
@@ -198,18 +198,18 @@ section:has(h3:contains("Document")) {
 
     p {
       font-style: italic;
-      color: #6c757d;
+      color: var(--fg-secondary-text, #6c757d);
     }
   }
 
   .document-error {
-    background-color: #fff3f3;
+    background-color: var(--bg-elevated, #fff3f3);
     padding: 1rem;
     @include tokens.radius('sm');
-    border-left: 4px solid #dc3545;
+    border-left: 4px solid var(--error-color, #dc3545);
 
     p {
-      color: #dc3545;
+      color: var(--error-color, #dc3545);
       margin: 0;
     }
   }
@@ -221,17 +221,17 @@ section:has(h3:contains("Document")) {
 .doc-icon {
   vertical-align: middle;
   margin-right: 0.5rem;
-  color: #2c3e50;
+  color: var(--fg-text, #2c3e50);
 }
 
 .loading-icon {
   animation: spin 1s infinite linear;
-  color: #6c757d;
+  color: var(--fg-secondary-text, #6c757d);
   margin-right: 0.5rem;
 }
 
 .error-icon {
-  color: #dc3545;
+  color: var(--error-color, #dc3545);
   margin-right: 0.5rem;
 }
 
@@ -245,18 +245,18 @@ section:has(h3:contains("Document")) {
 
 /* Content type specific styles */
 pre.application-json {
-  background-color: #f8f8ff;
-  color: #333;
+  background-color: var(--bg-card-alt, #f8f8ff);
+  color: var(--fg-text, #333);
 }
 
 pre.application-xml {
-  background-color: #fffcf5;
-  color: #333;
+  background-color: var(--bg-card-alt, #fffcf5);
+  color: var(--fg-text, #333);
 }
 
 pre.text-plain {
-  background-color: #fff;
-  color: #333;
+  background-color: var(--bg-card, #fff);
+  color: var(--fg-text, #333);
 }
 
 .loading-container {
@@ -266,7 +266,7 @@ pre.text-plain {
   flex-direction: column;
   padding: 2rem;
   text-align: center;
-  background-color: #f9f9f9;
+  background-color: var(--bg-elevated, #f9f9f9);
   @include tokens.radius('lg');
   margin: 1rem 0;
   min-height: 200px;
@@ -274,19 +274,19 @@ pre.text-plain {
 
 .error-message {
   padding: 1.5rem;
-  background-color: #fff0f0;
-  border: 1px solid #ffcdd2;
+  background-color: var(--bg-elevated, #fff0f0);
+  border: 1px solid var(--error-color, #ffcdd2);
   @include tokens.radius('lg');
   margin: 1rem 0;
 
   h2 {
-    color: #d32f2f;
+    color: var(--error-color, #d32f2f);
     margin-bottom: 0.5rem;
   }
 
   p {
     margin: 0;
-    color: #616161;
+    color: var(--fg-secondary-text, #616161);
   }
 }
 
@@ -295,8 +295,10 @@ pre.text-plain {
   align-items: center;
   margin: 1rem 0;
   padding: 0.75rem;
-  background-color: #e8f4fd;
+  background-color: var(--info-color, #e9f7fd);
   @include tokens.radius('sm');
+  border: 1px solid var(--fg-border, #d1e9f5);
+  color: var(--fg-text, #31708f);
 
   .loading-icon {
     color: #2196f3;
@@ -314,8 +316,10 @@ pre.text-plain {
   align-items: center;
   margin: 1rem 0;
   padding: 0.75rem;
-  background-color: #ffebee;
+  background-color: var(--error-color, #f8d7da);
   @include tokens.radius('sm');
+  border: 1px solid var(--fg-border, #f5c6cb);
+  color: var(--fg-text, #721c24);
 
   .error-icon {
     color: #f44336;
@@ -337,8 +341,8 @@ pre.text-plain {
 }
 
 .attribute-tile {
-  background-color: #f9f9f9;
-  border: 1px solid #eee;
+  background-color: var(--bg-elevated, #f9f9f9);
+  border: 1px solid var(--fg-border, #eee);
   @include tokens.radius('sm');
   padding: 1rem;
   display: flex;
@@ -347,7 +351,7 @@ pre.text-plain {
 
 .attribute-tile strong {
   font-weight: 600;
-  color: #333;
+  color: var(--fg-text, #333);
   margin-bottom: 0.5rem;
   display: block; /* Ensure strong takes full width before span/value */
 }
@@ -403,15 +407,15 @@ section > h3 {
 }
 
 .loading-document {
-  background-color: #e9f7fd;
-  border: 1px solid #d1e9f5;
-  color: #31708f;
+  background-color: var(--info-color, #e9f7fd);
+  border: 1px solid var(--fg-border, #d1e9f5);
+  color: var(--fg-text, #31708f);
 }
 
 .document-error {
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
+  background-color: var(--error-color, #f8d7da);
+  border: 1px solid var(--fg-border, #f5c6cb);
+  color: var(--fg-text, #721c24);
 }
 
 /* Ensure <pre> inside app-code-highlight takes full width and scrolls */

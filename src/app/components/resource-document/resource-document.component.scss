@@ -24,7 +24,7 @@
   box-sizing: border-box;
 
   // Add a dark gray left border to the resource-document
-  border-left: 3px solid #444;
+  border-left: 3px solid var(--fg-secondary-text, #444);
 
   // Ensure page header stays at top during loading
   ::ng-deep .page-header-main {
@@ -85,9 +85,9 @@
   section {
     margin-top: 0; // Remove top margin as we're using gap in the container
     padding: 0.75rem;
-    background-color: #f8f9fa;
+    background-color: var(--bg-elevated, #f8f9fa);
     @include tokens.radius('lg');
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--fg-border, #dee2e6);
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -99,12 +99,12 @@
     h3 {
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid #e9ecef;
+      border-bottom: 1px solid var(--fg-divider, #e9ecef);
     }
 
     .doc-icon {
       font-size: vars.$content-size * 1.5;
-      color: #1abc9c;
+      color: var(--success-color, #1abc9c);
     }
 
     .action-buttons {
@@ -130,12 +130,12 @@
     }
 
     .loading-document {
-      background-color: #e8f4fd;
-      border: 1px solid #d1e9f5;
-      color: #31708f;
+      background-color: var(--info-color, #e8f4fd);
+      border: 1px solid var(--fg-border, #d1e9f5);
+      color: var(--fg-text, #31708f);
 
       .loading-icon {
-        color: #2196f3;
+        color: var(--info-color, #2196f3);
         margin-right: 0.5rem;
         animation: spin 1.5s linear infinite;
       }
@@ -146,18 +146,18 @@
     }
 
     .document-error {
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
+      background-color: var(--error-color, #f8d7da);
+      border: 1px solid var(--fg-border, #f5c6cb);
+      color: var(--fg-text, #721c24);
 
       .error-icon {
-        color: #f44336;
+        color: var(--error-color, #f44336);
         margin-right: 0.5rem;
       }
 
       p {
         margin: 0;
-        color: #d32f2f;
+        color: var(--error-color, #d32f2f);
       }
     }
   }
@@ -225,7 +225,7 @@
       hr {
         border: 0;
         height: 2px;
-        background: linear-gradient(to right, transparent, #e9ecef 20%, #e9ecef 80%, transparent);
+        background: linear-gradient(to right, transparent, var(--fg-divider, #e9ecef) 20%, var(--fg-divider, #e9ecef) 80%, transparent);
         margin: 0;
       }
 
@@ -234,9 +234,9 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: #f8f9fa;
+        background: var(--bg-elevated, #f8f9fa);
         padding: 0 1rem;
-        color: #6c757d;
+        color: var(--fg-secondary-text, #6c757d);
         font-size: 0.9rem;
         font-weight: 600;
         letter-spacing: 0.5px;
@@ -253,9 +253,9 @@
 
     .complex-attribute-tile {
       width: 100%;
-      background: white;
+      background: var(--bg-card, white);
       @include tokens.radius('lg');
-      border: 1px solid #e0e0e0;
+      border: 1px solid var(--fg-border, #e0e0e0);
       padding: 1rem;
       @include tokens.shadow('xs');
 
@@ -301,7 +301,7 @@
 
       h4 {
         margin-bottom: 0.5rem;
-        color: #2c3e50;
+        color: var(--fg-text, #2c3e50);
       }
 
       app-resource-document-item {
@@ -429,5 +429,55 @@ app-code-highlight {
         }
       }
     }
+  }
+}
+
+.document-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--bg-elevated, #f8f9fa);
+  border-radius: 6px;
+  border: 1px solid var(--fg-border, #dee2e6);
+}
+
+.loading-document {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: var(--info-color, #e8f4fd);
+  border-radius: 4px;
+  border: 1px solid var(--fg-border, #d1e9f5);
+  color: var(--fg-text, #31708f);
+
+  .loading-icon {
+    color: var(--info-color, #2196f3);
+    margin-right: 0.5rem;
+    animation: spin 1.5s linear infinite;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.document-error {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: var(--error-color, #f8d7da);
+  border-radius: 4px;
+  border: 1px solid var(--fg-border, #f5c6cb);
+  color: var(--fg-text, #721c24);
+
+  .error-icon {
+    color: var(--error-color, #f44336);
+    margin-right: 0.5rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--error-color, #d32f2f);
   }
 }

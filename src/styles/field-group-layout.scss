@@ -23,7 +23,7 @@
 
   &:hover {
     background: var(--bg-hover, #f8f9fa);
-    border-color: var(--fg-border, #a8dadc);
+    border-color: var(--primary-color, #3F51B5);
   }
 
   // Field title
@@ -91,7 +91,7 @@
         transition: all 0.2s ease;
 
         &:focus {
-          border-color: #3F51B5;
+          border-color: var(--primary-color, #3F51B5);
           box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
           background: var(--bg-card, #fff);
         }
@@ -129,8 +129,8 @@
 
         &:hover {
           background: var(--bg-hover, #f8f9fa);
-          border-color: #3F51B5;
-          color: #3F51B5;
+          border-color: var(--primary-color, #3F51B5);
+          color: var(--primary-color, #3F51B5);
         }
 
         .external-link-icon,
@@ -171,8 +171,8 @@
 
         &:hover:not(:disabled) {
           background: var(--bg-hover, #f8f9fa);
-          border-color: #3F51B5;
-          color: #3F51B5;
+          border-color: var(--primary-color, #3F51B5);
+          color: var(--primary-color, #3F51B5);
         }
 
         &:disabled {
@@ -185,19 +185,19 @@
 
   // States
   &.error {
-    border-color: #F44336;
+    border-color: var(--error-color, #F44336);
     background: rgba(244, 67, 54, 0.05);
 
     .field-title {
-      color: #F44336;
+      color: var(--error-color, #F44336);
     }
 
     .input-wrapper .numeric-input,
     .input-wrapper .text-input {
-      border-color: #F44336;
+      border-color: var(--error-color, #F44336);
 
       &:focus {
-        border-color: #F44336;
+        border-color: var(--error-color, #F44336);
         box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.1);
       }
     }

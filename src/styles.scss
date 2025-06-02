@@ -9,6 +9,8 @@
 @use 'sass:map';
 @use 'sass:color';
 
+// Import highlight.js themes conditionally based on theme
+// Default light theme for initial load
 @import '../node_modules/highlight.js/styles/default.css';
 
 /* CSS Custom Properties for consistent theming */
@@ -20,6 +22,7 @@
   /* Background colors */
   --bg-card: #{theme.bg(card)};
   --bg-hover: #{theme.bg(hover)};
+  --bg-card-alt: #f5f5f5; /* Alternative card background for code blocks */
 
   /* Foreground colors */
   --fg-text: #{theme.fg(text)};
@@ -91,7 +94,7 @@ html, body {
   height: 100%;
   margin: 0;
   font-size: 14px;
-  color: theme.c(text);
+  // color: theme.c(text); // This was commented out, check if still needed or if var(--fg-text) is enough
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
@@ -101,9 +104,15 @@ html, body {
 body {
   margin: 0;
   font-family: theme.$app-font-family;
-  color: #333;
-  background-color: #fafafa;
+  color: var(--fg-text, #333); /* Use CSS variable */
+  /* background-color: #fafafa; REMOVED - Handled by theme-light/theme-dark */
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+app-root {
+  display: block; // Ensure app-root behaves like a block-level element
+  height: 100%; // Ensure it can fill the viewport height if its content does
+  background-color: var(--bg-app); // Apply the theme-aware application background
 }
 
 /* Ensure all elements use border-box sizing */
@@ -348,10 +357,8 @@ body.font-size-large {
 
 /* Dark theme - Using Fluent UI design tokens */
 body.theme-dark {
-  background-color: var(--neutral-layer-1, #11100f);
-  color: var(--neutral-foreground-rest, #f5f5f5);
-
-  /* Fluent UI Design Tokens for Dark Mode */
+  // Define Fluent UI tokens first (or ensure they are available from :root if preferred globally)
+  --neutral-layer-1: #11100f; // Explicitly define the base color token here if not in :root
   --colorNeutralForeground1: #f5f5f5;
   --colorNeutralForeground2: #e1dfdd;
   --colorNeutralForeground3: #c8c6c4;
@@ -406,12 +413,13 @@ body.theme-dark {
   --borderRadiusXLarge: 8px;
   --borderRadiusCircular: 10000px;
 
-  /* Update theme colors for dark mode using Fluent UI design tokens */
+  /* Application theme variables based on Fluent UI tokens */
+  --bg-app: #11100f; /* Directly use the desired dark color for app background */
   --bg-card: var(--colorNeutralBackground1, #292827);
   --bg-hover: var(--colorNeutralBackground1Hover, #323130);
-  --bg-app: var(--neutral-layer-1, #11100f);
-  --bg-surface: var(--neutral-layer-floating, #292827);
+  --bg-surface: var(--neutral-layer-floating, #292827); // Assuming --neutral-layer-floating would be defined similarly to --neutral-layer-1
   --bg-elevated: var(--colorNeutralBackground4, #484644);
+  --bg-card-alt: var(--colorNeutralBackground2, #201f1e);
   --fg-text: var(--colorNeutralForeground1, #f5f5f5);
   --fg-secondary-text: var(--colorNeutralForeground3, #c8c6c4);
   --fg-tertiary-text: var(--colorNeutralForegroundHint, #a19f9d);
@@ -428,6 +436,78 @@ body.theme-dark {
   --link-color: var(--colorBrandForeground1, #479ef5);
   --link-hover-color: var(--colorBrandBackgroundHover, #106ebe);
   --code-bg: var(--colorNeutralBackground2, #201f1e);
+
+  /* Disabled state variables for dark theme */
+  --bg-disabled: var(--colorNeutralBackground2, #201f1e);
+  --fg-disabled: var(--colorNeutralForegroundHint, #a19f9d);
+  --fg-border-disabled: var(--colorNeutralStroke2, #484644);
+
+  /* Dark mode syntax highlighting - Override highlight.js default theme */
+  .hljs {
+    background: var(--code-bg, #201f1e) !important;
+    color: var(--fg-text, #f5f5f5) !important;
+  }
+
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-literal,
+  .hljs-section,
+  .hljs-link {
+    color: #569cd6 !important; /* Blue keywords */
+  }
+
+  .hljs-string,
+  .hljs-attr {
+    color: #ce9178 !important; /* Orange strings */
+  }
+
+  .hljs-number,
+  .hljs-regexp,
+  .hljs-addition {
+    color: #b5cea8 !important; /* Green numbers */
+  }
+
+  .hljs-built_in,
+  .hljs-builtin-name,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-type,
+  .hljs-class .hljs-title {
+    color: #4ec9b0 !important; /* Cyan built-ins */
+  }
+
+  .hljs-comment,
+  .hljs-quote,
+  .hljs-deletion,
+  .hljs-meta {
+    color: #6a9955 !important; /* Green comments */
+  }
+
+  .hljs-property,
+  .hljs-attribute {
+    color: #9cdcfe !important; /* Light blue properties */
+  }
+
+  .hljs-function .hljs-title,
+  .hljs-title.function_ {
+    color: #dcdcaa !important; /* Yellow functions */
+  }
+
+  .hljs-tag {
+    color: var(--fg-text, #f5f5f5) !important;
+  }
+
+  .hljs-name {
+    color: #569cd6 !important;
+  }
+
+  .hljs-emphasis {
+    font-style: italic;
+  }
+
+  .hljs-strong {
+    font-weight: bold;
+  }
 
   /* Dark theme Fluent UI components */
   .header-toolbar {
@@ -830,18 +910,46 @@ body.theme-dark {
       }
     }
   }
+
+  background-color: var(--bg-app) !important; /* This should now work */
+  color: var(--neutral-foreground-rest, #f5f5f5); // This was var(--colorNeutralForeground1) but --neutral-foreground-rest is common for body text
+
+  /* View toggle button styling for dark mode */
+  .view-toggle {
+    fluent-button[aria-pressed="true"],
+    fluent-button.active,
+    fluent-button.selected,
+    button[aria-pressed="true"],
+    button.active,
+    button.selected,
+    fluent-button[aria-pressed="true"]:hover,
+    fluent-button.active:hover,
+    fluent-button.selected:hover,
+    button[aria-pressed="true"]:hover,
+    button.active:hover,
+    button.selected:hover {
+      background-color: var(--colorNeutralBackgroundInverted, #f5f5f5) !important; // Light background
+      color: var(--colorNeutralForegroundInverted, #11100f) !important;          // Dark text/icon
+      border-color: var(--primary-color, #0078d4) !important;                   // Primary color border
+
+      svg {
+        fill: var(--colorNeutralForegroundInverted, #11100f) !important;
+        filter: none !important; // Ensure no further inversion if we explicitly set a dark fill
+      }
+    }
+  }
 }
 
 /* Light theme (default) */
 body.theme-light {
-  background-color: #fafafa;
+  --bg-app: #fafafa; /* Define for light theme too */
+  background-color: var(--bg-app);
   color: #333;
-
   --bg-card: white;
   --bg-hover: #f5f5f5;
-  --bg-app: #fafafa;
   --bg-surface: white;
   --bg-elevated: #f8f9fa;
+  --bg-card-alt: #f5f5f5; /* Alternative card background for code blocks */
   --fg-text: #333333;
   --fg-secondary-text: #666666;
   --fg-tertiary-text: #999999;
@@ -854,6 +962,11 @@ body.theme-light {
   --info-color: #17a2b8;
   --link-color: #6c757d;
   --code-bg: #f8f9fa;
+
+  /* Disabled state variables for light theme (using existing or new fallbacks) */
+  --bg-disabled: #f3f2f1; /* Default light theme disabled background */
+  --fg-disabled: #a19f9d; /* Default light theme disabled foreground */
+  --fg-border-disabled: #c8c6c4; /* Default light theme disabled border */
 }
 
 /* Common utility classes */
@@ -867,7 +980,7 @@ body.theme-light {
   flex-direction: column;
   min-height: 100vh;
   position: relative;
-  background-color: var(--bg-app, #fafafa);
+  background-color: var(--bg-app);
   color: var(--fg-text, #333);
 }
 
@@ -1532,8 +1645,8 @@ app-footer {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: white;
-  border-top: 1px solid #e0e0e0;
+  background: var(--bg-card, white);
+  border-top: 1px solid var(--fg-divider, #e0e0e0);
   box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
 }
 

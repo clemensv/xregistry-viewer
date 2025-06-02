@@ -17,6 +17,8 @@
   min-height: 0 !important; /* Allow shrinking */
   flex: 0 0 auto !important; /* Override parent's flex: 1 */
   align-self: flex-start !important;
+  width: 100%; // Ensure host takes full width
+  background-color: var(--bg-app) !important; // Use application background color, ADDED !important
 }
 
 /* Container styling */
@@ -250,7 +252,7 @@ app-pagination {
       max-width: 100%;
       overflow: hidden;
       box-sizing: border-box;
-      border-left: 3px solid var(--primary-color, #0078d4);
+      border-left: 3px solid var(--info-color, #5bc0de);
       background: rgba(0, 120, 212, 0.05);
     }
 
@@ -322,8 +324,8 @@ app-pagination {
       font-size: 10px;
       font-weight: 500;
       line-height: 15px;
-      color: #ffffff;
-      background: #0078d4;
+      color: var(--colorNeutralForegroundOnBrand, #ffffff);
+      background: var(--primary-color, #0078d4);
       border-radius: 8px;
       white-space: nowrap;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -780,13 +782,13 @@ End of legacy resource-types styling */
 
 .group-icon {
   font-size: vars.$content-size * 1.5;
-  color: #9575cd; /* Match the vertical bar color */
+  color: var(--secondary-color, #9575cd); /* Match the vertical bar color */
   margin-right: 0.5rem;
 }
 
 .resource-type-icon {
   font-size: vars.$content-size * 1.1;
-  color: #5bc0de; /* Match the array bar color */
+  color: var(--info-color, #5bc0de); /* Match the array bar color */
   margin-right: 0.25rem;
   vertical-align: middle;
 }

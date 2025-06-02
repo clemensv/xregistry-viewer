@@ -8,6 +8,7 @@
 
 pre {
   background-color: var(--bg-card-alt, #f5f5f5); /* Light grey background */
+  color: var(--fg-text, #333); /* Text color that adapts to theme */
   padding: 10px;
   @include tokens.radius('sm');
   @include tokens.shadow('xs');
@@ -20,6 +21,7 @@ pre {
 
 code {
   font-family: inherit; /* Inherit font from pre */
+  color: inherit; /* Inherit color from pre */
 }
 
 /* Import a highlight.js theme */

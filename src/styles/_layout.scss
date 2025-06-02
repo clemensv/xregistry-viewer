@@ -9,10 +9,10 @@
 
 /* Semantic wrappers */
 .card, .tile {
-  background: white;
+  background: var(--bg-card, white);
   border-radius: $radius;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--fg-border, #e0e0e0);
   @include pad-y(m);
   @include pad-x(m);
 

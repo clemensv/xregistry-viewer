@@ -27,7 +27,7 @@ import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
       justify-content: center;
       min-height: 100vh;
       padding: 1rem;
-      background-color: #f8f9fa;
+      background-color: var(--bg-app, #f8f9fa);
     }
 
     .error-content {
@@ -35,27 +35,28 @@ import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
       max-width: 600px;
       padding: 2rem;
       border-radius: 8px;
-      background-color: white;
+      background-color: var(--bg-card, white);
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      color: var(--fg-text, #333);
     }
 
     .error-content h2 {
-      color: #dc3545;
+      color: var(--error-color, #dc3545);
       margin-bottom: 1rem;
     }
 
     .error-content button {
       margin-top: 1rem;
       padding: 0.5rem 1rem;
-      background-color: #007bff;
-      color: white;
+      background-color: var(--primary-color, #007bff);
+      color: var(--colorNeutralForegroundOnBrand, white);
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
 
     .error-content button:hover {
-      background-color: #0069d9;
+      background-color: var(--primary-hover-color, #0069d9);
     }
 
     .bootstrap-container {
