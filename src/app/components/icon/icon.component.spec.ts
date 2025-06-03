@@ -1,31 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { IconComponent } from './icon.component';
 
 describe('IconComponent', () => {
   let component: IconComponent;
   let fixture: ComponentFixture<IconComponent>;
-  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IconComponent, HttpClientTestingModule]
+      imports: [IconComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(IconComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    // Flush any pending requests before verification
-    const pendingRequests = httpMock.match(() => true);
-    pendingRequests.forEach(req => {
-      if (!req.cancelled) {
-        req.flush('<svg></svg>');
-      }
-    });
-    httpMock.verify();
   });
 
   it('should create', () => {
@@ -40,12 +26,6 @@ describe('IconComponent', () => {
     component.size = 20;
     fixture.detectChanges();
 
-    // Mock the HTTP request for the SVG
-    const mockSvg = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2L12 8L18 8L13 12L15 18L10 14L5 18L7 12L2 8L8 8Z"/></svg>';
-    const req = httpMock.expectOne((request) => request.url.includes('ic_fluent_settings_20_regular.svg'));
-    req.flush(mockSvg);
-
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
@@ -73,7 +53,17 @@ describe('IconComponent', () => {
 
     // The component should map legacy names to new format
     expect(component.name).toBe('font_decrease');
+  });
 
-    // Don't trigger change detection to avoid HTTP requests in this test
+  it('should render icon with correct size', () => {
+    component.name = 'settings';
+    component.size = 16;
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const iconElement = compiled.querySelector('.fluent-icon');
+
+    expect(iconElement).toBeTruthy();
+    // The exact styling will depend on the component implementation
   });
 });

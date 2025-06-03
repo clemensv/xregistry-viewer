@@ -23,15 +23,18 @@ const config: Config = {
   moduleNameMapper: {
     '^@app/(.*)$': '<rootDir>/src/app/$1',
     '^@env/(.*)$': '<rootDir>/src/environments/$1',
+    // Mock SVG files to fix Jest import issues
+    '\\.svg$': '<rootDir>/src/test-mocks/svg-mock.ts',
   },
-  moduleFileExtensions: ['ts', 'js', 'html'],
+  moduleFileExtensions: ['ts', 'js', 'html', 'svg'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
     '!src/main.ts',
     '!src/test-setup.ts',
     '!src/environments/*.ts',
-  ],  testMatch: [
+  ],
+  testMatch: [
     '<rootDir>/src/**/__tests__/**/*.[jt]s?(x)',
     '<rootDir>/src/**/*(*.)@(spec|test).[jt]s?(x)',
   ],
