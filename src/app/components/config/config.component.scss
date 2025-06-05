@@ -19,8 +19,6 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  /* Add bottom padding to account for fixed footer */
-  padding-bottom: 80px;
 }
 
 /* Loading and error states */

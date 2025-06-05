@@ -1099,6 +1099,8 @@ button:not(fluent-button) {
   flex: 1;
   min-height: 0; /* Allow flex shrinking */
   overflow: visible; /* Allow popups to overflow */
+  /* Add bottom padding to account for fixed footer on all pages */
+  padding-bottom: 80px;
 }
 
 /* Content area wrapper with natural height */
