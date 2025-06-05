@@ -5,7 +5,8 @@
     "https://xregistry.soaphub.org",
     "https://xregistry.soaphub.org/reg-APIs-Guru",
     "https://xregistry.soaphub.org/reg-DocStore",
-    "https://schemas.mcpxreg.com/api/registry"
+    "https://schemas.mcpxreg.com/api/registry",
+    "https://xregistry.io/xreg/"
   ],
   "modelUris": [],
   "baseUrl": "/",
