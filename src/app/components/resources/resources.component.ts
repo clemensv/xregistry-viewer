@@ -9,17 +9,31 @@ import { DebugService } from '../../services/debug.service';
 import { Resource } from '../../models/registry.model';
 import { FormsModule } from '@angular/forms';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
-import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
+import { LinkSet } from '../pagination/pagination.component';
 import { ResourceRowComponent } from '../resource-row/resource-row.component';
 import { SearchService } from '../../services/search.service';
 import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
 import { ConfigService } from '../../services/config.service';
 import { truncateText, truncateDescription, formatDateShort, getFullText } from '../../utils/text.utils';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { ErrorBoundaryComponent } from '../error-boundary/error-boundary.component';
+import { DeprecationIndicatorComponent } from '../deprecation-indicator/deprecation-indicator.component';
 
 @Component({
   standalone: true,
-  selector: 'app-resources',
-  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, ResourceRowComponent, ResourceDocumentComponent, PageHeaderComponent],
+  selector: 'app-resources',  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ResourceRowComponent,
+    ResourceDocumentComponent,
+    PageHeaderComponent,
+    LoadingIndicatorComponent,
+    EmptyStateComponent,
+    ErrorBoundaryComponent,
+    DeprecationIndicatorComponent
+  ],
   templateUrl: './resources.component.html',
   styleUrls: ['./resources.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -228,8 +242,7 @@ export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
           this.checkAutoForward();
 
           this.cdr.markForCheck();
-        },
-        error: (error) => {
+        },        error: (error) => {
           console.error('ResourcesComponent: Error loading resources:', error);
           this.loading = false;
           this.loadingProgress = false;
@@ -238,7 +251,12 @@ export class ResourcesComponent implements OnInit, OnDestroy, AfterViewInit {
 
           // Set appropriate error message based on error type
           if (error.status === 404) {
-            this.errorMessage = `No ${this.resourceType} resources found in ${this.groupType}/${this.groupId}.`;
+            // Check if this is a "resource path not found" vs "no resources in valid path"
+            if (error.isResourceNotFound) {
+              this.errorMessage = `Resource path "${this.resourceType}" not found in ${this.groupType}/${this.groupId}. Please check the URL and ensure the resource type exists.`;
+            } else {
+              this.errorMessage = `No ${this.resourceType} resources found in ${this.groupType}/${this.groupId}.`;
+            }
           } else if (error.status === 0) {
             this.errorMessage = `Unable to connect to the registry. Please check your network connection.`;
           } else if (error.status >= 500) {

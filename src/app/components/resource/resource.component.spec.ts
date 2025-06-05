@@ -7,7 +7,8 @@ import { ResourceComponent } from './resource.component';
 import { RegistryService } from '../../services/registry.service';
 import { ConfigService } from '../../services/config.service';
 import { ModelService } from '../../services/model.service';
-import { PLATFORM_ID } from '@angular/core';
+import { IconComponent } from '../icon/icon.component';
+import { PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 describe('ResourceComponent', () => {
   let component: ResourceComponent;
@@ -38,20 +39,18 @@ describe('ResourceComponent', () => {
         },
         queryParams: {}
       }
-    };
-
-    await TestBed.configureTestingModule({
+    };    await TestBed.configureTestingModule({
       imports: [
         ResourceComponent,
         HttpClientTestingModule
-      ],
-      providers: [
+      ],providers: [
         RegistryService,
         ConfigService,
         ModelService,
         { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: PLATFORM_ID, useValue: 'browser' }
-      ]
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
     .compileComponents();
 

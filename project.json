@@ -34,12 +34,14 @@
         "styles": [
           "src/styles.scss"
         ],
-        "scripts": [],
-        "stylePreprocessorOptions": {
+        "scripts": [],        "stylePreprocessorOptions": {
           "includePaths": [
             "node_modules"
           ]
-        }
+        },
+        "allowedCommonJsDependencies": [
+          "@fluentui/svg-icons"
+        ]
       },
       "configurations": {
         "production": {
@@ -62,10 +64,9 @@
               "type": "initial",
               "maximumWarning": "2MB",
               "maximumError": "3MB"
-            },
-            {
+            },            {
               "type": "anyComponentStyle",
-              "maximumWarning": "30kB",
+              "maximumWarning": "31kB",
               "maximumError": "35kB"
             }
           ]
@@ -87,8 +88,7 @@
       ]
     },
     "serve": {
-      "executor": "@angular-builders/custom-webpack:dev-server",
-      "options": {
+      "executor": "@angular-builders/custom-webpack:dev-server",      "options": {
         "buildTarget": "xregistry-viewer:build:development",
         "proxyConfig": "proxy.conf.json"
       },

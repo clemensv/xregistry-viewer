@@ -7,9 +7,9 @@
     "types": [
       "node"
     ]
-  },
-  "files": [
-    "src/main.ts"
+  },  "files": [
+    "src/main.ts",
+    "src/environments/environment.ts"
   ],
   "include": [
     "src/**/*.d.ts"

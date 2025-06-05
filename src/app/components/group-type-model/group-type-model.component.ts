@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { GroupType } from '../../models/registry.model';
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   standalone: true,
   selector: 'app-group-type-model',
-  imports: [CommonModule, RouterModule, ResourceDocumentItemComponent],
+  imports: [CommonModule, RouterModule, ResourceDocumentItemComponent, IconComponent],
   templateUrl: './group-type-model.component.html',
   styleUrls: ['./group-type-model.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

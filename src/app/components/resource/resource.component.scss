@@ -518,6 +518,21 @@ app-documentation-viewer {
   }
 }
 
+/* Version header container for deprecation indicators */
+.version-header-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--fg-text, #2c3e50);
+  }
+}
+
 // Responsive design
 @include breakpoints.custom-breakpoint($max: 1200px) {
   .resource-layout {

@@ -6,63 +6,60 @@
 @use '../../../styles/theme' as *;
 
 /* Component-specific overrides for group types */
-/* These will take precedence over global styles due to component encapsulation */
 
-/* Container styling - prevent overlap with enhanced constraints */
+/* Container styling */
 .group-types {
   width: 100%;
-  height: 100%; /* Fill parent height */
-  min-height: 100vh; /* Ensure minimum viewport height */
+  height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  overflow: visible; /* Allow popups to overflow */
+  overflow: visible;
   box-sizing: border-box;
-  padding: 0.5rem; /* Add padding to prevent edge clipping */
+  padding: 0.5rem;
 }
 
-/* Header styles now handled by global PageHeaderComponent */
 
-/* Grid container for cards view - responsive density */
+/* Grid container for cards view */
 .grid-container.cards-view {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 280px)); /* Fixed width columns for uniform sizing */
-  gap: 1.5rem 2rem; /* Increased horizontal gap for better separation */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 280px));
+  gap: 1.5rem 2rem;
   grid-row-gap: 1.5rem;
   grid-column-gap: 2rem;
   width: 100%;
-  flex: 1; /* Fill remaining space in flex container */
+  flex: 1;
   margin: 0 auto;
   justify-items: stretch;
   align-items: start;
-  grid-auto-rows: minmax(140px, 270px); /* Reduced from 180px for more compact tiles */
-  justify-content: center; /* Center the grid when there's extra space */
+  grid-auto-rows: minmax(140px, 270px);
+  justify-content: center;
 
-  /* Overflow protection and aspect ratio compatibility */
-  overflow: visible; /* Allow popups to overflow */
+  overflow: visible;
   box-sizing: border-box;
-  padding: 0.5rem; /* Add padding to prevent edge clipping */
+  padding: 0.5rem;
 }
 
-// High density layout for small font size - consistent spacing with uniform widths
+// High density layout for small font size
 :host-context(body.font-size-small) .grid-container.cards-view {
-  grid-template-columns: repeat(auto-fill, minmax(200px, 200px)); /* Smaller fixed width for small font */
-  grid-auto-rows: minmax(80px, auto); /* Reduced from 100px for small cards */
-  gap: 0.75rem 1rem; /* Increased horizontal gap from 0.75rem to 1rem */
-  grid-row-gap: 0.75rem; /* Keep vertical gap same */
-  grid-column-gap: 1rem; /* Explicit horizontal gap increased */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 200px));
+  grid-auto-rows: minmax(80px, auto);
+  gap: 0.75rem 1rem;
+  grid-row-gap: 0.75rem;
+  grid-column-gap: 1rem;
 }
 
-// Large font size layout - consistent spacing with uniform widths
+// Large font size layout
 :host-context(body.font-size-large) .grid-container.cards-view {
-  grid-template-columns: repeat(auto-fill, minmax(350px, 350px)); /* Larger fixed width for large font */
-  grid-auto-rows: minmax(160px, auto); /* Reduced from 200px for large cards */
-  gap: 1.75rem 2.25rem; /* Increased horizontal gap from 1.75rem to 2.25rem */
-  grid-row-gap: 1.75rem; /* Keep vertical gap same */
-  grid-column-gap: 2.25rem; /* Explicit horizontal gap increased */
+  grid-template-columns: repeat(auto-fill, minmax(350px, 350px));
+  grid-auto-rows: minmax(160px, auto);
+  gap: 1.75rem 2.25rem;
+  grid-row-gap: 1.75rem;
+  grid-column-gap: 2.25rem;
 }
 
-// Grid items - no overlap with proper spacing
+// Grid items
 .grid-item {
   position: relative;
   background: var(--bg-card, white);
@@ -71,19 +68,17 @@
   border: 1px solid var(--fg-divider, #e9ecef);
   display: flex;
   flex-direction: column;
-  width: 100%; /* Fill the grid cell completely */
-  min-width: 0; /* Allow shrinking */
-  height: 100%; /* Fill the grid cell completely */
+  width: 100%;
+  min-width: 0;
+  height: 100%;
   @include tokens.transition('interactive');
-  overflow: visible; /* Allow popup to overflow */
-  box-sizing: border-box; /* Ensure padding/border don't cause overflow */
-  margin: 0; /* Explicit no margin to prevent overlap */
+  overflow: visible;
+  box-sizing: border-box;
+  margin: 0;
 
   &:hover {
-    /* Remove transform to prevent overlap */
     @include tokens.shadow('sm');
     border-color: colors.primary();
-    /* No z-index needed without transform */
   }
 }
 
@@ -159,7 +154,7 @@
     @include tokens.transition('colors');
     flex-shrink: 0; /* Prevent button from shrinking */
 
-    fluent-icon {
+    app-icon {
       font-size: 1rem;
       color: var(--fg-secondary-text, #6c757d);
     }
@@ -167,12 +162,12 @@
     &:hover {
       background: var(--bg-hover, #f8f9fa);
 
-      fluent-icon {
+      app-icon {
         color: colors.primary();
       }
     }
 
-    &.expanded fluent-icon {
+    &.expanded app-icon {
       color: colors.primary();
     }
   }
@@ -200,7 +195,7 @@
 }
 
 /* Icon styling for group types */
-fluent-icon.group-type-icon {
+app-icon.group-type-icon {
   font-size: 1.25rem;
   margin-right: 0.5rem;
   color: colors.primary();
@@ -209,7 +204,7 @@ fluent-icon.group-type-icon {
   justify-content: center;
 }
 
-fluent-icon.group-type-icon-small {
+app-icon.group-type-icon-small {
   font-size: 1rem;
   margin-right: 0.5rem;
   color: colors.primary();
@@ -1555,7 +1550,7 @@ fluent-icon.group-type-icon-small {
     right: 0.375rem;
     padding: 0.2rem;
 
-    fluent-icon {
+    app-icon {
       font-size: 0.8rem;
     }
   }
@@ -1579,7 +1574,7 @@ fluent-icon.group-type-icon-small {
     right: 0.75rem;
     padding: 0.3rem;
 
-    fluent-icon {
+    app-icon {
       font-size: 1.2rem;
     }
   }

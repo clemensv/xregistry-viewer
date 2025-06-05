@@ -31,7 +31,6 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
-
   ngOnInit(): void {
     this.breadcrumbs$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -77,10 +76,8 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
                   const label = resType?.plural || seg;
                   console.log(`Breadcrumb: Resource type ${seg} -> ${label}`);
                   return of({ label, url });
-                }
-                if (idx === 3) {
+                }                if (idx === 3) {
                   // resource id - try API call with fallback to segment
-                  console.log(`Breadcrumb: Loading resource ${segments[0]}/${segments[1]}/${segments[2]}/${seg}`);
                   return this.registryService.getResource(
                     segments[0],
                     segments[1],
@@ -88,8 +85,10 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
                     seg
                   ).pipe(
                     map(r => {
-                      const label = r.name || seg;
-                      console.log(`Breadcrumb: Resource ${segments[0]}/${segments[1]}/${segments[2]}/${seg} -> ${label}`);
+                      // Check if the API response name looks like a filename (contains common file extensions)
+                      const isFilename = r.name && /\.(yaml|yml|json|xml|txt|md|html|pdf|doc|xls)$/i.test(r.name);
+                      // Use URL segment if name looks like a filename, otherwise use API response name
+                      const label = (isFilename || !r.name) ? seg : r.name;
                       return { label, url };
                     }),
                     catchError((error) => {
@@ -134,8 +133,7 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
           const lastSegment = segments[segments.length - 1];
           return of([{ label: lastSegment, url: this.router.url }]);
         }
-        return of([]);
-      })
+        return of([]);      })
     );
   }
 

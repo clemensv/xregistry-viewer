@@ -1,17 +1,37 @@
 <div class="model-page">
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="loading-spinner">      <fluent-icon name="arrow_sync_circle" class="spinning"></fluent-icon>
-    </div>
-    <div class="loading-text">Loading registry model...</div>
-  </div>
+  <!-- Loading state -->
+  <app-loading-indicator
+    *ngIf="loading && !hasError"
+    size="large"
+    title="Loading Registry Model"
+    message="Please wait while we load the registry model from the registry..."
+    [showText]="true">
+  </app-loading-indicator>
+
+  <!-- Error state -->
+  <app-error-boundary
+    *ngIf="hasError && !loading"
+    [errorState]="{hasError: true, error: {name: 'ModelLoadError', message: errorMessage || 'Unknown error occurred'}}"
+    [showDetails]="!!errorDetails"
+    [errorTitle]="'Unable to Load Registry Model'"
+    [errorMessage]="errorMessage || 'An unexpected error occurred while loading the registry model'"
+    (retry)="retryLoadModel()">
+  </app-error-boundary>
+
+  <!-- Progressive loading indicator -->
+  <app-loading-indicator
+    *ngIf="loadingProgress && !loading && !hasError && registryModel"
+    size="inline"
+    title="Loading Additional Data"
+    [message]="'Loading model data from additional endpoints...'"
+    [showText]="true">
+  </app-loading-indicator>
 
   <!-- Model Content -->
-  <div *ngIf="!loading && registryModel" class="model-content">
+  <div *ngIf="!loading && !hasError && registryModel" class="model-content">
 
     <!-- Registry Overview -->
-    <section class="registry-overview">
-      <div class="section-header">        <fluent-icon name="link" class="section-icon"></fluent-icon>
+    <section class="registry-overview">      <div class="section-header">        <app-icon name="link" class="section-icon"></app-icon>
         <h1>Registry Model</h1>
       </div>
 
@@ -34,8 +54,7 @@
         </app-resource-document-item>
       </div>
     </section>    <!-- Group Types -->
-    <section class="group-types-section">
-      <div class="section-header">        <fluent-icon name="folder" class="section-icon"></fluent-icon>
+    <section class="group-types-section">      <div class="section-header">        <app-icon name="folder" class="section-icon"></app-icon>
         <h2>Group Types</h2>
         <span class="count-badge">{{ groupTypes.length }}</span>
       </div>
@@ -52,19 +71,16 @@
             [origins]="gt.origins">
           </app-group-type-model>
         </div>
-      </div>
-    </section>
+      </div>    </section>
 
   </div>
 
-  <!-- Error State -->
-  <div *ngIf="!loading && !registryModel" class="error-state">    <fluent-icon name="warning" class="error-icon"></fluent-icon>
-    <h2>Unable to Load Registry Model</h2>
-    <p>There was an error loading the registry model. Please check your configuration and try again.</p>
-  </div>
-
-  <!-- Loading Progress -->
-  <div *ngIf="loadingProgress && !loading" class="progress-indicator">    <fluent-icon name="arrow_sync_circle" class="spinning"></fluent-icon>
-    <span>Loading additional endpoints...</span>
-  </div>
+  <!-- Empty state when no registry model is available -->
+  <app-empty-state
+    *ngIf="!loading && !hasError && !registryModel"
+    type="info"
+    iconName="inbox"
+    title="No Registry Model Found"
+    message="No registry model data is available. Please check your configuration and try again.">
+  </app-empty-state>
 </div>

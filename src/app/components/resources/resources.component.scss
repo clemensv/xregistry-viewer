@@ -236,6 +236,17 @@ h4 {
   margin-bottom: 0.4rem;
 }
 
+.resource-title-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+
+  h3 {
+    margin: 0;
+  }
+}
+
 .version-badge {
   background: #28a745;
   color: white;

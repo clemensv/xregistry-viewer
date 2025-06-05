@@ -16,11 +16,14 @@ import { PageHeaderComponent, ViewMode } from '../page-header/page-header.compon
 import { ConfigService } from '../../services/config.service';
 import { truncateText, truncateDescription, formatDateShort, getFullText } from '../../utils/text.utils';
 import { IconComponent } from '../icon/icon.component';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { ErrorBoundaryComponent } from '../error-boundary/error-boundary.component';
 
 @Component({
   standalone: true,
   selector: 'app-groups',
-  imports: [CommonModule, RouterModule, FormsModule, GroupRowComponent, ResourceDocumentItemComponent, PageHeaderComponent, IconComponent],
+  imports: [CommonModule, RouterModule, FormsModule, GroupRowComponent, ResourceDocumentItemComponent, IconComponent, PageHeaderComponent, LoadingIndicatorComponent, EmptyStateComponent, ErrorBoundaryComponent],
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -685,5 +688,20 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     // Force the model service to reload by clearing any cached data
     // This ensures we get fresh data from the new endpoints
     this.loadModelAndGroups();
+  }
+
+  /**
+   * Retry loading groups after an error
+   */
+  retryLoadGroups(): void {
+    this.hasApiError = false;
+    this.apiErrorMessage = '';
+    this.apiErrorDetails = null;
+    this.partialFailure = false;
+    this.totalFailure = false;
+    this.loading = true;
+    this.loadingProgress = true;
+    this.cdr.markForCheck();
+    this.loadGroups();
   }
 }

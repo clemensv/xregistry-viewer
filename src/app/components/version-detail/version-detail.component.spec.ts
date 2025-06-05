@@ -7,7 +7,8 @@ import { VersionDetailComponent } from './version-detail.component';
 import { RegistryService } from '../../services/registry.service';
 import { ConfigService } from '../../services/config.service';
 import { ModelService } from '../../services/model.service';
-import { PLATFORM_ID } from '@angular/core';
+import { MockIconComponent } from '../../test-helpers/mock-icon.component';
+import { PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 describe('VersionDetailComponent', () => {
   let component: VersionDetailComponent;
@@ -41,20 +42,19 @@ describe('VersionDetailComponent', () => {
         },
         queryParams: {}
       }
-    };
-
-    await TestBed.configureTestingModule({
+    };    await TestBed.configureTestingModule({
       imports: [
         VersionDetailComponent,
-        HttpClientTestingModule
-      ],
-      providers: [
+        HttpClientTestingModule,
+        MockIconComponent
+      ],providers: [
         RegistryService,
         ConfigService,
         ModelService,
         { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: PLATFORM_ID, useValue: 'browser' }
-      ]
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
     .compileComponents();
 

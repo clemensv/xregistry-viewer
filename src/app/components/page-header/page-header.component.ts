@@ -8,7 +8,7 @@ export type ViewMode = 'cards' | 'list';
 @Component({
   selector: 'app-page-header',
   standalone: true,
-  imports: [CommonModule, PaginationComponent, IconComponent],
+  imports: [CommonModule, IconComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './page-header.component.html',
   styleUrl: './page-header.component.scss'

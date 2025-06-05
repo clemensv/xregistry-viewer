@@ -50,7 +50,7 @@
     border-color: colors.primary();
     color: colors.primary();
   }
-  fluent-icon, .icon-span {
+  app-icon, .icon-span {
     font-size: 14px;
     line-height: 1;
   }
@@ -109,7 +109,7 @@
           justify-content: center;
           flex-shrink: 0;
 
-          fluent-icon {
+          app-icon {
             font-size: 16px;
             color: var(--fg-text, #323130);
           }
@@ -157,7 +157,7 @@
       color: var(--fg-secondary-text, #605e5c);
       cursor: default;
 
-      fluent-icon {
+      app-icon {
         font-size: 6px;
         line-height: 1;
       }
@@ -248,7 +248,7 @@
       border-color: var(--primary-color, #0078d4);
     }
 
-    fluent-icon {
+    app-icon {
       margin-left: auto;
       flex-shrink: 0;
       font-size: 12px;
@@ -294,7 +294,7 @@
       color: var(--primary-color, #0078d4);
     }
 
-    fluent-icon {
+    app-icon {
       font-size: 16px;
     }
   }

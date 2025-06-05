@@ -11,11 +11,17 @@ import { DocumentationViewerComponent } from '../documentation-viewer/documentat
 import { LinkSet, PaginationComponent } from '../pagination/pagination.component';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ConfigService } from '../../services/config.service';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { ErrorBoundaryComponent } from '../error-boundary/error-boundary.component';
+import { DeprecationIndicatorComponent } from '../deprecation-indicator/deprecation-indicator.component';
+import { CrossReferenceComponent } from '../cross-reference/cross-reference.component';
+import { UrlDebugComponent } from '../url-debug/url-debug.component';
 
 @Component({
   selector: 'app-resource',
   standalone: true,
-  imports: [CommonModule, RouterModule, ResourceDocumentComponent, DocumentationViewerComponent, PaginationComponent, PageHeaderComponent],
+  imports: [CommonModule, RouterModule, ResourceDocumentComponent, DocumentationViewerComponent, PaginationComponent, PageHeaderComponent, LoadingIndicatorComponent, EmptyStateComponent, ErrorBoundaryComponent, DeprecationIndicatorComponent, CrossReferenceComponent, UrlDebugComponent],
   templateUrl: './resource.component.html',
   styleUrl: './resource.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -527,8 +533,29 @@ export class ResourceComponent implements OnInit, OnDestroy {
       .catch((error) => {
         console.error('Error fetching document:', error);
         this.documentError = error.message;
-        this.isLoadingDocument = false;
-      });
+        this.isLoadingDocument = false;      });
+  }
+  /**
+   * Retry loading resource after an error
+   */
+  retryLoadResource(): void {
+    this.hasError = false;
+    this.errorMessage = null;
+    this.errorDetails = null;
+    this.versionsError = false;
+    this.versionsErrorMessage = null;
+    this.loading = true;
+    this.loadingProgress = true;
+    this.loadResource();
+  }
+
+  /**
+   * Retry loading versions after an error
+   */
+  retryLoadVersions(): void {
+    this.versionsError = false;
+    this.versionsErrorMessage = null;
+    this.loadVersions();
   }
 
   ngOnDestroy(): void {

@@ -1,12 +1,12 @@
-<td class="no-wrap" [title]="getFullText(group?.name || group?.id)">
-  <fluent-icon name="folder" class="group-icon-small"></fluent-icon>
-  <a [routerLink]="getGroupNavigationRoute()">{{ truncateText(group?.name || group?.id) }}</a>
+<td class="no-wrap" [title]="getFullText(group.name || group.id)">
+  <app-icon name="folder" class="group-icon-small"></app-icon>
+  <a [routerLink]="getGroupNavigationRoute()">{{ truncateText(group.name || group.id) }}</a>
 </td>
-<td class="description-cell" [title]="getFullText(group?.description)">
-  {{ truncateDescription(group?.description) }}
+<td class="description-cell" [title]="getFullText(group.description)">
+  {{ truncateDescription(group.description) }}
 </td>
-<td class="no-wrap" [title]="getFullText(group?.origin)">
-  {{ truncateText(group?.origin) }}
+<td class="no-wrap" [title]="getFullText(group.origin)">
+  {{ truncateText(group.origin) }}
 </td>
 <td class="no-wrap">
   <div *ngIf="resourceTypes && resourceTypes.length > 0" class="resource-types-compact">
@@ -20,9 +20,9 @@
   </div>
   <span *ngIf="!resourceTypes || resourceTypes.length === 0">-</span>
 </td>
-<td class="no-wrap" [title]="getFullText(formatDateShort(group?.['createdAt']))">
-  {{ formatDateShort(group?.['createdAt']) }}
+<td class="no-wrap" [title]="getFullText(formatDateShort(group['createdAt']))">
+  {{ formatDateShort(group['createdAt']) }}
 </td>
-<td class="no-wrap" [title]="getFullText(formatDateShort(group?.['modifiedAt']))">
-  {{ formatDateShort(group?.['modifiedAt']) }}
+<td class="no-wrap" [title]="getFullText(formatDateShort(group['modifiedAt']))">
+  {{ formatDateShort(group['modifiedAt']) }}
 </td>

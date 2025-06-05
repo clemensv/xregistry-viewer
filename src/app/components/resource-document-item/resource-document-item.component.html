@@ -15,7 +15,7 @@
                 class="toggle-icon"
                 [attr.aria-expanded]="isExpanded()"
                 (click)="$event.stopPropagation(); toggleExpansion($event)">
-          <fluent-icon [name]="isExpanded() ? 'chevron_down' : 'chevron_right'"></fluent-icon>
+          <app-icon [name]="isExpanded() ? 'chevron_down' : 'chevron_right'"></app-icon>
         </button>
 
         <!-- Count display -->
@@ -25,7 +25,7 @@
 
         <!-- Description if available -->
         <span *ngIf="item.description" class="info-icon" title="{{ item.description }}">
-          <fluent-icon name="info"></fluent-icon>
+          <app-icon name="info"></app-icon>
         </span>
       </div>
 
@@ -39,7 +39,7 @@
               [attr.aria-label]="'Copy ' + item.key + ' value'"
               title="Copy value"
               (click)="copyToClipboard(item.value); $event.stopPropagation();">
-        <fluent-icon name="copy"></fluent-icon>
+        <app-icon name="copy"></app-icon>
       </button>
     </div>
   </div>
@@ -60,7 +60,7 @@
            class="url-link"
            title="Open URL in new tab">
           {{ item.value }}
-          <fluent-icon name="open" class="external-link-icon"></fluent-icon>
+          <app-icon name="open" class="external-link-icon"></app-icon>
         </a>
 
         <!-- XID link display -->
@@ -69,7 +69,7 @@
            class="xid-link"
            title="Navigate to {{ item.value }} in this registry">
           {{ item.value }}
-          <fluent-icon name="arrow_right" class="internal-link-icon"></fluent-icon>
+          <app-icon name="arrow_right" class="internal-link-icon"></app-icon>
         </a>
 
         <!-- JSON/Any type display -->
@@ -98,7 +98,7 @@
 
         <!-- Info icon -->
         <span *ngIf="item.description" class="info-icon" title="{{ item.description }}">
-          <fluent-icon name="info"></fluent-icon>
+          <app-icon name="info"></app-icon>
         </span>
       </div>
 
@@ -110,7 +110,7 @@
               [attr.aria-label]="'Copy ' + item.key + ' value'"
               title="Copy value"
               (click)="copyToClipboard(item.value); $event.stopPropagation();">
-        <fluent-icon name="copy"></fluent-icon>
+        <app-icon name="copy"></app-icon>
       </button>
     </div>
   </div>

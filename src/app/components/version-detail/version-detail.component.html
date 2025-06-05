@@ -1,40 +1,21 @@
 <!-- Loading state -->
-<div *ngIf="loading && !hasError" class="empty-state">
-  <div class="empty-state-content">
-    <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
-    <h3 class="empty-state-title">Loading Version Details</h3>
-    <p class="empty-state-message">
-      Please wait while we load the version details from the registry...
-    </p>
-  </div>
-</div>
+<app-loading-indicator
+  *ngIf="loading && !hasError"
+  size="large"
+  title="Loading Version Details"
+  message="Please wait while we load the version details from the registry..."
+  [showText]="true">
+</app-loading-indicator>
 
 <!-- Error state -->
-<div *ngIf="hasError && !loading" class="empty-state error-state">
-  <div class="empty-state-content">
-    <fluent-icon name="error" class="empty-state-icon error-icon"></fluent-icon>
-    <h3 class="empty-state-title">Unable to Load Version</h3>
-    <p class="empty-state-message">
-      {{ errorMessage }}
-    </p>
-    <div *ngIf="errorDetails" class="error-details">
-      <details>
-        <summary>View technical details</summary>
-        <div class="error-technical">
-          <p><strong>Error Code:</strong> {{ errorDetails.status || 'Unknown' }}</p>
-          <p><strong>Error Message:</strong> {{ errorDetails.message || errorDetails.statusText || 'No additional details' }}</p>
-          <p><strong>Version Path:</strong> {{ groupType }}/{{ groupId }}/{{ resourceType }}/{{ resourceId }}/versions/{{ versionId }}</p>
-        </div>
-      </details>
-    </div>
-    <div class="error-actions">
-      <fluent-button appearance="outline" (click)="retryLoadVersion()">
-        <fluent-icon slot="start" name="refresh"></fluent-icon>
-        Retry Loading
-      </fluent-button>
-    </div>
-  </div>
-</div>
+<app-error-boundary
+  *ngIf="hasError && !loading"
+  [errorState]="{hasError: true, error: {name: 'VersionLoadError', message: errorMessage || 'Unknown error occurred'}}"
+  [showDetails]="!!errorDetails"
+  [errorTitle]="getErrorTitle()"
+  [errorMessage]="getErrorMessage()"
+  (retry)="retryLoadVersion()">
+</app-error-boundary>
 
 <!-- Main content when version is loaded successfully -->
 <div class="version-detail" *ngIf="!hasError && !loading && (version$ | async) as version">
@@ -48,6 +29,15 @@
 
     <h2>Version: {{ version['id'] }}</h2>
     <div class="origin-field" *ngIf="version.origin">Origin: {{ version.origin }}</div>
+
+    <!-- Add deprecation indicator for version if applicable -->
+    <app-deprecation-indicator
+      *ngIf="version['deprecated']"
+      [deprecatedInfo]="version['deprecated']"
+      [showActive]="true"
+      size="medium">
+    </app-deprecation-indicator>
+
     <!-- Use our shared component -->
     <app-resource-document
       [resourceDocument]="version"
@@ -57,17 +47,24 @@
       [showAttributes]="true"
       [showDocument]="true">
     </app-resource-document>
+
+    <!-- Cross-references (if available) -->
+    <app-cross-reference
+      *ngIf="version['xref'] || version['crossReferences']"
+      [crossReferences]="version['xref'] || version['crossReferences']"
+      [title]="'Related Resources'"
+      [showDescription]="true"
+      [compactMode]="false">
+    </app-cross-reference>
   </div>
 
   <ng-template #noData>
-    <div class="empty-state">
-      <div class="empty-state-content">
-        <fluent-icon name="document" class="empty-state-icon"></fluent-icon>
-        <h3 class="empty-state-title">No Version Data</h3>
-        <p class="empty-state-message">
-          No data was returned from the API for this version. The version may exist but have no content.
-        </p>
-      </div>
-    </div>
+    <app-empty-state
+      type="info"
+      iconName="document"
+      title="No Version Data"
+      message="No data was returned from the API for this version. The version may exist but have no content."
+      size="medium">
+    </app-empty-state>
   </ng-template>
 </div>

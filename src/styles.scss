@@ -44,8 +44,8 @@
   vertical-align: top;
 }
 
-/* Fluent Icon styles - standardized to 16px */
-fluent-icon {
+/* App Icon styles - standardized to 16px */
+app-icon {
   height: 16px;
   width: 16px;
   font-size: 16px;
@@ -57,32 +57,32 @@ fluent-icon {
 }
 
 /* Button context for icons */
-button fluent-icon,
-fluent-button fluent-icon {
+button app-icon,
+fluent-button app-icon {
   vertical-align: middle;
 }
 
 /* Search context for icons */
-.search-buttons fluent-icon {
+.search-buttons app-icon {
   font-size: 16px;
   vertical-align: middle;
 }
 
 /* View toggle context for icons */
-.view-toggle fluent-icon,
-.pagination-toggle fluent-icon {
+.view-toggle app-icon,
+.pagination-toggle app-icon {
   font-size: 16px;
   vertical-align: middle;
 }
 
 /* Specific icon types */
-fluent-icon.warning-icon {
+app-icon.warning-icon {
   color: #e76f51; /* theme warning color */
   font-size: 20px;
   margin-right: 8px;
 }
 
-fluent-icon.loading-spinner {
+app-icon.loading-spinner {
   animation: spin 1s linear infinite;
   color: theme.$primary-color;
   font-size: 20px;
@@ -572,8 +572,8 @@ body.theme-dark {
     }
   }
 
-  /* Enhanced fluent-icon styling for dark mode */
-  fluent-icon {
+  /* Enhanced app-icon styling for dark mode */
+  app-icon {
     color: var(--colorNeutralForeground1);
 
     /* SVG icon inversion for dark mode */
@@ -614,27 +614,27 @@ body.theme-dark {
   }
 
   /* Button context icons */
-  fluent-button fluent-icon,
-  button fluent-icon {
+  fluent-button app-icon,
+  button app-icon {
     color: inherit; /* Inherit from button color */
   }
 
   /* Accent button icons should be white */
-  fluent-button[appearance="accent"] fluent-icon,
-  button.accent fluent-icon {
+  fluent-button[appearance="accent"] app-icon,
+  button.accent app-icon {
     color: var(--colorNeutralForegroundOnBrand, #ffffff);
   }
 
   /* Navigation and interactive element icons */
-  .header-toolbar fluent-icon,
-  .nav-item fluent-icon,
-  .menu-item fluent-icon {
+  .header-toolbar app-icon,
+  .nav-item app-icon,
+  .menu-item app-icon {
     color: var(--colorNeutralForeground2, #e1dfdd);
   }
 
   /* Form and input related icons */
-  .search-container fluent-icon,
-  .input-group fluent-icon {
+  .search-container app-icon,
+  .input-group app-icon {
     color: var(--colorNeutralForeground3, #c8c6c4);
   }
 
@@ -1773,7 +1773,7 @@ router-outlet + app-groups {
 }
 
 /* Fluent menu button icon alignment */
-fluent-menu-button fluent-icon {
+fluent-menu-button app-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1781,7 +1781,7 @@ fluent-menu-button fluent-icon {
 }
 
 /* Fluent button icon alignment */
-fluent-button fluent-icon {
+fluent-button app-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;

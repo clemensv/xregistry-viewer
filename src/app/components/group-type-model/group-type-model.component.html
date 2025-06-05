@@ -1,7 +1,6 @@
 <div class="group-type-model">
-  <div class="model-header">
-    <div class="model-title">
-      <fluent-icon name="folder" class="model-icon"></fluent-icon>
+  <div class="model-header">    <div class="model-title">
+      <app-icon name="folder" class="model-icon"></app-icon>
       <h2>{{ model.plural }} Model</h2>
     </div>
     <div class="model-subtitle">
@@ -40,9 +39,8 @@
     </div>
   </div>
 
-  <div class="model-actions">
-    <a [routerLink]="getResourceCollectionRoute('')" class="action-button primary">
-      <fluent-icon name="folder"></fluent-icon>
+  <div class="model-actions">    <a [routerLink]="getResourceCollectionRoute('')" class="action-button primary">
+      <app-icon name="folder"></app-icon>
       Browse {{ model.plural }}
     </a>
   </div>

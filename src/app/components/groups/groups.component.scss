@@ -144,7 +144,7 @@ app-pagination {
       align-items: center;
       gap: 8px;
 
-      fluent-icon {
+      app-icon {
         font-size: 16px;
         color: var(--primary-color, #0078d4);
       }
@@ -309,7 +309,7 @@ app-pagination {
         color: var(--primary-color, #0078d4);
       }
 
-      fluent-icon {
+      app-icon {
         font-size: 16px;
       }
     }
@@ -476,7 +476,7 @@ app-pagination {
         line-height: 18px;
         gap: 6px;
 
-        fluent-icon {
+        app-icon {
           font-size: 14px;
         }
       }

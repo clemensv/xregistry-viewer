@@ -1,60 +1,43 @@
 <div class="resource-container">
+  <!-- Debug component for URL investigation -->
+  <app-url-debug></app-url-debug>
+
   <!-- Page header for consistency with other pages -->
   <app-page-header
     [title]="'Resource: ' + resourceId"
     [showViewToggle]="false"
-    [showPagination]="false"
-    [resultsCount]="hasMultipleVersions ? filteredVersionsList?.length || 0 : 1"
-    [totalCount]="hasMultipleVersions ? versionsList?.length || 0 : 1"
+    [showPagination]="false"    [resultsCount]="hasMultipleVersions ? filteredVersionsList.length || 0 : 1"
+    [totalCount]="hasMultipleVersions ? versionsList.length || 0 : 1"
     [resultsText]="hasMultipleVersions ? 'versions' : 'version'"
-    [searchResultsText]="hasMultipleVersions && currentSearchTerm ? 'Showing ' + (filteredVersionsList?.length || 0) + ' versions (filtered from ' + (versionsList?.length || 0) + ')' : ''">
+    [searchResultsText]="hasMultipleVersions && currentSearchTerm ? 'Showing ' + (filteredVersionsList.length || 0) + ' versions (filtered from ' + (versionsList.length || 0) + ')' : ''">
   </app-page-header>
-
   <!-- Loading state -->
-  <div *ngIf="loading && !hasError" class="empty-state">
-    <div class="empty-state-content">
-      <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
-      <h3 class="empty-state-title">Loading Resource</h3>
-      <p class="empty-state-message">
-        Please wait while we load the resource details from the registry...
-      </p>
-    </div>
-  </div>
+  <app-loading-indicator
+    *ngIf="loading && !hasError"
+    size="large"
+    title="Loading Resource"
+    message="Please wait while we load the resource details from the registry..."
+    [showText]="true">
+  </app-loading-indicator>
 
   <!-- Error state for resource loading -->
-  <div *ngIf="hasError && !loading" class="empty-state error-state">
-    <div class="empty-state-content">
-      <fluent-icon name="error" class="empty-state-icon error-icon"></fluent-icon>
-      <h3 class="empty-state-title">Unable to Load Resource</h3>
-      <p class="empty-state-message">
-        {{ errorMessage }}
-      </p>
-      <div *ngIf="errorDetails" class="error-details">
-        <details>
-          <summary>View technical details</summary>
-          <div class="error-technical">
-            <p><strong>Error Code:</strong> {{ errorDetails.status || 'Unknown' }}</p>
-            <p><strong>Error Message:</strong> {{ errorDetails.message || errorDetails.statusText || 'No additional details' }}</p>
-            <p><strong>Resource Path:</strong> {{ groupType }}/{{ groupId }}/{{ resourceType }}/{{ resourceId }}</p>
-          </div>
-        </details>
-      </div>
-      <div class="error-actions">
-        <fluent-button appearance="outline" (click)="loadDefaultVersion()">
-          <fluent-icon slot="start" name="refresh"></fluent-icon>
-          Retry Loading
-        </fluent-button>
-      </div>
-    </div>
-  </div>
+  <app-error-boundary
+    *ngIf="hasError && !loading"
+    [errorState]="{hasError: true, error: {name: 'ResourceLoadError', message: errorMessage || 'Unknown error occurred'}}"
+    [showDetails]="!!errorDetails"
+    [errorTitle]="'Unable to Load Resource'"
+    [errorMessage]="errorMessage || 'An unexpected error occurred while loading the resource'"
+    (retry)="retryLoadResource()">
+  </app-error-boundary>
 
   <!-- Progressive loading indicator -->
-  <div class="loading-progress" *ngIf="loadingProgress && (versionsList.length > 0 || (defaultVersion$ | async)) && !hasError">
-    <div class="loading-indicator">
-      <fluent-icon name="arrow_sync_circle" class="loading-spinner"></fluent-icon>
-      <span>Loading resource data from additional endpoints...</span>
-    </div>
-  </div>
+  <app-loading-indicator
+    *ngIf="loadingProgress && (versionsList.length > 0 || (defaultVersion$ | async)) && !hasError"
+    size="inline"
+    title="Loading Additional Data"
+    [message]="'Loading resource data from additional endpoints...'"
+    [showText]="true">
+  </app-loading-indicator>
 
   <!-- Main content when resource is loaded successfully -->
   <ng-container *ngIf="!hasError && !loading">
@@ -62,11 +45,19 @@
     <ng-container *ngIf="hasMultipleVersions">
       <div class="resource-layout">
         <!-- Main content area -->
-        <div class="main-content">
-          <div *ngIf="defaultVersion$ | async as defaultVersion" class="default-version-section">
-            <h3>Default Version: {{ defaultVersion.id }}</h3>
+        <div class="main-content">          <div *ngIf="defaultVersion$ | async as defaultVersion" class="default-version-section">
+            <div class="version-header-container">
+              <h3>Default Version: {{ defaultVersion['versionid'] }}</h3>
+              <!-- Deprecation indicator for the default version -->
+              <app-deprecation-indicator
+                *ngIf="defaultVersion.deprecated || defaultVersion['deprecation']"
+                [size]="'medium'"
+                [deprecatedAt]="defaultVersion.deprecated"
+                [deprecationInfo]="defaultVersion['deprecation']">
+              </app-deprecation-indicator>
+            </div>
             <div class="origin-field" *ngIf="defaultVersion.origin">Origin: {{ defaultVersion.origin }}</div>
-            <a [routerLink]="['versions', defaultVersion['versionid'] || defaultVersion['id']]" class="btn-view">View Version Details</a>
+            <a [routerLink]="['versions', defaultVersion['versionid']]" class="btn-view">View Version Details</a>
             <app-resource-document
               [resourceDocument]="defaultVersion"
               [resourceType]="resourceType"
@@ -76,6 +67,13 @@
               [showDocument]="true"
               [initialExpanded]="true">
             </app-resource-document>
+
+            <!-- Cross-references section for default version -->
+            <app-cross-reference
+              *ngIf="defaultVersion['xref'] || defaultVersion['crossReferences']"
+              [crossReferences]="defaultVersion['xref'] || defaultVersion['crossReferences']"
+              [title]="'Related Resources'">
+            </app-cross-reference>
           </div>
         </div>
 
@@ -102,42 +100,49 @@
                 [links]="pageLinks"
                 (pageChange)="onVersionPageChange($event)">
               </app-pagination>
-            </div>
-
-            <!-- Versions Error State -->
-            <div *ngIf="versionsError" class="versions-error">
-              <div class="error-content">
-                <fluent-icon name="warning" class="error-icon"></fluent-icon>
-                <p class="error-message">{{ versionsErrorMessage }}</p>
-                <fluent-button appearance="subtle" (click)="loadVersions()">
-                  <fluent-icon slot="start" name="refresh"></fluent-icon>
-                  Retry
-                </fluent-button>
-              </div>
-            </div>
+            </div>            <!-- Versions Error State -->
+            <app-error-boundary
+              *ngIf="versionsError"
+              [errorState]="{hasError: true, error: {name: 'VersionsLoadError', message: versionsErrorMessage || 'Unknown error occurred'}}"
+              [showDetails]="false"
+              [errorTitle]="'Unable to Load Version History'"
+              [errorMessage]="versionsErrorMessage || 'An unexpected error occurred while loading version history'"
+              (retry)="retryLoadVersions()">
+            </app-error-boundary>
 
             <!-- Versions List -->
-            <div *ngIf="!versionsError" class="versions-list-compact">
-              <div *ngFor="let v of filteredVersionsList"
+            <div *ngIf="!versionsError" class="versions-list-compact">              <div *ngFor="let v of filteredVersionsList"
                    class="version-item"
-                   [class.default-version]="v.isDefault">
-                <div class="version-header">
-                  <span class="version-id">{{ v.id || v.versionid }}</span>
+                   [class.default-version]="v.isDefault">                <div class="version-header">
+                  <span class="version-id">{{ v['versionid'] }}</span>
                   <span *ngIf="v.isDefault" class="default-badge">Default</span>
+                  <!-- Deprecation indicator for individual versions -->
+                  <app-deprecation-indicator
+                    *ngIf="v.deprecated || v['deprecation']"
+                    [size]="'small'"
+                    [deprecatedAt]="v.deprecated"
+                    [deprecationInfo]="v['deprecation']">
+                  </app-deprecation-indicator>
                 </div>
                 <div class="version-meta">
                   <small>Modified: {{ (v.modifiedAt || v.modifiedat) | date:'short' }}</small>
                 </div>
-                <a [routerLink]="['versions', v.id || v.versionid]" class="btn-view-compact">View</a>
-              </div>
+                <a [routerLink]="['versions', v['versionid']]" class="btn-view-compact">View</a>
+              </div>              <app-empty-state
+                *ngIf="filteredVersionsList.length === 0 && versionsList.length > 0"
+                type="info"
+                iconName="search_off"
+                title="No Matching Versions"
+                message="No versions match the search criteria.">
+              </app-empty-state>
 
-              <div *ngIf="filteredVersionsList.length === 0 && versionsList.length > 0" class="no-versions">
-                <p>No versions match the search criteria.</p>
-              </div>
-
-              <div *ngIf="versionsList.length === 0" class="no-versions">
-                <p>No version history available.</p>
-              </div>
+              <app-empty-state
+                *ngIf="versionsList.length === 0"
+                type="info"
+                iconName="history"
+                title="No Version History"
+                message="No version history is available for this resource.">
+              </app-empty-state>
             </div>
           </div>
         </div>
@@ -151,12 +156,17 @@
         *ngIf="documentationUrl"
         [documentationUrl]="documentationUrl"
         [resourceId]="resourceId">
-      </app-documentation-viewer>
-
-      <div class="version-detail">
-        <h3>Version: {{ version.id }}</h3>
-
-        <!-- Use our new shared component -->
+      </app-documentation-viewer>      <div class="version-detail">
+        <div class="version-header-container">
+          <h3>Version: {{ version.id }}</h3>
+          <!-- Deprecation indicator for the version -->
+          <app-deprecation-indicator
+            *ngIf="version.deprecated || version['deprecation']"
+            [size]="'medium'"
+            [deprecatedAt]="version.deprecated"
+            [deprecationInfo]="version['deprecation']">
+          </app-deprecation-indicator>
+        </div>        <!-- Use our new shared component -->
         <app-resource-document
           [resourceDocument]="version"
           [resourceType]="resourceType"
@@ -165,7 +175,12 @@
           [showAttributes]="true"
           [showDocument]="true"
           [initialExpanded]="true">
-        </app-resource-document>
+        </app-resource-document>        <!-- Cross-references section -->
+        <app-cross-reference
+          *ngIf="version['xref'] || version['crossReferences']"
+          [crossReferences]="version['xref'] || version['crossReferences']"
+          [title]="'Related Resources'">
+        </app-cross-reference>
       </div>
     </ng-container>
   </ng-container>

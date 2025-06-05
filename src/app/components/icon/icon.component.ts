@@ -39,6 +39,12 @@ import fontDecreaseIcon from '@fluentui/svg-icons/icons/font_decrease_20_regular
 import fontIncreaseIcon from '@fluentui/svg-icons/icons/font_increase_20_regular.svg';
 import fontSizeIcon from '@fluentui/svg-icons/icons/text_font_size_20_regular.svg';
 
+// Additional icons for new components
+import arrowClockwiseIcon from '@fluentui/svg-icons/icons/arrow_clockwise_20_regular.svg';
+import circleIcon from '@fluentui/svg-icons/icons/circle_20_regular.svg';
+import linkOffIcon from '@fluentui/svg-icons/icons/link_dismiss_20_regular.svg';
+import tagIcon from '@fluentui/svg-icons/icons/tag_20_regular.svg';
+
 // Theme toggle icons
 import sunIcon from '@fluentui/svg-icons/icons/weather_sunny_20_regular.svg';
 import moonIcon from '@fluentui/svg-icons/icons/weather_moon_20_regular.svg';
@@ -52,7 +58,8 @@ import checkingIcon from '@fluentui/svg-icons/icons/clock_20_regular.svg';
  * Icon component that uses official Fluent UI System Icons from @fluentui/svg-icons
  */
 @Component({
-  selector: 'fluent-icon',
+  selector: 'app-icon',
+  standalone: true,
   template: `<span class="fluent-icon" [innerHTML]="iconSvg" aria-hidden="true"></span>`,
   styles: [`
     .fluent-icon {
@@ -122,12 +129,16 @@ export class IconComponent implements OnInit, OnChanges {
     'search': searchIcon,
     'search_off': searchOffIcon,
     'dismiss': dismissIcon,
-    'settings': settingsIcon,
-
-    // Font size icons
+    'settings': settingsIcon,    // Font size icons
     'font_decrease': fontDecreaseIcon,
     'font_increase': fontIncreaseIcon,
     'font_size': fontSizeIcon,
+
+    // Additional icons for new components
+    'arrow_clockwise': arrowClockwiseIcon,
+    'circle': circleIcon,
+    'link_off': linkOffIcon,
+    'tag': tagIcon,
 
     // Theme toggle icons
     'sun': sunIcon,
@@ -140,7 +151,11 @@ export class IconComponent implements OnInit, OnChanges {
     // Config page status icons
     'online': onlineIcon,
     'offline': offlineIcon,
-    'checking': checkingIcon
+    'checking': checkingIcon,    // Aliases for compatibility
+    'check_circle': checkmarkCircleIcon,
+    'ErrorCircle': errorCircleIcon,
+    'ArrowClockwise': arrowClockwiseIcon,
+    'Circle': circleIcon
   };
 
   constructor(private sanitizer: DomSanitizer) {}

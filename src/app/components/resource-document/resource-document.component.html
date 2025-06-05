@@ -1,6 +1,5 @@
 <div class="resource-document">
-  <div class="resource-document-container" [class.has-document]="showDocument && (hasDocument() || cachedDocumentContent)">
-    <!-- Attributes section -->
+  <div class="resource-document-container" [class.has-document]="showDocument && (hasDocument() || cachedDocumentContent)">    <!-- Attributes section -->
     <section *ngIf="showAttributes" class="attributes-section">
 
       <!-- Simple Attributes Grid -->
@@ -32,34 +31,37 @@
                 [initialExpanded]="initialExpanded">
               </app-resource-document-item>
             </div>
-          </ng-container>
-        </div>
+          </ng-container>        </div>
       </div>
 
       <!-- Show download link if base64 encoded document is available -->
       <div *ngIf="hasBase64Document()" class="action-buttons">
         <button (click)="downloadBase64Document()" class="download-btn">
-          <fluent-icon name="arrow_download"></fluent-icon> Download Document
+          <app-icon name="arrow_download"></app-icon> Download Document
         </button>
       </div>
 
       <!-- Show loading message if fetching from URL -->
-      <div *ngIf="isLoadingDocument" class="loading-document">
-        <fluent-icon name="arrow_sync_circle" class="loading-icon"></fluent-icon>
-        <p>Loading document content...</p>
-      </div>
+      <app-loading-indicator
+        *ngIf="isLoadingDocument"
+        size="inline"
+        title="Loading Document"
+        message="Fetching document content from URL..."
+        [showText]="true">
+      </app-loading-indicator>
 
       <!-- Show error message if document fetch failed -->
-      <div *ngIf="documentError" class="document-error">
-        <fluent-icon name="warning" class="error-icon"></fluent-icon>
-        <p>Error loading document: {{ documentError }}</p>
-      </div>
-    </section>
-
-    <!-- Document section -->
+      <app-error-boundary
+        *ngIf="documentError && !isLoadingDocument"
+        [errorState]="{hasError: true, error: {name: 'DocumentLoadError', message: documentError}}"
+        [showDetails]="false"
+        [errorTitle]="'Unable to Load Document'"
+        [errorMessage]="documentError"
+        (retry)="retryLoadDocument()">
+      </app-error-boundary>    </section>    <!-- Document section -->
     <section *ngIf="showDocument && hasDocument()" class="document-section">
       <h3>
-        <fluent-icon name="document" class="doc-icon"></fluent-icon>
+        <app-icon name="document" class="doc-icon"></app-icon>
         Document
       </h3>
 
@@ -69,32 +71,35 @@
           [code]="formatDocumentContent(getDocumentContent()!)"
           [language]="'json'">
         </app-code-highlight>
-      </div>
-
-      <!-- Show download link if base64 encoded document is available -->
+      </div>      <!-- Show download link if base64 encoded document is available -->
       <div *ngIf="hasBase64Document()" class="action-buttons">
         <button (click)="downloadBase64Document()" class="download-btn">
-          <fluent-icon name="arrow_download"></fluent-icon> Download Document
+          <app-icon name="arrow_download"></app-icon> Download Document
         </button>
       </div>
 
       <!-- Show loading message if fetching from URL -->
-      <div *ngIf="isLoadingDocument" class="loading-document">
-        <fluent-icon name="arrow_sync_circle" class="loading-icon"></fluent-icon>
-        <p>Loading document content...</p>
-      </div>
+      <app-loading-indicator
+        *ngIf="isLoadingDocument"
+        size="inline"
+        title="Loading Document"
+        message="Fetching document content from URL..."
+        [showText]="true">
+      </app-loading-indicator>
 
       <!-- Show error message if document fetch failed -->
-      <div *ngIf="documentError" class="document-error">
-        <fluent-icon name="warning" class="error-icon"></fluent-icon>
-        <p>Error loading document: {{ documentError }}</p>
-      </div>
-    </section>
-
-    <!-- Document Items Section -->
+      <app-error-boundary
+        *ngIf="documentError && !isLoadingDocument"
+        [errorState]="{hasError: true, error: {name: 'DocumentLoadError', message: documentError}}"
+        [showDetails]="false"
+        [errorTitle]="'Unable to Load Document'"
+        [errorMessage]="documentError"
+        (retry)="retryLoadDocument()">
+      </app-error-boundary>
+    </section>    <!-- Document Items Section -->
     <section *ngIf="documentItems && documentItems.length > 0" class="document-items-section">
       <h3>
-        <fluent-icon name="list" class="items-icon"></fluent-icon>
+        <app-icon name="list" class="items-icon"></app-icon>
         Document Items
       </h3>
 

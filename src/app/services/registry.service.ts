@@ -1,8 +1,8 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 // Removed PaginationInfo import as pagination now uses LinkSet and Page<T>
-import { Observable, of, throwError, forkJoin, from, lastValueFrom } from 'rxjs';
-import { map, switchMap, catchError, tap } from 'rxjs/operators';
+import { Observable, of, throwError, forkJoin, from, lastValueFrom, timer } from 'rxjs';
+import { map, switchMap, catchError, tap, retryWhen, take, concat, delay } from 'rxjs/operators';
 import { Group, Resource, ResourceDocument } from '../models/registry.model';
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
@@ -20,6 +20,16 @@ type ResourceKey = {
   resourceType: string;
   resourceId?: string;
 };
+
+/**
+ * Retry configuration for API requests
+ */
+interface RetryConfig {
+  maxRetries: number;
+  baseDelay: number;
+  maxDelay: number;
+  backoffMultiplier: number;
+}
 
 // Define a Page<T> structure for paginated results
 export interface Page<T> {
@@ -53,6 +63,14 @@ export class RegistryService {
   // Cache for document resources to avoid repeated fetches
   private resourceCache = new LRUCache<string, ResourceDocument>(100);
 
+  // Default retry configuration
+  private defaultRetryConfig: RetryConfig = {
+    maxRetries: 3,
+    baseDelay: 1000, // 1 second
+    maxDelay: 10000, // 10 seconds
+    backoffMultiplier: 2
+  };
+
   constructor(
     private http: HttpClient,
     private modelService: ModelService,
@@ -65,23 +83,64 @@ export class RegistryService {
     function proxyUrl(path: string) {
       return `${configBaseUrl}/proxy${path}`;
     }
-    // Detect if running in a server context by checking for /proxy API
-    if (isPlatformBrowser(this.platformId)) {
-      // Browser: check if /proxy endpoint is available (relative to baseUrl)
-      // Use synchronous XHR to ensure completion before constructor exits
-      try {
-        const xhr = new XMLHttpRequest();
-        xhr.open('OPTIONS', proxyUrl(''), false); // false = synchronous
-        xhr.send();
-        this.servedFromServer = xhr.status == 200;
-      } catch {
-        this.servedFromServer = false;
-      }
-    } else {
-      // Server-side: assume /proxy is available
-      this.servedFromServer = true;
-    }
+    // Disable proxy detection - always use direct API calls
+    this.servedFromServer = false;
   }
+
+  /**
+   * Retry an observable with exponential backoff
+   */
+  private retryWithBackoff<T>(
+    source: Observable<T>,
+    config: Partial<RetryConfig> = {}
+  ): Observable<T> {
+    const finalConfig = { ...this.defaultRetryConfig, ...config };
+
+    return source.pipe(
+      retryWhen(errors =>
+        errors.pipe(
+          map((error, index) => ({ error, index })),
+          switchMap(({ error, index }) => {
+            const retryAttempt = index + 1;
+
+            // If we've exceeded max retries, throw the error
+            if (retryAttempt > finalConfig.maxRetries) {
+              this.debug.error(`Max retries (${finalConfig.maxRetries}) exceeded`, error);
+              return throwError(() => error);
+            }
+
+            // Calculate delay with exponential backoff
+            const delay = Math.min(
+              finalConfig.baseDelay * Math.pow(finalConfig.backoffMultiplier, index),
+              finalConfig.maxDelay
+            );
+
+            this.debug.log(`Retry attempt ${retryAttempt}/${finalConfig.maxRetries} after ${delay}ms delay`);
+
+            // Return a timer that emits after the calculated delay
+            return timer(delay);
+          })
+        )
+      )
+    );
+  }
+
+  /**
+   * Enhanced HTTP request with retry logic
+   */
+  private httpGetWithRetry<T>(
+    url: string,
+    options: any = {},
+    retryConfig?: Partial<RetryConfig>
+  ): Observable<HttpResponse<T>> {
+    return this.retryWithBackoff(
+      this.http.get<T>(url, { observe: 'response', ...options }).pipe(
+        map(response => response as HttpResponse<T>)
+      ),
+      retryConfig
+    );
+  }
+
   /**
    * Gets the API endpoints from configuration
    */
@@ -168,6 +227,10 @@ export class RegistryService {
       return { items: [], links: {} };
     }
 
+    // Track 404 errors to distinguish between "resource not found" vs other failures
+    let allEndpoints404 = true;
+    let lastError: any = null;
+
     // Try each API endpoint until we find one that works
     for (const api of apis) {
       try {
@@ -186,7 +249,7 @@ export class RegistryService {
 
         this.debug.log(`Requesting resources from: ${url}`);
         const response = await lastValueFrom(
-          this.http.get<{ [key: string]: any }>(url, { observe: 'response' as const })
+          this.httpGetWithRetry<{ [key: string]: any }>(url)
         );
         const data = response.body || {};
 
@@ -296,11 +359,30 @@ export class RegistryService {
         return { items, links, totalCount, pageSize, currentPage };
       } catch (err) {
         this.debug.error(`Failed to list resources from ${api}:`, err);
+        lastError = err;
+
+        // Check if this was a 404 error
+        if (err && typeof err === 'object' && 'status' in err && err.status !== 404) {
+          allEndpoints404 = false;
+        }
+
         continue;
       }
     }
 
-    // If all APIs failed, return empty result
+    // If all endpoints returned 404, this means the resource path doesn't exist
+    if (allEndpoints404 && lastError) {
+      this.debug.error('All endpoints returned 404 - resource path does not exist');
+      throw {
+        ...lastError,
+        status: 404,
+        message: `Resource path "${pagePath}" not found`,
+        isResourceNotFound: true
+      };
+    }
+
+    // If all APIs failed with other errors, return empty result but log the issue
+    this.debug.warn('All APIs failed to load resources, returning empty result');
     return { items: [], links: {}, totalCount: 0 };
   }
 
@@ -332,7 +414,9 @@ export class RegistryService {
       try {
         const url = this.getApiUrl(api, `/${groupType}/${groupId}`);
         const group = await lastValueFrom(
-          this.http.get<Group>(url)
+          this.httpGetWithRetry<Group>(url).pipe(
+            map(response => response.body as Group)
+          )
         );
 
         const result = { ...group, origin: api };
@@ -570,7 +654,7 @@ export class RegistryService {
 
         this.debug.log(`Requesting versions from: ${url}`);
         const response = await lastValueFrom(
-          this.http.get<any>(url, { observe: 'response' as const })
+          this.httpGetWithRetry<any>(url)
         );
         const data = response.body || {};
 
@@ -643,7 +727,9 @@ export class RegistryService {
       return of('');
     }
 
-    return this.http.get(url, { responseType: 'text' }).pipe(
+    return this.retryWithBackoff(
+      this.http.get(url, { responseType: 'text' })
+    ).pipe(
       catchError((error) => {
         this.debug.error(`Error fetching document from ${url}:`, error);
         return throwError(() => error);
@@ -698,9 +784,11 @@ export class RegistryService {
     const singularKey = resMeta.singular + 'id';
     const attrs = resMeta.attributes || {};
 
+    const selectedName = entry.name || entry.title || entry[singularKey] || entry.id;
+
     const resource: any = {
       id: entry[singularKey] || entry.id,
-      name: entry.name || entry.title || entry[singularKey] || entry.id,
+      name: selectedName,
       description: entry.description,
       createdAt: entry.createdat,
       modifiedAt: entry.modifiedat,
@@ -1026,6 +1114,10 @@ export class RegistryService {
     const resMeta = model.groups[groupType]?.resources?.[resourceType] ||
       { singular: resourceType, attributes: {}, hasdocument: false };
 
+    // Track 404 errors to distinguish between "not found" vs other failures
+    let allEndpoints404 = true;
+    let lastError: any = null;
+
     // Try each API endpoint until we get a successful response
     for (const api of apisToTry) {
       try {
@@ -1044,7 +1136,11 @@ export class RegistryService {
 
         // Try the primary URL first
         try {
-          const entry = await lastValueFrom(this.http.get<any>(primaryUrl));
+          const entry = await lastValueFrom(
+            this.httpGetWithRetry<any>(primaryUrl).pipe(
+              map(response => response.body)
+            )
+          );
 
           // Process the response
           const resource = this.processResourceResponse(entry, resMeta, api, hasDocument);
@@ -1063,35 +1159,76 @@ export class RegistryService {
           return resource;
         } catch (error) {          // If $details URL failed with 404, try the regular URL
           if (hasDocument && error && typeof error === 'object' && 'status' in error && error.status === 404) {
-            const entry = await lastValueFrom(this.http.get<any>(regularUrl));
+            try {
+              const entry = await lastValueFrom(
+                this.httpGetWithRetry<any>(regularUrl).pipe(
+                  map(response => response.body)
+                )
+              );
 
-            // Process the response
-            const resource = this.processResourceResponse(entry, resMeta, api, hasDocument);
+              // Process the response
+              const resource = this.processResourceResponse(entry, resMeta, api, hasDocument);
 
-            // Cache the successful API endpoint
-            this.endpointCache.set(endpointCacheKey, api);
+              // Cache the successful API endpoint
+              this.endpointCache.set(endpointCacheKey, api);
 
-            // Resolve document if needed
-            if (hasDocument &&
-                !resource.resource &&
-                !resource.resourceUrl &&
-                !resource.resourceBase64) {
-              await this.resolveDocumentAsync(regularUrl, resource, resourceType);
+              // Resolve document if needed
+              if (hasDocument &&
+                  !resource.resource &&
+                  !resource.resourceUrl &&
+                  !resource.resourceBase64) {
+                await this.resolveDocumentAsync(regularUrl, resource, resourceType);
+              }
+
+              return resource;
+            } catch (regularError) {
+              // If regular URL also failed, track the error
+              lastError = regularError;
+              if (regularError && typeof regularError === 'object' && 'status' in regularError && regularError.status !== 404) {
+                allEndpoints404 = false;
+              }
+              throw regularError;
             }
-
-            return resource;
           }
 
-          // Re-throw for other errors
+          // For other errors, track them and re-throw
+          lastError = error;
+          if (error && typeof error === 'object' && 'status' in error && error.status !== 404) {
+            allEndpoints404 = false;
+          }
           throw error;
         }
       } catch (err) {
         this.debug.error(`Failed to get resource details from ${api}:`, err);
+        lastError = err;
+        
+        // Check if this was a 404 error
+        if (err && typeof err === 'object' && 'status' in err && err.status !== 404) {
+          allEndpoints404 = false;
+        }
+        
         continue;
       }
     }
 
-    // If we reach this point, all APIs failed
+    // If all endpoints returned 404, throw appropriate "not found" error
+    if (allEndpoints404 && lastError) {
+      this.debug.error(`All endpoints returned 404 - ${versionId ? 'version' : 'resource'} does not exist`);
+      const notFoundMessage = versionId 
+        ? `Version "${versionId}" not found for resource "${resourceId}"`
+        : `Resource "${resourceId}" not found`;
+      
+      throw {
+        ...lastError,
+        status: 404,
+        message: notFoundMessage,
+        isResourceNotFound: !versionId, // true for resources, false for versions
+        isVersionNotFound: !!versionId  // true for versions, false for resources
+      };
+    }
+
+    // If all APIs failed with other errors, return null (maintains existing behavior)
+    this.debug.warn('All APIs failed to load resource details, returning null');
     return null as any;
   }
 
@@ -1214,7 +1351,7 @@ export class RegistryService {
         this.debug.log(`Requesting groups from: ${url}`);
 
         const response = await lastValueFrom(
-          this.http.get<{ [id: string]: any }>(url, { observe: 'response' as const })
+          this.httpGetWithRetry<{ [id: string]: any }>(url)
         );
         const data = response.body || {};
 

@@ -13,18 +13,19 @@
 </app-page-header>
 
 <!-- Progressive loading indicator -->
-<div class="loading-progress" *ngIf="loadingProgress && groupsList.length > 0">
-  <div class="loading-indicator">
-    <fluent-progress-ring indeterminate diameter="16" class="loading-spinner"></fluent-progress-ring>
-    <span>Loading more groups... ({{ groupsList.length }} loaded)</span>
-  </div>
-</div>
+<app-loading-indicator
+  *ngIf="loadingProgress && groupsList.length > 0"
+  size="inline"
+  title="Loading More Groups"
+  [message]="'Loading more groups... (' + groupsList.length + ' loaded)'"
+  [showText]="true">
+</app-loading-indicator>
 
 <!-- Cards View --><div class="groups">  <div *ngIf="viewMode === 'cards' && filteredGroupsList.length > 0" class="grid-container cards-view">
     <fluent-card *ngFor="let group of filteredGroupsList" class="group-card">
       <fluent-card-header>
         <fluent-card-title>
-          <fluent-icon slot="prefix" name="folder"></fluent-icon>
+          <app-icon slot="prefix" name="folder"></app-icon>
           {{ group['name'] || group['id'] }}
         </fluent-card-title>
         <fluent-badge slot="subtitle" *ngIf="group.origin">Origin: {{ group.origin }}</fluent-badge>
@@ -76,7 +77,7 @@
                       [attr.aria-label]="'Copy Resource Types value'"
                       title="Copy value"
                       (click)="$event.stopPropagation();">
-                <fluent-icon name="copy"></fluent-icon>
+                <app-icon name="copy"></app-icon>
               </button>
             </div>
           </div>
@@ -116,49 +117,29 @@
     </table>
   </div>
 
-  <!-- Loading state -->
-  <div *ngIf="loading && !hasApiError" class="empty-state">
-    <div class="empty-state-content">
-      <fluent-progress-ring indeterminate diameter="32" class="empty-state-icon"></fluent-progress-ring>
-      <h3 class="empty-state-title">Loading Groups</h3>
-      <p class="empty-state-message">
-        Please wait while we load the available groups from the registry...
-      </p>
-    </div>
-  </div>
-
   <!-- Error state when ALL APIs fail -->
-  <div *ngIf="hasApiError && totalFailure" class="empty-state error-state">
-    <div class="empty-state-content">
-      <fluent-icon class="error-icon" name="error"></fluent-icon>
-      <h3 class="empty-state-title">Unable to Load Groups</h3>
-      <p class="empty-state-message">
-        {{ apiErrorMessage }}
-      </p>
-      <div *ngIf="apiErrorDetails && apiErrorDetails.length > 1" class="error-details">
-        <details>
-          <summary>View detailed error information</summary>
-          <div class="error-endpoints">
-            <div *ngFor="let apiError of apiErrorDetails" class="error-endpoint">
-              <strong>{{ apiError.api }}:</strong>
-              <span class="error-message">{{ apiError.error?.message || apiError.error?.toString() || 'Unknown error' }}</span>
-            </div>
-          </div>
-        </details>
-      </div>
-      <div class="error-actions">
-        <fluent-button appearance="outline" (click)="loadGroups()">
-          <fluent-icon slot="start" name="refresh"></fluent-icon>
-          Retry Loading
-        </fluent-button>
-      </div>
-    </div>
-  </div>
+  <app-error-boundary
+    *ngIf="hasApiError && totalFailure"
+    [errorState]="{hasError: true, error: {name: 'GroupsLoadError', message: apiErrorMessage || 'Unknown error occurred'}}"
+    [showDetails]="!!apiErrorDetails"
+    [errorTitle]="'Unable to Load Groups'"
+    [errorMessage]="apiErrorMessage || 'An unexpected error occurred while loading groups'"
+    (retry)="retryLoadGroups()">
+  </app-error-boundary>
+
+  <!-- Loading state -->
+  <app-loading-indicator
+    *ngIf="loading && !hasApiError"
+    size="large"
+    title="Loading Groups"
+    message="Please wait while we load the available groups from the registry..."
+    [showText]="true">
+  </app-loading-indicator>
 
   <!-- Partial failure warning (when some APIs work) -->
   <div *ngIf="partialFailure && !totalFailure && groupsList.length > 0" class="partial-failure-warning">
     <div class="warning-content">
-      <fluent-icon name="warning" class="warning-icon"></fluent-icon>
+      <app-icon name="warning" class="warning-icon"></app-icon>
       <span class="warning-text">
         Some registry endpoints are unavailable. Showing available groups from working endpoints.
       </span>
@@ -166,26 +147,22 @@
   </div>
 
   <!-- Empty search results -->
-  <div *ngIf="!loading && currentSearchTerm && filteredGroupsList.length === 0 && groupsList.length > 0" class="empty-state">
-    <div class="empty-state-content">
-      <fluent-icon class="empty-state-icon" name="search_off"></fluent-icon>
-      <h3 class="empty-state-title">No Matching Groups</h3>
-      <p class="empty-state-message">
-        No groups match your search criteria "{{ currentSearchTerm }}".
-        Try adjusting your search terms or browse all available groups.
-      </p>
-    </div>
-  </div>
+  <app-empty-state
+    *ngIf="!loading && !hasApiError && currentSearchTerm && filteredGroupsList.length === 0 && groupsList.length > 0"
+    type="info"
+    iconName="search_off"
+    title="No Matching Groups"
+    message="No groups match your search criteria. Try adjusting your search terms or browse all available groups."
+    size="medium">
+  </app-empty-state>
 
   <!-- No data state -->
-  <div *ngIf="!loading && !currentSearchTerm && groupsList.length === 0" class="empty-state">
-    <div class="empty-state-content">
-      <fluent-icon class="empty-state-icon" name="folder_open"></fluent-icon>
-      <h3 class="empty-state-title">No Groups Available</h3>
-      <p class="empty-state-message">
-        There are currently no groups of type "{{ groupType }}" in this registry.
-        Groups contain resources and define their organizational structure.
-      </p>
-    </div>
-  </div>
+  <app-empty-state
+    *ngIf="!loading && !hasApiError && !currentSearchTerm && groupsList.length === 0"
+    type="info"
+    iconName="folder_open"
+    title="No Groups Available"
+    message="There are currently no groups in this registry. Groups contain resources and define their organizational structure."
+    size="medium">
+  </app-empty-state>
 </div>

@@ -30,8 +30,8 @@
   animation: spin 1s linear infinite;
 }
 
-// Icon styling for fluent-icon
-fluent-icon.section-icon {
+// Icon styling for app-icon
+app-icon.section-icon {
   font-size: 1.5rem;
   color: colors.primary();
   display: inline-flex;
@@ -39,7 +39,7 @@ fluent-icon.section-icon {
   justify-content: center;
 }
 
-fluent-icon.error-icon {
+app-icon.error-icon {
   font-size: 2rem;
   color: c(warning);
   margin-bottom: 1rem;

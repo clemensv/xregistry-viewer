@@ -15,7 +15,7 @@ import { IconComponent } from '../icon/icon.component';
           (click)="openInNewWindow()"
           title="Open documentation in new window"
           [attr.aria-label]="'Open documentation in new window'">
-          <fluent-icon name="open_in_new"></fluent-icon>
+          <app-icon name="open_in_new"></app-icon>
         </button>
       </div>
       <div class="documentation-content">

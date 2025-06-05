@@ -4,57 +4,45 @@
     [showViewToggle]="true"
     [currentViewMode]="viewMode"
     [showPagination]="true"
-    [pageLinks]="pageLinks"
-    [resultsCount]="filteredResourcesList?.length || 0"
+    [pageLinks]="pageLinks"    [resultsCount]="filteredResourcesList.length || 0"
     [totalCount]="totalCount"
     [resultsText]="'resources'"
-    [searchResultsText]="currentSearchTerm ? 'Showing ' + (filteredResourcesList?.length || 0) + ' resources (filtered)' : ''"
+    [searchResultsText]="currentSearchTerm ? 'Showing ' + (filteredResourcesList.length || 0) + ' resources (filtered)' : ''"
     (viewModeChange)="setViewMode($event)"
     (pageChange)="onPageChange($event)">
   </app-page-header>
-
   <!-- Progressive loading indicator -->
-  <div class="loading-progress" *ngIf="loadingProgress && resourcesList.length > 0 && !hasError">
-    <div class="loading-indicator">
-      <fluent-icon name="arrow_sync_circle" class="loading-spinner"></fluent-icon>
-      <span>Loading more resources... ({{ resourcesList.length }} loaded)</span>
-    </div>
-  </div>
+  <app-loading-indicator
+    *ngIf="loadingProgress && resourcesList.length > 0 && !hasError"
+    size="inline"
+    title="Loading more resources..."
+    [message]="'(' + resourcesList.length + ' loaded)'"
+    [showText]="true">
+  </app-loading-indicator>
 
-  <div class="page-content">
-    <!-- Error state for resource loading -->
-    <div *ngIf="hasError && !loading" class="empty-state error-state">
-      <div class="empty-state-content">
-        <fluent-icon name="error" class="empty-state-icon error-icon"></fluent-icon>
-        <h3 class="empty-state-title">Unable to Load Resources</h3>
-        <p class="empty-state-message">
-          {{ errorMessage }}
-        </p>
-        <div *ngIf="errorDetails" class="error-details">
-          <details>
-            <summary>View technical details</summary>
-            <div class="error-technical">
-              <p><strong>Error Code:</strong> {{ errorDetails.status || 'Unknown' }}</p>
-              <p><strong>Error Message:</strong> {{ errorDetails.message || errorDetails.statusText || 'No additional details' }}</p>
-              <p><strong>Resource Path:</strong> {{ groupType }}/{{ groupId }}/{{ resourceType }}</p>
-            </div>
-          </details>
-        </div>
-        <div class="error-actions">
-          <fluent-button appearance="outline" (click)="retryLoadResources()">
-            <fluent-icon slot="start" name="refresh"></fluent-icon>
-            Retry Loading
-          </fluent-button>
-        </div>
-      </div>
-    </div>
+  <div class="page-content">    <!-- Error state for resource loading -->
+    <app-error-boundary
+      *ngIf="hasError && !loading"
+      [errorState]="{hasError: true, error: {name: 'LoadError', message: errorMessage || 'Unknown error occurred'}}"
+      [showDetails]="!!errorDetails"
+      [errorTitle]="errorDetails?.isResourceNotFound ? 'Resource Not Found' : 'Unable to Load Resources'"
+      [errorMessage]="errorMessage || 'An unexpected error occurred while loading resources'"
+      (retry)="retryLoadResources()">
+    </app-error-boundary>
 
     <!-- Cards View -->
     <div *ngIf="!loading && !hasError && viewMode === 'cards' && filteredResourcesList.length > 0" [ngClass]="{'single-resource': filteredResourcesList.length === 1}">
       <div class="grid-container">
-        <div *ngFor="let res of filteredResourcesList" class="grid-item" [ngClass]="{'single-item': filteredResourcesList.length === 1}">
-          <div class="resource-header">
-            <h3>{{ res['name'] }}</h3>
+        <div *ngFor="let res of filteredResourcesList" class="grid-item" [ngClass]="{'single-item': filteredResourcesList.length === 1}">          <div class="resource-header">
+            <div class="resource-title-container">
+              <h3>{{ res['name'] }}</h3>
+              <app-deprecation-indicator
+                *ngIf="res['deprecated']"
+                [deprecatedInfo]="res['deprecated']"
+                [showActive]="false"
+                size="small">
+              </app-deprecation-indicator>
+            </div>
             <a [routerLink]="[res['id']]" class="tile">
               View Details
             </a>
@@ -100,41 +88,29 @@
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <!-- Loading state -->
-    <div *ngIf="loading && !hasError" class="empty-state">
-      <div class="empty-state-content">
-        <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
-        <h3 class="empty-state-title">Loading Resources</h3>
-        <p class="empty-state-message">
-          Please wait while we load the available resources from the registry...
-        </p>
-      </div>
-    </div>
-
-    <!-- Empty search results -->
-    <div *ngIf="!loading && !hasError && currentSearchTerm && filteredResourcesList.length === 0 && resourcesList.length > 0" class="empty-state">
-      <div class="empty-state-content">
-        <fluent-icon name="search" class="empty-state-icon"></fluent-icon>
-        <h3 class="empty-state-title">No Matching Resources</h3>
-        <p class="empty-state-message">
-          No resources match your search criteria "{{ currentSearchTerm }}".
-          Try adjusting your search terms or browse all available resources.
-        </p>
-      </div>
-    </div>
-
-    <!-- No data state -->
-    <div *ngIf="!loading && !hasError && !currentSearchTerm && resourcesList.length === 0" class="empty-state">
-      <div class="empty-state-content">
-        <fluent-icon name="document" class="empty-state-icon"></fluent-icon>
-        <h3 class="empty-state-title">No Resources Available</h3>
-        <p class="empty-state-message">
-          There are currently no {{ resourceType }} resources in {{ groupType }}/{{ groupId }}.
-          Resources are the core entities managed by this registry.
-        </p>
-      </div>
-    </div>
+    </div>    <!-- Loading state -->
+    <app-loading-indicator
+      *ngIf="loading && !hasError"
+      size="large"
+      title="Loading Resources"
+      message="Please wait while we load the available resources from the registry..."
+      [showText]="true">
+    </app-loading-indicator>    <!-- Empty search results -->
+    <app-empty-state
+      *ngIf="!loading && !hasError && currentSearchTerm && filteredResourcesList.length === 0 && resourcesList.length > 0"
+      type="info"
+      iconName="search"
+      title="No Matching Resources"
+      message="No resources match your search criteria. Try adjusting your search terms or browse all available resources."
+      size="medium">
+    </app-empty-state>    <!-- No data state -->
+    <app-empty-state
+      *ngIf="!loading && !hasError && !currentSearchTerm && resourcesList.length === 0"
+      type="info"
+      iconName="document"
+      title="No Resources Available"
+      [message]="'There are currently no ' + resourceType + ' resources in ' + groupType + '/' + groupId + '. Resources are the core entities managed by this registry.'"
+      size="medium">
+    </app-empty-state>
   </div>
 </div>

@@ -8,16 +8,21 @@ import { takeUntilDestroyed, toSignal, toObservable } from '@angular/core/rxjs-i
 import { HttpClient } from '@angular/common/http';
 import { IconComponent } from '../icon/icon.component';
 import { PageHeaderComponent } from '../page-header/page-header.component';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { ErrorBoundaryComponent } from '../error-boundary/error-boundary.component';
 
 @Component({
   selector: 'app-config',
-  standalone: true,
-  imports: [
+  standalone: true,  imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
     IconComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    LoadingIndicatorComponent,
+    EmptyStateComponent,
+    ErrorBoundaryComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './config.component.html',
@@ -491,6 +496,16 @@ export class ConfigComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Retry loading configuration after an error
+   */
+  retryLoadConfiguration(): void {
+    this.error.set(null);
+    this.loading.set(true);
+    this.cdr.markForCheck();
+    this.initializeConfig();
+  }
+
   updateEndpointValue(index: number, event: any): void {
     const control = this.apiEndpoints.at(index);
     if (control) {
@@ -537,5 +552,17 @@ export class ConfigComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error saving configuration immediately:', error);
     }
+  }
+
+  /**
+   * Retries the last failed operation
+   */
+  retry(): void {
+    this.error.set(null);
+    this.loading.set(true);
+
+    // Retry logic can be more complex depending on the operation
+    // For now, we just re-initialize the config
+    this.initializeConfig();
   }
 }

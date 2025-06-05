@@ -7,11 +7,13 @@ import { ResourceDocumentItem } from '../../models/resource-document-item.model'
 import { CodeHighlightComponent } from '../code-highlight/code-highlight.component';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { IconComponent } from '../icon/icon.component';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { ErrorBoundaryComponent } from '../error-boundary/error-boundary.component';
 
 @Component({
   selector: 'app-resource-document',
   standalone: true,
-  imports: [CommonModule, ResourceDocumentItemComponent, CodeHighlightComponent, IconComponent],
+  imports: [CommonModule, ResourceDocumentItemComponent, CodeHighlightComponent, IconComponent, LoadingIndicatorComponent, ErrorBoundaryComponent],
   templateUrl: './resource-document.component.html',
   styleUrl: './resource-document.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -31,6 +33,7 @@ export class ResourceDocumentComponent implements OnInit {
   cachedDocumentContent: string | null = null;
 
   constructor(private registry: RegistryService) {}
+
   ngOnInit(): void {
     // Clear cached content when component initializes with new data
     this.cachedDocumentContent = null;
@@ -334,6 +337,17 @@ export class ResourceDocumentComponent implements OnInit {
         this.isLoadingDocument = false;
       }
     });
+  }
+
+  /**
+   * Retry loading document from URL after an error
+   */
+  retryLoadDocument(): void {
+    if (this.resourceDocument?.resourceUrl) {
+      this.documentError = null;
+      this.cachedDocumentContent = null;
+      this.fetchDocumentFromUrl(this.resourceDocument.resourceUrl);
+    }
   }
 
   // Methods for the new attribute display style

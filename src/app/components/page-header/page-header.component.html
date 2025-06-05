@@ -6,35 +6,32 @@
       <div *ngIf="getResultsDisplayText()" class="results-info">
         <span class="results-text">{{ getResultsDisplayText() }}</span>
       </div>      <!-- Pagination buttons styled like view toggle -->
-      <div *ngIf="showPagination && pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" class="pagination-toggle">
-        <button type="button" class="toggle-btn pagination-btn" (click)="onPageChange(pageLinks.first!)" [disabled]="!pageLinks.first" title="First page">
-          <fluent-icon name="chevron_double_left"></fluent-icon>
+      <div *ngIf="showPagination && pageLinks && (pageLinks.first || pageLinks.prev || pageLinks.next || pageLinks.last)" class="pagination-toggle">        <button type="button" class="toggle-btn pagination-btn" (click)="onPageChange(pageLinks.first!)" [disabled]="!pageLinks.first" title="First page">
+          <app-icon name="chevron_double_left"></app-icon>
         </button>
         <button type="button" class="toggle-btn pagination-btn" (click)="onPageChange(pageLinks.prev!)" [disabled]="!pageLinks.prev" title="Previous page">
-          <fluent-icon name="chevron_left"></fluent-icon>
+          <app-icon name="chevron_left"></app-icon>
         </button>
         <button type="button" class="toggle-btn pagination-btn" (click)="onPageChange(pageLinks.next!)" [disabled]="!pageLinks.next" title="Next page">
-          <fluent-icon name="chevron_right"></fluent-icon>
+          <app-icon name="chevron_right"></app-icon>
         </button>
         <button type="button" class="toggle-btn pagination-btn" (click)="onPageChange(pageLinks.last!)" [disabled]="!pageLinks.last" title="Last page">
-          <fluent-icon name="chevron_double_right"></fluent-icon>
+          <app-icon name="chevron_double_right"></app-icon>
         </button>
       </div>
 
       <!-- View toggle -->
-      <div *ngIf="showViewToggle" class="view-toggle">
-        <button [class.active]="currentViewMode === 'cards'" (click)="setViewMode('cards')" title="Card View" class="toggle-btn view-btn">
-          <fluent-icon name="table_simple"></fluent-icon>
+      <div *ngIf="showViewToggle" class="view-toggle">        <button [class.active]="currentViewMode === 'cards'" (click)="setViewMode('cards')" title="Card View" class="toggle-btn view-btn">
+          <app-icon name="table_simple"></app-icon>
         </button>
         <button [class.active]="currentViewMode === 'list'" (click)="setViewMode('list')" title="List View" class="toggle-btn view-btn">
-          <fluent-icon name="list"></fluent-icon>
+          <app-icon name="list"></app-icon>
         </button>
       </div>
 
       <!-- Reset button -->
-      <div *ngIf="showResetButton" class="reset-toggle">
-        <button type="button" class="toggle-btn reset-btn" (click)="onResetClick()" title="Reset to defaults">
-          <fluent-icon name="refresh"></fluent-icon>
+      <div *ngIf="showResetButton" class="reset-toggle">        <button type="button" class="toggle-btn reset-btn" (click)="onResetClick()" title="Reset to defaults">
+          <app-icon name="refresh"></app-icon>
           Reset
         </button>
       </div>

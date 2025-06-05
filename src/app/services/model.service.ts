@@ -56,22 +56,8 @@ export class ModelService {
       return `${configBaseUrl}/proxy${path}`;
     }
 
-    // Detect if running in a server context by checking for /proxy API
+    // Disable proxy detection - always use direct API calls
     this.servedFromServer = false;
-    if (isPlatformBrowser(this.platformId)) {
-      // Browser: check if /proxy endpoint is available (relative to baseUrl)
-      try {
-        const xhr = new XMLHttpRequest();
-        xhr.open('OPTIONS', proxyUrl(''), false); // false = synchronous
-        xhr.send();
-        this.servedFromServer = xhr.status == 200;
-      } catch {
-        this.servedFromServer = false;
-      }
-    } else {
-      // Server-side: assume /proxy is available
-      this.servedFromServer = true;
-    }
   }
 
   getRegistryModel(): Observable<RegistryModel> {

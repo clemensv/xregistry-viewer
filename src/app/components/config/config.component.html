@@ -10,18 +10,24 @@
     [resultsText]="'endpoints'"
     (resetClick)="resetToDefaults()">
   </app-page-header>
-
   <!-- Loading State -->
-  <div *ngIf="loading()" class="loading-state">
-    <fluent-progress-ring size="small"></fluent-progress-ring>
-    Loading...
-  </div>
-
-  <!-- Error State -->
-  <div *ngIf="error() && !loading()" class="error-state">
-    <fluent-icon name="warning"></fluent-icon>
-    {{ error() }}
-  </div>
+  <app-loading-indicator
+    *ngIf="loading()"
+    size="large"
+    [showText]="true"
+    title="Loading Configuration">
+  </app-loading-indicator>  <!-- Error State -->
+  <app-error-boundary
+    *ngIf="error() && !loading()"
+    [errorState]="{
+      hasError: true,
+      error: {
+        message: error() || 'Unknown error',
+        name: 'ConfigurationError'
+      }
+    }"
+    (retry)="retryLoadConfiguration()">
+  </app-error-boundary>
 
   <!-- Endpoints Content -->
   <div *ngIf="!loading()" class="endpoints-content">
@@ -41,16 +47,14 @@
           <fluent-button
             appearance="accent"
             (click)="addEndpoint()"
-            [disabled]="!newEndpointUrl || newEndpointError || validatingEndpoint"
-            title="Add endpoint"
+            [disabled]="!newEndpointUrl || newEndpointError || validatingEndpoint"            title="Add endpoint"
             class="add-btn">
-            <fluent-icon name="add"></fluent-icon>
+            <app-icon name="add"></app-icon>
           </fluent-button>
         </div>
 
-        <div *ngIf="newEndpointError" class="error-text">{{ newEndpointError }}</div>
-        <div *ngIf="validatingEndpoint" class="validating-text">
-          <fluent-progress-ring size="small"></fluent-progress-ring>
+        <div *ngIf="newEndpointError" class="error-text">{{ newEndpointError }}</div>        <div *ngIf="validatingEndpoint" class="validating-text">
+          <app-loading-indicator size="inline" title="Validating endpoint"></app-loading-indicator>
           Validating...
         </div>
       </div>
@@ -75,9 +79,8 @@
         <!-- Display mode -->
         <div *ngIf="editingIndex !== i" class="endpoint-display-mode" (click)="editEndpoint(i)">
           <div class="endpoint-info">
-            <span class="endpoint-url">{{ endpoint.value }}</span>
-            <span class="endpoint-status" [class]="endpointStatus[i]">
-              <fluent-icon [name]="getStatusIcon(i)"></fluent-icon>
+            <span class="endpoint-url">{{ endpoint.value }}</span>            <span class="endpoint-status" [class]="endpointStatus[i]">
+              <app-icon [name]="getStatusIcon(i)"></app-icon>
               {{ getStatusText(i) }}
             </span>
           </div>
@@ -88,44 +91,41 @@
           <fluent-button
             appearance="subtle"
             (click)="moveUp(i)"
-            [disabled]="i === 0"
-            title="Move up"
+            [disabled]="i === 0"            title="Move up"
             class="action-btn square-btn">
-            <fluent-icon name="chevron_up"></fluent-icon>
+            <app-icon name="chevron_up"></app-icon>
           </fluent-button>
 
           <fluent-button
             appearance="subtle"
             (click)="moveDown(i)"
-            [disabled]="i === apiEndpoints.length - 1"
-            title="Move down"
+            [disabled]="i === apiEndpoints.length - 1"            title="Move down"
             class="action-btn square-btn">
-            <fluent-icon name="chevron_down"></fluent-icon>
+            <app-icon name="chevron_down"></app-icon>
           </fluent-button>
 
           <fluent-button
             appearance="subtle"
-            (click)="editEndpoint(i)"
-            title="Edit"
+            (click)="editEndpoint(i)"            title="Edit"
             class="action-btn square-btn">
-            <fluent-icon name="edit"></fluent-icon>
+            <app-icon name="edit"></app-icon>
           </fluent-button>
 
           <fluent-button
             appearance="subtle"
-            (click)="removeEndpoint(i)"
-            title="Remove"
+            (click)="removeEndpoint(i)"            title="Remove"
             class="action-btn square-btn remove-btn">
-            <fluent-icon name="delete"></fluent-icon>
+            <app-icon name="delete"></app-icon>
           </fluent-button>
         </div>
-      </div>
-
-      <!-- Empty state -->
-      <div *ngIf="apiEndpoints.length === 0" class="empty-state">
-        <fluent-icon name="inbox"></fluent-icon>
-        <p>No endpoints configured. Add one above to get started.</p>
-      </div>
+      </div>      <!-- Empty state -->
+      <app-empty-state
+        *ngIf="apiEndpoints.length === 0"
+        type="info"
+        iconName="inbox"
+        title="No Endpoints Configured"
+        message="Add an endpoint above to get started with your registry configuration.">
+      </app-empty-state>
     </div>
   </div>
 </div>

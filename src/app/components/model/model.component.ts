@@ -11,11 +11,14 @@ import { GroupTypeModelComponent } from '../group-type-model/group-type-model.co
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 import { ResourceDocumentItem } from '../../models/resource-document-item.model';
 import { IconComponent } from '../icon/icon.component';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { ErrorBoundaryComponent } from '../error-boundary/error-boundary.component';
 
 @Component({
   standalone: true,
   selector: 'app-model',
-  imports: [CommonModule, RouterModule, GroupTypeModelComponent, ResourceDocumentItemComponent, IconComponent],
+  imports: [CommonModule, RouterModule, GroupTypeModelComponent, ResourceDocumentItemComponent, IconComponent, LoadingIndicatorComponent, EmptyStateComponent, ErrorBoundaryComponent],
   templateUrl: './model.component.html',
   styleUrls: ['./model.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -27,6 +30,9 @@ export class ModelComponent implements OnInit, OnDestroy, AfterViewInit {
   targetGroupType: string | null = null;
   loading = true;
   loadingProgress = true;
+  hasError = false;
+  errorMessage = '';
+  errorDetails = '';
 
   registryDocumentItems: ResourceDocumentItem[] = [];
 
@@ -118,6 +124,9 @@ export class ModelComponent implements OnInit, OnDestroy, AfterViewInit {
           console.error('ModelComponent: Error loading registry model:', error);
           this.loading = false;
           this.loadingProgress = false;
+          this.hasError = true;
+          this.errorMessage = error?.message || 'Failed to load registry model from the registry';
+          this.errorDetails = error?.stack || error?.toString() || '';
           this.cdr.markForCheck();
         }
       });
@@ -198,5 +207,18 @@ export class ModelComponent implements OnInit, OnDestroy, AfterViewInit {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  /**
+   * Retry loading model after an error
+   */
+  retryLoadModel(): void {
+    this.hasError = false;
+    this.errorMessage = '';
+    this.errorDetails = '';
+    this.loading = true;
+    this.loadingProgress = true;
+    this.cdr.markForCheck();
+    this.loadData();
   }
 }

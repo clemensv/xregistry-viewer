@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
-import { switchMap, map, tap, catchError } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { switchMap, map, tap, catchError, takeUntil } from 'rxjs/operators';
 import { RegistryService } from '../../services/registry.service';
 import { ResourceDocument } from '../../models/registry.model';
 import { combineLatest, of } from 'rxjs';
@@ -10,17 +10,31 @@ import { ModelService } from '../../services/model.service';
 import { ResourceDocumentComponent } from '../resource-document/resource-document.component';
 import { DocumentationViewerComponent } from '../documentation-viewer/documentation-viewer.component';
 import { DebugService } from '../../services/debug.service';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { ErrorBoundaryComponent } from '../error-boundary/error-boundary.component';
+import { DeprecationIndicatorComponent } from '../deprecation-indicator/deprecation-indicator.component';
+import { CrossReferenceComponent } from '../cross-reference/cross-reference.component';
 
 @Component({
   standalone: true,
   selector: 'app-version-detail',
-  imports: [CommonModule, ResourceDocumentComponent, DocumentationViewerComponent],
+  imports: [
+    CommonModule,
+    ResourceDocumentComponent,
+    DocumentationViewerComponent,
+    LoadingIndicatorComponent,
+    EmptyStateComponent,
+    ErrorBoundaryComponent,
+    DeprecationIndicatorComponent,
+    CrossReferenceComponent
+  ],
   templateUrl: './version-detail.component.html',
   styleUrls: ['./version-detail.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class VersionDetailComponent implements OnInit {
-  version$!: Observable<ResourceDocument>;
+export class VersionDetailComponent implements OnInit, OnDestroy {
+  version$!: Observable<ResourceDocument | null>;
   groupType!: string;
   groupId!: string;
   resourceType!: string;
@@ -40,6 +54,8 @@ export class VersionDetailComponent implements OnInit {
   errorMessage: string | null = null;
   errorDetails: any = null;
   loading = true;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
@@ -70,60 +86,136 @@ export class VersionDetailComponent implements OnInit {
       this.errorDetails = null;
       this.loading = true;
 
-      // First load metadata, then load the version details
-      this.version$ = this.modelService.getRegistryModel().pipe(
-        map(model => model.groups[this.groupType]?.resources[this.resourceType]),
-        tap((resourceTypeModel: any) => {
-          if (resourceTypeModel) {
-            this.resourceAttributes = resourceTypeModel.attributes || {};
-            this.resTypeHasDocument = resourceTypeModel.hasdocument !== false;
-            this.debug.log(`Resource type ${this.resourceType} document support: ${this.resTypeHasDocument}`);
-            this.documentMetadataLoaded = true;
-          } else {
-            this.debug.warn(`Resource type model not found for ${this.resourceType}`);
-            this.resourceAttributes = {};
-            this.resTypeHasDocument = false;
-          }
-        }),
-        switchMap(() => {
-          this.debug.log(`Loading version detail with document support: ${this.resTypeHasDocument}`);
-          return this.registry.getVersionDetail(
-            this.groupType,
-            this.groupId,
-            this.resourceType,
-            this.resourceId,
-            this.versionId,
-            this.resTypeHasDocument
-          );
-        }),
-        tap((versionDetail: ResourceDocument) => {
-          this.debug.log('Version detail loaded:', versionDetail);
-          this.loading = false;
-          this.hasError = false;
-          this.versionOrigin = versionDetail?.origin;
-          this.documentationUrl = versionDetail?.['documentation'];
-        }),
-        catchError((err) => {
-          this.debug.error('Error loading version detail:', err);
-          this.loading = false;
-          this.hasError = true;
-          this.errorDetails = err;
-
-          // Set appropriate error message based on error type
-          if (err.status === 404) {
-            this.errorMessage = `Version "${this.versionId}" not found for resource "${this.resourceId}" in ${this.groupType}/${this.groupId}/${this.resourceType}.`;
-          } else if (err.status === 0) {
-            this.errorMessage = `Unable to connect to the registry. Please check your network connection.`;
-          } else if (err.status >= 500) {
-            this.errorMessage = `Server error occurred while loading the version details. Please try again later.`;
-          } else {
-            this.errorMessage = `Failed to load version details: ${err.message || 'Unknown error'}`;
-          }
-
-          return of(null as any);
-        })
-      );
+      // Load the version details
+      this.loadVersionDetails();
     });
+  }
+
+  private loadVersionDetails(): void {
+    // First load metadata, then load the version details
+    this.debug.log('=== Starting loadVersionDetails ===');
+    this.debug.log(`Loading version details for URL: ${this.groupType}/${this.groupId}/${this.resourceType}/${this.resourceId}/versions/${this.versionId}`);
+    this.debug.log('About to call modelService.getRegistryModel()');
+    this.loading = true;
+    this.hasError = false;
+    this.errorMessage = null;
+    this.errorDetails = null;
+
+    this.version$ = this.modelService.getRegistryModel().pipe(
+      tap(model => {
+        this.debug.log('=== MODEL SERVICE RESPONSE ===');
+        this.debug.log('Registry model received:', model);
+        this.debug.log('Available groups:', Object.keys(model.groups || {}));
+        this.debug.log('Looking for group type:', this.groupType);
+        // Force early error detection for invalid group types
+        if (!model.groups || !model.groups[this.groupType]) {
+          throw {
+            name: 'InvalidGroupTypeError',
+            message: `Group type '${this.groupType}' not found in registry`,
+            status: 404,
+            availableGroupTypes: Object.keys(model.groups || {})
+          };
+        }
+      }),
+      map(model => {
+        // Check if the group type exists
+        if (!model.groups[this.groupType]) {
+          this.debug.log('=== GROUP TYPE NOT FOUND ===');
+          this.debug.log('Throwing InvalidGroupTypeError');
+          throw {
+            name: 'InvalidGroupTypeError',
+            message: `Group type '${this.groupType}' not found in registry`,
+            status: 404,
+            availableGroupTypes: Object.keys(model.groups)
+          };
+        }
+
+        this.debug.log('Group type found, checking resource type...');
+        // Check if the resource type exists in the group
+        const resourceTypeModel = model.groups[this.groupType]?.resources[this.resourceType];
+        if (!resourceTypeModel) {
+          this.debug.log('=== RESOURCE TYPE NOT FOUND ===');
+          this.debug.log('Available resource types:', Object.keys(model.groups[this.groupType]?.resources || {}));
+          throw {
+            name: 'InvalidResourceTypeError',
+            message: `Resource type '${this.resourceType}' not found in group '${this.groupType}'`,
+            status: 404,
+            availableResourceTypes: Object.keys(model.groups[this.groupType]?.resources || {})
+          };
+        }
+
+        this.debug.log('Resource type found:', resourceTypeModel);
+        return resourceTypeModel;
+      }),
+      tap((resourceTypeModel: any) => {
+        this.resourceAttributes = resourceTypeModel.attributes || {};
+        this.resTypeHasDocument = resourceTypeModel.hasdocument !== false;
+        this.debug.log(`Resource type ${this.resourceType} document support: ${this.resTypeHasDocument}`);
+      }),
+      switchMap(() => {
+        this.debug.log(`Loading version detail with document support: ${this.resTypeHasDocument}`);
+        return this.registry.getVersionDetail(
+          this.groupType,
+          this.groupId,
+          this.resourceType,
+          this.resourceId,
+          this.versionId,
+          this.resTypeHasDocument
+        );
+      }),
+      tap((versionDetail: ResourceDocument) => {
+        this.debug.log('Version detail loaded:', versionDetail);
+        this.loading = false;
+        this.hasError = false;
+        this.versionOrigin = versionDetail?.origin;
+        this.documentationUrl = versionDetail?.['documentation'];
+      }),
+      catchError((err) => {
+        this.debug.log('=== ERROR CAUGHT IN VERSION DETAIL ===');
+        this.debug.log('Error object:', err);
+        this.debug.log('Error name:', err.name);
+        this.debug.error('Error loading version detail:', err);
+        this.loading = false;
+        this.hasError = true;
+        this.errorDetails = err;
+
+        // Handle specific error types with better messages
+        if (err.name === 'InvalidGroupTypeError') {
+          this.errorMessage = `The group type '${this.groupType}' does not exist in the registry. ` +
+            `Available group types are: ${err.availableGroupTypes.join(', ')}.`;
+        } else if (err.name === 'InvalidResourceTypeError') {
+          this.errorMessage = `The resource type '${this.resourceType}' does not exist in group '${this.groupType}'. ` +
+            `Available resource types in this group are: ${err.availableResourceTypes.join(', ')}.`;
+        } else if (err.status === 404) {
+          this.errorMessage = `Version "${this.versionId}" not found for resource "${this.resourceId}" in ${this.groupType}/${this.groupId}/${this.resourceType}.`;
+        } else if (err.status === 0) {
+          this.errorMessage = `Unable to connect to the registry. Please check your network connection.`;
+        } else if (err.status >= 500) {
+          this.errorMessage = `Server error occurred while loading the version details. Please try again later.`;
+        } else {
+          this.errorMessage = `Failed to load version details: ${err.message || 'Unknown error'}`;
+        }
+
+        return of(null);
+      })
+    );
+
+    // Subscribe to the observable explicitly for state tracking only
+    // Error handling is already done in the catchError operator
+    this.version$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => {
+        this.debug.log('Version data loaded successfully:', data);
+      },
+      error: (err) => {
+        // This should not be reached if catchError is working properly
+        this.debug.log('Error in explicit subscription - this should have been caught by catchError:', err);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   objectKeys(obj: any): string[] {
@@ -133,10 +225,6 @@ export class VersionDetailComponent implements OnInit {
     }
     return Object.keys(obj);
   }
-
-  // In the template, ensure objectKeys is only called when the object is defined
-  // Example usage in the template:
-  // *ngIf="resourceAttributes && objectKeys(resourceAttributes).length > 0"
 
   isArray(value: any): boolean {
     return Array.isArray(value);
@@ -167,10 +255,6 @@ export class VersionDetailComponent implements OnInit {
     );
   }
 
-  // Document handling methods
-  /**
-   * Check if the version has a document (using any of the supported formats)
-   */
   hasDocument(version: any, resourceType: string): boolean {
     if (!version || !this.resTypeHasDocument) {
       return false;
@@ -181,17 +265,10 @@ export class VersionDetailComponent implements OnInit {
     );
   }
 
-  /**
-   * Get the singular name of a resource type
-   */
   getSingularName(resourceType: string): string {
-    // Remove trailing 's' if it exists, or use more sophisticated logic as needed
     return resourceType.endsWith('s') ? resourceType.slice(0, -1) : resourceType;
   }
 
-  /**
-   * Get document content from any available source
-   */
   getDocumentContent(version: ResourceDocument, resourceType: string): string | null {
     if (!version || !this.resTypeHasDocument) {
       return null;
@@ -218,9 +295,6 @@ export class VersionDetailComponent implements OnInit {
     return null;
   }
 
-  /**
-   * Check if base64 encoded document is available
-   */
   hasBase64Document(version: any, resourceType: string): boolean {
     if (!version || !this.resTypeHasDocument) {
       return false;
@@ -229,9 +303,6 @@ export class VersionDetailComponent implements OnInit {
     return version.resourceBase64 && version.resourceBase64.length > 0;
   }
 
-  /**
-   * Download base64 encoded document
-   */
   downloadBase64Document(version: any, resourceType: string): void {
     if (!version || !this.resTypeHasDocument) {
       return;
@@ -244,7 +315,6 @@ export class VersionDetailComponent implements OnInit {
     }
 
     try {
-      // Create a blob from the base64 data
       const binary = atob(base64Data);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) {
@@ -252,13 +322,11 @@ export class VersionDetailComponent implements OnInit {
       }
       const blob = new Blob([bytes]);
 
-      // Create a download link
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `${resourceType}_${version.id}_document`;
       link.click();
 
-      // Clean up
       URL.revokeObjectURL(link.href);
     } catch (error) {
       this.debug.error('Error downloading document:', error);
@@ -266,9 +334,6 @@ export class VersionDetailComponent implements OnInit {
     }
   }
 
-  /**
-   * Fetch document content from URL
-   */
   private fetchDocumentFromUrl(url: string): void {
     this.isLoadingDocument = true;
     this.documentError = null;
@@ -285,9 +350,6 @@ export class VersionDetailComponent implements OnInit {
     });
   }
 
-  /**
-   * Check if the document content is JSON
-   */
   isJsonDocument(content: string): boolean {
     try {
       JSON.parse(content);
@@ -297,9 +359,6 @@ export class VersionDetailComponent implements OnInit {
     }
   }
 
-  /**
-   * Format document content for display
-   */
   formatDocumentContent(content: string): string {
     const contentType = this.getDocumentContentType(content);
     if (contentType === 'json') {
@@ -307,49 +366,30 @@ export class VersionDetailComponent implements OnInit {
         const parsedJson = JSON.parse(content);
         return JSON.stringify(parsedJson, null, 2);
       } catch (e) {
-        // If parsing fails, return original content
         return content;
       }
     }
-    // For other types, return as is, or add specific formatting
     return content;
   }
 
-  /**
-   * Get document content type based on content and resource type
-   */
   getDocumentContentType(content: string): string {
-    // Basic content type detection (can be expanded)
     if (content.trim().startsWith('<')) {
-      return 'xml'; // Or 'html'
+      return 'xml';
     }
     if (content.trim().startsWith('---') || content.includes(':\n  ')) {
         return 'yaml';
     }
-    // Add more checks for other types like YAML, etc.
-    return 'json'; // Default to json or plain text
+    return 'json';
   }
 
-  /**
-   * Check if this resource type supports documents
-   */
   supportsDocuments(): boolean {
     return this.resTypeHasDocument;
   }
 
-  /**
-   * Track whether we've tried to load document metadata
-   */
-  private documentMetadataLoaded = false;
-
-  /**
-   * @deprecated This method is no longer needed as metadata loading is handled in ngOnInit
-   */
   loadDocumentMetadata(): void {
     this.debug.warn('loadDocumentMetadata() is deprecated, metadata loading is handled in ngOnInit');
   }
 
-  // Add these helper methods for attribute display
   isSimpleAttribute(value: any): boolean {
     return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
   }
@@ -377,14 +417,27 @@ export class VersionDetailComponent implements OnInit {
       }));
   }
 
-  // Add retry method
+  getErrorTitle(): string {
+    if (this.errorDetails?.name === 'InvalidGroupTypeError') {
+      return 'Invalid Group Type';
+    } else if (this.errorDetails?.name === 'InvalidResourceTypeError') {
+      return 'Invalid Resource Type';
+    }
+    return 'Unable to Load Version Details';
+  }
+
+  getErrorMessage(): string {
+    if (this.errorMessage) {
+      return this.errorMessage;
+    }
+    return 'An unexpected error occurred while loading version details';
+  }
+
   retryLoadVersion(): void {
     this.hasError = false;
     this.errorMessage = null;
     this.errorDetails = null;
     this.loading = true;
-
-    // Trigger a reload by re-subscribing to the route params
-    this.ngOnInit();
+    this.loadVersionDetails();
   }
 }

@@ -7,9 +7,16 @@ import { VersionDetailComponent } from './components/version-detail/version-deta
 import { ConfigComponent } from './components/config/config.component';
 import { BootstrapComponent } from './components/bootstrap/bootstrap.component';
 import { ModelComponent } from './components/model/model.component';
-
+import { DebugModelComponent } from './components/debug-model/debug-model.component';
+import { ApiTesterComponent } from './components/api-tester/api-tester.component';
+import { GroupValidatorComponent } from './components/group-validator/group-validator.component';
+import { UrlDebugComponent } from './components/url-debug/url-debug.component';
 export const routes: Routes = [
   { path: '', component: GroupTypesComponent },
+  { path: 'debug-model', component: DebugModelComponent },
+  { path: 'api-test', component: ApiTesterComponent },
+  { path: 'group-validator', component: GroupValidatorComponent },
+  { path: 'url-debug', component: UrlDebugComponent },
   { path: 'bootstrap', component: BootstrapComponent },
   { path: 'config', component: ConfigComponent },
   { path: 'model', component: ModelComponent },

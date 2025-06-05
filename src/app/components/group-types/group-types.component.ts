@@ -11,11 +11,14 @@ import { GroupType } from '../../models/registry.model';
 import { PageHeaderComponent, ViewMode } from '../page-header/page-header.component';
 import { ResourceDocumentItemComponent } from '../resource-document-item/resource-document-item.component';
 import { IconComponent } from '../icon/icon.component';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { ErrorBoundaryComponent } from '../error-boundary/error-boundary.component';
 
 @Component({
   standalone: true,
   selector: 'app-group-types',
-  imports: [CommonModule, RouterModule, PageHeaderComponent, ResourceDocumentItemComponent, IconComponent],
+  imports: [CommonModule, RouterModule, PageHeaderComponent, ResourceDocumentItemComponent, IconComponent, LoadingIndicatorComponent, EmptyStateComponent, ErrorBoundaryComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './group-types.component.html',
   styleUrls: ['./group-types.component.scss'],
@@ -28,6 +31,9 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
   currentSearchTerm = '';
   loading = true;
   loadingProgress = true; // Tracks if we're still expecting more data
+  hasError = false;
+  errorMessage = '';
+  errorDetails = '';
   private destroy$ = new Subject<void>();
   private initialLoad = true;
   private userHasChangedView = false; // Track if user manually changed view mode
@@ -146,6 +152,9 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
           console.error('GroupTypesComponent: Error loading registry model:', error);
           this.loading = false;
           this.loadingProgress = false;
+          this.hasError = true;
+          this.errorMessage = error?.message || 'Failed to load group types from the registry';
+          this.errorDetails = error?.stack || error?.toString() || '';
           this.cdr.markForCheck();
         }
       });
@@ -481,5 +490,18 @@ export class GroupTypesComponent implements OnInit, OnDestroy, AfterViewInit {
         event.stopPropagation();
       }
     }
+  }
+
+  /**
+   * Retry loading group types after an error
+   */
+  retryLoadGroupTypes(): void {
+    this.hasError = false;
+    this.errorMessage = '';
+    this.errorDetails = '';
+    this.loading = true;
+    this.loadingProgress = true;
+    this.cdr.markForCheck();
+    this.loadData();
   }
 }

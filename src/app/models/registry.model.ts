@@ -13,6 +13,20 @@ export interface RegistryModel {
   };
 }
 
+export interface DeprecatedInfo {
+  reason?: string;
+  alternative?: string;
+  since?: string; // ISO date string
+}
+
+export interface CrossReference {
+  grouptype: string;
+  groupid: string;
+  resourcetype?: string;
+  resourceid?: string;
+  versionid?: string;
+}
+
 export interface GroupType {
   plural: string;
   singular: string;
@@ -57,6 +71,8 @@ export interface Group {
   xid: string;
   name: string;
   description?: string;
+  epoch?: string; // ETag-like mechanism for detecting modifications per xRegistry spec
+  deprecated?: DeprecatedInfo; // Deprecation information per xRegistry spec
   serverscount?: number; // Added to support displaying server count
   origin?: string; // API endpoint of origin
   [key: string]: any; // Index signature for dynamic property access
@@ -69,6 +85,8 @@ export interface ResourceDocument {
   description?: string;
   createdAt?: string; // ISO date string
   modifiedAt?: string; // ISO date string
+  epoch?: string; // ETag-like mechanism for detecting modifications per xRegistry spec
+  deprecated?: DeprecatedInfo; // Deprecation information per xRegistry spec
 
   // Document representation fields
   resource?: any;
@@ -78,7 +96,13 @@ export interface ResourceDocument {
   // Version-specific fields
   versionId?: string;
   isDefault?: boolean;
+  ancestor?: string; // Version ancestry per xRegistry spec
+  compatibility?: string; // Version compatibility strategy per xRegistry spec
+  compatibilityauthority?: string; // Authority for compatibility validation per xRegistry spec
   attributes?: any;
+
+  // Cross-reference support per xRegistry spec
+  xref?: CrossReference[];
 
   origin?: string; // API endpoint of origin
 

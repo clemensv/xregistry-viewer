@@ -4,31 +4,32 @@
     [showViewToggle]="true"
     [currentViewMode]="viewMode"
     [showPagination]="false"
-    [resultsCount]="filteredGroupTypesList?.length || 0"
-    [totalCount]="groupTypesList?.length || 0"
+    [resultsCount]="filteredGroupTypesList.length || 0"
+    [totalCount]="groupTypesList.length || 0"
     [resultsText]="'group types'"
-    [searchResultsText]="currentSearchTerm ? 'Showing ' + (filteredGroupTypesList?.length || 0) + ' group types (filtered from ' + (groupTypesList?.length || 0) + ')' : ''"
+    [searchResultsText]="currentSearchTerm ? 'Showing ' + (filteredGroupTypesList.length || 0) + ' group types (filtered from ' + (groupTypesList.length || 0) + ')' : ''"
     (viewModeChange)="setViewMode($event)">
   </app-page-header>
 
   <!-- Progressive loading indicator -->
-  <div class="loading-progress" *ngIf="loadingProgress && groupTypesList.length > 0">
-    <div class="loading-indicator">
-      <fluent-icon name="arrow_sync_circle" class="loading-spinner"></fluent-icon>
-      <span>Loading more group types... ({{ groupTypesList.length }} loaded)</span>
-    </div>
-  </div>
+  <app-loading-indicator
+    *ngIf="loadingProgress && groupTypesList.length > 0"
+    size="inline"
+    title="Loading More Group Types"
+    [message]="'Loading more group types... (' + groupTypesList.length + ' loaded)'"
+    [showText]="true">
+  </app-loading-indicator>
   <div *ngIf="!loading && viewMode === 'cards' && filteredGroupTypesList.length > 0" class="grid-container cards-view">
     <div *ngFor="let gt of filteredGroupTypesList" class="grid-item">
       <a [routerLink]="getResourceCollectionRoute(gt)" class="card-link">
         <div class="card-header">
-          <fluent-icon name="folder" class="group-type-icon"></fluent-icon>
+          <app-icon name="folder" class="group-type-icon"></app-icon>
           <h3>{{ gt.model.plural || gt.groupType }}</h3>
           <button class="details-expander"
                   (click)="$event.preventDefault(); $event.stopPropagation(); toggleDetails(gt.groupType)"
                   [class.expanded]="isDetailsExpanded(gt.groupType)"
                   title="Show details">
-            <fluent-icon name="info"></fluent-icon>
+            <app-icon name="info"></app-icon>
           </button>
         </div>
 
@@ -92,10 +93,10 @@
          (click)="$event.stopPropagation()"
          *ngFor="let groupType of getExpandedGroupTypes()">
       <div class="popup-header">
-        <fluent-icon name="folder" class="group-type-icon"></fluent-icon>
+        <app-icon name="folder" class="group-type-icon"></app-icon>
         <h3>{{ getGroupTypeModel(groupType)?.model?.plural || groupType }}</h3>
         <button class="close-button" (click)="closeAllDetails()" title="Close">
-          <fluent-icon name="dismiss"></fluent-icon>
+          <app-icon name="dismiss"></app-icon>
         </button>
       </div>
 
@@ -148,7 +149,7 @@
         <tr *ngFor="let gt of filteredGroupTypesList">
           <td class="group-type-cell">
             <div class="table-group-type">
-              <fluent-icon name="folder" class="group-type-icon-small"></fluent-icon>
+              <app-icon name="folder" class="group-type-icon-small"></app-icon>
               <a [routerLink]="getResourceCollectionRoute(gt)"
                  class="group-type-name"
                  [title]="gt.groupType">{{ gt.groupType }}</a>
@@ -194,38 +195,42 @@
     </table>
   </div>
 
+  <!-- Error state -->
+  <app-error-boundary
+    *ngIf="hasError && !loading"
+    [errorState]="{hasError: true, error: {name: 'GroupTypesLoadError', message: errorMessage || 'Unknown error occurred'}}"
+    [showDetails]="!!errorDetails"
+    [errorTitle]="'Unable to Load Group Types'"
+    [errorMessage]="errorMessage || 'An unexpected error occurred while loading group types'"
+    (retry)="retryLoadGroupTypes()">
+  </app-error-boundary>
+
   <!-- Loading state -->
-  <div *ngIf="loading" class="empty-state">
-    <div class="empty-state-content">
-      <fluent-icon name="arrow_sync_circle" class="empty-state-icon loading-spinner"></fluent-icon>
-      <h3 class="empty-state-title">Loading Group Types</h3>
-      <p class="empty-state-message">
-        Please wait while we load the available group types from the registry...
-      </p>
-    </div>
-  </div>
+  <app-loading-indicator
+    *ngIf="loading && !hasError"
+    size="large"
+    title="Loading Group Types"
+    message="Please wait while we load the available group types from the registry..."
+    [showText]="true">
+  </app-loading-indicator>
 
   <!-- Empty search results -->
-  <div *ngIf="!loading && currentSearchTerm && filteredGroupTypesList.length === 0 && groupTypesList.length > 0" class="empty-state">
-    <div class="empty-state-content">
-      <fluent-icon name="search" class="empty-state-icon"></fluent-icon>
-      <h3 class="empty-state-title">No Matching Group Types</h3>
-      <p class="empty-state-message">
-        No group types match your search criteria "{{ currentSearchTerm }}".
-        Try adjusting your search terms or browse all available group types.
-      </p>
-    </div>
-  </div>
+  <app-empty-state
+    *ngIf="!loading && !hasError && currentSearchTerm && filteredGroupTypesList.length === 0 && groupTypesList.length > 0"
+    type="info"
+    iconName="search"
+    title="No Matching Group Types"
+    message="No group types match your search criteria. Try adjusting your search terms or browse all available group types."
+    size="medium">
+  </app-empty-state>
 
   <!-- No data state -->
-  <div *ngIf="!loading && !currentSearchTerm && groupTypesList.length === 0" class="empty-state">
-    <div class="empty-state-content">
-      <fluent-icon name="inbox" class="empty-state-icon"></fluent-icon>
-      <h3 class="empty-state-title">No Group Types Available</h3>
-      <p class="empty-state-message">
-        There are currently no group types configured in this registry.
-        Group types define the structure and organization of resources.
-      </p>
-    </div>
-  </div>
+  <app-empty-state
+    *ngIf="!loading && !hasError && !currentSearchTerm && groupTypesList.length === 0"
+    type="info"
+    iconName="inbox"
+    title="No Group Types Available"
+    message="There are currently no group types configured in this registry. Group types define the structure and organization of resources."
+    size="medium">
+  </app-empty-state>
 </div>
