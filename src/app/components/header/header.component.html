@@ -19,7 +19,7 @@
           appearance="subtle"
           (click)="navigateToConfig()"
           aria-label="API Settings">
-          <fluent-icon name="settings"></fluent-icon>
+          <app-icon name="settings"></app-icon>
         </fluent-button>
       </div>
 
@@ -30,28 +30,28 @@
             appearance="subtle"
             (click)="fontMenuOpen = !fontMenuOpen"
             aria-label="Font Size">
-            <fluent-icon [name]="getFontSizeIcon()"></fluent-icon>
+            <app-icon [name]="getFontSizeIcon()"></app-icon>
           </fluent-button>
           <div *ngIf="fontMenuOpen" class="font-size-menu">
             <div
               class="font-menu-item"
               [class.active]="currentFontSize === 'small'"
               (click)="setFontSize('small'); fontMenuOpen = false">
-              <fluent-icon name="font_decrease"></fluent-icon>
+              <app-icon name="font_decrease"></app-icon>
               <span>Small</span>
             </div>
             <div
               class="font-menu-item"
               [class.active]="currentFontSize === 'medium'"
               (click)="setFontSize('medium'); fontMenuOpen = false">
-              <fluent-icon name="font_size"></fluent-icon>
+              <app-icon name="font_size"></app-icon>
               <span>Medium</span>
             </div>
             <div
               class="font-menu-item"
               [class.active]="currentFontSize === 'large'"
               (click)="setFontSize('large'); fontMenuOpen = false">
-              <fluent-icon name="font_increase"></fluent-icon>
+              <app-icon name="font_increase"></app-icon>
               <span>Large</span>
             </div>
           </div>
@@ -64,7 +64,7 @@
           appearance="subtle"
           (click)="toggleTheme()"
           aria-label="Toggle Theme">
-          <fluent-icon [name]="currentTheme === 'light' ? 'weather_moon' : 'weather_sunny'"></fluent-icon>
+          <app-icon [name]="currentTheme === 'light' ? 'weather_moon' : 'weather_sunny'"></app-icon>
         </fluent-button>
       </div>
     </div>
