@@ -227,7 +227,7 @@ jobs:
             exit 1
           fi
           
-          if ! echo "$BODY" | jq -e '.status == "ok"' > /dev/null 2>&1; then
+          if ! echo "$BODY" | jq -e '.status == "OK"' > /dev/null 2>&1; then
             echo "❌ Invalid health response"
             exit 1
           fi
