@@ -56,9 +56,58 @@ export const environment = {
 
 Production build:
 ```bash
-ng build
+npm run build-prod
 ```
 Artifacts stored in `dist/` directory.
+
+## Docker Deployment
+
+The application can be deployed using Docker with a unified Node.js + Express server that handles both static file serving and API proxying.
+
+### Quick Start with Docker Compose
+
+```bash
+# Build and start the service
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop service
+docker-compose down
+```
+
+Access the application at:
+- **Application**: http://localhost:4000
+- **Health Check**: http://localhost:4000/health
+- **Proxy Endpoint**: http://localhost:4000/proxy?target=<url>
+
+### Build Docker Images
+
+Using the build scripts:
+
+**PowerShell (Windows):**
+```powershell
+.\build-docker.ps1
+```
+
+**Bash (Linux/Mac):**
+```bash
+chmod +x build-docker.sh
+./build-docker.sh
+```
+
+### Manual Docker Build
+
+```bash
+# Build the application
+docker build -t xregistry-viewer:latest .
+
+# Run the container
+docker run -d -p 4000:4000 --name xregistry-viewer xregistry-viewer:latest
+```
+
+For detailed deployment instructions, security configuration, and production best practices, see [Docker Deployment Guide](docs/DOCKER_DEPLOYMENT.md).
 
 ## Testing
 
