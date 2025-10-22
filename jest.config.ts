@@ -25,6 +25,8 @@ const config: Config = {
     '^@env/(.*)$': '<rootDir>/src/environments/$1',
     // Mock SVG files to fix Jest import issues
     '\\.svg$': '<rootDir>/src/test-mocks/svg-mock.ts',
+    // Mock file-type ESM module for tests
+    '^file-type$': '<rootDir>/src/test-mocks/file-type-mock.ts',
   },
   moduleFileExtensions: ['ts', 'js', 'html', 'svg'],
   collectCoverageFrom: [
