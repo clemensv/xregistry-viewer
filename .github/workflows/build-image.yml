@@ -1,0 +1,129 @@
+name: Build xRegistry Viewer Container Image
+
+on:
+  push:
+    branches: ["master"]
+    tags: ["v*.*.*"]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "Dockerfile"
+      - "package*.json"
+      - "server.js"
+      - "nx.json"
+      - "tsconfig*.json"
+      - "jest.config.ts"
+      - "webpack.config.js"
+      - ".github/workflows/build-image.yml"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-viewer:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    outputs:
+      digest: ${{ steps.build-viewer.outputs.digest }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: sigstore/cosign-installer@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ github.sha }}
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref,'refs/tags/v') }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref,'refs/tags/v') }}
+            type=ref,event=branch
+            type=ref,event=pr
+
+      - id: build-viewer
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: mode=max
+
+      - name: Sign image (OIDC)
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          COSIGN_YES: "true"
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          REF="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-viewer.outputs.digest }}"
+          # Check if signature already exists, if not sign it
+          if ! cosign verify \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity "https://github.com/${{ github.workflow_ref }}" \
+            "${REF}" 2>/dev/null; then
+            cosign sign "${REF}"
+          else
+            echo "Image already signed, skipping"
+          fi
+
+  verify-viewer:
+    needs: build-viewer
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      id-token: write
+
+    steps:
+      - uses: sigstore/cosign-installer@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify signature
+        run: |
+          REF="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-viewer.outputs.digest }}"
+          cosign verify \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity "https://github.com/${{ github.workflow_ref }}" \
+            "${REF}"
+
+  summary:
+    needs: verify-viewer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Summary
+        run: |
+          echo "🎉 xRegistry Viewer container image built, signed, and verified successfully!"
+          echo ""
+          echo "📦 Built image:"
+          echo "  • Viewer: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          echo ""
+          echo "🔐 Image signed with Sigstore cosign using OIDC"
+          echo "✅ Signature verified successfully"
+          echo ""
+          echo "🚀 Image is ready for deployment"
+          echo ""
+          echo "To pull the image:"
+          echo "  docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
