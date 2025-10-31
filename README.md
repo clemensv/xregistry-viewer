@@ -1,5 +1,9 @@
 # xRegistry Viewer
 
+[![CI/CD Pipeline](https://github.com/clemensv/xregistry-viewer/actions/workflows/ci.yml/badge.svg)](https://github.com/clemensv/xregistry-viewer/actions/workflows/ci.yml)
+[![Build Container Image](https://github.com/clemensv/xregistry-viewer/actions/workflows/build-image.yml/badge.svg)](https://github.com/clemensv/xregistry-viewer/actions/workflows/build-image.yml)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Fclemensv%2Fxregistry--viewer-blue?logo=docker)](https://github.com/clemensv/xregistry-viewer/pkgs/container/xregistry-viewer)
+
 This is an Angular application that visualizes and explores data from an
 xRegistry-compliant API. It provides a user-friendly interface to browse
 registry groups, resources, versions, and detailed documents.
