@@ -1,11 +1,11 @@
 {
   "apiEndpoints": [
-    "https://mcpxreg.com/registry",
-    "https://packages.mcpxreg.com",
+    "https://myregistry.example.com/registry",
+    "https://packages.myregistry.example.com",
     "https://xregistry.soaphub.org",
     "https://xregistry.soaphub.org/reg-APIs-Guru",
     "https://xregistry.soaphub.org/reg-DocStore",
-    "https://schemas.mcpxreg.com/api/registry"
+    "https://schemas.myregistry.example.com/api/registry"
   ],
   "modelUris": [],
   "baseUrl": "/",

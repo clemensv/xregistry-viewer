@@ -11,9 +11,7 @@
     "test:watch": "nx test --watch",
     "test:coverage": "nx test --coverage",
     "serve:ssr:app": "node dist/app/server/server.mjs",
-    "serve:prod": "node server.js",
-    "proxy": "node proxy-server.js",
-    "dev": "concurrently \"npm run proxy\" \"npm start\""
+    "serve:prod": "node server.js"
   },
   "private": true,
   "dependencies": {

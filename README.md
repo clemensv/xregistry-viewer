@@ -1,6 +1,20 @@
 # xRegistry Viewer
 
-An Angular 19 single-page application (SPA) for browsing and exploring xRegistry metadata. Built with TypeScript, Angular Material, and modern web standards.
+This is an Angular application that visualizes and explores data from an
+xRegistry-compliant API. It provides a user-friendly interface to browse
+registry groups, resources, versions, and detailed documents.
+
+The application is model-driven, using the metadata provided by the xRegistry API's
+model endpoint and dynamically adapts its UI based on the resource schemas and types.
+
+You can point the application to one of multiple xRegistry endpoints. The
+application will consolidate and display data from the selected registries in a
+unified interface, grouping metadata by model and groups.
+
+The repository builds a Docker image with a production-ready Angular application
+served via a Node.js + Express server, including an API proxy for cross-origin
+requests.
+
 
 ## 📋 Table of Contents
 
@@ -89,9 +103,9 @@ npm install
 This will install all required packages listed in `package.json`, including:
 
 - Angular 19 framework and dependencies
-- Angular Material UI components
+- FluentUI Web Components for UI
 - RxJS for reactive programming
-- Development tools (TypeScript, Webpack, etc.)
+- Development tools (TypeScript, Jest, etc.)
 
 ### 3. Start Development Server
 
@@ -136,8 +150,8 @@ xregistry-viewer/
 ### Key Technologies
 
 - **Angular 19**: Frontend framework with standalone components
-- **TypeScript 5.5**: Strongly-typed JavaScript superset
-- **Angular Material**: UI component library
+- **TypeScript 5.7**: Strongly-typed JavaScript superset
+- **FluentUI Web Components**: UI component library
 - **RxJS 7**: Reactive programming library
 - **SCSS**: CSS preprocessor for styling
 - **Jest**: Testing framework
@@ -164,56 +178,19 @@ xregistry-viewer/
    npm run test:watch    # Watch mode for TDD
    ```
 
-4. **Lint Your Code**
-
-   ```bash
-   npm run lint          # Check for linting errors
-   npm run lint:fix      # Auto-fix linting issues
-   ```
-
-5. **Build for Production**
+4. **Build for Production**
 
    ```bash
    npm run build-prod    # Create production build
    ```
 
-6. **Commit and Push**
+5. **Commit and Push**
 
    ```bash
    git add .
    git commit -m "feat: add new feature"
    git push origin feature/my-new-feature
    ```
-
-### Common Development Tasks
-
-#### Generate New Component
-
-```bash
-ng generate component components/my-component
-# or shorthand:
-ng g c components/my-component
-```
-
-#### Generate New Service
-
-```bash
-ng generate service services/my-service
-# or shorthand:
-ng g s services/my-service
-```
-
-#### Generate Other Schematics
-
-```bash
-ng generate directive|pipe|guard|interface|enum|module --help
-```
-
-#### Debug in VS Code
-
-1. Set breakpoints in your TypeScript code
-2. Press `F5` or use "Run and Debug" panel
-3. Choose "Chrome" or "Edge" as the debug target
 
 ## ⚙️ Configuration
 
@@ -225,7 +202,7 @@ The application needs to be configured with your xRegistry API endpoint.
 
 1. Click the **Settings icon** (⚙️) in the application header
 2. Navigate to **API Configuration**
-3. Enter your API base URL (e.g., `https://mcpxreg.org`)
+3. Enter your API base URL (e.g., `https://myregistry.example.com`)
 4. Click **Save Changes**
 
 Configuration is persisted in browser local storage and survives page reloads.
@@ -257,7 +234,7 @@ For build-time configuration, edit environment files:
 ```typescript
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://dev-mcpxreg.org'
+  apiBaseUrl: 'https://dev.myregistry.example.com'
 };
 ```
 
@@ -266,7 +243,7 @@ export const environment = {
 ```typescript
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://mcpxreg.org'
+  apiBaseUrl: 'https://myregistry.example.com'
 };
 ```
 
@@ -279,7 +256,7 @@ The built-in proxy allows the application to make cross-origin API requests secu
 ```json
 {
   "proxyPrefixes": [
-    "https://mcpxreg.org",
+    "https://myregistry.example.com",
     "https://api.example.com"
   ]
 }
@@ -332,6 +309,13 @@ dist/xregistry-viewer/
 
 ## 🐳 Docker Deployment
 
+Pre-built Docker images are automatically published to GitHub Container Registry (ghcr.io) on every push to master and for tagged releases. Images are signed with Sigstore cosign for supply chain security.
+
+**Pull the latest image:**
+```bash
+docker pull ghcr.io/clemensv/xregistry-viewer:latest
+```
+
 The application uses a **unified architecture** with a single Node.js + Express server that handles:
 
 - Static file serving (Angular application)
@@ -362,9 +346,25 @@ The application uses a **unified architecture** with a single Node.js + Express 
 
 ### Quick Start with Docker Compose (Recommended)
 
-This is the easiest way to run the application in Docker.
+This is the easiest way to run the application in Docker using the pre-built image.
 
-**Step 1: Start the service**
+**Step 1: Create a docker-compose.yml**
+
+```yaml
+version: '3.8'
+services:
+  xregistry-viewer:
+    image: ghcr.io/clemensv/xregistry-viewer:latest
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./public/config.json:/app/dist/xregistry-viewer/config.json
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+```
+
+**Step 2: Start the service**
 
 ```bash
 docker-compose up -d
@@ -372,12 +372,12 @@ docker-compose up -d
 
 This will:
 
-1. Build the Docker image (multi-stage build)
+1. Pull the latest pre-built Docker image from GitHub Container Registry
 2. Start the container in detached mode
 3. Expose port 4000 on your host machine
 4. Mount `public/config.json` as a volume (for easy configuration updates)
 
-**Step 2: Verify it's running**
+**Step 3: Verify it's running**
 
 ```bash
 # Check container status
@@ -390,66 +390,77 @@ docker-compose logs -f
 curl http://localhost:4000/health
 ```
 
-**Step 3: Access the application**
+**Step 4: Access the application**
 
 - **Application**: <http://localhost:4000>
 - **Health Check**: <http://localhost:4000/health>
 - **Config Endpoint**: <http://localhost:4000/config.json>
 - **Proxy Endpoint**: <http://localhost:4000/proxy?target=https://api.example.com>
 
-**Step 4: Stop the service**
+**Step 5: Stop the service**
 
 ```bash
 docker-compose down
 ```
 
-### Build Docker Images with Scripts
+### Using Pre-built Images (Recommended)
 
-Convenient build scripts are provided for both Windows and Unix systems.
+Pull and run the latest image directly:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/clemensv/xregistry-viewer:latest
+
+# Run the container
+docker run -d \
+  -p 4000:4000 \
+  --name xregistry-viewer \
+  -v $(pwd)/public/config.json:/app/dist/xregistry-viewer/config.json \
+  ghcr.io/clemensv/xregistry-viewer:latest
+```
+
+**Available image tags:**
+- `latest` - Latest build from master branch
+- `v1.2.3` - Specific version (semantic versioning)
+- `<sha>` - Specific commit SHA
+
+**Images are:**
+- ✅ Automatically built on every push to master
+- ✅ Signed with Sigstore cosign (supply chain security)
+- ✅ Published to GitHub Container Registry (ghcr.io)
+- ✅ Multi-platform (linux/amd64, linux/arm64)
+
+### Build Docker Images Locally (Advanced)
+
+For local development or custom builds:
+
+**Using build scripts:**
 
 **PowerShell (Windows):**
-
 ```powershell
 .\build-docker.ps1
 ```
 
 **Bash (Linux/Mac):**
-
 ```bash
 chmod +x build-docker.sh
 ./build-docker.sh
 ```
 
-These scripts will:
-
-1. Run production build (`npm run build-prod`)
-2. Build Docker image with proper tags
-3. Show build summary
-4. Provide instructions for running the container
-
-### Manual Docker Build (Advanced)
-
-For more control over the build process:
-
-**Step 1: Build the image**
+**Manual build:**
 
 ```bash
+# Build the image
 docker build -t xregistry-viewer:latest .
-```
 
-**Step 2: Run the container**
-
-```bash
+# Run the container
 docker run -d \
   -p 4000:4000 \
   --name xregistry-viewer \
   -v $(pwd)/public/config.json:/app/dist/xregistry-viewer/config.json \
   xregistry-viewer:latest
-```
 
-**Step 3: Verify**
-
-```bash
+# Verify
 docker ps
 docker logs xregistry-viewer
 ```
@@ -482,10 +493,10 @@ docker run -d \
 
 ```json
 {
-  "apiBaseUrl": "https://mcpxreg.org",
-  "registryEndpoint": "https://mcpxreg.org/api/v1",
+  "apiBaseUrl": "https://myregistry.example.com",
+  "registryEndpoint": "https://myregistry.example.com/api/v1",
   "proxyPrefixes": [
-    "https://mcpxreg.org",
+    "https://myregistry.example.com",
     "https://api.example.com"
   ]
 }
@@ -593,32 +604,6 @@ describe('MyService', () => {
   });
 });
 ```
-
-### End-to-End Tests
-
-E2E tests verify the application works correctly from a user's perspective.
-
-```bash
-npm run e2e
-# or
-ng e2e
-```
-
-### Smoke Tests
-
-Quick verification that the application starts and basic functionality works:
-
-```bash
-# Start the server and run smoke tests
-npm run smoke-test
-```
-
-This will:
-
-1. Start the development server
-2. Wait for the server to be ready
-3. Run basic HTTP checks (health endpoint, index page)
-4. Stop the server
 
 ### Testing in Docker
 

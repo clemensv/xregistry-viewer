@@ -2,7 +2,36 @@
 
 This guide explains how to deploy the xRegistry Viewer using Docker with a unified Node.js + Express server.
 
-## 📋 Architecture Overview
+## � Pre-built Images
+
+Docker images are automatically built and published to GitHub Container Registry on every push to master and for tagged releases.
+
+**Pull the latest image:**
+```bash
+docker pull ghcr.io/clemensv/xregistry-viewer:latest
+```
+
+**Available tags:**
+- `latest` - Latest build from master branch
+- `v1.2.3` - Specific semantic version (for tagged releases)
+- `<commit-sha>` - Build from specific commit
+
+**Image features:**
+- ✅ Automatically built via GitHub Actions
+- ✅ Signed with Sigstore cosign (supply chain security)
+- ✅ SLSA provenance attestation included
+- ✅ Multi-stage build for minimal size (~250MB)
+- ✅ Built on Node.js 22 Alpine
+
+**Verify image signature:**
+```bash
+cosign verify \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity "https://github.com/clemensv/xregistry-viewer/.github/workflows/build-image.yml@refs/heads/master" \
+  ghcr.io/clemensv/xregistry-viewer:latest
+```
+
+## �📋 Architecture Overview
 
 The xRegistry Viewer uses a **unified server architecture** with a single Node.js + Express application that:
 
@@ -46,8 +75,31 @@ The xRegistry Viewer uses a **unified server architecture** with a single Node.j
 
 ### Using Docker Compose (Recommended)
 
+**Step 1: Create docker-compose.yml**
+
+```yaml
+version: '3.8'
+services:
+  xregistry-viewer:
+    image: ghcr.io/clemensv/xregistry-viewer:latest
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./public/config.json:/app/dist/xregistry-viewer/config.json
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+```
+
+**Step 2: Start the service**
+
 ```bash
-# Build and start
+# Start
 docker-compose up -d
 
 # View logs
@@ -62,14 +114,15 @@ docker-compose down
 ### Using Docker CLI
 
 ```bash
-# Build
-docker build -t xregistry-viewer:latest .
+# Pull the latest image
+docker pull ghcr.io/clemensv/xregistry-viewer:latest
 
 # Run
 docker run -d \
   -p 4000:4000 \
   --name xregistry-viewer \
-  xregistry-viewer:latest
+  -v $(pwd)/public/config.json:/app/dist/xregistry-viewer/config.json \
+  ghcr.io/clemensv/xregistry-viewer:latest
 
 # View logs
 docker logs -f xregistry-viewer
@@ -79,7 +132,9 @@ docker stop xregistry-viewer
 docker rm xregistry-viewer
 ```
 
-## 📦 Building Images
+## 📦 Building Images Locally (Optional)
+
+**Note:** Pre-built images are available on GitHub Container Registry. Local builds are only needed for development or custom modifications.
 
 ### Automated Build Scripts
 
@@ -97,12 +152,14 @@ chmod +x build-docker.sh
 ### Manual Build
 
 ```bash
+# Build with custom tag
+docker build -t xregistry-viewer:custom .
+
 # Build with version tag
 docker build -t xregistry-viewer:1.0.0 .
-
-# Build with latest tag
-docker build -t xregistry-viewer:latest .
 ```
+
+**Note:** GitHub Actions automatically builds and publishes images on every push to master and for version tags.
 
 ## ⚙️ Configuration
 
@@ -418,47 +475,40 @@ spec:
 
 ## 🔄 CI/CD Integration
 
-### GitHub Actions
+### GitHub Actions (Built-in)
 
-```yaml
-name: Build and Push Docker Image
+The repository includes a complete GitHub Actions workflow (`.github/workflows/build-image.yml`) that:
 
-on:
-  push:
-    branches: [main, master]
-    tags: ['v*']
+1. **Builds** the Docker image on every push to master
+2. **Tags** images with `latest`, commit SHA, and semantic versions
+3. **Signs** images with Sigstore cosign (keyless signing via OIDC)
+4. **Publishes** to GitHub Container Registry (ghcr.io)
+5. **Verifies** signatures after publishing
+6. **Generates** SLSA provenance attestations
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      
-      - name: Log in to registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/${{ github.repository }}
-      
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+**Triggered on:**
+- Push to master branch
+- Version tags (v*.*.*)
+- Manual workflow dispatch
+- Changes to source files, Dockerfile, or configuration
+
+**Image tags generated:**
+- `latest` (for master branch)
+- `<commit-sha>` (for traceability)
+- `v1.2.3`, `v1.2` (for version tags)
+
+**View workflow runs:**
+```bash
+gh run list --workflow=build-image.yml
+```
+
+**Pull specific build:**
+```bash
+# By commit SHA
+docker pull ghcr.io/clemensv/xregistry-viewer:abc1234
+
+# By version tag
+docker pull ghcr.io/clemensv/xregistry-viewer:v1.2.3
 ```
 
 ### GitLab CI
@@ -478,6 +528,19 @@ build:
 
 ### Updating the Application
 
+```bash
+# Pull latest pre-built image
+docker pull ghcr.io/clemensv/xregistry-viewer:latest
+
+# Update docker-compose.yml to use the new image (if needed)
+# The image tag in docker-compose.yml pulls the latest automatically
+
+# Restart with new image
+docker-compose pull
+docker-compose up -d
+```
+
+**For local builds:**
 ```bash
 # Pull latest code
 git pull
@@ -554,6 +617,8 @@ docker exec xregistry-viewer env
 ## 🎯 Summary
 
 **Key Points:**
+- ✅ Pre-built images available on GitHub Container Registry
+- ✅ Automatically built and signed with every push
 - ✅ Single unified container (Node.js + Express)
 - ✅ No separate nginx or proxy containers needed
 - ✅ Simpler deployment and maintenance
@@ -561,7 +626,9 @@ docker exec xregistry-viewer env
 - ✅ Health checks and monitoring ready
 - ✅ Production-ready security features
 - ✅ Easy to scale horizontally
+- ✅ Supply chain security with Sigstore cosign
 
+**Registry:** ghcr.io/clemensv/xregistry-viewer  
 **Default Port:** 4000  
 **Health Check:** /health  
 **Proxy Endpoint:** /proxy?target=<url>

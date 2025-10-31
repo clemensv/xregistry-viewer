@@ -14,7 +14,7 @@ describe('RegistryService', () => {
   beforeEach(() => {
     const configMock = {
       getConfig: jest.fn().mockReturnValue({
-        apiEndpoints: ['https://test-api.mcpxreg.org'],
+        apiEndpoints: ['https://test-api.myregistry.example.com'],
         baseUrl: '/',
         defaultDocumentView: true,
         features: {
@@ -25,7 +25,7 @@ describe('RegistryService', () => {
         modelUris: []
       }),
       config$: of({
-        apiEndpoints: ['https://test-api.mcpxreg.org'],
+        apiEndpoints: ['https://test-api.myregistry.example.com'],
         baseUrl: '/',
         defaultDocumentView: true,
         features: {

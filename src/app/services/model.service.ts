@@ -228,10 +228,10 @@ export class ModelService {
           if (!model) continue;
           foundModel = true;
 
-          // Debug logging for packages.mcpxreg.com
+          // Debug logging for packages endpoint
           const modelDesc = model.description || 'no description';
           if (modelDesc.includes('container registries')) {
-            this.debug.log('ModelService: Processing packages.mcpxreg.com model:');
+            this.debug.log('ModelService: Processing packages endpoint model:');
             this.debug.log('  - Groups available:', model.groups ? Object.keys(model.groups) : 'none');
             this.debug.log('  - Has specversion:', !!model.specversion);
             this.debug.log('  - Has registryid:', !!model.registryid);
@@ -254,9 +254,9 @@ export class ModelService {
             for (const groupType of Object.keys(model.groups)) {
               const group = model.groups[groupType];
 
-              // Debug logging for packages.mcpxreg.com groups
+              // Debug logging for packages endpoint groups
               if (modelDesc.includes('container registries')) {
-                this.debug.log(`ModelService: Adding group type '${groupType}' from packages.mcpxreg.com`);
+                this.debug.log(`ModelService: Adding group type '${groupType}' from packages endpoint`);
                 this.debug.log(`  - Group description: ${group.description || 'none'}`);
                 this.debug.log(`  - Group resources: ${group.resources ? Object.keys(group.resources) : 'none'}`);
               }
@@ -299,10 +299,10 @@ export class ModelService {
         this.debug.log('ModelService: Cached final merged model with', Object.keys(finalModel.groups).length, 'group types');
         this.debug.log('ModelService: Final group types:', Object.keys(finalModel.groups));
 
-        // Debug: Check if packages.mcpxreg.com groups are present
+        // Debug: Check if packages endpoint groups are present
         const packageGroups = ['noderegistries', 'pythonregistries', 'javaregistries', 'dotnetregistries', 'containerregistries'];
         const foundPackageGroups = packageGroups.filter(gt => finalModel.groups[gt]);
-        this.debug.log('ModelService: packages.mcpxreg.com groups in final model:', foundPackageGroups);
+        this.debug.log('ModelService: packages endpoint groups in final model:', foundPackageGroups);
 
         // Clear ongoing request
         this.ongoingModelRequest = null;
