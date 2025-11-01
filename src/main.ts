@@ -28,14 +28,23 @@ provideFluentDesignSystem()
  * This ensures the base URL and API URL are set up before the app starts
  */
 function configFactory(configService: ConfigService, baseUrlService: BaseUrlService) {
-  return () => configService.loadConfigFromJson('/config.json')
-    .then(() => {
-      // Update the base href after config is loaded
-      baseUrlService.updateBaseHref();
+  return () => {
+    // Get the base href from the document (set by Angular CLI --base-href)
+    const baseElement = document.querySelector('base');
+    const baseHref = baseElement?.getAttribute('href') || '/';
+    const configPath = `${baseHref}config.json`.replace('//', '/');
+    
+    console.log(`Loading config from: ${configPath}`);
+    
+    return configService.loadConfigFromJson(configPath)
+      .then(() => {
+        // Update the base href after config is loaded
+        baseUrlService.updateBaseHref();
 
-      // Log successful initialization
-      console.info('Application configuration loaded successfully');
-    });
+        // Log successful initialization
+        console.info('Application configuration loaded successfully');
+      });
+  };
 }
 
 bootstrapApplication(AppComponent, {

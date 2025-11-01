@@ -1,5 +1,6 @@
 {
   "apiEndpoints": [
+    "http://localhost:8080/registry",
     "https://myregistry.example.com/registry",
     "https://packages.myregistry.example.com",
     "https://xregistry.soaphub.org",
@@ -9,7 +10,7 @@
     "https://xregistry.io/xreg/"
   ],
   "modelUris": [],
-  "baseUrl": "/",
+  "baseUrl": "/viewer",
   "defaultDocumentView": true,
   "features": {
     "enableFilters": true,
