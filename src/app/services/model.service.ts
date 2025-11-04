@@ -32,6 +32,9 @@ export class ModelService {
     totalCount: number;
   }> | null = null;
 
+  // Session-based blocklist for CORS-blocked endpoints
+  private static corsBlocklist: Set<string> = new Set();
+
   // Cache for ongoing requests to prevent duplicates
   private ongoingModelRequest: Observable<RegistryModel> | null = null;
   private ongoingProgressiveRequest: Observable<{
@@ -58,6 +61,17 @@ export class ModelService {
 
     // Disable proxy detection - always use direct API calls
     this.servedFromServer = false;
+  }
+
+  /**
+   * Detect if an HTTP error is a CORS error
+   */
+  private isCorsError(error: any): boolean {
+    // CORS errors typically have status 0 and a specific error message or type
+    return error.status === 0 &&
+           (error.statusText === 'Unknown Error' ||
+            error.name === 'HttpErrorResponse' ||
+            (error.message && error.message.includes('CORS')));
   }
 
   getRegistryModel(): Observable<RegistryModel> {
@@ -89,6 +103,13 @@ export class ModelService {
 
     // Process model URIs
     for (const uri of modelUris) {
+      // Skip CORS-blocked endpoints
+      if (ModelService.corsBlocklist.has(uri)) {
+        this.debug.log(`ModelService: Skipping ${uri} - CORS blocked`);
+        modelRequests.push(of(null as any));
+        continue;
+      }
+
       const cached = ModelService.endpointCache[uri];
       if (cached && (cached.status === 'success' || cached.status === 'failed' || cached.status === 'timeout')) {
         // Use cached result (success, failed, or timeout)
@@ -129,6 +150,15 @@ export class ModelService {
                   error: `Timeout after ${this.MAX_LOAD_TIME}ms`,
                   loadTime: this.MAX_LOAD_TIME
                 };
+              } else if (this.isCorsError(err)) {
+                this.debug.warn(`ModelService: CORS error from ${uri} - adding to blocklist`);
+                ModelService.corsBlocklist.add(uri);
+                ModelService.endpointCache[uri] = {
+                  model: null,
+                  status: 'failed',
+                  error: 'CORS blocked',
+                  loadTime
+                };
               } else {
                 this.debug.error('Failed to load model from', uri, err);
                 ModelService.endpointCache[uri] = {
@@ -147,6 +177,13 @@ export class ModelService {
 
     // Process API endpoints
     for (const api of apiEndpoints) {
+      // Skip CORS-blocked endpoints
+      if (ModelService.corsBlocklist.has(api)) {
+        this.debug.log(`ModelService: Skipping ${api} - CORS blocked`);
+        modelRequests.push(of(null as any));
+        continue;
+      }
+
       const cached = ModelService.endpointCache[api];
       if (cached && (cached.status === 'success' || cached.status === 'failed' || cached.status === 'timeout')) {
         // Use cached result (success, failed, or timeout)
@@ -186,6 +223,15 @@ export class ModelService {
                   status: 'timeout',
                   error: `Timeout after ${this.MAX_LOAD_TIME}ms`,
                   loadTime: this.MAX_LOAD_TIME
+                };
+              } else if (this.isCorsError(err)) {
+                this.debug.warn(`ModelService: CORS error from ${api} - adding to blocklist`);
+                ModelService.corsBlocklist.add(api);
+                ModelService.endpointCache[api] = {
+                  model: null,
+                  status: 'failed',
+                  error: 'CORS blocked',
+                  loadTime
                 };
               } else {
                 this.debug.error(`Failed to load model from ${api}:`, err);
@@ -364,6 +410,13 @@ export class ModelService {
 
     // Add model URIs
     for (const uri of modelUris) {
+      // Skip CORS-blocked endpoints
+      if (ModelService.corsBlocklist.has(uri)) {
+        this.debug.log(`Progressive ModelService: Skipping ${uri} - CORS blocked`);
+        modelStreams.push(of({ endpoint: uri, model: null }));
+        continue;
+      }
+
       if (ModelService.endpointCache[uri] && (ModelService.endpointCache[uri].status === 'success' || ModelService.endpointCache[uri].status === 'failed' || ModelService.endpointCache[uri].status === 'timeout')) {
         modelStreams.push(of({ endpoint: uri, model: ModelService.endpointCache[uri].model }));
       } else {
@@ -389,6 +442,15 @@ export class ModelService {
                   error: `Timeout after ${this.MAX_LOAD_TIME}ms`,
                   loadTime: this.MAX_LOAD_TIME
                 };
+              } else if (this.isCorsError(err)) {
+                this.debug.warn(`Progressive ModelService: CORS error from ${uri} - adding to blocklist`);
+                ModelService.corsBlocklist.add(uri);
+                ModelService.endpointCache[uri] = {
+                  model: null,
+                  status: 'failed',
+                  error: 'CORS blocked',
+                  loadTime
+                };
               } else {
                 this.debug.error(`Progressive ModelService: Failed to load model from ${uri}:`, err);
                 ModelService.endpointCache[uri] = {
@@ -407,6 +469,13 @@ export class ModelService {
 
     // Add API endpoints
     for (const api of apiEndpoints) {
+      // Skip CORS-blocked endpoints
+      if (ModelService.corsBlocklist.has(api)) {
+        this.debug.log(`Progressive ModelService: Skipping ${api} - CORS blocked`);
+        modelStreams.push(of({ endpoint: api, model: null }));
+        continue;
+      }
+
       if (ModelService.endpointCache[api] && (ModelService.endpointCache[api].status === 'success' || ModelService.endpointCache[api].status === 'failed' || ModelService.endpointCache[api].status === 'timeout')) {
         modelStreams.push(of({ endpoint: api, model: ModelService.endpointCache[api].model }));
       } else {
@@ -431,6 +500,15 @@ export class ModelService {
                   status: 'timeout',
                   error: `Timeout after ${this.MAX_LOAD_TIME}ms`,
                   loadTime: this.MAX_LOAD_TIME
+                };
+              } else if (this.isCorsError(err)) {
+                this.debug.warn(`Progressive ModelService: CORS error from ${api} - adding to blocklist`);
+                ModelService.corsBlocklist.add(api);
+                ModelService.endpointCache[api] = {
+                  model: null,
+                  status: 'failed',
+                  error: 'CORS blocked',
+                  loadTime
                 };
               } else {
                 this.debug.error(`Progressive ModelService: Failed to load model from ${api}:`, err);
@@ -628,6 +706,7 @@ export class ModelService {
     ModelService.cachedModel = null;
     ModelService.endpointCache = {};
     ModelService.progressiveCache = null;
+    ModelService.corsBlocklist.clear(); // Clear CORS blocklist on config change
     this.ongoingModelRequest = null;
     this.ongoingProgressiveRequest = null;
   }
@@ -644,68 +723,19 @@ export class ModelService {
   }
 
   private getDefaultModel(): RegistryModel {
-    this.debug.log('ModelService: Creating default model for fallback');
-    // Return a more comprehensive model to allow the application to function during development
+    this.debug.log('ModelService: Creating empty default model - no endpoints configured');
+    // Return an empty model structure without fake data
     return {
       specversion: '1.0',
-      registryid: 'default-registry',
-      name: 'Default Registry',
-      description: 'Fallback registry for development or when API is unavailable',
+      registryid: 'empty-registry',
+      name: 'No Registry',
+      description: 'No API endpoints configured',
       capabilities: {
-        apis: ['v1'],
-        schemas: ['openapi-v3'],
+        apis: [],
+        schemas: [],
         pagination: false
       },
-      groups: {
-        'messagegroups': {
-          plural: 'messagegroups',
-          singular: 'messagegroup',
-          description: 'Groups for organizing message definitions',
-          attributes: {},
-          resources: {
-            'messages': {
-              plural: 'messages',
-              singular: 'message',
-              description: 'Message definitions',
-              hasdocument: true,
-              maxversions: 0,
-              attributes: {}
-            }
-          }
-        },
-        'schemagroups': {
-          plural: 'schemagroups',
-          singular: 'schemagroup',
-          description: 'Groups for organizing schema definitions',
-          attributes: {},
-          resources: {
-            'schemas': {
-              plural: 'schemas',
-              singular: 'schema',
-              description: 'Schema definitions',
-              hasdocument: true,
-              maxversions: 0,
-              attributes: {}
-            }
-          }
-        },
-        'endpointgroups': {
-          plural: 'endpointgroups',
-          singular: 'endpointgroup',
-          description: 'Groups for organizing API endpoints',
-          attributes: {},
-          resources: {
-            'endpoints': {
-              plural: 'endpoints',
-              singular: 'endpoint',
-              description: 'API endpoint definitions',
-              hasdocument: true,
-              maxversions: 0,
-              attributes: {}
-            }
-          }
-        }
-      }
+      groups: {}
     } as RegistryModel;
   }
 

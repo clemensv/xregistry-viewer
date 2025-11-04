@@ -1,11 +1,9 @@
 {
   "apiEndpoints": [
-    "https://myregistry.example.com/registry",
-    "https://packages.myregistry.example.com",
+    "http://localhost:8080/reg-CloudEvents",
     "https://xregistry.soaphub.org",
     "https://xregistry.soaphub.org/reg-APIs-Guru",
     "https://xregistry.soaphub.org/reg-DocStore",
-    "https://schemas.myregistry.example.com/api/registry",
     "https://xregistry.io/xreg/"
   ],
   "modelUris": [],

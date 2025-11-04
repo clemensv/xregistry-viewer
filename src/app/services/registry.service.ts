@@ -1,7 +1,7 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 // Removed PaginationInfo import as pagination now uses LinkSet and Page<T>
-import { Observable, of, throwError, forkJoin, from, lastValueFrom, timer } from 'rxjs';
+import { Observable, of, throwError, forkJoin, from, lastValueFrom, timer, defer } from 'rxjs';
 import { map, switchMap, catchError, tap, retryWhen, take, concat, delay } from 'rxjs/operators';
 import { Group, Resource, ResourceDocument } from '../models/registry.model';
 import { ModelService } from './model.service';
@@ -85,6 +85,21 @@ export class RegistryService {
     }
     // Disable proxy detection - always use direct API calls
     this.servedFromServer = false;
+
+    // Subscribe to config changes to clear caches when endpoints change
+    this.configService.configChanges$.subscribe(() => {
+      console.log('RegistryService: Config changed, clearing caches');
+      this.clearCache();
+    });
+  }
+
+  /**
+   * Clear all caches (called when configuration changes)
+   */
+  clearCache(): void {
+    console.log('RegistryService: Clearing endpoint and resource caches');
+    this.endpointCache.clear();
+    this.resourceCache.clear();
   }
 
   /**
@@ -550,14 +565,16 @@ export class RegistryService {
     hasDocument: boolean,
     origin?: string // use origin if provided
   ): Observable<ResourceDocument> {
-    return from(this.getResourceDetailAsync(
+    // Use defer() to delay Promise creation until subscription
+    // This ensures the Promise doesn't start executing before the async pipe subscribes
+    return defer(() => from(this.getResourceDetailAsync(
       groupType,
       groupId,
       resourceType,
       resourceId,
       hasDocument,
       origin
-    ));
+    )));
   }
 
   /**
@@ -571,6 +588,8 @@ export class RegistryService {
     hasDocument: boolean,
     origin?: string
   ): Promise<ResourceDocument> {
+    console.log(`RegistryService: getResourceDetailAsync called for ${groupId}/${resourceId}`);
+
     // Check resource cache first
     const cacheKey = this.getCacheKey({
       groupType,
@@ -581,9 +600,11 @@ export class RegistryService {
 
     const cachedResource = this.resourceCache.get(cacheKey);
     if (cachedResource) {
+      console.log(`RegistryService: Returning cached resource for ${resourceId}`);
       return cachedResource;
     }
 
+    console.log(`RegistryService: Fetching resource ${resourceId} from API`);
     // Get the resource details using common method
     const resource = await this.fetchResourceDetailsAsync({
       groupType,
@@ -596,7 +617,10 @@ export class RegistryService {
 
     // Cache the result
     if (resource) {
+      console.log(`RegistryService: Caching resource ${resourceId}`);
       this.resourceCache.set(cacheKey, resource);
+    } else {
+      console.warn(`RegistryService: Resource ${resourceId} returned null`);
     }
 
     return resource;
@@ -1201,12 +1225,12 @@ export class RegistryService {
       } catch (err) {
         this.debug.error(`Failed to get resource details from ${api}:`, err);
         lastError = err;
-        
+
         // Check if this was a 404 error
         if (err && typeof err === 'object' && 'status' in err && err.status !== 404) {
           allEndpoints404 = false;
         }
-        
+
         continue;
       }
     }
@@ -1214,10 +1238,10 @@ export class RegistryService {
     // If all endpoints returned 404, throw appropriate "not found" error
     if (allEndpoints404 && lastError) {
       this.debug.error(`All endpoints returned 404 - ${versionId ? 'version' : 'resource'} does not exist`);
-      const notFoundMessage = versionId 
+      const notFoundMessage = versionId
         ? `Version "${versionId}" not found for resource "${resourceId}"`
         : `Resource "${resourceId}" not found`;
-      
+
       throw {
         ...lastError,
         status: 404,
@@ -1387,10 +1411,14 @@ export class RegistryService {
     const errors: any[] = [];
 
     results.forEach(result => {
-      if (result.success && result.groups.length > 0) {
-        allGroups.push(...result.groups);
+      if (result.success) {
+        // Endpoint responded successfully, even if it returned 0 groups
         successfulApis.push(result.api);
-      } else if (!result.success) {
+        if (result.groups.length > 0) {
+          allGroups.push(...result.groups);
+        }
+      } else {
+        // Endpoint failed to respond (network error, 404, 500, etc.)
         failedApis.push(result.api);
         if (result.error) {
           errors.push({ api: result.api, error: result.error });

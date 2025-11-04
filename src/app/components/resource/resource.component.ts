@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of, switchMap, tap, catchError, map, Subject, takeUntil, interval } from 'rxjs';
 import { RegistryService } from '../../services/registry.service';
@@ -51,6 +51,7 @@ export class ResourceComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private initialLoad = true;
   loadingProgress = true; // Tracks if we're still expecting more data
+  private modelSubscription$ = new Subject<void>(); // For unsubscribing model loading on param changes
 
   // Error handling properties
   hasError = false;
@@ -64,11 +65,15 @@ export class ResourceComponent implements OnInit, OnDestroy {
     private registry: RegistryService,
     private modelService: ModelService,
     private searchService: SearchService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
+      // Reset state for new resource
+      this.resetComponentState();
+
       this.groupType = params.get('groupType')!;
       this.groupId = params.get('groupId')!;
       this.resourceType = params.get('resourceType')!;
@@ -90,6 +95,36 @@ export class ResourceComponent implements OnInit, OnDestroy {
           this.applyVersionFilter();
         }
       });
+  }
+
+  /**
+   * Resets component state when navigating to a new resource
+   */
+  private resetComponentState(): void {
+    console.log('ResourceComponent: Resetting state for new resource');
+    // Cancel any in-progress model loading
+    this.modelSubscription$.next();
+    this.modelSubscription$.complete();
+    this.modelSubscription$ = new Subject<void>();
+
+    // Reset loading and error states
+    this.loading = true;
+    this.loadingProgress = true;
+    this.initialLoad = true;
+    this.hasError = false;
+    this.errorMessage = null;
+    this.errorDetails = null;
+    this.versionsError = false;
+    this.versionsErrorMessage = null;
+
+    // Reset data
+    this.versionsList = [];
+    this.filteredVersionsList = [];
+    this.resourceAttributes = {};
+    this.defaultVersionOrigin = undefined;
+    this.documentationUrl = undefined;
+    this.cachedDocumentContent = null;
+    this.cachedResourceId = null;
   }
 
   private waitForConfigAndLoadData(): void {
@@ -122,7 +157,10 @@ export class ResourceComponent implements OnInit, OnDestroy {
   private loadModelAndResource(): void {
     // Load resource type metadata using progressive loading
     this.modelService.getProgressiveRegistryModel()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        takeUntil(this.modelSubscription$)
+      )
       .subscribe({
         next: (result) => {
           const model = result.model;
@@ -136,10 +174,13 @@ export class ResourceComponent implements OnInit, OnDestroy {
 
             // Load resource on initial model load or when model is complete
             if (this.initialLoad || result.isComplete) {
+              console.log(`ResourceComponent: Loading resource (initialLoad=${this.initialLoad}, isComplete=${result.isComplete})`);
               this.loadResource();
               if (this.initialLoad) {
                 this.initialLoad = false;
               }
+            } else {
+              console.log(`ResourceComponent: Skipping loadResource (initialLoad=${this.initialLoad}, isComplete=${result.isComplete})`);
             }
           }
 
@@ -174,10 +215,12 @@ export class ResourceComponent implements OnInit, OnDestroy {
    * Loads the default version of the resource
    */
   loadDefaultVersion(): void {
+    console.log(`ResourceComponent: Loading default version for ${this.groupId}/${this.resourceId}`);
     this.hasError = false;
     this.errorMessage = null;
     this.errorDetails = null;
 
+    console.log('ResourceComponent: Creating Observable for defaultVersion$');
     this.defaultVersion$ = this.registry
       .getResourceDetail(
         this.groupType,
@@ -187,12 +230,16 @@ export class ResourceComponent implements OnInit, OnDestroy {
         this.resourceTypeData?.hasdocument !== false
       )
       .pipe(
+        tap(() => console.log('ResourceComponent: Observable stream started')),
         tap((version) => {
-          // Set loading to false when the default version is loaded
-          this.loading = false;
+          // Process version data when it arrives
+          console.log(`ResourceComponent: Default version received for ${this.resourceId}`);
           this.hasError = false;
           this.defaultVersionOrigin = version?.origin;
           this.documentationUrl = version?.['documentation'];
+
+          // Trigger change detection to ensure template updates
+          this.cdr.markForCheck();
 
           // Debug: log the version details to see what document fields we're getting
           console.log('Default version loaded:', version);
@@ -211,7 +258,6 @@ export class ResourceComponent implements OnInit, OnDestroy {
         }),
         catchError((err) => {
           console.error('Error loading default version:', err);
-          this.loading = false;
           this.hasError = true;
           this.errorDetails = err;
 
@@ -229,6 +275,11 @@ export class ResourceComponent implements OnInit, OnDestroy {
           return of(null as any);
         })
       );
+
+    // Set loading to false immediately so the async pipe can subscribe
+    // The pipe will then trigger when the Observable emits
+    this.loading = false;
+    console.log('ResourceComponent: Set loading=false, template should now render async pipe');
   }
 
   /**

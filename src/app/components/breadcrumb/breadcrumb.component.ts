@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, AfterViewInit, Inject, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, map, switchMap, catchError } from 'rxjs/operators';
+import { filter, map, switchMap, catchError, startWith } from 'rxjs/operators';
 import { Observable, of, forkJoin } from 'rxjs';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -34,8 +34,11 @@ export class BreadcrumbComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.breadcrumbs$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
+      startWith({ urlAfterRedirects: this.router.url } as NavigationEnd), // Trigger immediately with current URL
       switchMap(() => {
         const segments = this.router.url.split('/').filter((seg: string) => seg);
+
+        console.log('Breadcrumb: Building breadcrumbs for URL:', this.router.url, 'segments:', segments);
 
         // If no segments, return empty breadcrumbs
         if (segments.length === 0) {

@@ -6,6 +6,7 @@ import { BaseUrlService } from '../../services/base-url.service';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
+import { timeout } from 'rxjs/operators';
 import { IconComponent } from '../icon/icon.component';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
@@ -320,16 +321,59 @@ export class ConfigComponent implements OnInit, OnDestroy {
     this.endpointStatus[index] = 'checking';
     this.cdr.markForCheck();
 
+    // Determine if this is a localhost/local network endpoint
+    const isLocalEndpoint = url.includes('localhost') ||
+                           url.includes('127.0.0.1') ||
+                           url.includes('192.168.') ||
+                           url.includes('10.0.') ||
+                           url.includes('[::1]');
+
     try {
-      // Try a simple HEAD request
-      await this.http.head(url, {
+      // Try to access the /model endpoint which is what's actually used by the app
+      const modelUrl = url.endsWith('/') ? `${url}model` : `${url}/model`;
+
+      // Use a short timeout to avoid long waits
+      await this.http.get(modelUrl, {
         observe: 'response',
-        responseType: 'text'
-      }).toPromise();
+        responseType: 'json'
+      }).pipe(
+        timeout(5000) // 5 second timeout
+      ).toPromise();
 
       this.endpointStatus[index] = 'online';
-    } catch (error) {
-      this.endpointStatus[index] = 'offline';
+    } catch (error: any) {
+      // Check if this is a CORS error or network issue
+      // CORS errors typically have error.status === 0
+      if (error?.status === 0 && error?.statusText === 'Unknown Error') {
+        // For localhost endpoints, status 0 means it's not reachable (offline)
+        // For remote HTTPS endpoints, it might be a CORS issue but the endpoint could still be valid
+        if (isLocalEndpoint) {
+          this.endpointStatus[index] = 'offline';
+        } else {
+          // Remote endpoint with CORS - assume online since the app uses a proxy
+          this.endpointStatus[index] = 'online';
+        }
+      } else if (error?.name === 'TimeoutError') {
+        // Timeout - endpoint is unreachable
+        this.endpointStatus[index] = 'offline';
+      } else if (error?.status === 404) {
+        // 404 might mean the endpoint doesn't have /model but could still be valid
+        // Try the root path as a fallback
+        try {
+          await this.http.get(url, {
+            observe: 'response',
+            responseType: 'text'
+          }).pipe(
+            timeout(5000)
+          ).toPromise();
+          this.endpointStatus[index] = 'online';
+        } catch {
+          this.endpointStatus[index] = 'offline';
+        }
+      } else {
+        // Other errors - likely offline
+        this.endpointStatus[index] = 'offline';
+      }
     }
 
     this.cdr.markForCheck();

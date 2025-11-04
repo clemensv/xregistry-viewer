@@ -266,6 +266,11 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewInit {
               // Some APIs failed but we have data - log warning but continue
               this.debug.warn(`Partial API failure: ${page.failedApis} of ${page.totalApis} APIs failed for group type '${this.groupType}'`);
             }
+
+            // If all APIs succeeded but returned no items, it's not an error - just empty data
+            if (page.successfulApis! > 0 && page.items.length === 0 && !this.totalFailure) {
+              this.debug.log(`All ${page.successfulApis} APIs responded successfully but returned no groups for type '${this.groupType}'`);
+            }
           }
 
           // Check if server returned pagination links
