@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { GroupTypesComponent } from './components/group-types/group-types.component';
 import { GroupsComponent } from './components/groups/groups.component';
+import { GroupDetailsComponent } from './components/group-details/group-details.component';
 import { ResourcesComponent } from './components/resources/resources.component';
 import { ResourceComponent } from './components/resource/resource.component';
 import { VersionDetailComponent } from './components/version-detail/version-detail.component';
@@ -27,7 +28,7 @@ export const routes: Routes = [
   { path: ':groupType/:groupId/:resourceType/:resourceId', component: ResourceComponent },
   // Direct path to a specific version
   { path: ':groupType/:groupId/:resourceType/:resourceId/versions/:versionId', component: VersionDetailComponent },
-  // Redirect group detail route to grid view with highlight param - moved to end to avoid conflicts
-  { path: ':groupType/:groupId', redirectTo: ':groupType?highlight=:groupId', pathMatch: 'full' },
+  // Group detail page showing individual group information
+  { path: ':groupType/:groupId', component: GroupDetailsComponent },
   { path: '**', redirectTo: '' }
 ];

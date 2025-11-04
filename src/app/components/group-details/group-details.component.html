@@ -1,0 +1,148 @@
+<div class="group-details-container">
+  <!-- Page Header -->
+  <app-page-header
+    [title]="'Group: ' + groupId"
+    [showViewToggle]="false"
+    [showPagination]="false">
+  </app-page-header>
+
+  <!-- Loading State -->
+  <app-loading-indicator
+    *ngIf="loading && !hasError"
+    size="large"
+    title="Loading Group"
+    message="Please wait while we load the group details from the registry..."
+    [showText]="true">
+  </app-loading-indicator>
+
+  <!-- Error State -->
+  <app-error-boundary
+    *ngIf="hasError && !loading"
+    [errorState]="{hasError: true, error: {name: 'GroupLoadError', message: errorMessage || 'Unknown error occurred'}}"
+    [showDetails]="!!errorDetails"
+    [errorTitle]="'Unable to Load Group'"
+    [errorMessage]="errorMessage || 'An unexpected error occurred while loading the group'"
+    (retry)="retryLoadGroup()">
+  </app-error-boundary>
+
+  <!-- Progressive Loading Indicator -->
+  <app-loading-indicator
+    *ngIf="loadingProgress && (group$ | async) && !hasError"
+    size="inline"
+    title="Loading Additional Data"
+    [message]="'Loading group data from additional endpoints...'"
+    [showText]="true">
+  </app-loading-indicator>
+
+  <!-- Main Content -->
+  <ng-container *ngIf="!hasError && !loading">
+    <div *ngIf="group$ | async as group" class="group-content">
+      
+      <!-- Group Header Card -->
+      <div class="group-header-card">
+        <div class="header-top">
+          <div class="group-title-section">
+            <h2 class="group-title">
+              <app-icon name="folder"></app-icon>
+              {{ group.name || group.id }}
+            </h2>
+            
+            <!-- Deprecation Indicator -->
+            <app-deprecation-indicator
+              *ngIf="group.deprecated"
+              [size]="'large'"
+              [deprecatedAt]="group.deprecated"
+              [deprecationInfo]="group.deprecated">
+            </app-deprecation-indicator>
+          </div>
+          
+          <!-- Origin Badge -->
+          <div class="origin-badge" *ngIf="group.origin">
+            <app-icon name="globe"></app-icon>
+            <span>{{ group.origin }}</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="group-description" *ngIf="group.description">
+          <p>{{ group.description }}</p>
+        </div>
+
+        <!-- Metadata -->
+        <div class="group-metadata">
+          <div class="metadata-item" *ngIf="group.id">
+            <span class="metadata-label">ID:</span>
+            <span class="metadata-value">{{ group.id }}</span>
+          </div>
+          <div class="metadata-item" *ngIf="group.xid">
+            <span class="metadata-label">XID:</span>
+            <span class="metadata-value">{{ group.xid }}</span>
+          </div>
+          <div class="metadata-item" *ngIf="group.epoch">
+            <span class="metadata-label">Epoch:</span>
+            <span class="metadata-value">{{ group.epoch }}</span>
+          </div>
+          <div class="metadata-item" *ngIf="group['createdAt']">
+            <span class="metadata-label">Created:</span>
+            <span class="metadata-value" [title]="group['createdAt']">{{ formatDateShort(group['createdAt']) }}</span>
+          </div>
+          <div class="metadata-item" *ngIf="group['modifiedAt']">
+            <span class="metadata-label">Modified:</span>
+            <span class="metadata-value" [title]="group['modifiedAt']">{{ formatDateShort(group['modifiedAt']) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resource Types Section -->
+      <div class="resource-types-section" *ngIf="resourceTypes.length > 0">
+        <h3>Resource Types</h3>
+        <div class="resource-types-grid">
+          <div *ngFor="let rt of resourceTypes" class="resource-type-card">
+            <a [routerLink]="['/', groupType, groupId, rt.name]" class="resource-type-link">
+              <div class="resource-type-header">
+                <app-icon name="list"></app-icon>
+                <span class="resource-type-name">{{ rt.plural }}</span>
+                <span class="resource-count" *ngIf="rt.count !== undefined">({{ rt.count }})</span>
+              </div>
+              <p class="resource-type-description" *ngIf="rt.description">{{ rt.description }}</p>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Attributes Section -->
+      <div class="custom-attributes-section" *ngIf="displayAttributes.length > 0">
+        <h3>Additional Attributes</h3>
+        <div class="attributes-list">
+          <ng-container *ngFor="let attrName of displayAttributes">
+            <div class="attribute-item" *ngIf="hasValue(group[attrName])">
+              <div class="attribute-content">
+                <app-resource-document-item
+                  [item]="{
+                    key: attrName,
+                    value: group[attrName],
+                    type: groupAttributes[attrName]?.type || typeof group[attrName],
+                    description: groupAttributes[attrName]?.description,
+                    itemModel: groupAttributes[attrName],
+                    isExpanded: false
+                  }"
+                  [nestingLevel]="0"
+                  [initialExpanded]="false">
+                </app-resource-document-item>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Empty State for No Additional Data -->
+      <app-empty-state
+        *ngIf="resourceTypes.length === 0 && displayAttributes.length === 0"
+        icon="info"
+        title="No Additional Information"
+        message="This group has no resource types or custom attributes defined.">
+      </app-empty-state>
+
+    </div>
+  </ng-container>
+</div>
