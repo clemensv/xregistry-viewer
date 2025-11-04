@@ -8,7 +8,7 @@ Docker images are automatically built and published to GitHub Container Registry
 
 **Pull the latest image:**
 ```bash
-docker pull ghcr.io/clemensv/xregistry-viewer:latest
+docker pull ghcr.io/xregistry/viewer:latest
 ```
 
 **Available tags:**
@@ -27,8 +27,8 @@ docker pull ghcr.io/clemensv/xregistry-viewer:latest
 ```bash
 cosign verify \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity "https://github.com/clemensv/xregistry-viewer/.github/workflows/build-image.yml@refs/heads/main" \
-  ghcr.io/clemensv/xregistry-viewer:latest
+  --certificate-identity "https://github.com/xregistry/viewer/.github/workflows/build-image.yml@refs/heads/main" \
+  ghcr.io/xregistry/viewer:latest
 ```
 
 ## �📋 Architecture Overview
@@ -81,7 +81,7 @@ The xRegistry Viewer uses a **unified server architecture** with a single Node.j
 version: '3.8'
 services:
   xregistry-viewer:
-    image: ghcr.io/clemensv/xregistry-viewer:latest
+    image: ghcr.io/xregistry/viewer:latest
     ports:
       - "4000:4000"
     volumes:
@@ -115,14 +115,14 @@ docker-compose down
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/clemensv/xregistry-viewer:latest
+docker pull ghcr.io/xregistry/viewer:latest
 
 # Run
 docker run -d \
   -p 4000:4000 \
   --name xregistry-viewer \
   -v $(pwd)/public/config.json:/app/dist/xregistry-viewer/config.json \
-  ghcr.io/clemensv/xregistry-viewer:latest
+  ghcr.io/xregistry/viewer:latest
 
 # View logs
 docker logs -f xregistry-viewer
@@ -505,10 +505,10 @@ gh run list --workflow=build-image.yml
 **Pull specific build:**
 ```bash
 # By commit SHA
-docker pull ghcr.io/clemensv/xregistry-viewer:abc1234
+docker pull ghcr.io/xregistry/viewer:abc1234
 
 # By version tag
-docker pull ghcr.io/clemensv/xregistry-viewer:v1.2.3
+docker pull ghcr.io/xregistry/viewer:v1.2.3
 ```
 
 ### GitLab CI
@@ -530,7 +530,7 @@ build:
 
 ```bash
 # Pull latest pre-built image
-docker pull ghcr.io/clemensv/xregistry-viewer:latest
+docker pull ghcr.io/xregistry/viewer:latest
 
 # Update docker-compose.yml to use the new image (if needed)
 # The image tag in docker-compose.yml pulls the latest automatically
@@ -628,7 +628,7 @@ docker exec xregistry-viewer env
 - ✅ Easy to scale horizontally
 - ✅ Supply chain security with Sigstore cosign
 
-**Registry:** ghcr.io/clemensv/xregistry-viewer  
+**Registry:** ghcr.io/xregistry/viewer  
 **Default Port:** 4000  
 **Health Check:** /health  
 **Proxy Endpoint:** /proxy?target=<url>

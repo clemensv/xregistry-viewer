@@ -1,8 +1,8 @@
 # xRegistry Viewer
 
-[![CI/CD Pipeline](https://github.com/clemensv/xregistry-viewer/actions/workflows/ci.yml/badge.svg)](https://github.com/clemensv/xregistry-viewer/actions/workflows/ci.yml)
-[![Build Container Image](https://github.com/clemensv/xregistry-viewer/actions/workflows/build-image.yml/badge.svg)](https://github.com/clemensv/xregistry-viewer/actions/workflows/build-image.yml)
-[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Fclemensv%2Fxregistry--viewer-blue?logo=docker)](https://github.com/clemensv/xregistry-viewer/pkgs/container/xregistry-viewer)
+[![CI/CD Pipeline](https://github.com/xregistry/viewer/actions/workflows/ci.yml/badge.svg)](https://github.com/xregistry/viewer/actions/workflows/ci.yml)
+[![Build Container Image](https://github.com/xregistry/viewer/actions/workflows/build-image.yml/badge.svg)](https://github.com/xregistry/viewer/actions/workflows/build-image.yml)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Fxregistry%2Fviewer-blue?logo=docker)](https://github.com/xregistry/viewer/pkgs/container/viewer)
 
 This is an Angular application that visualizes and explores data from an
 xRegistry-compliant API. It provides a user-friendly interface to browse
@@ -94,8 +94,8 @@ npm install -g @angular/cli@19
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/clemensv/xregistry-viewer.git
-cd xregistry-viewer
+git clone https://github.com/xregistry/viewer.git
+cd viewer
 ```
 
 ### 2. Install Dependencies
@@ -317,7 +317,7 @@ Pre-built Docker images are automatically published to GitHub Container Registry
 
 **Pull the latest image:**
 ```bash
-docker pull ghcr.io/clemensv/xregistry-viewer:latest
+docker pull ghcr.io/xregistry/viewer:latest
 ```
 
 The application uses a **unified architecture** with a single Node.js + Express server that handles:
@@ -358,7 +358,7 @@ This is the easiest way to run the application in Docker using the pre-built ima
 version: '3.8'
 services:
   xregistry-viewer:
-    image: ghcr.io/clemensv/xregistry-viewer:latest
+    image: ghcr.io/xregistry/viewer:latest
     ports:
       - "4000:4000"
     volumes:
@@ -413,14 +413,14 @@ Pull and run the latest image directly:
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/clemensv/xregistry-viewer:latest
+docker pull ghcr.io/xregistry/viewer:latest
 
 # Run the container
 docker run -d \
   -p 4000:4000 \
   --name xregistry-viewer \
   -v $(pwd)/public/config.json:/app/dist/xregistry-viewer/config.json \
-  ghcr.io/clemensv/xregistry-viewer:latest
+  ghcr.io/xregistry/viewer:latest
 ```
 
 **Available image tags:**
@@ -773,8 +773,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🆘 Support
 
-- **Issues**: [GitHub Issues](https://github.com/clemensv/xregistry-viewer/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/clemensv/xregistry-viewer/discussions)
+- **Issues**: [GitHub Issues](https://github.com/xregistry/viewer/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/xregistry/viewer/discussions)
 - **Documentation**: [docs/](docs/)
 
 ## 🙏 Acknowledgments
