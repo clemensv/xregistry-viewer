@@ -34,6 +34,17 @@ describe('RegistryService', () => {
           enableDocDownload: true
         },
         modelUris: []
+      }),
+      configChanges$: of({
+        apiEndpoints: ['https://test-api.myregistry.example.com'],
+        baseUrl: '/',
+        defaultDocumentView: true,
+        features: {
+          enableFilters: true,
+          enableSearch: true,
+          enableDocDownload: true
+        },
+        modelUris: []
       })
     };
 
