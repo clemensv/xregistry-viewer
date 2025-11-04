@@ -42,24 +42,24 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
   resourceTypes: Array<{ name: string; plural: string; description?: string; count?: number }> = [];
   loading = true;
   loadingProgress = true;
-  
+
   // Error handling
   hasError = false;
   errorMessage: string | null = null;
   errorDetails: any = null;
-  
+
   private destroy$ = new Subject<void>();
   private initialLoad = true;
-  
+
   // Suppress these standard attributes from display
   private suppressAttributes = [
     'id', 'xid', 'self', 'epoch', 'name', 'description',
     'createdat', 'modifiedat', 'origin', 'deprecated'
   ];
-  
+
   // Utility functions
   formatDateShort = formatDateShort;
-  
+
   constructor(
     private route: ActivatedRoute,
     private registry: RegistryService,
@@ -67,20 +67,20 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private cdr: ChangeDetectorRef
   ) {}
-  
+
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.groupType = params.get('groupType')!;
       this.groupId = params.get('groupId')!;
-      
+
       // Reset state for new group
       this.resetComponentState();
-      
+
       // Wait for config to be loaded
       this.waitForConfigAndLoadData();
     });
   }
-  
+
   private resetComponentState(): void {
     console.log('GroupDetailsComponent: Resetting state for new group');
     this.loading = true;
@@ -92,22 +92,22 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
     this.groupAttributes = {};
     this.resourceTypes = [];
   }
-  
+
   private waitForConfigAndLoadData(): void {
     const config = this.configService.getConfig();
     if (config && config.apiEndpoints && config.apiEndpoints.length > 0) {
       this.loadModelAndGroup();
       return;
     }
-    
+
     // Wait for config
     let attempts = 0;
     const maxAttempts = 50;
-    
+
     const checkInterval = interval(100).pipe(takeUntil(this.destroy$)).subscribe(() => {
       attempts++;
       const config = this.configService.getConfig();
-      
+
       if (config && config.apiEndpoints && config.apiEndpoints.length > 0) {
         checkInterval.unsubscribe();
         this.loadModelAndGroup();
@@ -122,7 +122,7 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
       }
     });
   }
-  
+
   private loadModelAndGroup(): void {
     // Load group metadata using progressive loading
     this.modelService.getProgressiveRegistryModel()
@@ -130,12 +130,12 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (result) => {
           const model = result.model;
-          
+
           // Get group type metadata
           if (model.groups && model.groups[this.groupType]) {
             const groupTypeMeta = model.groups[this.groupType];
             this.groupAttributes = groupTypeMeta.attributes || {};
-            
+
             // Build resource types list from model
             if (groupTypeMeta.resources) {
               this.resourceTypes = Object.keys(groupTypeMeta.resources).map(rtKey => ({
@@ -144,7 +144,7 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
                 description: groupTypeMeta.resources[rtKey].description
               }));
             }
-            
+
             // Load group data on initial model load or when model is complete
             if (this.initialLoad || result.isComplete) {
               console.log(`GroupDetailsComponent: Loading group (initialLoad=${this.initialLoad}, isComplete=${result.isComplete})`);
@@ -154,12 +154,12 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
               }
             }
           }
-          
+
           // Update progress indicator
           if (result.isComplete) {
             this.loadingProgress = false;
           }
-          
+
           this.cdr.markForCheck();
         },
         error: (error) => {
@@ -170,19 +170,19 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
         }
       });
   }
-  
+
   private loadGroup(): void {
     console.log(`GroupDetailsComponent: Loading group ${this.groupType}/${this.groupId}`);
     this.hasError = false;
     this.errorMessage = null;
     this.errorDetails = null;
-    
+
     this.group$ = this.registry.getGroup(this.groupType, this.groupId).pipe(
       tap((group) => {
         console.log(`GroupDetailsComponent: Group loaded:`, group);
         this.loading = false;
         this.hasError = false;
-        
+
         // Count resources for each resource type if available
         if (group && this.resourceTypes.length > 0) {
           this.resourceTypes.forEach(rt => {
@@ -193,7 +193,7 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
             }
           });
         }
-        
+
         this.cdr.markForCheck();
       }),
       catchError((err) => {
@@ -201,7 +201,7 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.hasError = true;
         this.errorDetails = err;
-        
+
         // Set appropriate error message
         if (err.status === 404) {
           this.errorMessage = `Group "${this.groupId}" not found in ${this.groupType}.`;
@@ -212,23 +212,23 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
         } else {
           this.errorMessage = `Failed to load group: ${err.message || 'Unknown error'}`;
         }
-        
+
         this.cdr.markForCheck();
         return of(null as any);
       })
     );
-    
+
     // Set loading to false immediately so async pipe can subscribe
     this.loading = false;
     console.log('GroupDetailsComponent: Set loading=false, template should render');
   }
-  
+
   get displayAttributes(): string[] {
     return Object.keys(this.groupAttributes || {}).filter(
       key => !this.suppressAttributes.includes(key.toLowerCase())
     );
   }
-  
+
   getGroupMetadataAttributes(): any {
     // Return metadata attributes that should be displayed using resource-document pattern
     // These are the basic group properties that aren't custom attributes
@@ -243,7 +243,7 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
       }
     };
   }
-  
+
   hasValue(value: any): boolean {
     if (value === null || value === undefined || value === '') {
       return false;
@@ -256,11 +256,11 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
     }
     return true;
   }
-  
+
   objectKeys(obj: any): string[] {
     return obj ? Object.keys(obj) : [];
   }
-  
+
   isSimpleAttribute(value: any): boolean {
     if (value === null || value === undefined) {
       return true;
@@ -268,13 +268,13 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
     const type = typeof value;
     return type === 'string' || type === 'number' || type === 'boolean';
   }
-  
+
   retryLoadGroup(): void {
     console.log('GroupDetailsComponent: Retrying group load');
     this.resetComponentState();
     this.loadModelAndGroup();
   }
-  
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

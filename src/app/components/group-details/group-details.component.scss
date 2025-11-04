@@ -53,20 +53,20 @@ app-resource-document {
 .resource-types-section {
   margin-top: 2rem;
   margin-bottom: 1.5rem;
-  
+
   h3 {
     margin: 0 0 1rem 0;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--fg-text, #333);
   }
-  
+
   .resource-types-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--spacing-md);
   }
-  
+
   .resource-type-link {
     display: block;
     padding: var(--spacing-md);
@@ -76,36 +76,36 @@ app-resource-document {
     border: 1px solid var(--neutral-stroke);
     border-radius: var(--border-radius-md);
     transition: all 0.2s ease;
-    
+
     &:hover {
       border-color: var(--accent-color);
       box-shadow: var(--shadow-sm);
       transform: translateY(-1px);
     }
-    
+
     &:focus {
       outline: 2px solid var(--accent-color);
       outline-offset: 2px;
     }
-    
+
     .resource-type-header {
       display: flex;
       align-items: center;
       gap: var(--spacing-sm);
       margin-bottom: var(--spacing-xs);
-      
+
       app-icon {
         font-size: 1.3em;
         color: var(--accent-color);
       }
-      
+
       .resource-type-name {
         font-size: var(--font-size-md);
         font-weight: 600;
         color: var(--text-primary);
         flex: 1;
       }
-      
+
       .resource-count {
         font-size: var(--font-size-sm);
         color: var(--text-secondary);
@@ -114,7 +114,7 @@ app-resource-document {
         border-radius: var(--border-radius-sm);
       }
     }
-    
+
     .resource-type-description {
       margin: 0;
       font-size: var(--font-size-sm);
@@ -132,14 +132,14 @@ app-resource-document {
   border-radius: 8px;
   border: 1px solid var(--fg-border, #dee2e6);
   border-left: 3px solid var(--fg-secondary-text, #444);
-  
+
   h3 {
     margin: 0 0 1rem 0;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--fg-text, #333);
   }
-  
+
   .attributes-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(280px, calc(100% - 2rem)), 1fr));
@@ -151,7 +151,7 @@ app-resource-document {
     justify-content: start;
     align-items: start;
   }
-  
+
   .attribute-item {
     width: 100%;
     max-width: 100%;
@@ -166,11 +166,11 @@ app-resource-document {
   .group-details-container {
     padding: var(--spacing-md);
   }
-  
+
   .group-header-card {
     padding: var(--spacing-lg);
   }
-  
+
   .resource-types-grid {
     grid-template-columns: 1fr;
   }

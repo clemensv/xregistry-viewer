@@ -37,11 +37,11 @@
   <!-- Main Content -->
   <ng-container *ngIf="!hasError && !loading">
     <div *ngIf="group$ | async as group" class="group-detail">
-      
+
       <!-- Group Header -->
       <div class="group-header-container">
         <h3>{{ group.name || group['messagegroupid'] || group.id }}</h3>
-        
+
         <!-- Deprecation Indicator -->
         <app-deprecation-indicator
           *ngIf="group.deprecated"
@@ -50,7 +50,7 @@
           [deprecationInfo]="group.deprecated">
         </app-deprecation-indicator>
       </div>
-      
+
       <!-- Origin -->
       <div class="origin-field" *ngIf="group.origin">Origin: {{ group.origin }}</div>
 
@@ -70,8 +70,8 @@
       <div class="resource-types-section" *ngIf="resourceTypes.length > 0">
         <h3>Resource Types</h3>
         <div class="resource-types-grid">
-          <a *ngFor="let rt of resourceTypes" 
-             [routerLink]="['/', groupType, groupId, rt.name]" 
+          <a *ngFor="let rt of resourceTypes"
+             [routerLink]="['/', groupType, groupId, rt.name]"
              class="resource-type-link">
             <div class="resource-type-header">
               <app-icon name="list"></app-icon>
