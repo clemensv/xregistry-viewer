@@ -313,7 +313,7 @@ dist/xregistry-viewer/
 
 ## 🐳 Docker Deployment
 
-Pre-built Docker images are automatically published to GitHub Container Registry (ghcr.io) on every push to master and for tagged releases. Images are signed with Sigstore cosign for supply chain security.
+Pre-built Docker images are automatically published to GitHub Container Registry (ghcr.io) on every push to main and for tagged releases. Images are signed with Sigstore cosign for supply chain security.
 
 **Pull the latest image:**
 ```bash
@@ -424,12 +424,12 @@ docker run -d \
 ```
 
 **Available image tags:**
-- `latest` - Latest build from master branch
+- `latest` - Latest build from main branch
 - `v1.2.3` - Specific version (semantic versioning)
 - `<sha>` - Specific commit SHA
 
 **Images are:**
-- ✅ Automatically built on every push to master
+- ✅ Automatically built on every push to main
 - ✅ Signed with Sigstore cosign (supply chain security)
 - ✅ Published to GitHub Container Registry (ghcr.io)
 - ✅ Multi-platform (linux/amd64, linux/arm64)

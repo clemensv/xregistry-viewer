@@ -2,7 +2,7 @@ name: Build xRegistry Viewer Container Image
 
 on:
   push:
-    branches: ["master"]
+    branches: ["main"]
     tags: ["v*.*.*"]
     paths:
       - "src/**"

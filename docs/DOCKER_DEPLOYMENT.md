@@ -2,9 +2,9 @@
 
 This guide explains how to deploy the xRegistry Viewer using Docker with a unified Node.js + Express server.
 
-## � Pre-built Images
+## 📦 Pre-built Images
 
-Docker images are automatically built and published to GitHub Container Registry on every push to master and for tagged releases.
+Docker images are automatically built and published to GitHub Container Registry on every push to main and for tagged releases.
 
 **Pull the latest image:**
 ```bash
@@ -12,7 +12,7 @@ docker pull ghcr.io/clemensv/xregistry-viewer:latest
 ```
 
 **Available tags:**
-- `latest` - Latest build from master branch
+- `latest` - Latest build from main branch
 - `v1.2.3` - Specific semantic version (for tagged releases)
 - `<commit-sha>` - Build from specific commit
 
@@ -27,7 +27,7 @@ docker pull ghcr.io/clemensv/xregistry-viewer:latest
 ```bash
 cosign verify \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity "https://github.com/clemensv/xregistry-viewer/.github/workflows/build-image.yml@refs/heads/master" \
+  --certificate-identity "https://github.com/clemensv/xregistry-viewer/.github/workflows/build-image.yml@refs/heads/main" \
   ghcr.io/clemensv/xregistry-viewer:latest
 ```
 
@@ -159,7 +159,7 @@ docker build -t xregistry-viewer:custom .
 docker build -t xregistry-viewer:1.0.0 .
 ```
 
-**Note:** GitHub Actions automatically builds and publishes images on every push to master and for version tags.
+**Note:** GitHub Actions automatically builds and publishes images on every push to main and for version tags.
 
 ## ⚙️ Configuration
 
@@ -479,7 +479,7 @@ spec:
 
 The repository includes a complete GitHub Actions workflow (`.github/workflows/build-image.yml`) that:
 
-1. **Builds** the Docker image on every push to master
+1. **Builds** the Docker image on every push to main
 2. **Tags** images with `latest`, commit SHA, and semantic versions
 3. **Signs** images with Sigstore cosign (keyless signing via OIDC)
 4. **Publishes** to GitHub Container Registry (ghcr.io)
@@ -487,13 +487,13 @@ The repository includes a complete GitHub Actions workflow (`.github/workflows/b
 6. **Generates** SLSA provenance attestations
 
 **Triggered on:**
-- Push to master branch
+- Push to main branch
 - Version tags (v*.*.*)
 - Manual workflow dispatch
 - Changes to source files, Dockerfile, or configuration
 
 **Image tags generated:**
-- `latest` (for master branch)
+- `latest` (for main branch)
 - `<commit-sha>` (for traceability)
 - `v1.2.3`, `v1.2` (for version tags)
 
