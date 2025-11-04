@@ -36,100 +36,71 @@
 
   <!-- Main Content -->
   <ng-container *ngIf="!hasError && !loading">
-    <div *ngIf="group$ | async as group" class="group-content">
+    <div *ngIf="group$ | async as group" class="group-detail">
       
-      <!-- Group Header Card -->
-      <div class="group-header-card">
-        <div class="header-top">
-          <div class="group-title-section">
-            <h2 class="group-title">
-              <app-icon name="folder"></app-icon>
-              {{ group.name || group.id }}
-            </h2>
-            
-            <!-- Deprecation Indicator -->
-            <app-deprecation-indicator
-              *ngIf="group.deprecated"
-              [size]="'large'"
-              [deprecatedAt]="group.deprecated"
-              [deprecationInfo]="group.deprecated">
-            </app-deprecation-indicator>
-          </div>
-          
-          <!-- Origin Badge -->
-          <div class="origin-badge" *ngIf="group.origin">
-            <app-icon name="globe"></app-icon>
-            <span>{{ group.origin }}</span>
-          </div>
-        </div>
-
-        <!-- Description -->
-        <div class="group-description" *ngIf="group.description">
-          <p>{{ group.description }}</p>
-        </div>
-
-        <!-- Metadata -->
-        <div class="group-metadata">
-          <div class="metadata-item" *ngIf="group.id">
-            <span class="metadata-label">ID:</span>
-            <span class="metadata-value">{{ group.id }}</span>
-          </div>
-          <div class="metadata-item" *ngIf="group.xid">
-            <span class="metadata-label">XID:</span>
-            <span class="metadata-value">{{ group.xid }}</span>
-          </div>
-          <div class="metadata-item" *ngIf="group.epoch">
-            <span class="metadata-label">Epoch:</span>
-            <span class="metadata-value">{{ group.epoch }}</span>
-          </div>
-          <div class="metadata-item" *ngIf="group['createdAt']">
-            <span class="metadata-label">Created:</span>
-            <span class="metadata-value" [title]="group['createdAt']">{{ formatDateShort(group['createdAt']) }}</span>
-          </div>
-          <div class="metadata-item" *ngIf="group['modifiedAt']">
-            <span class="metadata-label">Modified:</span>
-            <span class="metadata-value" [title]="group['modifiedAt']">{{ formatDateShort(group['modifiedAt']) }}</span>
-          </div>
-        </div>
+      <!-- Group Header -->
+      <div class="group-header-container">
+        <h3>{{ group.name || group['messagegroupid'] || group.id }}</h3>
+        
+        <!-- Deprecation Indicator -->
+        <app-deprecation-indicator
+          *ngIf="group.deprecated"
+          [size]="'medium'"
+          [deprecatedAt]="group.deprecated"
+          [deprecationInfo]="group.deprecated">
+        </app-deprecation-indicator>
       </div>
+      
+      <!-- Origin -->
+      <div class="origin-field" *ngIf="group.origin">Origin: {{ group.origin }}</div>
+
+      <!-- Description -->
+      <p class="group-description" *ngIf="group.description">{{ group.description }}</p>
+
+      <!-- Group Metadata as attributes using resource-document pattern -->
+      <app-resource-document
+        [resourceDocument]="group"
+        [resourceAttributes]="getGroupMetadataAttributes()"
+        [showAttributes]="true"
+        [showDocument]="false"
+        [initialExpanded]="true">
+      </app-resource-document>
 
       <!-- Resource Types Section -->
       <div class="resource-types-section" *ngIf="resourceTypes.length > 0">
         <h3>Resource Types</h3>
         <div class="resource-types-grid">
-          <div *ngFor="let rt of resourceTypes" class="resource-type-card">
-            <a [routerLink]="['/', groupType, groupId, rt.name]" class="resource-type-link">
-              <div class="resource-type-header">
-                <app-icon name="list"></app-icon>
-                <span class="resource-type-name">{{ rt.plural }}</span>
-                <span class="resource-count" *ngIf="rt.count !== undefined">({{ rt.count }})</span>
-              </div>
-              <p class="resource-type-description" *ngIf="rt.description">{{ rt.description }}</p>
-            </a>
-          </div>
+          <a *ngFor="let rt of resourceTypes" 
+             [routerLink]="['/', groupType, groupId, rt.name]" 
+             class="resource-type-link">
+            <div class="resource-type-header">
+              <app-icon name="list"></app-icon>
+              <span class="resource-type-name">{{ rt.plural }}</span>
+              <span class="resource-count" *ngIf="rt.count !== undefined">({{ rt.count }})</span>
+            </div>
+            <p class="resource-type-description" *ngIf="rt.description">{{ rt.description }}</p>
+          </a>
         </div>
       </div>
 
-      <!-- Custom Attributes Section -->
+      <!-- Additional Attributes Section using resource-document pattern -->
       <div class="custom-attributes-section" *ngIf="displayAttributes.length > 0">
         <h3>Additional Attributes</h3>
         <div class="attributes-list">
           <ng-container *ngFor="let attrName of displayAttributes">
             <div class="attribute-item" *ngIf="hasValue(group[attrName])">
-              <div class="attribute-content">
-                <app-resource-document-item
-                  [item]="{
-                    key: attrName,
-                    value: group[attrName],
-                    type: groupAttributes[attrName]?.type || typeof group[attrName],
-                    description: groupAttributes[attrName]?.description,
-                    itemModel: groupAttributes[attrName],
-                    isExpanded: false
-                  }"
-                  [nestingLevel]="0"
-                  [initialExpanded]="false">
-                </app-resource-document-item>
-              </div>
+              <app-resource-document-item
+                [item]="{
+                  key: attrName,
+                  value: group[attrName],
+                  type: groupAttributes[attrName]?.type || typeof group[attrName],
+                  description: groupAttributes[attrName]?.description,
+                  itemModel: groupAttributes[attrName],
+                  isExpanded: false
+                }"
+                [nestingLevel]="0"
+                [initialExpanded]="false">
+              </app-resource-document-item>
             </div>
           </ng-container>
         </div>

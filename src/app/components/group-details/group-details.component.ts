@@ -229,6 +229,21 @@ export class GroupDetailsComponent implements OnInit, OnDestroy {
     );
   }
   
+  getGroupMetadataAttributes(): any {
+    // Return metadata attributes that should be displayed using resource-document pattern
+    // These are the basic group properties that aren't custom attributes
+    return {
+      'xid': {
+        type: 'string',
+        description: 'Registry unique identifier for this group'
+      },
+      'epoch': {
+        type: 'integer',
+        description: 'Version counter for optimistic concurrency control'
+      }
+    };
+  }
+  
   hasValue(value: any): boolean {
     if (value === null || value === undefined || value === '') {
       return false;
