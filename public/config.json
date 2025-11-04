@@ -1,13 +1,12 @@
 {
   "apiEndpoints": [
-    "http://localhost:8080/reg-CloudEvents",
     "https://xregistry.soaphub.org",
     "https://xregistry.soaphub.org/reg-APIs-Guru",
     "https://xregistry.soaphub.org/reg-DocStore",
     "https://xregistry.io/xreg/"
   ],
   "modelUris": [],
-  "baseUrl": "/",
+  "baseUrl": "/viewer",
   "defaultDocumentView": true,
   "features": {
     "enableFilters": true,
