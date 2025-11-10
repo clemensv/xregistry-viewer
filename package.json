@@ -24,7 +24,7 @@
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/platform-server": "^19.2.0",
     "@angular/router": "^19.2.0",
-    "@angular/ssr": "^19.2.11",
+    "@angular/ssr": "^19.2.19",
     "@fluentui/svg-icons": "1.1.302",
     "@fluentui/web-components": "^2.6.1",
     "compression": "^1.8.1",
