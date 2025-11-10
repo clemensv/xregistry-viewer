@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
     <div class="bootstrap-container">
       <div class="loading-container">
         <div class="logo-container">
-          <img src="xregistry-logo.svg" alt="xRegistry Logo" class="logo" />
+          <img src="/xregistry-logo.svg" alt="xRegistry Logo" class="logo" />
         </div>
         <div class="loading-spinner"></div>
         <p class="loading-text">Loading application...</p>
