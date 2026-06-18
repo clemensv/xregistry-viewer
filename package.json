@@ -28,7 +28,7 @@
     "@fluentui/svg-icons": "1.1.302",
     "@fluentui/web-components": "^2.6.1",
     "compression": "^1.8.1",
-    "express": "^4.21.2",
+    "express": "^4.22.1",
     "file-type": "^21.0.0",
     "highlight.js": "^11.11.1",
     "ngx-highlightjs": "^10.0.0",
